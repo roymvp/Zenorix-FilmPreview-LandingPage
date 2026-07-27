@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from 'react'
 
-export function ThemeToggle() {
-  const [isDark, setIsDark] = useState(false)
+export function ThemeToggle({ label }: { label: string }) {
+  const [isDark, setIsDark] = useState(true)
 
   useEffect(() => {
     setIsDark(document.documentElement.classList.contains('dark'))
@@ -19,7 +19,7 @@ export function ThemeToggle() {
   }
 
   return (
-    <md-icon-button onClick={toggle} aria-label="Toggle light and dark theme">
+    <md-icon-button className="zx-theme-toggle" onClick={toggle} aria-label={label}>
       <md-icon>{isDark ? 'light_mode' : 'dark_mode'}</md-icon>
     </md-icon-button>
   )

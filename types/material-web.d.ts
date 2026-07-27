@@ -30,6 +30,8 @@ type ButtonLike = {
   type?: string
   value?: string
   name?: string
+  /** Associates the button with a <form> by id, used to close md-dialog. */
+  form?: string
   'trailing-icon'?: boolean
 }
 

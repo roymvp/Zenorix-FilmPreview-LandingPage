@@ -192,11 +192,11 @@ export function ImmersivePlayer({
       <div className="zx-stage-flags">
         <span className="zx-flag">
           <md-icon aria-hidden="true">lock_clock</md-icon>
-          {copy.previewLabel}
+          <span>{copy.previewLabel}</span>
         </span>
         <span className="zx-flag">
           <md-icon aria-hidden="true">verified</md-icon>
-          {copy.licensed}
+          <span>{copy.licensed}</span>
         </span>
       </div>
 

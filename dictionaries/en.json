@@ -154,7 +154,7 @@
   },
   "a11y": {
     "skipToContent": "Skip to film details",
-    "posterAlt": "Poster for {title}"
-  },
-  "free": "Free"
+    "posterAlt": "Poster for {title}",
+    "theme": "Switch between light and dark theme"
+  }
 }

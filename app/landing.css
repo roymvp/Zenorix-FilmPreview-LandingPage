@@ -256,6 +256,15 @@
   flex-wrap: wrap;
   gap: 8px;
   pointer-events: none;
+  /* Leaves room for the floating CTA so long translations (th) never slide
+     under it; the row wraps instead of colliding. */
+  max-width: min(58%, 260px);
+}
+
+@media (min-width: 600px) {
+  .zx-stage-flags {
+    max-width: min(70%, 460px);
+  }
 }
 
 .zx-flag {
@@ -277,7 +286,15 @@
   font-size: 14px;
   width: 14px;
   height: 14px;
+  /* The icon must never be squeezed out by a long label. */
+  flex: 0 0 auto;
   color: var(--md-sys-color-primary);
+}
+
+/* Wrap long localized labels rather than clipping them to an empty pill. */
+.zx-flag span {
+  min-width: 0;
+  text-wrap: pretty;
 }
 
 .zx-watermark {
@@ -1258,6 +1275,17 @@
 }
 
 /* ------------------------------------------------------- language selector */
+
+.zx-footer-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.zx-theme-toggle {
+  --md-icon-button-icon-color: var(--md-sys-color-on-surface-variant);
+  --md-icon-button-icon-size: 20px;
+}
 
 .zx-lang {
   position: relative;

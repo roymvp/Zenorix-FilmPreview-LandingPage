@@ -1,4 +1,5 @@
 import { LanguageSwitcher } from '@/components/landing/language-switcher'
+import { ThemeToggle } from '@/components/theme-toggle'
 import { SITE } from '@/lib/config/site'
 import type { Locale } from '@/lib/i18n/config'
 
@@ -11,6 +12,7 @@ export function SiteFooter({
   disclaimer,
   languageLabel,
   languageMenuLabel,
+  themeLabel,
 }: {
   locale: Locale
   localeHrefs: Record<Locale, string>
@@ -21,6 +23,7 @@ export function SiteFooter({
   disclaimer: string
   languageLabel: string
   languageMenuLabel: string
+  themeLabel: string
 }) {
   return (
     <footer className="zx-footer">
@@ -36,13 +39,16 @@ export function SiteFooter({
             <p className="zx-footer-tagline">{tagline}</p>
           </div>
 
-          <LanguageSwitcher
-            current={locale}
-            hrefs={localeHrefs}
-            label={languageLabel}
-            menuLabel={languageMenuLabel}
-            variant="footer"
-          />
+          <div className="zx-footer-actions">
+            <ThemeToggle label={themeLabel} />
+            <LanguageSwitcher
+              current={locale}
+              hrefs={localeHrefs}
+              label={languageLabel}
+              menuLabel={languageMenuLabel}
+              variant="footer"
+            />
+          </div>
         </div>
 
         <ul className="zx-footer-links">

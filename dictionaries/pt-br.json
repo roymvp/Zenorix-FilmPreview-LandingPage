@@ -154,7 +154,7 @@
   },
   "a11y": {
     "skipToContent": "Ir para os detalhes do filme",
-    "posterAlt": "Pôster de {title}"
-  },
-  "free": "Grátis"
+    "posterAlt": "Pôster de {title}",
+    "theme": "Alternar entre tema claro e escuro"
+  }
 }

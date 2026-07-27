@@ -205,6 +205,7 @@ export function FilmLanding({
           disclaimer={dict.footer.disclaimer}
           languageLabel={dict.footer.language}
           languageMenuLabel={dict.nav.languageMenu}
+          themeLabel={dict.a11y.theme}
         />
 
         <StickyDownloadBar

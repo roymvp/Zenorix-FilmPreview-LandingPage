@@ -1,5 +1,4 @@
 import { LanguageSwitcher } from '@/components/landing/language-switcher'
-import { ThemeToggle } from '@/components/theme-toggle'
 import { SITE } from '@/lib/config/site'
 import type { Locale } from '@/lib/i18n/config'
 
@@ -29,7 +28,6 @@ export function TopBar({
       </a>
 
       <div className="zx-topbar-actions">
-        <ThemeToggle />
         <LanguageSwitcher
           current={locale}
           label={languageLabel}
