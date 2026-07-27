@@ -47,9 +47,12 @@
   --md-sys-color-surface-container-high: #f6e6d7;
   --md-sys-color-surface-container-highest: #f0e0d1;
 
-  /* Typefaces: applied to every system and component token */
-  --md-ref-typeface-brand: var(--font-roboto), Roboto, system-ui, sans-serif;
-  --md-ref-typeface-plain: var(--font-roboto), Roboto, system-ui, sans-serif;
+  /* Typefaces: applied to every system and component token.
+     Noto Sans Thai follows Roboto because Roboto ships no Thai subset. The
+     browser resolves font-family per glyph, so Latin/Portuguese stay in Roboto
+     and only Thai codepoints fall through to the Thai face. */
+  --md-ref-typeface-brand: var(--font-roboto), Roboto, var(--font-noto-thai), system-ui, sans-serif;
+  --md-ref-typeface-plain: var(--font-roboto), Roboto, var(--font-noto-thai), system-ui, sans-serif;
 }
 
 .dark {

@@ -13,6 +13,9 @@
   --zx-radius-sm: 12px;
   display: flex;
   flex-direction: column;
+  /* Horizontal scrollers (the Top 10 rail, the compare table) must scroll
+     inside themselves and never widen the document. */
+  overflow-x: clip;
 }
 
 @media (min-width: 600px) {
@@ -780,6 +783,10 @@
   padding: 0;
   display: grid;
   grid-auto-flow: column;
+  /* A column-flow grid reports its full intrinsic track width to ancestors,
+     which widens the document instead of scrolling inside the rail.
+     min-width:0 keeps the overflow local to this scroller. */
+  min-width: 0;
   grid-auto-columns: 148px;
   gap: 14px;
   overflow-x: auto;

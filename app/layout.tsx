@@ -1,20 +1,35 @@
 import type { ReactNode } from 'react'
 import type { Metadata, Viewport } from 'next'
-import { Roboto } from 'next/font/google'
+import { Roboto, Noto_Sans_Thai } from 'next/font/google'
 import { MaterialWebLoader } from '@/components/material-web-loader'
 import { SITE } from '@/lib/config/site'
 import './globals.css'
 import './landing.css'
 
 /**
- * Subsets must cover every market we ship: `latin-ext` carries Portuguese
- * diacritics and `thai` carries the Thai script. Without the `thai` subset the
- * glyphs are simply absent from the font and Thai copy renders blank.
+ * Roboto covers the US and BR markets — `latin-ext` carries the Portuguese
+ * diacritics. Roboto ships NO Thai subset on Google Fonts, so it cannot render
+ * the TH market at all.
  */
 const roboto = Roboto({
-  subsets: ['latin', 'latin-ext', 'thai'],
+  subsets: ['latin', 'latin-ext'],
   weight: ['400', '500', '700'],
   variable: '--font-roboto',
+  display: 'swap',
+})
+
+/**
+ * Noto Sans Thai supplies the Thai glyphs Roboto lacks. It is appended to the
+ * global font stack rather than swapped in per locale: browsers resolve
+ * font-family per glyph, so Latin still renders in Roboto and only Thai
+ * codepoints fall through to this face. Never drop it — the sandbox (and many
+ * devices) have no Thai system font, so Thai copy renders as blank boxes
+ * without a webfont that actually contains the script.
+ */
+const notoSansThai = Noto_Sans_Thai({
+  subsets: ['thai'],
+  weight: ['400', '500', '700'],
+  variable: '--font-noto-thai',
   display: 'swap',
 })
 
@@ -43,7 +58,11 @@ export const viewport: Viewport = {
  */
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en-US" className={`${roboto.variable} dark`} suppressHydrationWarning>
+    <html
+      lang="en-US"
+      className={`${roboto.variable} ${notoSansThai.variable} dark`}
+      suppressHydrationWarning
+    >
       <head>
         {/* Material Symbols for <md-icon>. */}
         <link
