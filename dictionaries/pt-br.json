@@ -1,0 +1,160 @@
+{
+  "market": {
+    "country": "no Brasil",
+    "countryShort": "no Brasil",
+    "currency": "BRL",
+    "zero": "R$ 0",
+    "monthly": "R$ 9,90",
+    "annualPerMonth": "R$ 6,20",
+    "annualTotal": "R$ 74,40",
+    "monthlyValue": 9.9,
+    "annualPerMonthValue": 6.2,
+    "annualTotalValue": 74.4
+  },
+  "meta": {
+    "title": "{title} ({year}) — Assista grátis em 4K | Zenorix",
+    "description": "Assista {title} grátis em 4K no Zenorix — mais de 28.000 filmes, 8.000 séries e 900 canais ao vivo de todas as grandes plataformas. Primeiro mês grátis, depois R$ 9,90/mês.",
+    "ogTitle": "{title} — grátis em 4K no Zenorix",
+    "keywords": "assistir {title} grátis, {title} filme completo, {title} 4K online, app de streaming grátis Android, Zenorix APK",
+    "imageAlt": "Arte do filme {title}, disponível grátis em 4K no Zenorix"
+  },
+  "nav": {
+    "home": "Página inicial da Zenorix",
+    "language": "Idioma",
+    "languageMenu": "Escolha seu idioma"
+  },
+  "player": {
+    "watermark": "Prévia Zenorix",
+    "play": "Reproduzir",
+    "pause": "Pausar",
+    "mute": "Desativar som",
+    "unmute": "Ativar som",
+    "fullscreen": "Tela cheia",
+    "seek": "Avançar dentro da prévia gratuita",
+    "tapForSound": "Toque para ouvir",
+    "previewLabel": "Prévia gratuita de {minutes} min",
+    "floatingCta": "Baixar APK",
+    "scrollHint": "Arraste para ver detalhes",
+    "loading": "Carregando prévia"
+  },
+  "info": {
+    "heading": "Sobre o filme",
+    "cta": "Baixe e assista ao filme completo grátis",
+    "ctaSub": "APK para Android · {size} · sem cartão de crédito",
+    "trustStrip": "Disponível em todas as grandes plataformas",
+    "licensed": "Licenciado oficialmente"
+  },
+  "chart": {
+    "heading": "Top 10 {country} nesta semana",
+    "sub": "Atualizado toda segunda com dados reais de audiência da Zenorix",
+    "rank": "Número {rank}",
+    "seeAll": "Ver todos os 28.000+ títulos",
+    "seeAllShort": "Ver tudo",
+    "kind": { "movie": "Filme", "series": "Série" }
+  },
+  "value": {
+    "heading": "Três motivos para trocar",
+    "items": [
+      {
+        "icon": "savings",
+        "title": "O menor preço do mercado",
+        "body": "{annualPerMonth} por mês no plano anual e o primeiro mês sai de graça. Custa menos que uma garrafa de água — e vale por todas as plataformas juntas."
+      },
+      {
+        "icon": "apps",
+        "title": "Todas as plataformas em um app",
+        "body": "Títulos da Netflix, Disney+, HBO Max, Apple TV+ e Paramount+ lado a lado. Um login, uma cobrança, zero cansaço de assinatura."
+      },
+      {
+        "icon": "4k",
+        "title": "Feito para assistir de verdade",
+        "body": "4K Ultra HD, legendas em vários idiomas, download offline e servidores globais que simplesmente não travam."
+      }
+    ]
+  },
+  "compare": {
+    "heading": "Zenorix x pagar todas separadas",
+    "sub": "Os mesmos filmes e séries. Um app, por uma fração do preço.",
+    "labels": {
+      "service": "Serviço",
+      "price": "Por mês",
+      "titles": "Títulos",
+      "liveTv": "TV ao vivo",
+      "quality": "Qualidade máx."
+    },
+    "rows": [
+      { "service": "Zenorix", "price": "{annualPerMonth}", "titles": "36.000+", "liveTv": "900+ canais", "quality": "4K HDR", "highlight": true },
+      { "service": "Netflix", "price": "R$ 44,90", "titles": "~6.000", "liveTv": "Não tem", "quality": "4K HDR" },
+      { "service": "Disney+", "price": "R$ 43,90", "titles": "~2.100", "liveTv": "Não tem", "quality": "4K HDR" },
+      { "service": "HBO Max", "price": "R$ 34,90", "titles": "~3.300", "liveTv": "Não tem", "quality": "4K HDR" },
+      { "service": "Apple TV+", "price": "R$ 21,90", "titles": "~260", "liveTv": "Não tem", "quality": "4K HDR" }
+    ],
+    "totalLabel": "As quatro separadas",
+    "totalPrice": "R$ 145,60",
+    "footnote": "Os preços dos concorrentes são planos padrão divulgados publicamente {country} e servem apenas para comparação. Todas as marcas pertencem aos seus respectivos donos."
+  },
+  "faq": {
+    "heading": "Dúvidas antes de baixar",
+    "items": [
+      {
+        "q": "O primeiro mês é realmente grátis?",
+        "a": "Sim. Seus primeiros 30 dias de Zenorix custam {zero} e não é preciso cartão para começar. Depois do mês grátis você escolhe {monthly} por mês ou {annualPerMonth} por mês no plano anual."
+      },
+      {
+        "q": "Posso cancelar quando quiser?",
+        "a": "Sim, em dois toques dentro do app. Não há contrato nem multa de cancelamento, e você mantém o acesso até o fim do período já pago."
+      },
+      {
+        "q": "O conteúdo é licenciado oficialmente?",
+        "a": "Sim. A Zenorix transmite de catálogos licenciados oficialmente e sincronizados com as grandes plataformas. Todo título chega por acordo de distribuição — nada é copiado ou re-hospedado."
+      },
+      {
+        "q": "Quais aparelhos o APK suporta?",
+        "a": "Qualquer celular, tablet, TV box ou Android TV com Android {minAndroid} ou superior. O APK tem {size}, instala em cerca de 30 segundos e uma conta assiste em até quatro aparelhos."
+      }
+    ]
+  },
+  "finalCta": {
+    "heading": "Termine {title} de graça hoje",
+    "body": "Uma instalação de {size} libera o filme completo em 4K, mais 28.000 títulos, 8.000 séries e 900 canais ao vivo. Primeiro mês grátis.",
+    "cta": "Baixar APK · Primeiro mês grátis",
+    "meta": "v{version} · {size} · Android {minAndroid}+",
+    "badges": ["APK seguro", "Sem malware", "Assinatura verificada"]
+  },
+  "sticky": {
+    "default": "Baixar APK · Primeiro mês grátis",
+    "urgent": "Baixe para assistir ao filme completo",
+    "close": "Ocultar barra de download"
+  },
+  "modals": {
+    "content": {
+      "eyebrow": "Disponível no app",
+      "heading": "Libere todos os filmes e séries",
+      "body": "Acesso imediato a todos os 28.000+ títulos, incluindo cada um deste Top 10. O primeiro mês é totalmente grátis.",
+      "bullets": ["Todas as plataformas em um app", "4K Ultra HD", "Legendas em vários idiomas", "Cancele quando quiser"],
+      "cta": "Baixar agora — assista a tudo grátis",
+      "close": "Fechar"
+    },
+    "preview": {
+      "heading": "Gostou do que está vendo?",
+      "sub": "Termine este filme inteiro de graça — e mais 28.000. Seu primeiro mês custa {zero}.",
+      "cta": "Baixar APK — continuar assistindo",
+      "secondary": "Instala em 30 segundos · Sem cartão de crédito",
+      "close": "Fechar"
+    }
+  },
+  "footer": {
+    "tagline": "Todas as plataformas. Um app. {annualPerMonth} por mês.",
+    "privacy": "Política de Privacidade",
+    "terms": "Termos de Uso",
+    "dmca": "DMCA",
+    "copyright": "© {year} Zenorix. Todos os direitos reservados.",
+    "disclaimer": "A Zenorix transmite catálogos licenciados oficialmente. Netflix, Disney+, HBO Max, Apple TV+ e Paramount+ são marcas de seus respectivos donos e não têm vínculo com a Zenorix.",
+    "language": "Idioma"
+  },
+  "a11y": {
+    "skipToContent": "Ir para os detalhes do filme",
+    "posterAlt": "Pôster de {title}"
+  },
+  "free": "Grátis"
+}

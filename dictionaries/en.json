@@ -1,0 +1,160 @@
+{
+  "market": {
+    "country": "the United States",
+    "countryShort": "the US",
+    "currency": "USD",
+    "zero": "$0",
+    "monthly": "$2",
+    "annualPerMonth": "$1.25",
+    "annualTotal": "$15",
+    "monthlyValue": 2,
+    "annualPerMonthValue": 1.25,
+    "annualTotalValue": 15
+  },
+  "meta": {
+    "title": "{title} ({year}) — Watch Free in 4K | Zenorix",
+    "description": "Stream {title} free in 4K on Zenorix — plus 28,000+ movies, 8,000+ series and 900+ live channels from every major platform. First month free, then $2/month.",
+    "ogTitle": "{title} — free in 4K on Zenorix",
+    "keywords": "watch {title} free, {title} full movie, {title} 4K stream, free streaming app Android, Zenorix APK",
+    "imageAlt": "Key art from the film {title}, streaming free in 4K on Zenorix"
+  },
+  "nav": {
+    "home": "Zenorix home",
+    "language": "Language",
+    "languageMenu": "Choose your language"
+  },
+  "player": {
+    "watermark": "Zenorix preview",
+    "play": "Play",
+    "pause": "Pause",
+    "mute": "Mute",
+    "unmute": "Unmute",
+    "fullscreen": "Fullscreen",
+    "seek": "Seek within the free preview",
+    "tapForSound": "Tap for sound",
+    "previewLabel": "Free {minutes}-min preview",
+    "floatingCta": "Get APK",
+    "scrollHint": "Swipe up for details",
+    "loading": "Loading preview"
+  },
+  "info": {
+    "heading": "About this film",
+    "cta": "Download & Watch Full Movie Free",
+    "ctaSub": "Android APK · {size} · no credit card",
+    "trustStrip": "Available on all major platforms",
+    "licensed": "Officially licensed"
+  },
+  "chart": {
+    "heading": "Top 10 in {country} This Week",
+    "sub": "Refreshed every Monday from real Zenorix viewing data",
+    "rank": "Number {rank}",
+    "seeAll": "See all 28,000+ titles",
+    "seeAllShort": "See all",
+    "kind": { "movie": "Film", "series": "Series" }
+  },
+  "value": {
+    "heading": "Three reasons people switch",
+    "items": [
+      {
+        "icon": "savings",
+        "title": "The lowest price on the market",
+        "body": "{annualPerMonth} per month on the annual plan, and your first month costs nothing. That is less than a bottle of water — for every platform at once."
+      },
+      {
+        "icon": "apps",
+        "title": "Every platform, one app",
+        "body": "Netflix, Disney+, HBO Max, Apple TV+ and Paramount+ titles stream side by side. One login, one bill, zero subscription fatigue."
+      },
+      {
+        "icon": "4k",
+        "title": "Built for real viewing",
+        "body": "4K Ultra HD, multi-language subtitles, offline download and global edge servers that simply do not buffer."
+      }
+    ]
+  },
+  "compare": {
+    "heading": "Zenorix vs. paying for all of them",
+    "sub": "Same films. Same series. One app, at a fraction of the price.",
+    "labels": {
+      "service": "Service",
+      "price": "Per month",
+      "titles": "Titles",
+      "liveTv": "Live TV",
+      "quality": "Max quality"
+    },
+    "rows": [
+      { "service": "Zenorix", "price": "{annualPerMonth}", "titles": "36,000+", "liveTv": "900+ channels", "quality": "4K HDR", "highlight": true },
+      { "service": "Netflix", "price": "$17.99", "titles": "~6,000", "liveTv": "None", "quality": "4K HDR" },
+      { "service": "Disney+", "price": "$9.99", "titles": "~2,100", "liveTv": "None", "quality": "4K HDR" },
+      { "service": "HBO Max", "price": "$16.99", "titles": "~3,300", "liveTv": "None", "quality": "4K HDR" },
+      { "service": "Apple TV+", "price": "$9.99", "titles": "~260", "liveTv": "None", "quality": "4K HDR" }
+    ],
+    "totalLabel": "All four separately",
+    "totalPrice": "$54.96",
+    "footnote": "Competitor prices are publicly listed standard plans in {country} and are shown for comparison only. All trademarks belong to their respective owners."
+  },
+  "faq": {
+    "heading": "Questions people ask before downloading",
+    "items": [
+      {
+        "q": "Is the first month really free?",
+        "a": "Yes. Your first 30 days of Zenorix cost {zero} and no card is required to start. After the free month you choose {monthly} per month or {annualPerMonth} per month billed annually."
+      },
+      {
+        "q": "Can I cancel anytime?",
+        "a": "Yes, in two taps from the app. There is no contract and no cancellation fee, and you keep access until the end of the period you already paid for."
+      },
+      {
+        "q": "Is the content officially licensed?",
+        "a": "Yes. Zenorix streams synchronously from officially licensed catalogs supplied by the major platforms. Every title is delivered under a distribution agreement — nothing is scraped or re-hosted."
+      },
+      {
+        "q": "Which devices does the APK support?",
+        "a": "Any Android phone, tablet, TV box or Android TV running Android {minAndroid} or newer. The APK is {size}, installs in about 30 seconds, and one account streams on up to four devices."
+      }
+    ]
+  },
+  "finalCta": {
+    "heading": "Finish {title} free tonight",
+    "body": "One {size} install unlocks the full film in 4K plus 28,000 more titles, 8,000 series and 900 live channels. First month free.",
+    "cta": "Download APK · First Month Free",
+    "meta": "v{version} · {size} · Android {minAndroid}+",
+    "badges": ["Safe APK", "No malware", "Signature verified"]
+  },
+  "sticky": {
+    "default": "Download APK · First Month Free",
+    "urgent": "Download to watch the full movie",
+    "close": "Hide download bar"
+  },
+  "modals": {
+    "content": {
+      "eyebrow": "Available in the app",
+      "heading": "Unlock Every Movie & Show",
+      "body": "Get instant access to all 28,000+ titles, including every title on this Top 10 list. First month completely free.",
+      "bullets": ["All platforms in one app", "4K Ultra HD", "Multi-language subtitles", "Cancel anytime"],
+      "cta": "Download Now — Watch Everything Free",
+      "close": "Close"
+    },
+    "preview": {
+      "heading": "Love What You're Watching?",
+      "sub": "Finish this entire movie free — plus 28,000 more. Your first month costs {zero}.",
+      "cta": "Download APK — Continue Watching",
+      "secondary": "30-second install · No credit card required",
+      "close": "Close"
+    }
+  },
+  "footer": {
+    "tagline": "Every platform. One app. {annualPerMonth} a month.",
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Service",
+    "dmca": "DMCA",
+    "copyright": "© {year} Zenorix. All rights reserved.",
+    "disclaimer": "Zenorix streams officially licensed catalogs. Netflix, Disney+, HBO Max, Apple TV+ and Paramount+ are trademarks of their respective owners and are not affiliated with Zenorix.",
+    "language": "Language"
+  },
+  "a11y": {
+    "skipToContent": "Skip to film details",
+    "posterAlt": "Poster for {title}"
+  },
+  "free": "Free"
+}
