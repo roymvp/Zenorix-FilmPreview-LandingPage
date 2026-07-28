@@ -1,14 +1,13 @@
+import { AboutZenorix } from '@/components/landing/about-zenorix'
 import { ConversionDialogs } from '@/components/landing/conversion-dialogs'
 import { ConversionProvider } from '@/components/landing/conversion-provider'
 import { FaqSection } from '@/components/landing/faq-section'
 import { FilmInfo } from '@/components/landing/film-info'
 import { FinalCta } from '@/components/landing/final-cta'
 import { ImmersivePlayer } from '@/components/landing/immersive-player'
-import { PlatformStrip } from '@/components/landing/platform-strip'
 import { SiteFooter } from '@/components/landing/site-footer'
 import { TopBar } from '@/components/landing/top-bar'
 import { TopChart } from '@/components/landing/top-chart'
-import { ValueProps } from '@/components/landing/value-props'
 import { SITE } from '@/lib/config/site'
 import { getChart, type Movie } from '@/lib/content/movies'
 import { fill, type Dictionary } from '@/lib/i18n/dictionaries'
@@ -20,7 +19,7 @@ import { buildStructuredData, marketValues } from '@/lib/seo'
  * /movie/[slug] routes.
  *
  * Section order is the funnel: cinematic hook -> what it is -> social proof ->
- * why switch -> objections -> close, all wired to one download handler.
+ * what Zenorix is -> objections -> close, all wired to one download handler.
  *
  * The layout is mobile-only by design: `.zx-page` caps itself at a phone width
  * and centers, so the page never stretches into a desktop composition.
@@ -113,17 +112,18 @@ export function FilmLanding({
             moreHint={dict.chart.moreHint}
           />
 
-          {/* Sits after the Top 10: the licensed-source claim lands harder once
-              the catalogue has been shown than it does next to a single film. */}
-          <PlatformStrip label={dict.info.trustStrip} />
-
-          <ValueProps
-            heading={dict.value.heading}
-            items={dict.value.items.map((item) => ({
-              icon: item.icon,
-              title: fill(item.title, values),
-              body: fill(item.body, values),
-            }))}
+          {/* Sits after the Top 10: the platform wall and the price both land
+              harder once the catalogue has been shown than they would next to a
+              single film. */}
+          <AboutZenorix
+            heading={dict.about.heading}
+            apps={dict.about.apps}
+            price={{
+              label: dict.about.price.label,
+              value: fill(dict.about.price.value, values),
+            }}
+            viewing={dict.about.viewing}
+            trial={dict.about.trial}
           />
 
           <FaqSection

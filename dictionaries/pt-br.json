@@ -34,7 +34,6 @@
   "info": {
     "cta": "Install Zenorix. Watch Full Moive Free.",
     "ctaSub": "Android APK · {size} · {downloads}",
-    "trustStrip": "Disponível em todas as grandes plataformas",
     "synopsisExpand": "Mais",
     "synopsisCollapse": "Menos"
   },
@@ -45,25 +44,24 @@
     "more": "Ver mais filmes e séries de sucesso",
     "moreHint": "Mais de 28.000 filmes, 8.000 séries e canais de TV ao vivo"
   },
-  "value": {
-    "heading": "Três motivos para trocar",
-    "items": [
-      {
-        "icon": "savings",
-        "title": "O menor preço do mercado",
-        "body": "{annualPerMonth} por mês no plano anual e o primeiro mês sai de graça. Custa menos que uma garrafa de água — e vale por todas as plataformas juntas."
-      },
-      {
-        "icon": "apps",
-        "title": "Todas as plataformas em um app",
-        "body": "Títulos da Netflix, Disney+, HBO Max, Apple TV+ e Paramount+ lado a lado. Um login, uma cobrança, zero cansaço de assinatura."
-      },
-      {
-        "icon": "4k",
-        "title": "Feito para assistir de verdade",
-        "body": "4K Ultra HD, legendas em vários idiomas, download offline e servidores globais que simplesmente não travam."
-      }
-    ]
+  "about": {
+    "heading": "Sobre a Zenorix",
+    "apps": {
+      "label": "Mais de 20 apps top em um só"
+    },
+    "price": {
+      "label": "Preço imbatível",
+      "value": "{annualPerMonth}/mês"
+    },
+    "viewing": {
+      "label": "Experiência de cinema",
+      "items": ["4K Ultra HD", "Dolby Atmos", "Zero travamento"]
+    },
+    "trial": {
+      "label": "Teste fácil",
+      "value": "30 DIAS GRÁTIS.",
+      "note": "Não precisa de cartão de crédito."
+    }
   },
   "faq": {
     "heading": "FAQ",

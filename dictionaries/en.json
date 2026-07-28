@@ -34,7 +34,6 @@
   "info": {
     "cta": "Install Zenorix. Watch Full Moive Free.",
     "ctaSub": "Android APK · {size} · {downloads}",
-    "trustStrip": "Available on all major platforms",
     "synopsisExpand": "More",
     "synopsisCollapse": "Less"
   },
@@ -45,25 +44,24 @@
     "more": "See more hit movies & shows",
     "moreHint": "28,000+ movies, 8,000+ shows & live TV channels"
   },
-  "value": {
-    "heading": "Three reasons people switch",
-    "items": [
-      {
-        "icon": "savings",
-        "title": "The lowest price on the market",
-        "body": "{annualPerMonth} per month on the annual plan, and your first month costs nothing. That is less than a bottle of water — for every platform at once."
-      },
-      {
-        "icon": "apps",
-        "title": "Every platform, one app",
-        "body": "Netflix, Disney+, HBO Max, Apple TV+ and Paramount+ titles stream side by side. One login, one bill, zero subscription fatigue."
-      },
-      {
-        "icon": "4k",
-        "title": "Built for real viewing",
-        "body": "4K Ultra HD, multi-language subtitles, offline download and global edge servers that simply do not buffer."
-      }
-    ]
+  "about": {
+    "heading": "About Zenorix",
+    "apps": {
+      "label": "20+ Top Apps in One"
+    },
+    "price": {
+      "label": "Unbeatable Price",
+      "value": "{annualPerMonth}/mo"
+    },
+    "viewing": {
+      "label": "Cinematic Viewing",
+      "items": ["4K Ultra HD", "Dolby Atmos", "Zero Buffering"]
+    },
+    "trial": {
+      "label": "Easy Try",
+      "value": "30 DAYS FREE.",
+      "note": "No credit card required."
+    }
   },
   "faq": {
     "heading": "FAQ",

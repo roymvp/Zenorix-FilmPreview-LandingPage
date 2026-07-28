@@ -6,7 +6,7 @@
  * caps itself at --zx-page-max and centers on wider screens rather than
  * reflowing into a desktop composition.
  *
- * ONE BACKGROUND. Every section — info, Top 10, trust strip, value props, FAQ,
+ * ONE BACKGROUND. Every section — info, Top 10, About Zenorix, FAQ,
  * final CTA, footer — paints nothing and inherits `--md-sys-color-surface` from
  * .zx-page, and the area around the column (body) uses that same color. There
  * are exactly two exceptions, both deliberate: the top bar, which is a light
@@ -43,14 +43,9 @@
 
 /* Semantic lists are used throughout; none of them want default list styling. */
 .zx-rail,
-.zx-strip-logos,
 .zx-footer-links,
 .zx-dialog-bullets {
   list-style: none;
-}
-.zx-strip-logos {
-  margin: 0;
-  padding: 0;
 }
 
 /* The page itself is already capped, so the shell only owns the side gutter. */
@@ -651,55 +646,9 @@
   color: var(--md-sys-color-primary);
 }
 
-/* ----------------------------------------------------------- brand strip */
-
-.zx-strip {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  padding-block: 22px;
-  border-block: 1px solid var(--md-sys-color-outline-variant);
-}
-
-.zx-strip-label {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 7px;
-  color: var(--md-sys-color-on-surface-variant);
-  font-size: 11px;
-  letter-spacing: 0.11em;
-  text-transform: uppercase;
-  text-align: center;
-}
-
-.zx-strip-label md-icon {
-  font-size: 15px;
-  width: 15px;
-  height: 15px;
-  color: var(--md-sys-color-primary);
-}
-
-.zx-strip-logos {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-}
-
-/* Real store app icons, used unmodified and in full color — no monochrome
-   tint, because these now read as the apps themselves rather than as an
-   abstract logo wall. Squares are clipped to the platform icon shape and get a
-   hairline ring so dark icons keep an edge against the page. */
-.zx-strip-logos img {
-  display: block;
-  width: 40px;
-  height: 40px;
-  border-radius: 10px;
-  object-fit: cover;
-  box-shadow: 0 0 0 1px var(--md-sys-color-outline-variant);
-}
+/* NOTE: the standalone brand strip lived here. It was merged into the
+   "About Zenorix" section — see .zx-about, whose first row carries the same
+   platform icon wall at display size. */
 
 /* --------------------------------------------------------------- top chart */
 
@@ -917,53 +866,103 @@
   text-wrap: balance;
 }
 
-/* ------------------------------------------------------------- value props */
+/* ------------------------------------------------------------ about zenorix */
 
-/* Three bullets, not cards: the claims are short, so card chrome was pure
-   weight. The icon column keeps the text block aligned as rows wrap. */
-.zx-values {
+/* Quiet label, loud answer. The whole section runs on ONE contrast rule: the
+   label is 11px uppercase muted, the proof beneath it is display-scale. Rows
+   are separated by hairlines only — no cards, matching the page's single
+   surface. */
+.zx-about {
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-block-start: 1px solid var(--md-sys-color-outline-variant);
+}
+
+.zx-about-row {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-block: 22px;
+  border-block-end: 1px solid var(--md-sys-color-outline-variant);
+}
+
+/* The section's own bottom padding already separates it from the FAQ, so a
+   closing hairline would just float above a dead gap. */
+.zx-about-row:last-child {
+  border-block-end: 0;
+  padding-block-end: 0;
+}
+
+.zx-about-label {
+  margin: 0;
+  color: var(--md-sys-color-on-surface-variant);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.11em;
+  line-height: 1.3;
+  text-transform: uppercase;
+}
+
+/* The shared display treatment. Tight leading and negative tracking so a long
+   value ("30 DAYS FREE.") still reads as one confident block at 420px. */
+.zx-about-display {
+  margin: 0;
+  font-size: 27px;
+  font-weight: 700;
+  line-height: 1.12;
+  letter-spacing: -0.02em;
+  color: var(--md-sys-color-on-surface);
+  text-wrap: balance;
+}
+
+/* The price is the wedge, so it gets the one size nothing else on the page
+   uses, plus the accent color to break the neutral run. */
+.zx-about-price {
+  font-size: 40px;
+  letter-spacing: -0.03em;
+  color: var(--md-sys-color-primary);
+}
+
+.zx-about-specs {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
-.zx-value {
-  display: flex;
-  align-items: flex-start;
-  gap: 13px;
-}
-
-.zx-value-icon {
-  flex: none;
-  margin-block-start: 1px;
-  font-size: 22px;
-  width: 22px;
-  height: 22px;
-  color: var(--md-sys-color-primary);
-}
-
-.zx-value-text {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-  min-width: 0;
-}
-
-.zx-value-text strong {
-  font-size: 15px;
-  font-weight: 650;
-  line-height: 1.3;
-  color: var(--md-sys-color-on-surface);
-}
-
-.zx-value-text span {
+.zx-about-note {
+  margin: 0;
+  color: var(--md-sys-color-on-surface-variant);
   font-size: 13px;
   line-height: 1.5;
-  color: var(--md-sys-color-on-surface-variant);
   text-wrap: pretty;
+}
+
+/* Real store app icons, unmodified and in full color — they read as the apps
+   themselves, not as an abstract logo wall. Clipped to the platform icon shape
+   with a hairline ring so dark icons keep an edge against the page. */
+.zx-about-logos {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.zx-about-logos img {
+  display: block;
+  width: 44px;
+  height: 44px;
+  border-radius: 11px;
+  object-fit: cover;
+  box-shadow: 0 0 0 1px var(--md-sys-color-outline-variant);
 }
 
 /* --------------------------------------------------------------------- faq */
