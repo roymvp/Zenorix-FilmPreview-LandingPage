@@ -71,6 +71,7 @@ export function FilmLanding({
             homeLabel={dict.nav.home}
             languageLabel={dict.nav.language}
             languageMenuLabel={dict.nav.languageMenu}
+            installLabel={dict.nav.install}
             localeHrefs={localeHrefs}
           />
 

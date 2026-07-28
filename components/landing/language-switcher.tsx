@@ -29,7 +29,11 @@ export function LanguageSwitcher({
 
   return (
     <div className="zx-lang" ref={wrapRef}>
-      <md-outlined-button
+      {/* A plain button, not an outlined MD button: in the top bar this is a
+          tertiary control next to the install CTA, and button chrome made the
+          two read as competing actions. Just the locale code and a caret. */}
+      <button
+        type="button"
         id={anchorId}
         className="zx-lang-trigger"
         aria-haspopup="menu"
@@ -37,13 +41,11 @@ export function LanguageSwitcher({
         aria-label={menuLabel}
         onClick={() => setOpen((value) => !value)}
       >
-        <md-icon slot="icon" aria-hidden="true">
-          language
-        </md-icon>
         {variant === 'footer'
           ? `${label}: ${localeMeta[current].name}`
           : localeMeta[current].short}
-      </md-outlined-button>
+        <md-icon aria-hidden="true">expand_more</md-icon>
+      </button>
 
       <md-menu
         anchor={anchorId}

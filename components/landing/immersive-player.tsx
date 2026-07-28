@@ -1,8 +1,17 @@
 'use client'
 
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState, type CSSProperties } from 'react'
 import { useConversion } from '@/components/landing/conversion-provider'
 import { trackEvent } from '@/lib/analytics'
+
+/** m:ss, or h:mm:ss once the film runs past an hour. */
+function formatTime(seconds: number): string {
+  const safe = Math.max(0, Math.floor(seconds))
+  const h = Math.floor(safe / 3600)
+  const m = Math.floor((safe % 3600) / 60)
+  const s = String(safe % 60).padStart(2, '0')
+  return h > 0 ? `${h}:${String(m).padStart(2, '0')}:${s}` : `${m}:${s}`
+}
 
 export type PlayerCopy = {
   play: string
@@ -188,15 +197,15 @@ export function ImmersivePlayer({
   }
 
   /** Seeking is allowed inside the preview window and blocked past it. */
-  function handleSeek(event: Event) {
+  function handleSeek(event: React.ChangeEvent<HTMLInputElement>) {
     const video = videoRef.current
-    const target = event.target as HTMLInputElement | null
-    if (!video || !target) return
+    const target = event.currentTarget
+    if (!video) return
     const requested = Number(target.value)
     if (requested >= cap) {
       trackEvent('preview_scrub_locked', { requested: Math.round(requested) })
       target.value = String(Math.floor(cap))
-      enforceGate()
+      void enforceGate()
       return
     }
     video.currentTime = requested
@@ -204,6 +213,7 @@ export function ImmersivePlayer({
   }
 
   const lockedFraction = 1 - cap / runtimeSeconds
+  const playedPercent = ((Math.min(current, runtimeSeconds) / runtimeSeconds) * 100).toFixed(2)
 
   return (
     <div className="zx-stage" data-playing={started ? 'true' : 'false'}>
@@ -238,15 +248,17 @@ export function ImmersivePlayer({
       />
 
       {/* Sound toggle, top-right. It is the ONE control that cannot live on the
-          tap layer, since tapping the frame is already play/pause. */}
-      <div className="zx-mute">
-        <md-icon-button
-          onClick={toggleMute}
-          aria-label={muted ? copy.unmute : copy.mute}
-        >
-          <md-icon>{muted ? 'volume_off' : 'volume_up'}</md-icon>
-        </md-icon-button>
-      </div>
+          tap layer, since tapping the frame is already play/pause. A bare
+          button rather than <md-icon-button> — no pill, no blur, just the
+          glyph with a shadow for legibility over a bright frame. */}
+      <button
+        type="button"
+        className="zx-mute"
+        onClick={toggleMute}
+        aria-label={muted ? copy.unmute : copy.mute}
+      >
+        <md-icon aria-hidden="true">{muted ? 'volume_off' : 'volume_up'}</md-icon>
+      </button>
 
       {/* Paused-state affordance only — not a button. Play/pause is the frame
           tap, so a real button here would be a second control for one action. */}
@@ -259,18 +271,30 @@ export function ImmersivePlayer({
       ) : null}
 
       <div className="zx-player-bar">
+        {/* Elapsed / total sits above the bar so it never crowds the track. */}
+        <p className="zx-player-time">
+          <span>{formatTime(current)}</span>
+          <span className="zx-player-time-total">{formatTime(runtimeSeconds)}</span>
+        </p>
+
+        {/* A native range input rather than <md-slider>: the MD slider brings a
+            large handle, ripple and value bubble, which is far heavier chrome
+            than a preview scrubber needs. Styled thin in landing.css. */}
         <div className="zx-scrub">
-          <md-slider
+          <input
+            className="zx-scrub-input"
+            type="range"
             min={0}
             max={runtimeSeconds}
             step={1}
             value={Math.floor(current)}
             aria-label={copy.seek}
-            oninput={handleSeek}
+            onChange={handleSeek}
+            style={{ '--zx-progress': `${playedPercent}%` } as CSSProperties}
           />
           <span
             className="zx-scrub-lock"
-            style={{ width: `calc(${(lockedFraction * 100).toFixed(2)}% - 12px)` }}
+            style={{ width: `${(lockedFraction * 100).toFixed(2)}%` }}
             aria-hidden="true"
           />
         </div>

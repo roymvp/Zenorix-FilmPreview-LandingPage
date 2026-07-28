@@ -29,7 +29,7 @@ export function FinalCta({
         </h2>
         <p className="md-typescale-body-large">{body}</p>
 
-        <DownloadCta label={cta} sub={meta} source="final_cta" icon="android" />
+        <DownloadCta label={cta} sub={meta} source="final_cta" />
 
         <ul className="zx-badges">
           {badges.map((badge) => (

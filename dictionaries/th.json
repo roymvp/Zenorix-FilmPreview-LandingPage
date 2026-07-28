@@ -21,7 +21,8 @@
   "nav": {
     "home": "หน้าแรก Zenorix",
     "language": "ภาษา",
-    "languageMenu": "เลือกภาษาของคุณ"
+    "languageMenu": "เลือกภาษาของคุณ",
+    "install": "ติดตั้ง"
   },
   "player": {
     "play": "เล่น",
@@ -31,7 +32,7 @@
     "seek": "เลื่อนดูภายในช่วงตัวอย่างฟรี"
   },
   "info": {
-    "cta": "ดาวน์โหลดและดูเต็มเรื่องฟรี",
+    "cta": "Install Zenorix. Watch Full Moive Free.",
     "ctaSub": "ไฟล์ APK สำหรับ Android · {size} · ไม่ต้องใช้บัตรเครดิต",
     "trustStrip": "รวมคอนเทนต์จากทุกแพลตฟอร์มใหญ่"
   },
@@ -84,7 +85,7 @@
   "finalCta": {
     "heading": "ดู {title} ให้จบคืนนี้ ฟรี",
     "body": "ติดตั้งไฟล์ขนาด {size} ครั้งเดียว ปลดล็อกหนังเรื่องนี้เต็มเรื่องในระบบ 4K พร้อมหนังอีกกว่า 28,000 เรื่อง ซีรีส์ 8,000 เรื่อง และทีวีสด 900 ช่อง เดือนแรกฟรี",
-    "cta": "ดาวน์โหลด APK · เดือนแรกฟรี",
+    "cta": "Install Zenorix. Watch Full Moive Free.",
     "meta": "v{version} · {size} · Android {minAndroid} ขึ้นไป",
     "badges": [
       "ไฟล์ APK ปลอดภัย",
@@ -93,8 +94,8 @@
     ]
   },
   "sticky": {
-    "default": "ดาวน์โหลด APK · เดือนแรกฟรี",
-    "urgent": "ดาวน์โหลดเพื่อดูเต็มเรื่อง",
+    "default": "Install Zenorix. Watch Full Moive Free.",
+    "urgent": "Install Zenorix. Watch Full Moive Free.",
     "close": "ซ่อนแถบดาวน์โหลด"
   },
   "modals": {
@@ -108,13 +109,13 @@
         "ซับไทยและหลายภาษา",
         "ยกเลิกได้ตลอดเวลา"
       ],
-      "cta": "ดาวน์โหลดเลย — ดูได้ทุกเรื่องฟรี",
+      "cta": "Install Zenorix. Watch Full Moive Free.",
       "close": "ปิด"
     },
     "preview": {
       "heading": "กำลังสนุกอยู่ใช่ไหม",
       "sub": "ดูเรื่องนี้ให้จบฟรี พร้อมอีกกว่า 28,000 เรื่อง เดือนแรกของคุณจ่ายเพียง {zero}",
-      "cta": "ดาวน์โหลด APK — ดูต่อทันที",
+      "cta": "Install Zenorix. Watch Full Moive Free.",
       "secondary": "ติดตั้ง 30 วินาที · ไม่ต้องใช้บัตรเครดิต",
       "close": "ปิด"
     }

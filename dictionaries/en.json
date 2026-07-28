@@ -21,7 +21,8 @@
   "nav": {
     "home": "Zenorix home",
     "language": "Language",
-    "languageMenu": "Choose your language"
+    "languageMenu": "Choose your language",
+    "install": "Install"
   },
   "player": {
     "play": "Play",
@@ -31,7 +32,7 @@
     "seek": "Seek within the free preview"
   },
   "info": {
-    "cta": "Download & Watch Full Movie Free",
+    "cta": "Install Zenorix. Watch Full Moive Free.",
     "ctaSub": "Android APK · {size} · no credit card",
     "trustStrip": "Available on all major platforms"
   },
@@ -84,7 +85,7 @@
   "finalCta": {
     "heading": "Finish {title} free tonight",
     "body": "One {size} install unlocks the full film in 4K plus 28,000 more titles, 8,000 series and 900 live channels. First month free.",
-    "cta": "Download APK · First Month Free",
+    "cta": "Install Zenorix. Watch Full Moive Free.",
     "meta": "v{version} · {size} · Android {minAndroid}+",
     "badges": [
       "Safe APK",
@@ -93,8 +94,8 @@
     ]
   },
   "sticky": {
-    "default": "Download APK · First Month Free",
-    "urgent": "Download to watch the full movie",
+    "default": "Install Zenorix. Watch Full Moive Free.",
+    "urgent": "Install Zenorix. Watch Full Moive Free.",
     "close": "Hide download bar"
   },
   "modals": {
@@ -108,13 +109,13 @@
         "Multi-language subtitles",
         "Cancel anytime"
       ],
-      "cta": "Download Now — Watch Everything Free",
+      "cta": "Install Zenorix. Watch Full Moive Free.",
       "close": "Close"
     },
     "preview": {
       "heading": "Love What You're Watching?",
       "sub": "Finish this entire movie free — plus 28,000 more. Your first month costs {zero}.",
-      "cta": "Download APK — Continue Watching",
+      "cta": "Install Zenorix. Watch Full Moive Free.",
       "secondary": "30-second install · No credit card required",
       "close": "Close"
     }

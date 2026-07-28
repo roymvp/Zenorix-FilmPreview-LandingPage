@@ -21,7 +21,8 @@
   "nav": {
     "home": "Página inicial da Zenorix",
     "language": "Idioma",
-    "languageMenu": "Escolha seu idioma"
+    "languageMenu": "Escolha seu idioma",
+    "install": "Instalar"
   },
   "player": {
     "play": "Reproduzir",
@@ -31,7 +32,7 @@
     "seek": "Avançar dentro da prévia gratuita"
   },
   "info": {
-    "cta": "Baixe e assista ao filme completo grátis",
+    "cta": "Install Zenorix. Watch Full Moive Free.",
     "ctaSub": "APK para Android · {size} · sem cartão de crédito",
     "trustStrip": "Disponível em todas as grandes plataformas"
   },
@@ -84,7 +85,7 @@
   "finalCta": {
     "heading": "Termine {title} de graça hoje",
     "body": "Uma instalação de {size} libera o filme completo em 4K, mais 28.000 títulos, 8.000 séries e 900 canais ao vivo. Primeiro mês grátis.",
-    "cta": "Baixar APK · Primeiro mês grátis",
+    "cta": "Install Zenorix. Watch Full Moive Free.",
     "meta": "v{version} · {size} · Android {minAndroid}+",
     "badges": [
       "APK seguro",
@@ -93,8 +94,8 @@
     ]
   },
   "sticky": {
-    "default": "Baixar APK · Primeiro mês grátis",
-    "urgent": "Baixe para assistir ao filme completo",
+    "default": "Install Zenorix. Watch Full Moive Free.",
+    "urgent": "Install Zenorix. Watch Full Moive Free.",
     "close": "Ocultar barra de download"
   },
   "modals": {
@@ -108,13 +109,13 @@
         "Legendas em vários idiomas",
         "Cancele quando quiser"
       ],
-      "cta": "Baixar agora — assista a tudo grátis",
+      "cta": "Install Zenorix. Watch Full Moive Free.",
       "close": "Fechar"
     },
     "preview": {
       "heading": "Gostou do que está vendo?",
       "sub": "Termine este filme inteiro de graça — e mais 28.000. Seu primeiro mês custa {zero}.",
-      "cta": "Baixar APK — continuar assistindo",
+      "cta": "Install Zenorix. Watch Full Moive Free.",
       "secondary": "Instala em 30 segundos · Sem cartão de crédito",
       "close": "Fechar"
     }

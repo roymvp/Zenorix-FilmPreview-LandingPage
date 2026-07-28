@@ -59,9 +59,6 @@ export function StickyDownloadBar({
           onClick={() => download(urgent ? 'sticky_urgent' : 'sticky')}
           tabIndex={visible ? 0 : -1}
         >
-          <md-icon slot="icon" aria-hidden="true">
-            android
-          </md-icon>
           {urgent ? urgentLabel : defaultLabel}
         </md-filled-button>
         <span className="zx-visually-hidden">

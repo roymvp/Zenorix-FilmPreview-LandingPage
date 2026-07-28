@@ -77,7 +77,6 @@ export function ConversionDialogs({
           <DownloadCta
             label={copy.content.cta}
             source={`content_lock:${contentTitle ?? 'unknown'}`}
-            icon="android"
           />
           <md-text-button form="zx-content-form" value="close">
             {copy.content.close}
@@ -113,7 +112,6 @@ export function ConversionDialogs({
             label={copy.preview.cta}
             sub={copy.preview.secondary}
             source={`preview_gate:${previewReason ?? 'limit'}`}
-            icon="android"
           />
           <md-text-button form="zx-preview-form" value="close">
             {copy.preview.close}

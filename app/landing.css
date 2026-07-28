@@ -146,7 +146,7 @@
   color: var(--md-sys-color-on-surface-variant);
 }
 
-/* Only the footer still pairs a wordmark with the mark; the top bar is icon-only. */
+/* Wordmark, paired with the mark in both the top bar and the footer. */
 .zx-brand-name {
   font-size: 15px;
   font-weight: 700;
@@ -156,10 +156,22 @@
 .zx-topbar-actions {
   display: flex;
   align-items: center;
-  gap: 2px;
+  gap: 4px;
   --md-icon-button-icon-color: var(--zx-on-media);
   --md-icon-button-hover-icon-color: var(--md-sys-color-primary);
   --md-icon-button-pressed-icon-color: var(--md-sys-color-primary);
+}
+
+/* Compact install button: same pill shape as the in-page CTAs, sized to the
+   bar. It carries only the short `nav.install` label — the full CTA sentence
+   would not fit a 420px header beside the brand and language control. */
+.zx-topbar-cta {
+  --md-filled-button-container-height: 32px;
+  --md-filled-button-label-text-size: 13px;
+  --md-filled-button-label-text-weight: 700;
+  --md-filled-button-container-shape: 999px;
+  --md-filled-button-leading-space: 14px;
+  --md-filled-button-trailing-space: 14px;
 }
 
 /* ------------------------------------------------------------------- hero */
@@ -297,61 +309,137 @@
 /* Player controls: mute (top-right) and the scrub bar (bottom). Play/pause has
    no button of its own — it is the full-frame tap target. */
 
-/* Sits above .zx-stage-tap so the tap layer cannot swallow the mute click. */
+/* Sits above .zx-stage-tap so the tap layer cannot swallow the mute click.
+   Just the glyph — no pill, no blur, no state layer; a text shadow does the
+   legibility work that the translucent container used to. */
 .zx-mute {
   position: absolute;
   z-index: 5;
-  inset-block-start: 4px;
-  inset-inline-end: 4px;
-  --md-icon-button-icon-color: var(--zx-on-media);
-  --md-icon-button-icon-size: 20px;
-  --md-icon-button-hover-icon-color: var(--md-sys-color-primary);
-  --md-icon-button-pressed-icon-color: var(--md-sys-color-primary);
+  inset-block-start: 6px;
+  inset-inline-end: 8px;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--zx-on-media);
+  cursor: pointer;
+  appearance: none;
 }
 
-/* Keeps the glyph legible over a bright frame. */
-.zx-mute md-icon-button {
-  background: rgba(6, 5, 4, 0.42);
+.zx-mute md-icon {
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+  filter: drop-shadow(0 1px 3px rgba(6, 5, 4, 0.85));
+}
+
+.zx-mute:hover {
+  color: var(--md-sys-color-primary);
+}
+
+.zx-mute:focus-visible {
+  outline: 2px solid var(--md-sys-color-primary);
+  outline-offset: 2px;
   border-radius: 999px;
-  backdrop-filter: blur(8px);
 }
 
+/* Elapsed / total, directly above the track. */
+.zx-player-time {
+  display: flex;
+  justify-content: space-between;
+  margin: 0 0 5px;
+  font-size: 11px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--zx-on-media);
+  text-shadow: 0 1px 3px rgba(6, 5, 4, 0.85);
+}
+
+.zx-player-time-total {
+  color: var(--zx-on-media-variant);
+}
+
+/* A thin native range input replaces <md-slider>: same behaviour, far less
+   chrome. The played portion is painted with a gradient driven by the
+   --zx-progress custom property the component sets inline. */
 .zx-scrub {
   position: relative;
   display: flex;
   align-items: center;
-  --md-slider-active-track-color: var(--md-sys-color-primary);
-  --md-slider-inactive-track-color: rgba(255, 255, 255, 0.26);
-  --md-slider-handle-color: var(--md-sys-color-primary);
-  --md-slider-focus-handle-color: var(--md-sys-color-primary);
-  --md-slider-hover-handle-color: var(--md-sys-color-primary);
-  --md-slider-pressed-handle-color: var(--md-sys-color-primary);
-  --md-slider-label-container-color: var(--md-sys-color-primary);
-  --md-slider-label-text-color: var(--md-sys-color-on-primary);
-  --md-slider-active-track-height: 4px;
-  --md-slider-inactive-track-height: 4px;
-  --md-slider-handle-width: 12px;
-  --md-slider-handle-height: 12px;
-  --md-slider-state-layer-color: var(--md-sys-color-primary);
+  height: 12px;
 }
 
-.zx-scrub md-slider {
+.zx-scrub-input {
   flex: 1;
   min-width: 0;
+  height: 12px;
+  margin: 0;
+  background: transparent;
+  appearance: none;
+  cursor: pointer;
 }
 
-/* The locked tail visualizes "the rest of the film is behind the app". */
+.zx-scrub-input::-webkit-slider-runnable-track {
+  height: 3px;
+  border-radius: 999px;
+  background: linear-gradient(
+    to right,
+    var(--md-sys-color-primary) var(--zx-progress, 0%),
+    rgba(255, 255, 255, 0.28) var(--zx-progress, 0%)
+  );
+}
+
+.zx-scrub-input::-moz-range-track {
+  height: 3px;
+  border-radius: 999px;
+  background: linear-gradient(
+    to right,
+    var(--md-sys-color-primary) var(--zx-progress, 0%),
+    rgba(255, 255, 255, 0.28) var(--zx-progress, 0%)
+  );
+}
+
+/* A small dot, not a grabbable MD handle: this scrubber only spans a preview. */
+.zx-scrub-input::-webkit-slider-thumb {
+  appearance: none;
+  width: 9px;
+  height: 9px;
+  margin-block-start: -3px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--md-sys-color-primary);
+}
+
+.zx-scrub-input::-moz-range-thumb {
+  width: 9px;
+  height: 9px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--md-sys-color-primary);
+}
+
+.zx-scrub-input:focus-visible {
+  outline: 2px solid var(--md-sys-color-primary);
+  outline-offset: 3px;
+  border-radius: 999px;
+}
+
+/* The locked tail visualizes "the rest of the film is behind the app". Sits on
+   the track, above the input's own background but not blocking its pointer. */
 .zx-scrub-lock {
   position: absolute;
   inset-block-start: 50%;
   transform: translateY(-50%);
-  inset-inline-end: 12px;
-  height: 4px;
-  border-radius: 2px;
+  inset-inline-end: 0;
+  height: 3px;
+  border-radius: 999px;
   background: repeating-linear-gradient(
     115deg,
-    rgba(255, 255, 255, 0.34) 0 5px,
-    rgba(255, 255, 255, 0.08) 5px 10px
+    rgba(255, 255, 255, 0.3) 0 5px,
+    rgba(255, 255, 255, 0.06) 5px 10px
   );
   pointer-events: none;
 }
@@ -411,10 +499,18 @@
   color: var(--md-sys-color-on-surface-variant);
 }
 
+/* Capped at 3 lines with an ellipsis: the synopsis is supporting copy, and a
+   long one pushed the download CTA below the fold. The full text stays in the
+   DOM (and in the JSON-LD description), so nothing is lost to crawlers. */
 .zx-synopsis {
   margin: 14px 0 20px;
   color: var(--md-sys-color-on-surface-variant);
   text-wrap: pretty;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  overflow: hidden;
 }
 
 /* Genre chips. These now sit inline in .zx-film-meta (after the runtime), so
@@ -437,11 +533,13 @@
   align-items: stretch;
 }
 
+/* Fully rounded (pill). The label is a sentence, so the text size is a touch
+   smaller than a typical 56px button to keep it on one or two lines. */
 .zx-cta-button {
   --md-filled-button-container-height: 56px;
-  --md-filled-button-label-text-size: 16px;
+  --md-filled-button-label-text-size: 15px;
   --md-filled-button-label-text-weight: 700;
-  --md-filled-button-container-shape: 16px;
+  --md-filled-button-container-shape: 999px;
   width: 100%;
 }
 
@@ -890,18 +988,47 @@
   position: relative;
 }
 
+/* Text + caret, no outline or filled container: this is a tertiary control and
+   button chrome made it compete with the install CTA sitting next to it. */
 .zx-lang-trigger {
-  --md-outlined-button-container-height: 34px;
-  --md-outlined-button-label-text-size: 12px;
-  --md-outlined-button-label-text-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 1px;
+  height: 32px;
+  padding: 0 4px;
+  border: 0;
+  background: transparent;
+  color: var(--md-sys-color-on-surface-variant);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  appearance: none;
 }
 
+.zx-lang-trigger md-icon {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+}
+
+.zx-lang-trigger:hover {
+  color: var(--md-sys-color-primary);
+}
+
+.zx-lang-trigger:focus-visible {
+  outline: 2px solid var(--md-sys-color-primary);
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+
+/* Over the cinema-black bar the on-surface color would be invisible. */
 .zx-topbar .zx-lang-trigger {
-  --md-outlined-button-label-text-color: var(--zx-on-media);
-  --md-outlined-button-outline-color: var(--zx-media-outline);
-  --md-outlined-button-hover-label-text-color: var(--md-sys-color-primary);
-  --md-outlined-button-icon-color: var(--zx-on-media);
-  --md-outlined-button-hover-icon-color: var(--md-sys-color-primary);
+  color: var(--zx-on-media);
+}
+
+.zx-topbar .zx-lang-trigger:hover {
+  color: var(--md-sys-color-primary);
 }
 
 /* ------------------------------------------------------------ sticky bar */

@@ -67,7 +67,7 @@ export function FilmInfo({
 
         <p className="zx-synopsis md-typescale-body-medium">{synopsis}</p>
 
-        <DownloadCta label={cta} sub={ctaSub} source="film_info" icon="android" />
+        <DownloadCta label={cta} sub={ctaSub} source="film_info" />
       </div>
     </section>
   )
