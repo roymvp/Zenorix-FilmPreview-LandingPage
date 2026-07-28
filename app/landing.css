@@ -896,6 +896,12 @@
   padding-block-end: 0;
 }
 
+/* Clear of the last row's proof text so the button reads as the whole section's
+   conclusion rather than as part of the trial row. */
+.zx-about-cta {
+  margin-block-start: 24px;
+}
+
 .zx-about-label {
   margin: 0;
   color: var(--md-sys-color-on-surface-variant);

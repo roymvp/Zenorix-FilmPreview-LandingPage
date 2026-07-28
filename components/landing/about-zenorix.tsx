@@ -1,3 +1,4 @@
+import { DownloadCta } from '@/components/landing/download-cta'
 import { PLATFORMS, PLATFORM_ORDER } from '@/lib/content/platforms'
 
 /**
@@ -21,6 +22,7 @@ export function AboutZenorix({
   price,
   viewing,
   trial,
+  cta,
 }: {
   heading: string
   /** Row 1 label. Its "content" is the platform icon wall itself. */
@@ -31,6 +33,8 @@ export function AboutZenorix({
   viewing: { label: string; items: string[] }
   /** Row 4: the offer, plus the objection it removes. */
   trial: { label: string; value: string; note: string }
+  /** Short install label for the section-closing button. */
+  cta: string
 }) {
   return (
     <section className="zx-section" aria-labelledby="zx-about-heading">
@@ -86,6 +90,13 @@ export function AboutZenorix({
             <p className="zx-about-note">{trial.note}</p>
           </li>
         </ul>
+
+        {/* The four claims build to a decision, so the section closes on the
+            action instead of making the reader scroll back for one. Short label
+            here — the long sentence CTA stays reserved for the final close. */}
+        <div className="zx-about-cta">
+          <DownloadCta label={cta} source="about" />
+        </div>
       </div>
     </section>
   )
