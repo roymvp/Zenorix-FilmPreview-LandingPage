@@ -6,6 +6,14 @@
  * caps itself at --zx-page-max and centers on wider screens rather than
  * reflowing into a desktop composition.
  *
+ * ONE BACKGROUND. Every section — info, Top 10, trust strip, value props, FAQ,
+ * final CTA, footer — paints nothing and inherits `--md-sys-color-surface` from
+ * .zx-page, and the area around the column (body) uses that same color. There
+ * are exactly two exceptions, both deliberate: the top bar, which is a light
+ * island (see .zx-topbar), and the video frame itself. No section tints, no
+ * background gradients, no backdrop images behind copy. Sections are separated
+ * by spacing and hairlines only.
+ *
  * Consequence, and the reason this file has no `min-width` media queries:
  * media queries match the VIEWPORT, not this capped container, so any
  * `min-width` rule would fire on a desktop viewport and restyle a 420px-wide
@@ -237,43 +245,20 @@
   opacity: 0;
 }
 
-/* Cinematic vignette + bottom scrim so type stays legible over any frame. */
+/* One job only: keep the timecode and scrub bar legible over a bright frame.
+   The former full-frame vignette and warm ember light leak are gone — they
+   tinted the film and added two more gradients to the page. */
 .zx-stage-scrim {
   position: absolute;
   inset: 0;
   z-index: 2;
   pointer-events: none;
-  background:
-    radial-gradient(
-      120% 90% at 50% 18%,
-      var(--zx-media-scrim) 40%,
-      rgba(6, 5, 4, 0.55) 100%
-    ),
-    linear-gradient(
-      to top,
-      var(--zx-media-scrim-strong) 0%,
-      rgba(6, 5, 4, 0.92) 14%,
-      rgba(6, 5, 4, 0.5) 38%,
-      rgba(6, 5, 4, 0.12) 62%,
-      rgba(6, 5, 4, 0.42) 100%
-    );
-}
-
-/* Warm ember light leak — the brand's cinematic signature. */
-.zx-stage-glow {
-  position: absolute;
-  inset-block-end: -12%;
-  inset-inline-start: -10%;
-  z-index: 2;
-  width: 70%;
-  height: 55%;
-  pointer-events: none;
-  background: radial-gradient(
-    closest-side,
-    rgba(255, 160, 60, 0.22),
-    rgba(255, 160, 60, 0)
+  background: linear-gradient(
+    to top,
+    rgba(6, 5, 4, 0.72) 0%,
+    rgba(6, 5, 4, 0.32) 22%,
+    var(--zx-media-scrim) 45%
   );
-  filter: blur(6px);
 }
 
 .zx-stage-tap {
@@ -510,35 +495,33 @@
   transform: scale(0.86);
 }
 
-/* Sized well above the MD "large" default: this is the hero control on a 16/9
-   phone frame and it has to be an obvious, thumb-sized target from across the
+/* ONE shape: a single translucent circle. No FAB container, no outline ring on
+   top of it — the previous version stacked an <md-fab>'s rounded-square surface
+   under a circular box-shadow and read as two shapes at once.
+   Sized well above the MD "large" default: this is the hero control on a 16/9
+   phone frame and has to be an obvious, thumb-sized target from across the
    room, not a small chip floating in the middle of the video. */
-.zx-bigplay md-fab {
-  pointer-events: none;
-  --md-fab-container-color: rgba(6, 5, 4, 0.55);
-  --md-fab-icon-color: var(--zx-on-media);
-  --md-fab-container-shape: 999px;
-  --md-fab-container-width: 84px;
-  --md-fab-container-height: 84px;
-  --md-fab-large-container-width: 84px;
-  --md-fab-large-container-height: 84px;
-  --md-fab-icon-size: 46px;
-  --md-fab-large-icon-size: 46px;
-  --md-fab-container-elevation: 0;
-  /* The FAB is translucent, so a ring keeps its edge readable on a bright frame. */
-  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.22);
-  border-radius: 999px;
+.zx-bigplay-disc {
+  display: grid;
+  place-items: center;
+  width: 78px;
+  height: 78px;
+  border-radius: 50%;
+  background: rgba(6, 5, 4, 0.5);
+  color: var(--zx-on-media);
+}
+
+.zx-bigplay-disc md-icon {
+  font-size: 42px;
+  width: 42px;
+  height: 42px;
 }
 
 /* --------------------------------------------------------------- film info */
 
+/* No gradient blend out of the player: the page has ONE background color and
+   the video frame's own edge is the transition. */
 .zx-info {
-  /* Blends the cinema black into the page surface. */
-  background: linear-gradient(
-    to bottom,
-    var(--md-sys-color-surface-container-lowest),
-    var(--md-sys-color-surface)
-  );
   padding-block: 18px var(--zx-section-y);
 }
 
@@ -704,28 +687,26 @@
   flex-wrap: wrap;
   align-items: center;
   justify-content: center;
-  gap: 20px 30px;
+  gap: 12px;
 }
 
+/* Real store app icons, used unmodified and in full color — no monochrome
+   tint, because these now read as the apps themselves rather than as an
+   abstract logo wall. Squares are clipped to the platform icon shape and get a
+   hairline ring so dark icons keep an edge against the page. */
 .zx-strip-logos img {
-  height: 20px;
-  width: auto;
-  max-width: 104px;
-  object-fit: contain;
-  opacity: 0.72;
-  /* Brand marks are used unmodified; only rendered monochrome for contrast. */
-  filter: grayscale(1) brightness(0) invert(var(--zx-logo-invert, 0));
-}
-
-.dark .zx-strip-logos img {
-  --zx-logo-invert: 1;
+  display: block;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  object-fit: cover;
+  box-shadow: 0 0 0 1px var(--md-sys-color-outline-variant);
 }
 
 /* --------------------------------------------------------------- top chart */
 
-.zx-chart {
-  background: var(--md-sys-color-surface-container-low);
-}
+/* Intentionally has NO background of its own: every section shares the page
+   surface, and the rail is separated by rhythm, not by a tinted band. */
 
 /* The rail is a direct child of the section (NOT of .zx-shell) so the scroll
    track can run the full page width. It therefore owns the side gutter itself:
@@ -819,11 +800,9 @@
   place-items: center;
   border: 1px dashed var(--md-sys-color-outline-variant);
   border-radius: inherit;
-  background: repeating-linear-gradient(
-    135deg,
-    var(--md-sys-color-surface-container-high) 0 8px,
-    var(--md-sys-color-surface-container-highest) 8px 16px
-  );
+  /* Flat tint, not a striped gradient: the only patterned fill on the page read
+     as a third background treatment. */
+  background: var(--md-sys-color-surface-container-high);
   color: var(--md-sys-color-outline);
 }
 
@@ -833,26 +812,30 @@
   height: 26px;
 }
 
-/* Source app icon, top-right. A light rounded-square tile so the marks (which
-   are solid single-color SVGs) stay legible over any poster. */
+/* Source app icon, top-right. The real store icon, so the tile IS the artwork:
+   no plate or padding behind it — just the icon clipped to the platform's own
+   rounded-square shape, with a hairline ring to separate dark icons (Netflix,
+   Apple TV, HBO Max) from dark poster art. */
 .zx-chart-badge {
   position: absolute;
   z-index: 2;
   inset-block-start: 5px;
   inset-inline-end: 5px;
-  display: grid;
-  place-items: center;
-  width: 22px;
-  height: 22px;
-  border-radius: 6px;
-  background: rgba(255, 255, 255, 0.92);
-  box-shadow: 0 1px 4px rgba(6, 5, 4, 0.4);
+  display: block;
+  width: 24px;
+  height: 24px;
+  border-radius: 7px;
+  overflow: hidden;
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.35),
+    0 1px 4px rgba(6, 5, 4, 0.4);
 }
 
 .zx-chart-badge img {
-  width: 13px;
-  height: 13px;
-  object-fit: contain;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 /* Rank badge, bottom-left. Previously an oversized outlined numeral bleeding off
@@ -933,10 +916,10 @@
   gap: 10px;
 }
 
+/* Outline only, no fill: the card sits on the same surface as the page. */
 .zx-faq-item {
   border-radius: var(--zx-radius-md);
   border: 1px solid var(--md-sys-color-outline-variant);
-  background: var(--md-sys-color-surface-container-low);
   overflow: hidden;
 }
 
@@ -975,40 +958,10 @@
 
 /* ---------------------------------------------------------------- final cta */
 
+/* Same surface as every other section — see the "one background" note at the
+   top of this file. No backdrop image, no tint, no gradient. */
 .zx-final {
-  position: relative;
-  isolation: isolate;
-  overflow: hidden;
-  background: #0a0806;
-  color: var(--zx-on-media);
   text-align: center;
-}
-
-.zx-final-art {
-  position: absolute;
-  inset: 0;
-  z-index: -2;
-}
-
-.zx-final-art img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  opacity: 0.4;
-}
-
-.zx-final::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  background:
-    radial-gradient(
-      80% 70% at 50% 110%,
-      rgba(255, 160, 60, 0.26),
-      rgba(255, 160, 60, 0) 70%
-    ),
-    linear-gradient(to bottom, rgba(10, 8, 6, 0.86), rgba(10, 8, 6, 0.95));
 }
 
 .zx-final-inner {
@@ -1020,14 +973,14 @@
 
 .zx-final h2 {
   margin: 0;
-  color: var(--zx-on-media);
+  color: var(--md-sys-color-on-surface);
   text-wrap: balance;
   max-width: 24ch;
 }
 
 .zx-final p {
   margin: 0;
-  color: var(--zx-on-media-variant);
+  color: var(--md-sys-color-on-surface-variant);
   max-width: 52ch;
   text-wrap: pretty;
 }
@@ -1039,7 +992,6 @@
 
 .zx-final .zx-cta-sub {
   justify-content: center;
-  color: var(--zx-on-media-variant);
 }
 
 .zx-badges {
@@ -1054,7 +1006,7 @@
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  color: var(--zx-on-media-variant);
+  color: var(--md-sys-color-on-surface-variant);
   font-size: 11.5px;
   letter-spacing: 0.04em;
 }
@@ -1069,7 +1021,6 @@
 /* ------------------------------------------------------------------ footer */
 
 .zx-footer {
-  background: var(--md-sys-color-surface-container-lowest);
   border-block-start: 1px solid var(--md-sys-color-outline-variant);
   padding-block: 36px 44px;
 }
@@ -1196,12 +1147,10 @@
   transform: translateY(110%);
   transition: transform 320ms cubic-bezier(0.2, 0, 0, 1);
   padding: 10px var(--zx-gutter) max(10px, env(safe-area-inset-bottom));
-  background: color-mix(
-    in srgb,
-    var(--md-sys-color-surface-container-highest) 88%,
-    transparent
-  );
-  backdrop-filter: blur(18px);
+  /* Same surface as the page it covers — it is a floating slice of the page,
+     not a differently tinted panel. Opaque, so scrolling content cannot show
+     through behind the CTA. */
+  background: var(--md-sys-color-surface);
   border-block-start: 1px solid var(--md-sys-color-outline-variant);
 }
 

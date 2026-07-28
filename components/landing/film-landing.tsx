@@ -134,7 +134,6 @@ export function FilmLanding({
           />
 
           <FinalCta
-            backdrop={movie.backdrop}
             heading={fill(dict.finalCta.heading, values)}
             body={fill(dict.finalCta.body, values)}
             cta={dict.finalCta.cta}

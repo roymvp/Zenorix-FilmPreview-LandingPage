@@ -1,16 +1,8 @@
 'use client'
 
 import { useConversion } from '@/components/landing/conversion-provider'
-import type { ChartEntry, ChartPlatform } from '@/lib/content/movies'
-
-/**
- * Source-platform app icons badged on each poster. These are the same marks as
- * the trust strip, reused here so a card reads as "this title comes from X".
- */
-const PLATFORM_ICONS: Record<ChartPlatform, { src: string; name: string }> = {
-  netflix: { src: '/brands/netflix.svg', name: 'Netflix' },
-  hbo: { src: '/brands/hbo-max.svg', name: 'HBO Max' },
-}
+import type { ChartEntry } from '@/lib/content/movies'
+import { PLATFORMS } from '@/lib/content/platforms'
 
 /**
  * Regional Top 10 — placeholder art, rank, source badge. Nothing else.
@@ -51,7 +43,7 @@ export function TopChart({
           full page width. */}
       <ul className="zx-rail">
         {entries.map((entry, index) => {
-          const platform = PLATFORM_ICONS[entry.platform]
+          const platform = PLATFORMS[entry.platform]
           return (
             <li key={entry.id} className="zx-rail-item">
               <button
@@ -67,12 +59,20 @@ export function TopChart({
                     <md-icon>image</md-icon>
                   </span>
 
-                  {/* Source app icon, top-right. aria-hidden: the platform is
-                      not part of the card's accessible name, which already
-                      carries rank + title. */}
+                  {/* Source app icon, top-right — the service's own store icon,
+                      full color. aria-hidden: the platform is not part of the
+                      card's accessible name, which already carries rank +
+                      title. */}
                   <span className="zx-chart-badge" aria-hidden="true">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={platform.src} alt="" loading="lazy" decoding="async" />
+                    <img
+                      src={platform.icon || '/placeholder.svg'}
+                      alt=""
+                      width={44}
+                      height={44}
+                      loading="lazy"
+                      decoding="async"
+                    />
                   </span>
 
                   <span className="zx-rank" aria-hidden="true">

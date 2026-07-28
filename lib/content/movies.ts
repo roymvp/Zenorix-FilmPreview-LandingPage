@@ -1,3 +1,4 @@
+import type { PlatformId } from '@/lib/content/platforms'
 import type { Locale } from '@/lib/i18n/config'
 
 /**
@@ -156,8 +157,11 @@ export function getMovie(slug: string): Movie | undefined {
   return movies.find((movie) => movie.slug === slug)
 }
 
-/** Source platform whose app icon is badged on the poster. */
-export type ChartPlatform = 'netflix' | 'hbo'
+/**
+ * Source platform whose app icon is badged on the poster. The mark itself lives
+ * in `lib/content/platforms.ts` — this is only the key into that registry.
+ */
+export type ChartPlatform = PlatformId
 
 /**
  * One entry of the regional weekly chart.
@@ -177,16 +181,16 @@ export type ChartEntry = {
 
 const chartPool: Record<string, ChartEntry> = {
   nocturne: { id: 'nocturne', title: 'Nocturne Protocol', kind: 'movie', platform: 'netflix' },
-  crimson: { id: 'crimson', title: 'Crimson Harbor', kind: 'movie', platform: 'hbo' },
-  signal: { id: 'signal', title: 'The Last Signal', kind: 'movie', platform: 'netflix' },
-  neon: { id: 'neon', title: 'Neon Requiem', kind: 'series', platform: 'hbo' },
-  orbit: { id: 'orbit', title: 'Silent Orbit', kind: 'movie', platform: 'netflix' },
-  ember: { id: 'ember', title: 'Ash & Ember', kind: 'movie', platform: 'hbo' },
-  cartel: { id: 'cartel', title: 'Midnight Cartel', kind: 'series', platform: 'netflix' },
-  glass: { id: 'glass', title: 'Glass Kingdom', kind: 'series', platform: 'hbo' },
-  tigers: { id: 'tigers', title: 'Paper Tigers', kind: 'movie', platform: 'netflix' },
-  solstice: { id: 'solstice', title: 'Solstice', kind: 'movie', platform: 'hbo' },
-  crown: { id: 'crown', title: 'Hollow Crown', kind: 'series', platform: 'netflix' },
+  crimson: { id: 'crimson', title: 'Crimson Harbor', kind: 'movie', platform: 'hbo-max' },
+  signal: { id: 'signal', title: 'The Last Signal', kind: 'movie', platform: 'apple-tv' },
+  neon: { id: 'neon', title: 'Neon Requiem', kind: 'series', platform: 'prime-video' },
+  orbit: { id: 'orbit', title: 'Silent Orbit', kind: 'movie', platform: 'disney-plus' },
+  ember: { id: 'ember', title: 'Ash & Ember', kind: 'movie', platform: 'amc-plus' },
+  cartel: { id: 'cartel', title: 'Midnight Cartel', kind: 'series', platform: 'paramount-plus' },
+  glass: { id: 'glass', title: 'Glass Kingdom', kind: 'series', platform: 'hulu' },
+  tigers: { id: 'tigers', title: 'Paper Tigers', kind: 'movie', platform: 'peacock' },
+  solstice: { id: 'solstice', title: 'Solstice', kind: 'movie', platform: 'fox-one' },
+  crown: { id: 'crown', title: 'Hollow Crown', kind: 'series', platform: 'nbc' },
 }
 
 const order: Record<Locale, string[]> = {

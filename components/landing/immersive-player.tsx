@@ -281,7 +281,6 @@ export function ImmersivePlayer({
       </video>
 
       <div className="zx-stage-scrim" aria-hidden="true" />
-      <div className="zx-stage-glow" aria-hidden="true" />
 
       {/* Full-stage tap target: the expected mobile gesture for play/pause. */}
       <button
@@ -315,9 +314,12 @@ export function ImmersivePlayer({
           data-visible={controlsVisible ? 'true' : 'false'}
           aria-hidden="true"
         >
-          <md-fab size="large">
-            <md-icon slot="icon">{playing ? 'pause' : 'play_arrow'}</md-icon>
-          </md-fab>
+          {/* A plain circle rather than <md-fab>: the FAB painted its own
+              rounded-square container underneath the circular ring we added on
+              top, so the glyph read as two overlapping shapes. */}
+          <span className="zx-bigplay-disc">
+            <md-icon>{playing ? 'pause' : 'play_arrow'}</md-icon>
+          </span>
         </div>
       ) : null}
 
