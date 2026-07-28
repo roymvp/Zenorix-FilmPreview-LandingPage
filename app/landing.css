@@ -35,14 +35,12 @@
 
 /* Semantic lists are used throughout; none of them want default list styling. */
 .zx-rail,
-.zx-genres,
 .zx-badges,
 .zx-strip-logos,
 .zx-footer-links,
 .zx-dialog-bullets {
   list-style: none;
 }
-.zx-genres,
 .zx-badges,
 .zx-strip-logos {
   margin: 0;
@@ -111,17 +109,48 @@
   color: var(--zx-on-media);
 }
 
+/* The box and its corner radius live here, so the real logo can drop in as an
+   <img class="zx-brand-mark"> and need no further styling. */
 .zx-brand-mark {
   display: grid;
   place-items: center;
   width: 30px;
   height: 30px;
-  border-radius: 9px;
+  border-radius: 6px;
+  object-fit: cover;
   background: var(--md-sys-color-primary);
   color: var(--md-sys-color-on-primary);
   font-weight: 700;
   font-size: 17px;
   line-height: 1;
+}
+
+/* Neutral stand-in until the brand asset exists. Deliberately reads as an empty
+   slot rather than a finished logo. */
+.zx-brand-mark[data-placeholder] {
+  background: rgba(255, 255, 255, 0.09);
+  border: 1px dashed var(--zx-media-outline);
+  color: var(--zx-on-media-variant);
+}
+
+.zx-brand-mark[data-placeholder] md-icon {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+}
+
+/* On the light footer surface the media-tinted placeholder would vanish. */
+.zx-footer .zx-brand-mark[data-placeholder] {
+  background: var(--md-sys-color-surface-container-highest);
+  border-color: var(--md-sys-color-outline-variant);
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+/* Only the footer still pairs a wordmark with the mark; the top bar is icon-only. */
+.zx-brand-name {
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
 }
 
 .zx-topbar-actions {
@@ -265,12 +294,26 @@
   opacity: 0.5;
 }
 
-/* Player controls */
+/* Player controls: mute (top-right) and the scrub bar (bottom). Play/pause has
+   no button of its own — it is the full-frame tap target. */
 
-.zx-controls {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
+/* Sits above .zx-stage-tap so the tap layer cannot swallow the mute click. */
+.zx-mute {
+  position: absolute;
+  z-index: 5;
+  inset-block-start: 4px;
+  inset-inline-end: 4px;
+  --md-icon-button-icon-color: var(--zx-on-media);
+  --md-icon-button-icon-size: 20px;
+  --md-icon-button-hover-icon-color: var(--md-sys-color-primary);
+  --md-icon-button-pressed-icon-color: var(--md-sys-color-primary);
+}
+
+/* Keeps the glyph legible over a bright frame. */
+.zx-mute md-icon-button {
+  background: rgba(6, 5, 4, 0.42);
+  border-radius: 999px;
+  backdrop-filter: blur(8px);
 }
 
 .zx-scrub {
@@ -313,87 +356,14 @@
   pointer-events: none;
 }
 
-.zx-controls-row {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  --md-icon-button-icon-color: var(--zx-on-media);
-  --md-icon-button-icon-size: 22px;
-  --md-icon-button-hover-icon-color: var(--md-sys-color-primary);
-  --md-icon-button-pressed-icon-color: var(--md-sys-color-primary);
-}
-
-.zx-time {
-  color: var(--zx-on-media-variant);
-  font-size: 12px;
-  font-variant-numeric: tabular-nums;
-  letter-spacing: 0.02em;
-  white-space: nowrap;
-}
-
-.zx-time-locked {
-  color: var(--md-sys-color-primary);
-}
-
-.zx-controls-spacer {
-  flex: 1;
-}
-
-/* Tap-for-sound nudge */
-
-.zx-sound-nudge {
-  position: absolute;
-  z-index: 5;
-  inset-block-end: 46%;
-  inset-inline: 0;
-  display: flex;
-  justify-content: center;
-  pointer-events: none;
-}
-
-.zx-sound-nudge span {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  padding: 9px 16px;
-  border-radius: 999px;
-  background: rgba(6, 5, 4, 0.62);
-  border: 1px solid var(--zx-media-outline);
-  backdrop-filter: blur(12px);
-  color: var(--zx-on-media);
-  font-size: 13px;
-  font-weight: 600;
-  animation: zx-pulse 2.4s ease-in-out infinite;
-}
-
-.zx-sound-nudge md-icon {
-  color: var(--md-sys-color-primary);
-  font-size: 18px;
-  width: 18px;
-  height: 18px;
-}
-
-@keyframes zx-pulse {
-  0%,
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-  }
-  50% {
-    opacity: 0.72;
-    transform: translateY(-3px);
-  }
-}
-
 /* Big center play affordance before first playback */
 
-/* Centered in the frame ABOVE the control strip, not the whole frame: on a
-   16/9 phone-width video the two are only ~235px apart and a full-inset
-   centered FAB lands on top of the scrubber. */
+/* Centered in the frame above the scrub bar, not across the whole frame, so it
+   never sits on top of the slider on a short 16/9 phone-width video. */
 .zx-bigplay {
   position: absolute;
-  z-index: 5;
-  inset: 0 0 76px;
+  z-index: 4;
+  inset: 0 0 34px;
   display: grid;
   place-items: center;
   pointer-events: none;
@@ -447,20 +417,14 @@
   text-wrap: pretty;
 }
 
-.zx-genres {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-block-start: 12px;
-}
-
+/* Genre chips. These now sit inline in .zx-film-meta (after the runtime), so
+   they are sized to that 13px line rather than as standalone pills. */
 .zx-genre {
-  padding: 5px 11px;
+  padding: 2px 9px;
   border-radius: 999px;
-  border: 1px solid var(--md-sys-color-outline-variant);
-  background: var(--md-sys-color-surface-container-low);
+  background: var(--md-sys-color-surface-container-high);
   color: var(--md-sys-color-on-surface-variant);
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 600;
 }
 

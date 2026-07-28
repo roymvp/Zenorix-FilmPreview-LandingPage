@@ -4,6 +4,7 @@ import { FaqSection } from '@/components/landing/faq-section'
 import { FilmInfo } from '@/components/landing/film-info'
 import { FinalCta } from '@/components/landing/final-cta'
 import { ImmersivePlayer } from '@/components/landing/immersive-player'
+import { PlatformStrip } from '@/components/landing/platform-strip'
 import { SiteFooter } from '@/components/landing/site-footer'
 import { StickyDownloadBar } from '@/components/landing/sticky-download-bar'
 import { TopBar } from '@/components/landing/top-bar'
@@ -86,7 +87,6 @@ export function FilmLanding({
               mute: dict.player.mute,
               unmute: dict.player.unmute,
               seek: dict.player.seek,
-              tapForSound: dict.player.tapForSound,
             }}
           />
         </section>
@@ -101,7 +101,6 @@ export function FilmLanding({
             genres={copy.genres}
             cta={dict.info.cta}
             ctaSub={fill(dict.info.ctaSub, values)}
-            stripLabel={dict.info.trustStrip}
           />
 
           <TopChart
@@ -109,6 +108,10 @@ export function FilmLanding({
             heading={fill(dict.chart.heading, values)}
             rankLabel={dict.chart.rank}
           />
+
+          {/* Sits after the Top 10: the licensed-source claim lands harder once
+              the catalogue has been shown than it does next to a single film. */}
+          <PlatformStrip label={dict.info.trustStrip} />
 
           <ValueProps
             heading={dict.value.heading}

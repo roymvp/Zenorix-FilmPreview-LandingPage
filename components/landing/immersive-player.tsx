@@ -10,7 +10,6 @@ export type PlayerCopy = {
   mute: string
   unmute: string
   seek: string
-  tapForSound: string
 }
 
 /**
@@ -25,6 +24,14 @@ export type PlayerCopy = {
  *
  * The frame itself carries no badges, watermark or CTA: the film is the hook,
  * and the download ask lives in the content flow directly below it.
+ *
+ * The control set is deliberately exactly three things, with no duplicates:
+ *  1. play/pause  — tap anywhere on the frame (`.zx-stage-tap`);
+ *  2. mute/unmute — the single top-right icon button;
+ *  3. seek        — the scrub bar.
+ * No fullscreen, no time readout, no second play button, no tap-for-sound
+ * nudge. If you add a control here, make sure it isn't already reachable by
+ * tapping the frame.
  *
  * RESERVED: `src` is a plain MP4 for the template. For production HLS/DASH,
  * attach hls.js (or Shaka) to the same `videoRef` inside the mount effect —
@@ -150,7 +157,6 @@ export function ImmersivePlayer({
   }
 
   const lockedFraction = 1 - cap / runtimeSeconds
-  const atCap = current >= cap - 0.25
 
   return (
     <div className="zx-stage" data-playing={started ? 'true' : 'false'}>
@@ -184,6 +190,19 @@ export function ImmersivePlayer({
         aria-label={playing ? copy.pause : copy.play}
       />
 
+      {/* Sound toggle, top-right. It is the ONE control that cannot live on the
+          tap layer, since tapping the frame is already play/pause. */}
+      <div className="zx-mute">
+        <md-icon-button
+          onClick={toggleMute}
+          aria-label={muted ? copy.unmute : copy.mute}
+        >
+          <md-icon>{muted ? 'volume_off' : 'volume_up'}</md-icon>
+        </md-icon-button>
+      </div>
+
+      {/* Paused-state affordance only — not a button. Play/pause is the frame
+          tap, so a real button here would be a second control for one action. */}
       {!playing && !gateHit ? (
         <div className="zx-bigplay" aria-hidden="true">
           <md-fab size="medium">
@@ -192,64 +211,23 @@ export function ImmersivePlayer({
         </div>
       ) : null}
 
-      {muted && playing ? (
-        <div className="zx-sound-nudge" aria-hidden="true">
-          <span>
-            <md-icon>volume_up</md-icon>
-            {copy.tapForSound}
-          </span>
-        </div>
-      ) : null}
-
       <div className="zx-player-bar">
-        <div className="zx-controls">
-          <div className="zx-scrub">
-            <md-slider
-              min={0}
-              max={runtimeSeconds}
-              step={1}
-              value={Math.floor(current)}
-              aria-label={copy.seek}
-              oninput={handleSeek}
-            />
-            <span
-              className="zx-scrub-lock"
-              style={{ width: `calc(${(lockedFraction * 100).toFixed(2)}% - 12px)` }}
-              aria-hidden="true"
-            />
-          </div>
-
-          <div className="zx-controls-row">
-            <md-icon-button
-              onClick={togglePlay}
-              aria-label={playing ? copy.pause : copy.play}
-            >
-              <md-icon>{playing ? 'pause' : 'play_arrow'}</md-icon>
-            </md-icon-button>
-            <md-icon-button
-              onClick={toggleMute}
-              aria-label={muted ? copy.unmute : copy.mute}
-            >
-              <md-icon>{muted ? 'volume_off' : 'volume_up'}</md-icon>
-            </md-icon-button>
-            <span className={atCap ? 'zx-time zx-time-locked' : 'zx-time'}>
-              {formatTime(current)} / {formatTime(runtimeSeconds)}
-            </span>
-            <span className="zx-controls-spacer" />
-          </div>
+        <div className="zx-scrub">
+          <md-slider
+            min={0}
+            max={runtimeSeconds}
+            step={1}
+            value={Math.floor(current)}
+            aria-label={copy.seek}
+            oninput={handleSeek}
+          />
+          <span
+            className="zx-scrub-lock"
+            style={{ width: `calc(${(lockedFraction * 100).toFixed(2)}% - 12px)` }}
+            aria-hidden="true"
+          />
         </div>
       </div>
     </div>
   )
-}
-
-function formatTime(seconds: number): string {
-  const safe = Math.max(0, Math.floor(seconds))
-  const h = Math.floor(safe / 3600)
-  const m = Math.floor((safe % 3600) / 60)
-  const s = safe % 60
-  const mm = h > 0 ? String(m).padStart(2, '0') : String(m)
-  return h > 0
-    ? `${h}:${mm}:${String(s).padStart(2, '0')}`
-    : `${mm}:${String(s).padStart(2, '0')}`
 }

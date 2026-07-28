@@ -30,9 +30,11 @@ export function SiteFooter({
       <div className="zx-shell">
         <div className="zx-footer-top">
           <div>
+            {/* Same logo placeholder as the top bar — see top-bar.tsx for how
+                to swap in the real asset. */}
             <span className="zx-brand">
-              <span className="zx-brand-mark" aria-hidden="true">
-                Z
+              <span className="zx-brand-mark" data-placeholder="logo" aria-hidden="true">
+                <md-icon>image</md-icon>
               </span>
               <span className="zx-brand-name">{SITE.name}</span>
             </span>

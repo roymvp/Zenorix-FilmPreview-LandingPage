@@ -20,10 +20,16 @@ export function TopBar({
   return (
     <header className="zx-topbar">
       {/* Home mark only — the wordmark is redundant next to it and competes
-          with the film art for attention. */}
+          with the film art for attention.
+
+          TO REPLACE WITH THE REAL LOGO: swap the <span> below for an <img>
+          (or inline SVG) and keep the `zx-brand-mark` class — it already owns
+          the 30x30 box and the rounded corners, so no CSS change is needed:
+
+            <img className="zx-brand-mark" src="/brands/zenorix.svg" alt="" /> */}
       <a className="zx-brand" href={homeHref} aria-label={homeLabel}>
-        <span className="zx-brand-mark" aria-hidden="true">
-          Z
+        <span className="zx-brand-mark" data-placeholder="logo" aria-hidden="true">
+          <md-icon>image</md-icon>
         </span>
       </a>
 

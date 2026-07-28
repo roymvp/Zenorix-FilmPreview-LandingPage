@@ -28,10 +28,7 @@
     "pause": "Pause",
     "mute": "Mute",
     "unmute": "Unmute",
-    "fullscreen": "Fullscreen",
-    "seek": "Seek within the free preview",
-    "tapForSound": "Tap for sound",
-    "loading": "Loading preview"
+    "seek": "Seek within the free preview"
   },
   "info": {
     "cta": "Download & Watch Full Movie Free",

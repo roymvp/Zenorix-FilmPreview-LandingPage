@@ -28,10 +28,7 @@
     "pause": "Pausar",
     "mute": "Desativar som",
     "unmute": "Ativar som",
-    "fullscreen": "Tela cheia",
-    "seek": "Avançar dentro da prévia gratuita",
-    "tapForSound": "Toque para ouvir",
-    "loading": "Carregando prévia"
+    "seek": "Avançar dentro da prévia gratuita"
   },
   "info": {
     "cta": "Baixe e assista ao filme completo grátis",

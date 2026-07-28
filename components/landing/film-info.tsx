@@ -1,5 +1,7 @@
 import { DownloadCta } from '@/components/landing/download-cta'
-import { PlatformStrip } from '@/components/landing/platform-strip'
+
+/** Genre chips shown in the metadata row. More than two wraps the line. */
+const MAX_GENRES = 2
 
 /**
  * The film's identity block, directly below the player.
@@ -17,18 +19,21 @@ export function FilmInfo({
   genres,
   cta,
   ctaSub,
-  stripLabel,
 }: {
   title: string
   releaseYear: number
   runtimeMinutes: number
-  /** 4K / HDR / Dolby-style specs, shown inline with year and runtime. */
+  /** 4K / Dolby-style specs, shown inline after the genres. */
   qualityTags: string[]
   synopsis: string
+  /**
+   * Full localized genre list. Only the first MAX_GENRES are displayed; the
+   * complete list is still emitted in the JSON-LD `genre` field, so trimming
+   * here is a layout choice and costs nothing in SEO.
+   */
   genres: string[]
   cta: string
   ctaSub: string
-  stripLabel: string
 }) {
   const hours = Math.floor(runtimeMinutes / 60)
   const minutes = runtimeMinutes % 60
@@ -40,12 +45,19 @@ export function FilmInfo({
           {title}
         </h1>
 
+        {/* One line, in reading order: year, runtime, genre, then A/V specs. */}
         <p className="zx-film-meta">
           <span>{releaseYear}</span>
           <span className="zx-dot" aria-hidden="true" />
           <span>
             {hours}h {minutes}m
           </span>
+          <span className="zx-dot" aria-hidden="true" />
+          {genres.slice(0, MAX_GENRES).map((genre) => (
+            <span key={genre} className="zx-genre">
+              {genre}
+            </span>
+          ))}
           {qualityTags.map((tag) => (
             <span key={tag} className="zx-tag">
               {tag}
@@ -53,19 +65,9 @@ export function FilmInfo({
           ))}
         </p>
 
-        <ul className="zx-genres">
-          {genres.map((genre) => (
-            <li key={genre} className="zx-genre">
-              {genre}
-            </li>
-          ))}
-        </ul>
-
         <p className="zx-synopsis md-typescale-body-medium">{synopsis}</p>
 
         <DownloadCta label={cta} sub={ctaSub} source="film_info" icon="android" />
-
-        <PlatformStrip label={stripLabel} />
       </div>
     </section>
   )

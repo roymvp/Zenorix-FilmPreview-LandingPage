@@ -25,7 +25,11 @@ export type Movie = {
   slug: string
   releaseYear: number
   runtimeMinutes: number
-  /** Badges shown in the metadata row. Non-localized on purpose. */
+  /**
+   * Badges shown in the metadata row. Non-localized on purpose.
+   * Keep this to two entries — the row is one line on a phone and a third
+   * badge pushes it to wrap.
+   */
   qualityTags: string[]
   poster: string
   backdrop: string
@@ -46,7 +50,7 @@ export const movies: Movie[] = [
     slug: 'nocturne-protocol',
     releaseYear: 2026,
     runtimeMinutes: 128,
-    qualityTags: ['4K', 'HDR10+', 'Dolby Atmos'],
+    qualityTags: ['4K', 'Dolby'],
     poster: '/media/poster-nocturne-protocol.png',
     backdrop: '/media/nocturne-protocol-backdrop.png',
     videoSrc: SAMPLE_STREAM,
@@ -80,7 +84,7 @@ export const movies: Movie[] = [
     slug: 'crimson-harbor',
     releaseYear: 2025,
     runtimeMinutes: 116,
-    qualityTags: ['4K', 'HDR', 'Dolby Audio'],
+    qualityTags: ['4K', 'Dolby'],
     poster: '/media/poster-crimson-harbor.png',
     backdrop: '/media/poster-crimson-harbor.png',
     videoSrc: SAMPLE_STREAM,
@@ -114,7 +118,7 @@ export const movies: Movie[] = [
     slug: 'the-last-signal',
     releaseYear: 2026,
     runtimeMinutes: 134,
-    qualityTags: ['4K', 'HDR10+', 'Dolby Atmos'],
+    qualityTags: ['4K', 'Dolby'],
     poster: '/media/poster-the-last-signal.png',
     backdrop: '/media/poster-the-last-signal.png',
     videoSrc: SAMPLE_STREAM,
