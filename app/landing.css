@@ -88,7 +88,11 @@
 
 /* In normal flow above the player, not overlaid on it: the frame is now a
    16/9 video rather than a full-height hero, so floating chrome over it would
-   collide with the playback controls. */
+   collide with the playback controls.
+
+   Because it is a real bar rather than an overlay, it sits on the LIGHT page
+   surface (not cinema black) and everything inside it uses on-surface colors.
+   The hairline is what separates it from the video frame below. */
 .zx-topbar {
   position: relative;
   z-index: 4;
@@ -98,7 +102,8 @@
   gap: 12px;
   padding: 10px var(--zx-gutter);
   padding-block-start: max(10px, env(safe-area-inset-top));
-  background: #060504;
+  background: var(--md-sys-color-surface-container-lowest);
+  border-block-end: 1px solid var(--md-sys-color-outline-variant);
 }
 
 .zx-brand {
@@ -106,7 +111,7 @@
   align-items: center;
   gap: 8px;
   text-decoration: none;
-  color: var(--zx-on-media);
+  color: var(--md-sys-color-on-surface);
 }
 
 /* The box and its corner radius live here, so the real logo can drop in as an
@@ -126,24 +131,18 @@
 }
 
 /* Neutral stand-in until the brand asset exists. Deliberately reads as an empty
-   slot rather than a finished logo. */
+   slot rather than a finished logo. Both places it appears — the top bar and the
+   footer — are page surfaces, so it uses on-surface colors. */
 .zx-brand-mark[data-placeholder] {
-  background: rgba(255, 255, 255, 0.09);
-  border: 1px dashed var(--zx-media-outline);
-  color: var(--zx-on-media-variant);
+  background: var(--md-sys-color-surface-container-highest);
+  border: 1px dashed var(--md-sys-color-outline-variant);
+  color: var(--md-sys-color-on-surface-variant);
 }
 
 .zx-brand-mark[data-placeholder] md-icon {
   font-size: 16px;
   width: 16px;
   height: 16px;
-}
-
-/* On the light footer surface the media-tinted placeholder would vanish. */
-.zx-footer .zx-brand-mark[data-placeholder] {
-  background: var(--md-sys-color-surface-container-highest);
-  border-color: var(--md-sys-color-outline-variant);
-  color: var(--md-sys-color-on-surface-variant);
 }
 
 /* Wordmark, paired with the mark in both the top bar and the footer. */
@@ -157,19 +156,23 @@
   display: flex;
   align-items: center;
   gap: 4px;
-  --md-icon-button-icon-color: var(--zx-on-media);
+  --md-icon-button-icon-color: var(--md-sys-color-on-surface-variant);
   --md-icon-button-hover-icon-color: var(--md-sys-color-primary);
   --md-icon-button-pressed-icon-color: var(--md-sys-color-primary);
 }
 
-/* Compact install button: same pill shape as the in-page CTAs, sized to the
-   bar. It carries only the short `nav.install` label — the full CTA sentence
-   would not fit a 420px header beside the brand and language control. */
+/* Compact install button, sized to the bar. It carries only the short
+   `nav.install` label — the full CTA sentence would not fit a 420px header
+   beside the brand and language control.
+
+   Unlike the in-page CTAs it is a small-radius rectangle, not a pill: at 32px
+   tall a pill reads as a chip, and the squarer corner makes it read as the
+   bar's primary action and echoes the 6px brand mark beside it. */
 .zx-topbar-cta {
   --md-filled-button-container-height: 32px;
   --md-filled-button-label-text-size: 13px;
   --md-filled-button-label-text-weight: 700;
-  --md-filled-button-container-shape: 999px;
+  --md-filled-button-container-shape: 8px;
   --md-filled-button-leading-space: 14px;
   --md-filled-button-trailing-space: 14px;
 }
@@ -270,7 +273,11 @@
 }
 
 /* Playback control strip, pinned to the bottom of the video frame. Formerly
-   also held the title and metadata, which now live in .zx-info below. */
+   also held the title and metadata, which now live in .zx-info below.
+
+   Visible while paused, faded out 2s into playback — `data-visible` is driven by
+   `controlsVisible` in ImmersivePlayer. Hidden controls also drop out of the hit
+   test so a tap on the frame reaches the play/pause layer instead of the bar. */
 .zx-player-bar {
   position: absolute;
   z-index: 4;
@@ -278,9 +285,17 @@
   inset-block-end: 0;
   padding: 0 var(--zx-gutter) 10px;
   pointer-events: none;
+  transition:
+    opacity 260ms ease,
+    transform 260ms ease;
 }
 
-.zx-player-bar > * {
+.zx-player-bar[data-visible='false'] {
+  opacity: 0;
+  transform: translateY(6px);
+}
+
+.zx-player-bar[data-visible='true'] > * {
   pointer-events: auto;
 }
 
@@ -327,6 +342,14 @@
   color: var(--zx-on-media);
   cursor: pointer;
   appearance: none;
+  transition: opacity 260ms ease;
+}
+
+/* Fades with the rest of the controls during playback, and stops taking taps
+   while hidden so the frame tap underneath keeps working. */
+.zx-mute[data-visible='false'] {
+  opacity: 0;
+  pointer-events: none;
 }
 
 .zx-mute md-icon {
@@ -444,10 +467,11 @@
   pointer-events: none;
 }
 
-/* Big center play affordance before first playback */
+/* Big center play/pause affordance */
 
 /* Centered in the frame above the scrub bar, not across the whole frame, so it
-   never sits on top of the slider on a short 16/9 phone-width video. */
+   never sits on top of the slider on a short 16/9 phone-width video. Fades with
+   the rest of the controls 2s into playback (see .zx-player-bar). */
 .zx-bigplay {
   position: absolute;
   z-index: 4;
@@ -455,13 +479,35 @@
   display: grid;
   place-items: center;
   pointer-events: none;
+  transition:
+    opacity 260ms ease,
+    transform 260ms ease;
 }
 
+.zx-bigplay[data-visible='false'] {
+  opacity: 0;
+  /* Shrinks rather than just fading, so it reads as receding into the film. */
+  transform: scale(0.86);
+}
+
+/* Sized well above the MD "large" default: this is the hero control on a 16/9
+   phone frame and it has to be an obvious, thumb-sized target from across the
+   room, not a small chip floating in the middle of the video. */
 .zx-bigplay md-fab {
   pointer-events: none;
   --md-fab-container-color: rgba(6, 5, 4, 0.55);
   --md-fab-icon-color: var(--zx-on-media);
   --md-fab-container-shape: 999px;
+  --md-fab-container-width: 84px;
+  --md-fab-container-height: 84px;
+  --md-fab-large-container-width: 84px;
+  --md-fab-large-container-height: 84px;
+  --md-fab-icon-size: 46px;
+  --md-fab-large-icon-size: 46px;
+  --md-fab-container-elevation: 0;
+  /* The FAB is translucent, so a ring keeps its edge readable on a bright frame. */
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.22);
+  border-radius: 999px;
 }
 
 /* --------------------------------------------------------------- film info */
@@ -499,18 +545,62 @@
   color: var(--md-sys-color-on-surface-variant);
 }
 
-/* Capped at 3 lines with an ellipsis: the synopsis is supporting copy, and a
-   long one pushed the download CTA below the fold. The full text stays in the
-   DOM (and in the JSON-LD description), so nothing is lost to crawlers. */
-.zx-synopsis {
+.zx-synopsis-wrap {
   margin: 14px 0 20px;
-  color: var(--md-sys-color-on-surface-variant);
+}
+
+/* Clamped to 2 lines and expanded in place by the toggle below: the synopsis is
+   supporting copy, and a long one pushed the download CTA below the fold. The
+   full text always stays in the DOM (and in the JSON-LD description), so the
+   clamp is purely visual and nothing is lost to crawlers.
+
+   `--md-sys-color-outline` rather than on-surface-variant: this is the lowest
+   emphasis body copy on the page and should sit clearly behind the title, the
+   metadata row and the CTA in the reading hierarchy. */
+.zx-synopsis {
+  margin: 0;
+  color: var(--md-sys-color-outline);
   text-wrap: pretty;
   display: -webkit-box;
   -webkit-box-orient: vertical;
-  -webkit-line-clamp: 3;
-  line-clamp: 3;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
   overflow: hidden;
+}
+
+/* Expanded: drop the clamp so the paragraph grows to its natural height. */
+.zx-synopsis[data-expanded='true'] {
+  -webkit-line-clamp: unset;
+  line-clamp: unset;
+  overflow: visible;
+}
+
+/* Text + caret, deliberately quieter than the CTA below it. */
+.zx-synopsis-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  margin-block-start: 4px;
+  padding: 4px 0;
+  border: 0;
+  background: transparent;
+  color: var(--md-sys-color-primary);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.zx-synopsis-toggle md-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+}
+
+.zx-synopsis-toggle:focus-visible {
+  outline: 2px solid var(--md-sys-color-primary);
+  outline-offset: 2px;
+  border-radius: 6px;
 }
 
 /* Genre chips. These now sit inline in .zx-film-meta (after the runtime), so
@@ -617,9 +707,13 @@
   background: var(--md-sys-color-surface-container-low);
 }
 
+/* The rail is a direct child of the section (NOT of .zx-shell) so the scroll
+   track can run the full page width. It therefore owns the side gutter itself:
+   padding-inline is what keeps the first card off the left edge, and it is
+   preserved while scrolling because it is padding on the scroller, not a margin
+   on the first card. */
 .zx-rail {
   margin: 0;
-  padding: 0;
   display: grid;
   grid-auto-flow: column;
   /* A column-flow grid reports its full intrinsic track width to ancestors,
@@ -630,9 +724,11 @@
   gap: 12px;
   overflow-x: auto;
   scroll-snap-type: x mandatory;
-  padding-block-end: 10px;
-  padding-inline: var(--zx-gutter);
-  margin-inline: calc(var(--zx-gutter) * -1);
+  /* Extra inline-start padding beyond the page gutter: the cards carry a drop
+     shadow and a rank badge, and sitting exactly on the gutter made the rail
+     look cramped against the edge compared to the heading above it. */
+  padding: 4px var(--zx-gutter) 10px calc(var(--zx-gutter) + 4px);
+  scroll-padding-inline-start: calc(var(--zx-gutter) + 4px);
   scrollbar-width: none;
 }
 
@@ -645,10 +741,7 @@
   min-width: 0;
 }
 
-/* Poster + rank only. `position: relative` anchors the rank numeral, which is
-   a sibling of the artwork rather than a child of it. */
 .zx-chart-card {
-  position: relative;
   scroll-snap-align: start;
   display: block;
   width: 100%;
@@ -660,7 +753,10 @@
   font: inherit;
 }
 
+/* The artwork frame. `position: relative` anchors the rank badge and the
+   platform icon, which are both children of it. */
 .zx-chart-art {
+  position: relative;
   display: block;
   aspect-ratio: 2 / 3;
   border-radius: var(--zx-radius-sm);
@@ -687,37 +783,77 @@
   outline-offset: 2px;
 }
 
-.zx-chart-art img {
+/* Applies to real artwork when it replaces the placeholder — see TopChart. */
+.zx-chart-img {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-.zx-chart-art::after {
-  content: '';
+/* Poster placeholder. Deliberately reads as an empty slot: a flat tint, a dashed
+   frame and a centered image glyph, never as finished art. */
+.zx-chart-ph {
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    to top,
-    rgba(6, 5, 4, 0.78) 0%,
-    rgba(6, 5, 4, 0) 46%
+  display: grid;
+  place-items: center;
+  border: 1px dashed var(--md-sys-color-outline-variant);
+  border-radius: inherit;
+  background: repeating-linear-gradient(
+    135deg,
+    var(--md-sys-color-surface-container-high) 0 8px,
+    var(--md-sys-color-surface-container-highest) 8px 16px
   );
+  color: var(--md-sys-color-outline);
 }
 
-/* Oversized rank numeral — the streaming-chart visual language. It is the only
-   label on the card, so it carries the whole hierarchy. */
+.zx-chart-ph md-icon {
+  font-size: 26px;
+  width: 26px;
+  height: 26px;
+}
+
+/* Source app icon, top-right. A light rounded-square tile so the marks (which
+   are solid single-color SVGs) stay legible over any poster. */
+.zx-chart-badge {
+  position: absolute;
+  z-index: 2;
+  inset-block-start: 5px;
+  inset-inline-end: 5px;
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 1px 4px rgba(6, 5, 4, 0.4);
+}
+
+.zx-chart-badge img {
+  width: 13px;
+  height: 13px;
+  object-fit: contain;
+}
+
+/* Rank badge, bottom-left. Previously an oversized outlined numeral bleeding off
+   the card; now a compact solid chip, because the placeholder tiles give it no
+   dark artwork to sit on and the numeral needs its own contrast. */
 .zx-rank {
   position: absolute;
-  z-index: 1;
-  inset-block-end: -4px;
-  inset-inline-start: 3px;
-  font-size: 54px;
-  font-weight: 700;
-  line-height: 0.78;
+  z-index: 2;
+  inset-block-end: 5px;
+  inset-inline-start: 5px;
+  min-width: 22px;
+  padding: 1px 6px;
+  border-radius: 6px;
+  background: rgba(6, 5, 4, 0.82);
   color: var(--zx-on-media);
-  letter-spacing: -0.06em;
-  -webkit-text-stroke: 2px rgba(6, 5, 4, 0.55);
-  paint-order: stroke fill;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.35;
+  letter-spacing: -0.02em;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
 }
 
 /* ------------------------------------------------------------- value props */
@@ -1022,14 +1158,9 @@
   border-radius: 8px;
 }
 
-/* Over the cinema-black bar the on-surface color would be invisible. */
-.zx-topbar .zx-lang-trigger {
-  color: var(--zx-on-media);
-}
-
-.zx-topbar .zx-lang-trigger:hover {
-  color: var(--md-sys-color-primary);
-}
+/* NOTE: the top bar used to be cinema black and needed an --zx-on-media
+   override here. It is a light surface now, so the base on-surface color above
+   is correct in both the top bar and the footer. */
 
 /* ------------------------------------------------------------ sticky bar */
 

@@ -1,4 +1,5 @@
 import { DownloadCta } from '@/components/landing/download-cta'
+import { FilmSynopsis } from '@/components/landing/film-synopsis'
 
 /** Genre chips shown in the metadata row. More than two wraps the line. */
 const MAX_GENRES = 2
@@ -19,6 +20,8 @@ export function FilmInfo({
   genres,
   cta,
   ctaSub,
+  expandLabel,
+  collapseLabel,
 }: {
   title: string
   releaseYear: number
@@ -34,6 +37,9 @@ export function FilmInfo({
   genres: string[]
   cta: string
   ctaSub: string
+  /** Labels for the synopsis show-more / show-less toggle. */
+  expandLabel: string
+  collapseLabel: string
 }) {
   const hours = Math.floor(runtimeMinutes / 60)
   const minutes = runtimeMinutes % 60
@@ -65,7 +71,11 @@ export function FilmInfo({
           ))}
         </p>
 
-        <p className="zx-synopsis md-typescale-body-medium">{synopsis}</p>
+        <FilmSynopsis
+          text={synopsis}
+          expandLabel={expandLabel}
+          collapseLabel={collapseLabel}
+        />
 
         <DownloadCta label={cta} sub={ctaSub} source="film_info" />
       </div>

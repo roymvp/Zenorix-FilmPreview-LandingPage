@@ -159,6 +159,7 @@ export function marketValues(dict: Dictionary) {
     annualPerMonth: dict.market.annualPerMonth,
     annualTotal: dict.market.annualTotal,
     size: SITE.apkSize,
+    downloads: SITE.apkDownloads,
     version: SITE.apkVersion,
     minAndroid: SITE.minAndroid,
     movies: SITE.library.movies,

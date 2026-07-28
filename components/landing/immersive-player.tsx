@@ -71,6 +71,9 @@ export function ImmersivePlayer({
   const [started, setStarted] = useState(false)
   const [current, setCurrent] = useState(0)
   const [gateHit, setGateHit] = useState(false)
+  /** Controls fade out during playback; see `controlsVisible` below. */
+  const [showControls, setShowControls] = useState(false)
+  const hideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const cap = Math.min(limitSeconds, runtimeSeconds)
 
@@ -102,6 +105,24 @@ export function ImmersivePlayer({
     return settled
   }, [])
 
+  /**
+   * Shows the controls and re-arms the 2s auto-hide. Called on every tap, so
+   * an interaction during playback always brings the controls back first.
+   */
+  const revealControls = useCallback(() => {
+    setShowControls(true)
+    if (hideTimerRef.current) clearTimeout(hideTimerRef.current)
+    hideTimerRef.current = setTimeout(() => setShowControls(false), 2000)
+  }, [])
+
+  // Drop the pending timer on unmount so it cannot set state on a dead component.
+  useEffect(
+    () => () => {
+      if (hideTimerRef.current) clearTimeout(hideTimerRef.current)
+    },
+    [],
+  )
+
   /** Waits for any pending play() so pause() cannot interrupt it. */
   const safePause = useCallback(async () => {
     const video = videoRef.current
@@ -122,12 +143,16 @@ export function ImmersivePlayer({
     void safePlay().then((ok) => {
       if (cancelled) return
       setPlaying(ok)
-      if (ok) setStarted(true)
+      if (ok) {
+        setStarted(true)
+        // Autoplay counts as "playback began", so start the hide countdown too.
+        revealControls()
+      }
     })
     return () => {
       cancelled = true
     }
-  }, [safePlay])
+  }, [safePlay, revealControls])
 
   const enforceGate = useCallback(async () => {
     const video = videoRef.current
@@ -164,16 +189,27 @@ export function ImmersivePlayer({
       void enforceGate()
       return
     }
+    // If the controls are currently hidden mid-playback, the first tap only
+    // brings them back — it does not also pause. That matches how native
+    // players behave and avoids an accidental pause when reaching for a control.
+    if (playing && !showControls) {
+      revealControls()
+      return
+    }
     if (video.paused) {
       setPlaying(true)
       setStarted(true)
       trackEvent('preview_play', {})
+      revealControls()
       // Roll the optimistic state back if the browser refuses to play.
       void safePlay().then((ok) => {
         if (!ok) setPlaying(false)
       })
     } else {
       setPlaying(false)
+      // Paused: controls stay up, so cancel the pending hide.
+      if (hideTimerRef.current) clearTimeout(hideTimerRef.current)
+      setShowControls(true)
       void safePause()
     }
   }
@@ -184,6 +220,7 @@ export function ImmersivePlayer({
     const next = !video.muted
     video.muted = next
     setMuted(next)
+    revealControls()
     if (!next) {
       trackEvent('preview_unmute', {})
       if (video.paused && video.currentTime < cap) {
@@ -214,6 +251,13 @@ export function ImmersivePlayer({
 
   const lockedFraction = 1 - cap / runtimeSeconds
   const playedPercent = ((Math.min(current, runtimeSeconds) / runtimeSeconds) * 100).toFixed(2)
+
+  /**
+   * Controls are visible while paused and fade out 2s into playback, which is
+   * the standard player convention and keeps the frame clean once the film has
+   * the viewer's attention. Any tap brings them back (see togglePlay).
+   */
+  const controlsVisible = !playing || showControls
 
   return (
     <div className="zx-stage" data-playing={started ? 'true' : 'false'}>
@@ -254,23 +298,30 @@ export function ImmersivePlayer({
       <button
         type="button"
         className="zx-mute"
+        data-visible={controlsVisible ? 'true' : 'false'}
         onClick={toggleMute}
         aria-label={muted ? copy.unmute : copy.mute}
       >
         <md-icon aria-hidden="true">{muted ? 'volume_off' : 'volume_up'}</md-icon>
       </button>
 
-      {/* Paused-state affordance only — not a button. Play/pause is the frame
-          tap, so a real button here would be a second control for one action. */}
-      {!playing && !gateHit ? (
-        <div className="zx-bigplay" aria-hidden="true">
-          <md-fab size="medium">
-            <md-icon slot="icon">play_arrow</md-icon>
+      {/* Center play/pause affordance. Still not a button — the frame tap owns
+          the action, so a real button here would duplicate one control — but it
+          now mirrors state, showing pause while playing. It hides with the rest
+          of the controls 2s into playback. */}
+      {!gateHit ? (
+        <div
+          className="zx-bigplay"
+          data-visible={controlsVisible ? 'true' : 'false'}
+          aria-hidden="true"
+        >
+          <md-fab size="large">
+            <md-icon slot="icon">{playing ? 'pause' : 'play_arrow'}</md-icon>
           </md-fab>
         </div>
       ) : null}
 
-      <div className="zx-player-bar">
+      <div className="zx-player-bar" data-visible={controlsVisible ? 'true' : 'false'}>
         {/* Elapsed / total sits above the bar so it never crowds the track. */}
         <p className="zx-player-time">
           <span>{formatTime(current)}</span>

@@ -33,8 +33,10 @@
   },
   "info": {
     "cta": "Install Zenorix. Watch Full Moive Free.",
-    "ctaSub": "Android APK · {size} · no credit card",
-    "trustStrip": "Available on all major platforms"
+    "ctaSub": "Android APK · {size} · {downloads}",
+    "trustStrip": "Available on all major platforms",
+    "synopsisExpand": "More",
+    "synopsisCollapse": "Less"
   },
   "chart": {
     "heading": "Top 10 in {country} This Week",

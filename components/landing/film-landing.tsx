@@ -102,6 +102,8 @@ export function FilmLanding({
             genres={copy.genres}
             cta={dict.info.cta}
             ctaSub={fill(dict.info.ctaSub, values)}
+            expandLabel={dict.info.synopsisExpand}
+            collapseLabel={dict.info.synopsisCollapse}
           />
 
           <TopChart

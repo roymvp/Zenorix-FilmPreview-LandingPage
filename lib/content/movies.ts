@@ -156,27 +156,37 @@ export function getMovie(slug: string): Movie | undefined {
   return movies.find((movie) => movie.slug === slug)
 }
 
-/** One entry of the regional weekly chart. */
+/** Source platform whose app icon is badged on the poster. */
+export type ChartPlatform = 'netflix' | 'hbo'
+
+/**
+ * One entry of the regional weekly chart.
+ *
+ * RESERVED: there is deliberately no `poster` field. The rail renders a neutral
+ * placeholder tile for every entry until real artwork is licensed. To wire
+ * artwork up, add `poster: string` here, set it on each pool entry below, and
+ * render it inside `.zx-chart-art` in `TopChart` (see the note there).
+ */
 export type ChartEntry = {
   id: string
   title: string
-  poster: string
   /** Localized "Movie" / "Series" style label key. */
   kind: 'movie' | 'series'
+  platform: ChartPlatform
 }
 
 const chartPool: Record<string, ChartEntry> = {
-  nocturne: { id: 'nocturne', title: 'Nocturne Protocol', poster: '/media/poster-nocturne-protocol.png', kind: 'movie' },
-  crimson: { id: 'crimson', title: 'Crimson Harbor', poster: '/media/poster-crimson-harbor.png', kind: 'movie' },
-  signal: { id: 'signal', title: 'The Last Signal', poster: '/media/poster-the-last-signal.png', kind: 'movie' },
-  neon: { id: 'neon', title: 'Neon Requiem', poster: '/media/poster-neon-requiem.png', kind: 'series' },
-  orbit: { id: 'orbit', title: 'Silent Orbit', poster: '/media/poster-silent-orbit.png', kind: 'movie' },
-  ember: { id: 'ember', title: 'Ash & Ember', poster: '/media/poster-ash-and-ember.png', kind: 'movie' },
-  cartel: { id: 'cartel', title: 'Midnight Cartel', poster: '/media/poster-midnight-cartel.png', kind: 'series' },
-  glass: { id: 'glass', title: 'Glass Kingdom', poster: '/media/poster-glass-kingdom.png', kind: 'series' },
-  tigers: { id: 'tigers', title: 'Paper Tigers', poster: '/media/poster-paper-tigers.png', kind: 'movie' },
-  solstice: { id: 'solstice', title: 'Solstice', poster: '/media/poster-solstice.png', kind: 'movie' },
-  crown: { id: 'crown', title: 'Hollow Crown', poster: '/media/poster-hollow-crown.png', kind: 'series' },
+  nocturne: { id: 'nocturne', title: 'Nocturne Protocol', kind: 'movie', platform: 'netflix' },
+  crimson: { id: 'crimson', title: 'Crimson Harbor', kind: 'movie', platform: 'hbo' },
+  signal: { id: 'signal', title: 'The Last Signal', kind: 'movie', platform: 'netflix' },
+  neon: { id: 'neon', title: 'Neon Requiem', kind: 'series', platform: 'hbo' },
+  orbit: { id: 'orbit', title: 'Silent Orbit', kind: 'movie', platform: 'netflix' },
+  ember: { id: 'ember', title: 'Ash & Ember', kind: 'movie', platform: 'hbo' },
+  cartel: { id: 'cartel', title: 'Midnight Cartel', kind: 'series', platform: 'netflix' },
+  glass: { id: 'glass', title: 'Glass Kingdom', kind: 'series', platform: 'hbo' },
+  tigers: { id: 'tigers', title: 'Paper Tigers', kind: 'movie', platform: 'netflix' },
+  solstice: { id: 'solstice', title: 'Solstice', kind: 'movie', platform: 'hbo' },
+  crown: { id: 'crown', title: 'Hollow Crown', kind: 'series', platform: 'netflix' },
 }
 
 const order: Record<Locale, string[]> = {

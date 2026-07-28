@@ -1,15 +1,30 @@
 'use client'
 
 import { useConversion } from '@/components/landing/conversion-provider'
-import type { ChartEntry } from '@/lib/content/movies'
+import type { ChartEntry, ChartPlatform } from '@/lib/content/movies'
 
 /**
- * Regional Top 10 — heading, poster, rank. Nothing else.
+ * Source-platform app icons badged on each poster. These are the same marks as
+ * the trust strip, reused here so a card reads as "this title comes from X".
+ */
+const PLATFORM_ICONS: Record<ChartPlatform, { src: string; name: string }> = {
+  netflix: { src: '/brands/netflix.svg', name: 'Netflix' },
+  hbo: { src: '/brands/hbo-max.svg', name: 'HBO Max' },
+}
+
+/**
+ * Regional Top 10 — placeholder art, rank, source badge. Nothing else.
  *
- * Every poster is a locked door: tapping any title opens the download upsell
+ * Every card is a locked door: tapping any title opens the download upsell
  * instead of a detail page. Titles and type labels are deliberately omitted so
  * the rail reads as pure curiosity bait; the accessible name still carries the
  * rank and title for screen readers.
+ *
+ * TO REPLACE WITH REAL POSTERS: add `poster: string` back to `ChartEntry`
+ * (see `lib/content/movies.ts`) and swap the placeholder <span> below for an
+ * <img className="zx-chart-img" src={entry.poster} alt="" loading="lazy" />.
+ * `.zx-chart-art` already owns the 2/3 aspect ratio, radius and clipping, so
+ * no CSS needs to change.
  */
 export function TopChart({
   entries,
@@ -29,9 +44,15 @@ export function TopChart({
         <h2 id="zx-chart-heading" className="zx-section-title">
           {heading}
         </h2>
+      </div>
 
-        <ul className="zx-rail">
-          {entries.map((entry, index) => (
+      {/* The rail sits OUTSIDE .zx-shell and owns its own inline padding, so the
+          first card starts at the gutter while the scroll track still runs the
+          full page width. */}
+      <ul className="zx-rail">
+        {entries.map((entry, index) => {
+          const platform = PLATFORM_ICONS[entry.platform]
+          return (
             <li key={entry.id} className="zx-rail-item">
               <button
                 type="button"
@@ -40,17 +61,29 @@ export function TopChart({
                 aria-label={`${rankLabel.replace('{rank}', String(index + 1))} · ${entry.title}`}
               >
                 <span className="zx-chart-art">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={entry.poster} alt="" loading="lazy" decoding="async" />
-                </span>
-                <span className="zx-rank" aria-hidden="true">
-                  {index + 1}
+                  {/* Neutral stand-in until artwork is licensed. Reads as an
+                      empty slot, never as finished art. */}
+                  <span className="zx-chart-ph" aria-hidden="true">
+                    <md-icon>image</md-icon>
+                  </span>
+
+                  {/* Source app icon, top-right. aria-hidden: the platform is
+                      not part of the card's accessible name, which already
+                      carries rank + title. */}
+                  <span className="zx-chart-badge" aria-hidden="true">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={platform.src} alt="" loading="lazy" decoding="async" />
+                  </span>
+
+                  <span className="zx-rank" aria-hidden="true">
+                    {index + 1}
+                  </span>
                 </span>
               </button>
             </li>
-          ))}
-        </ul>
-      </div>
+          )
+        })}
+      </ul>
     </section>
   )
 }
