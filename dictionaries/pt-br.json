@@ -24,7 +24,6 @@
     "languageMenu": "Escolha seu idioma"
   },
   "player": {
-    "watermark": "Prévia Zenorix",
     "play": "Reproduzir",
     "pause": "Pausar",
     "mute": "Desativar som",
@@ -32,25 +31,17 @@
     "fullscreen": "Tela cheia",
     "seek": "Avançar dentro da prévia gratuita",
     "tapForSound": "Toque para ouvir",
-    "previewLabel": "Prévia gratuita de {minutes} min",
-    "floatingCta": "Baixar APK",
-    "scrollHint": "Arraste para ver detalhes",
     "loading": "Carregando prévia"
   },
   "info": {
-    "heading": "Sobre o filme",
     "cta": "Baixe e assista ao filme completo grátis",
     "ctaSub": "APK para Android · {size} · sem cartão de crédito",
-    "trustStrip": "Disponível em todas as grandes plataformas",
-    "licensed": "Licenciado oficialmente"
+    "trustStrip": "Disponível em todas as grandes plataformas"
   },
   "chart": {
     "heading": "Top 10 {country} nesta semana",
-    "sub": "Atualizado toda segunda com dados reais de audiência da Zenorix",
     "rank": "Número {rank}",
-    "seeAll": "Ver todos os 28.000+ títulos",
-    "seeAllShort": "Ver tudo",
-    "kind": { "movie": "Filme", "series": "Série" }
+    "seeAllShort": "Ver tudo"
   },
   "value": {
     "heading": "Três motivos para trocar",
@@ -71,27 +62,6 @@
         "body": "4K Ultra HD, legendas em vários idiomas, download offline e servidores globais que simplesmente não travam."
       }
     ]
-  },
-  "compare": {
-    "heading": "Zenorix x pagar todas separadas",
-    "sub": "Os mesmos filmes e séries. Um app, por uma fração do preço.",
-    "labels": {
-      "service": "Serviço",
-      "price": "Por mês",
-      "titles": "Títulos",
-      "liveTv": "TV ao vivo",
-      "quality": "Qualidade máx."
-    },
-    "rows": [
-      { "service": "Zenorix", "price": "{annualPerMonth}", "titles": "36.000+", "liveTv": "900+ canais", "quality": "4K HDR", "highlight": true },
-      { "service": "Netflix", "price": "R$ 44,90", "titles": "~6.000", "liveTv": "Não tem", "quality": "4K HDR" },
-      { "service": "Disney+", "price": "R$ 43,90", "titles": "~2.100", "liveTv": "Não tem", "quality": "4K HDR" },
-      { "service": "HBO Max", "price": "R$ 34,90", "titles": "~3.300", "liveTv": "Não tem", "quality": "4K HDR" },
-      { "service": "Apple TV+", "price": "R$ 21,90", "titles": "~260", "liveTv": "Não tem", "quality": "4K HDR" }
-    ],
-    "totalLabel": "As quatro separadas",
-    "totalPrice": "R$ 145,60",
-    "footnote": "Os preços dos concorrentes são planos padrão divulgados publicamente {country} e servem apenas para comparação. Todas as marcas pertencem aos seus respectivos donos."
   },
   "faq": {
     "heading": "Dúvidas antes de baixar",
@@ -119,7 +89,11 @@
     "body": "Uma instalação de {size} libera o filme completo em 4K, mais 28.000 títulos, 8.000 séries e 900 canais ao vivo. Primeiro mês grátis.",
     "cta": "Baixar APK · Primeiro mês grátis",
     "meta": "v{version} · {size} · Android {minAndroid}+",
-    "badges": ["APK seguro", "Sem malware", "Assinatura verificada"]
+    "badges": [
+      "APK seguro",
+      "Sem malware",
+      "Assinatura verificada"
+    ]
   },
   "sticky": {
     "default": "Baixar APK · Primeiro mês grátis",
@@ -131,7 +105,12 @@
       "eyebrow": "Disponível no app",
       "heading": "Libere todos os filmes e séries",
       "body": "Acesso imediato a todos os 28.000+ títulos, incluindo cada um deste Top 10. O primeiro mês é totalmente grátis.",
-      "bullets": ["Todas as plataformas em um app", "4K Ultra HD", "Legendas em vários idiomas", "Cancele quando quiser"],
+      "bullets": [
+        "Todas as plataformas em um app",
+        "4K Ultra HD",
+        "Legendas em vários idiomas",
+        "Cancele quando quiser"
+      ],
       "cta": "Baixar agora — assista a tudo grátis",
       "close": "Fechar"
     },

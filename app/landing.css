@@ -228,21 +228,18 @@
   outline-offset: -6px;
 }
 
-/* Hero title block */
-
-.zx-hero-copy {
+/* Playback control strip, pinned to the bottom of the video frame. Formerly
+   also held the title and metadata, which now live in .zx-info below. */
+.zx-player-bar {
   position: absolute;
   z-index: 4;
   inset-inline: 0;
   inset-block-end: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  padding: 0 var(--zx-gutter) 14px;
+  padding: 0 var(--zx-gutter) 10px;
   pointer-events: none;
 }
 
-.zx-hero-copy > * {
+.zx-player-bar > * {
   pointer-events: auto;
 }
 
@@ -390,10 +387,13 @@
 
 /* Big center play affordance before first playback */
 
+/* Centered in the frame ABOVE the control strip, not the whole frame: on a
+   16/9 phone-width video the two are only ~235px apart and a full-inset
+   centered FAB lands on top of the scrubber. */
 .zx-bigplay {
   position: absolute;
   z-index: 5;
-  inset: 0;
+  inset: 0 0 76px;
   display: grid;
   place-items: center;
   pointer-events: none;

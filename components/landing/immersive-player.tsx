@@ -186,7 +186,7 @@ export function ImmersivePlayer({
 
       {!playing && !gateHit ? (
         <div className="zx-bigplay" aria-hidden="true">
-          <md-fab size="large">
+          <md-fab size="medium">
             <md-icon slot="icon">play_arrow</md-icon>
           </md-fab>
         </div>
@@ -201,7 +201,7 @@ export function ImmersivePlayer({
         </div>
       ) : null}
 
-      <div className="zx-hero-copy">
+      <div className="zx-player-bar">
         <div className="zx-controls">
           <div className="zx-scrub">
             <md-slider
