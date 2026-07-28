@@ -14,8 +14,9 @@ import { SITE } from '@/lib/config/site'
 /**
  * Single source of truth for the download funnel.
  *
- * Every CTA on the page — hero pill, info block, chart card, sticky bar, both
- * dialogs — routes through `download()`, so the APK URL and the conversion
+ * Every CTA on the page — hero pill, info block, chart card, the rail's "see
+ * more" tail, both dialogs — routes through `download()`, so the APK URL and
+ * the conversion
  * event exist in exactly one place. Dialog state lives here too, which is what
  * lets the player trigger the upsell without knowing the dialog exists.
  */
@@ -33,8 +34,8 @@ type ConversionState = {
   openPreview: (reason: PreviewReason) => void
   closePreview: () => void
   /**
-   * Set once the visitor has hit the preview wall. The sticky bar swaps to
-   * higher-urgency copy, because at that point intent is proven.
+   * Set once the visitor has hit the preview wall — intent is proven from that
+   * point on. RESERVED for higher-urgency CTA copy.
    */
   urgent: boolean
 }

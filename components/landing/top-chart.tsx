@@ -22,13 +22,16 @@ export function TopChart({
   entries,
   heading,
   rankLabel,
+  moreLabel,
 }: {
   entries: ChartEntry[]
   heading: string
   /** "Number {rank}" template, used to build each poster's accessible name. */
   rankLabel: string
+  /** Outlined tail button that jumps straight to the download. */
+  moreLabel: string
 }) {
-  const { openContent } = useConversion()
+  const { openContent, download } = useConversion()
 
   return (
     <section className="zx-section zx-chart" aria-labelledby="zx-chart-heading">
@@ -84,6 +87,20 @@ export function TopChart({
           )
         })}
       </ul>
+
+      {/* Tail action for the rail: the catalogue is the promise, so "see more"
+          resolves to the only thing that can actually deliver it — the install.
+          Outlined on purpose: the filled CTA stays the section-level primary. */}
+      <div className="zx-shell zx-chart-more-wrap">
+        <button
+          type="button"
+          className="zx-chart-more"
+          onClick={() => download('chart_more')}
+        >
+          {moreLabel}
+          <md-icon aria-hidden="true">arrow_forward</md-icon>
+        </button>
+      </div>
     </section>
   )
 }

@@ -41,7 +41,8 @@
   "chart": {
     "heading": "Top 10 in {country} This Week",
     "rank": "Number {rank}",
-    "seeAllShort": "See all"
+    "seeAllShort": "See all",
+    "more": "See more trending movies & shows"
   },
   "value": {
     "heading": "Three reasons people switch",
@@ -64,41 +65,50 @@
     ]
   },
   "faq": {
-    "heading": "Questions people ask before downloading",
+    "heading": "FAQ",
     "items": [
       {
-        "q": "Is the first month really free?",
-        "a": "Yes. Your first 30 days of Zenorix cost {zero} and no card is required to start. After the free month you choose {monthly} per month or {annualPerMonth} per month billed annually."
+        "q": "Do I get full access to everything during the free month?",
+        "a": "100% full, unrestricted access. Zero locked titles, zero paywalled features, zero hidden tiers. Every movie, every show, every live channel, full 4K quality — all unlocked the second you install the app. No fine print, no limitations."
       },
       {
-        "q": "Can I cancel anytime?",
-        "a": "Yes, in two taps from the app. There is no contract and no cancellation fee, and you keep access until the end of the period you already paid for."
+        "q": "How much does it cost after the first free month?",
+        "a": "Two straightforward plans. The monthly plan is {monthly} after your free trial. The annual plan works out to just {annualPerMonth} per month — the cheapest streaming price on the market, way lower than Netflix, Disney+ or any other major service."
       },
       {
-        "q": "Is the content officially licensed?",
-        "a": "Yes. Zenorix streams synchronously from officially licensed catalogs supplied by the major platforms. Every title is delivered under a distribution agreement — nothing is scraped or re-hosted."
+        "q": "Will I get charged automatically when the free month ends?",
+        "a": "Only if you keep your subscription. Cancel anytime before your free month wraps up and you pay absolutely nothing. No hidden fees, no fine print, no sneaky auto-renewal tricks."
       },
       {
-        "q": "Which devices does the APK support?",
-        "a": "Any Android phone, tablet, TV box or Android TV running Android {minAndroid} or newer. The APK is {size}, installs in about 30 seconds, and one account streams on up to four devices."
+        "q": "How do I install the APK on my Android phone?",
+        "a": "Takes 10 seconds flat. Tap download, open the file, and allow installs from unknown sources when prompted. No rooting, no complicated setup — just install and start watching instantly."
+      },
+      {
+        "q": "How much content is actually available?",
+        "a": "The biggest streaming library anywhere. 28,000+ blockbuster movies, 8,000+ binge-worthy TV series, plus 900+ live global TV channels. You'll never run out of things to watch."
+      },
+      {
+        "q": "How quickly are new shows and movies added?",
+        "a": "Same-day — often same-minute — premieres. Every new episode, every theatrical release goes live the exact same time it drops on the original platforms. No waiting, no spoilers."
+      },
+      {
+        "q": "What video quality do I get?",
+        "a": "True 4K Ultra HD on every single title. No fuzzy compressed streams, no extra charge for premium quality. Crisp, cinema-grade picture on every screen."
+      },
+      {
+        "q": "Can I watch on my Android TV or tablet too?",
+        "a": "Absolutely. Works on every Android device — phones, tablets, Android TV boxes, Fire sticks. One account works on all your screens. Install once, watch anywhere."
+      },
+      {
+        "q": "Can I cancel my subscription whenever I want?",
+        "a": "Yes. Cancel in one tap, no hoops to jump through, no cancellation fees. You're never locked into a contract. Stay only as long as you love the service."
       }
     ]
   },
   "finalCta": {
     "heading": "Finish {title} free tonight",
-    "body": "One {size} install unlocks the full film in 4K plus 28,000 more titles, 8,000 series and 900 live channels. First month free.",
     "cta": "Install Zenorix. Watch Full Moive Free.",
-    "meta": "v{version} · {size} · Android {minAndroid}+",
-    "badges": [
-      "Safe APK",
-      "No malware",
-      "Signature verified"
-    ]
-  },
-  "sticky": {
-    "default": "Install Zenorix. Watch Full Moive Free.",
-    "urgent": "Install Zenorix. Watch Full Moive Free.",
-    "close": "Hide download bar"
+    "meta": "v{version} · {size} · Android {minAndroid}+"
   },
   "modals": {
     "content": {
@@ -123,12 +133,10 @@
     }
   },
   "footer": {
-    "tagline": "Every platform. One app. {annualPerMonth} a month.",
-    "privacy": "Privacy Policy",
-    "terms": "Terms of Service",
+    "privacy": "Privacy",
+    "terms": "Terms",
     "dmca": "DMCA",
-    "copyright": "© {year} Zenorix. All rights reserved.",
-    "disclaimer": "Zenorix streams officially licensed catalogs. Netflix, Disney+, HBO Max, Apple TV+ and Paramount+ are trademarks of their respective owners and are not affiliated with Zenorix.",
+    "copyright": "© {year} Zenorix",
     "language": "Language"
   },
   "a11y": {

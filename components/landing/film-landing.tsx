@@ -6,7 +6,6 @@ import { FinalCta } from '@/components/landing/final-cta'
 import { ImmersivePlayer } from '@/components/landing/immersive-player'
 import { PlatformStrip } from '@/components/landing/platform-strip'
 import { SiteFooter } from '@/components/landing/site-footer'
-import { StickyDownloadBar } from '@/components/landing/sticky-download-bar'
 import { TopBar } from '@/components/landing/top-bar'
 import { TopChart } from '@/components/landing/top-chart'
 import { ValueProps } from '@/components/landing/value-props'
@@ -110,6 +109,7 @@ export function FilmLanding({
             entries={getChart(locale)}
             heading={fill(dict.chart.heading, values)}
             rankLabel={dict.chart.rank}
+            moreLabel={dict.chart.more}
           />
 
           {/* Sits after the Top 10: the licensed-source claim lands harder once
@@ -135,34 +135,23 @@ export function FilmLanding({
 
           <FinalCta
             heading={fill(dict.finalCta.heading, values)}
-            body={fill(dict.finalCta.body, values)}
             cta={dict.finalCta.cta}
             meta={fill(dict.finalCta.meta, values)}
-            badges={dict.finalCta.badges}
           />
         </main>
 
         <SiteFooter
           locale={locale}
           localeHrefs={localeHrefs}
-          tagline={fill(dict.footer.tagline, values)}
           links={[
             { label: dict.footer.privacy, href: `/${locale}#privacy` },
             { label: dict.footer.terms, href: `/${locale}#terms` },
             { label: dict.footer.dmca, href: `/${locale}#dmca` },
           ]}
           copyright={fill(dict.footer.copyright, { year: 2026 })}
-          disclaimer={dict.footer.disclaimer}
           languageLabel={dict.footer.language}
           languageMenuLabel={dict.nav.languageMenu}
           themeLabel={dict.a11y.theme}
-        />
-
-        <StickyDownloadBar
-          defaultLabel={dict.sticky.default}
-          urgentLabel={dict.sticky.urgent}
-          title={copy.title}
-          meta={fill(dict.finalCta.meta, values)}
         />
 
         <ConversionDialogs

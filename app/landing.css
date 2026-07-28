@@ -43,13 +43,11 @@
 
 /* Semantic lists are used throughout; none of them want default list styling. */
 .zx-rail,
-.zx-badges,
 .zx-strip-logos,
 .zx-footer-links,
 .zx-dialog-bullets {
   list-style: none;
 }
-.zx-badges,
 .zx-strip-logos {
   margin: 0;
   padding: 0;
@@ -859,6 +857,55 @@
   font-variant-numeric: tabular-nums;
 }
 
+/* Tail action under the rail. Outlined, transparent, full-width pill: it has to
+   read as secondary to the filled install CTA above it while still being an
+   obvious tap target at the end of the list. */
+.zx-chart-more-wrap {
+  margin-block-start: 14px;
+}
+
+.zx-chart-more {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  min-height: 46px;
+  padding: 0 18px;
+  border: 1px solid var(--md-sys-color-outline);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--md-sys-color-on-surface);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.2;
+  text-align: center;
+  cursor: pointer;
+  appearance: none;
+  transition:
+    border-color 180ms ease,
+    color 180ms ease;
+}
+
+.zx-chart-more md-icon {
+  flex: 0 0 auto;
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  color: var(--md-sys-color-primary);
+}
+
+.zx-chart-more:hover {
+  border-color: var(--md-sys-color-primary);
+  color: var(--md-sys-color-primary);
+}
+
+.zx-chart-more:focus-visible {
+  outline: 2px solid var(--md-sys-color-primary);
+  outline-offset: 2px;
+}
+
 /* ------------------------------------------------------------- value props */
 
 /* Three bullets, not cards: the claims are short, so card chrome was pure
@@ -994,59 +1041,18 @@
   justify-content: center;
 }
 
-.zx-badges {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 8px 18px;
-  margin-block-start: 6px;
-}
-
-.zx-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  color: var(--md-sys-color-on-surface-variant);
-  font-size: 11.5px;
-  letter-spacing: 0.04em;
-}
-
-.zx-badge md-icon {
-  font-size: 15px;
-  width: 15px;
-  height: 15px;
-  color: var(--md-sys-color-primary);
-}
-
 /* ------------------------------------------------------------------ footer */
 
 .zx-footer {
   border-block-start: 1px solid var(--md-sys-color-outline-variant);
-  padding-block: 36px 44px;
-}
-
-.zx-footer-top {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  align-items: flex-start;
-}
-
-.zx-footer .zx-brand {
-  color: var(--md-sys-color-on-surface);
-}
-
-.zx-footer-tagline {
-  margin: 6px 0 0;
-  color: var(--md-sys-color-on-surface-variant);
-  font-size: 13px;
+  padding-block: 20px max(20px, env(safe-area-inset-bottom));
 }
 
 .zx-footer-links {
   display: flex;
   flex-wrap: wrap;
   gap: 8px 20px;
-  margin: 20px 0 0;
+  margin: 0;
   padding: 0;
   list-style: none;
 }
@@ -1062,20 +1068,21 @@
   text-decoration: underline;
 }
 
-.zx-footer-legal {
+/* Copyright and the utility controls share one row: at phone width the two
+   blocks are short enough that stacking them only added height. */
+.zx-footer-bottom {
   display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-block-start: 24px;
-  padding-block-start: 20px;
-  border-block-start: 1px solid var(--md-sys-color-outline-variant);
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-block-start: 12px;
 }
 
-.zx-footer-legal p {
+.zx-footer-copy {
   margin: 0;
   color: var(--md-sys-color-on-surface-variant);
   font-size: 11.5px;
-  line-height: 1.65;
+  line-height: 1.5;
 }
 
 /* ------------------------------------------------------- language selector */
@@ -1133,53 +1140,9 @@
    override here. It is a light surface now, so the base on-surface color above
    is correct in both the top bar and the footer. */
 
-/* ------------------------------------------------------------ sticky bar */
-
-.zx-sticky {
-  position: fixed;
-  z-index: 20;
-  /* Fixed positioning is viewport-relative, so the bar has to repeat the page
-     cap itself to stay aligned with the phone column on wide screens. */
-  inset-inline: 0;
-  max-width: var(--zx-page-max);
-  margin-inline: auto;
-  inset-block-end: 0;
-  transform: translateY(110%);
-  transition: transform 320ms cubic-bezier(0.2, 0, 0, 1);
-  padding: 10px var(--zx-gutter) max(10px, env(safe-area-inset-bottom));
-  /* Same surface as the page it covers — it is a floating slice of the page,
-     not a differently tinted panel. Opaque, so scrolling content cannot show
-     through behind the CTA. */
-  background: var(--md-sys-color-surface);
-  border-block-start: 1px solid var(--md-sys-color-outline-variant);
-}
-
-.zx-sticky[data-visible='true'] {
-  transform: translateY(0);
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .zx-sticky {
-    transition: none;
-  }
-}
-
-.zx-sticky-inner {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.zx-sticky-inner .zx-cta-button {
-  flex: 1;
-  min-width: 0;
-  --md-filled-button-container-height: 50px;
-  --md-filled-button-label-text-size: 14.5px;
-}
-
-.zx-sticky-meta {
-  display: none;
-}
+/* NOTE: a fixed bottom download bar used to live here. It was removed — the
+   page now closes on the in-flow final CTA, so nothing permanently covers
+   content and the page needs no bottom spacer. */
 
 /* ----------------------------------------------------------------- dialogs */
 

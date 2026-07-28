@@ -142,8 +142,6 @@ body {
   color: var(--md-sys-color-on-background);
   font-family: var(--md-ref-typeface-plain);
   -webkit-font-smoothing: antialiased;
-  /* Room for the persistent download bar so it never covers page content. */
-  padding-block-end: var(--zx-sticky-space, 0px);
 }
 
 /* Material Symbols icon font for <md-icon> */
