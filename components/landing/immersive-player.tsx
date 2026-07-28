@@ -65,27 +65,68 @@ export function ImmersivePlayer({
 
   const cap = Math.min(limitSeconds, runtimeSeconds)
 
+  /**
+   * In-flight `play()` promise.
+   *
+   * `HTMLMediaElement.play()` is async: calling `pause()` while it is still
+   * pending rejects it with `AbortError: The play() request was interrupted`.
+   * That is easy to trigger here — autoplay races the preview gate, and a quick
+   * double tap races itself — so every play/pause goes through safePlay/
+   * safePause below, which serialize the pair and swallow the expected reject.
+   */
+  const playPromiseRef = useRef<Promise<void> | null>(null)
+  /** Guards against re-entrant gating while an awaited pause settles. */
+  const gatingRef = useRef(false)
+
+  /** Resolves true if playback actually started. Never rejects. */
+  const safePlay = useCallback(async () => {
+    const video = videoRef.current
+    if (!video) return false
+    const attempt = video.play()
+    // Legacy browsers return undefined rather than a promise.
+    if (!attempt || typeof attempt.then !== 'function') return true
+    const settled = attempt.then(
+      () => true,
+      () => false,
+    )
+    playPromiseRef.current = settled.then(() => undefined)
+    return settled
+  }, [])
+
+  /** Waits for any pending play() so pause() cannot interrupt it. */
+  const safePause = useCallback(async () => {
+    const video = videoRef.current
+    if (!video) return
+    const pending = playPromiseRef.current
+    if (pending) await pending
+    playPromiseRef.current = null
+    video.pause()
+  }, [])
+
   // Autoplay muted on mount. Failure is expected on some browsers and simply
   // leaves the poster + big play affordance in place.
   useEffect(() => {
     const video = videoRef.current
     if (!video) return
     video.muted = true
-    video
-      .play()
-      .then(() => {
-        setPlaying(true)
-        setStarted(true)
-      })
-      .catch(() => {
-        setPlaying(false)
-      })
-  }, [])
+    let cancelled = false
+    void safePlay().then((ok) => {
+      if (cancelled) return
+      setPlaying(ok)
+      if (ok) setStarted(true)
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [safePlay])
 
-  const enforceGate = useCallback(() => {
+  const enforceGate = useCallback(async () => {
     const video = videoRef.current
-    if (!video) return
-    video.pause()
+    if (!video || gatingRef.current) return
+    gatingRef.current = true
+    // `timeupdate` keeps firing until the pause lands, so the ref above stops
+    // this from re-entering and opening the upsell dialog several times.
+    await safePause()
     video.currentTime = cap
     setPlaying(false)
     setCurrent(cap)
@@ -94,13 +135,14 @@ export function ImmersivePlayer({
       trackEvent('preview_limit_reached', { seconds: cap })
     }
     openPreview('limit')
-  }, [cap, gateHit, openPreview])
+    gatingRef.current = false
+  }, [cap, gateHit, openPreview, safePause])
 
   function handleTimeUpdate() {
     const video = videoRef.current
     if (!video) return
     if (video.currentTime >= cap) {
-      enforceGate()
+      void enforceGate()
       return
     }
     setCurrent(video.currentTime)
@@ -110,17 +152,20 @@ export function ImmersivePlayer({
     const video = videoRef.current
     if (!video) return
     if (video.currentTime >= cap) {
-      enforceGate()
+      void enforceGate()
       return
     }
     if (video.paused) {
-      void video.play()
       setPlaying(true)
       setStarted(true)
       trackEvent('preview_play', {})
+      // Roll the optimistic state back if the browser refuses to play.
+      void safePlay().then((ok) => {
+        if (!ok) setPlaying(false)
+      })
     } else {
-      video.pause()
       setPlaying(false)
+      void safePause()
     }
   }
 
@@ -133,9 +178,11 @@ export function ImmersivePlayer({
     if (!next) {
       trackEvent('preview_unmute', {})
       if (video.paused && video.currentTime < cap) {
-        void video.play()
-        setPlaying(true)
         setStarted(true)
+        setPlaying(true)
+        void safePlay().then((ok) => {
+          if (!ok) setPlaying(false)
+        })
       }
     }
   }
@@ -172,7 +219,7 @@ export function ImmersivePlayer({
         loop={false}
         preload="metadata"
         onTimeUpdate={handleTimeUpdate}
-        onEnded={enforceGate}
+        onEnded={() => void enforceGate()}
         aria-label={posterAlt}
         tabIndex={-1}
       >
