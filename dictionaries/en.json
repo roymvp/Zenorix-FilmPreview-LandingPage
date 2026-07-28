@@ -42,7 +42,8 @@
     "heading": "Top 10 in {country} This Week",
     "rank": "Number {rank}",
     "seeAllShort": "See all",
-    "more": "See more trending movies & shows"
+    "more": "See more hit movies & shows",
+    "moreHint": "28,000+ movies, 8,000+ shows & live TV channels"
   },
   "value": {
     "heading": "Three reasons people switch",

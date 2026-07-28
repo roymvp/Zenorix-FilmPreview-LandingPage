@@ -110,6 +110,7 @@ export function FilmLanding({
             heading={fill(dict.chart.heading, values)}
             rankLabel={dict.chart.rank}
             moreLabel={dict.chart.more}
+            moreHint={dict.chart.moreHint}
           />
 
           {/* Sits after the Top 10: the licensed-source claim lands harder once

@@ -42,7 +42,8 @@
     "heading": "Top 10 {country} nesta semana",
     "rank": "Número {rank}",
     "seeAllShort": "Ver tudo",
-    "more": "Ver mais filmes e séries em alta"
+    "more": "Ver mais filmes e séries de sucesso",
+    "moreHint": "Mais de 28.000 filmes, 8.000 séries e canais de TV ao vivo"
   },
   "value": {
     "heading": "Três motivos para trocar",

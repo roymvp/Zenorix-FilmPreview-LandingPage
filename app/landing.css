@@ -906,6 +906,17 @@
   outline-offset: 2px;
 }
 
+/* The button states the action; this line states the size of the payoff. Kept
+   quiet and centred under the pill so it reads as a caption, not a second CTA. */
+.zx-chart-more-hint {
+  margin: 8px 0 0;
+  color: var(--md-sys-color-on-surface-variant);
+  font-size: 12px;
+  line-height: 1.45;
+  text-align: center;
+  text-wrap: balance;
+}
+
 /* ------------------------------------------------------------- value props */
 
 /* Three bullets, not cards: the claims are short, so card chrome was pure

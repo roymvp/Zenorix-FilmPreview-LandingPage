@@ -23,6 +23,7 @@ export function TopChart({
   heading,
   rankLabel,
   moreLabel,
+  moreHint,
 }: {
   entries: ChartEntry[]
   heading: string
@@ -30,6 +31,8 @@ export function TopChart({
   rankLabel: string
   /** Outlined tail button that jumps straight to the download. */
   moreLabel: string
+  /** Catalogue size line under the button — the payoff for tapping it. */
+  moreHint: string
 }) {
   const { openContent, download } = useConversion()
 
@@ -100,6 +103,7 @@ export function TopChart({
           {moreLabel}
           <md-icon aria-hidden="true">arrow_forward</md-icon>
         </button>
+        <p className="zx-chart-more-hint">{moreHint}</p>
       </div>
     </section>
   )
