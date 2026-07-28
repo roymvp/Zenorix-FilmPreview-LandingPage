@@ -11,10 +11,6 @@ export type PlayerCopy = {
   unmute: string
   seek: string
   tapForSound: string
-  previewLabel: string
-  floatingCta: string
-  watermark: string
-  licensed: string
 }
 
 /**
@@ -25,8 +21,10 @@ export type PlayerCopy = {
  *    moving film rather than a static banner;
  *  - the scrub bar spans the FULL runtime while only `limitSeconds` is
  *    playable, so the locked remainder is visible, not merely stated;
- *  - hitting the limit pauses and hands off to the upsell dialog;
- *  - a compact download pill stays on screen during playback.
+ *  - hitting the limit pauses and hands off to the upsell dialog.
+ *
+ * The frame itself carries no badges, watermark or CTA: the film is the hook,
+ * and the download ask lives in the content flow directly below it.
  *
  * RESERVED: `src` is a plain MP4 for the template. For production HLS/DASH,
  * attach hls.js (or Shaka) to the same `videoRef` inside the mount effect —
@@ -40,7 +38,6 @@ export function ImmersivePlayer({
   runtimeSeconds,
   limitSeconds,
   copy,
-  children,
 }: {
   src: string
   type: string
@@ -49,11 +46,9 @@ export function ImmersivePlayer({
   runtimeSeconds: number
   limitSeconds: number
   copy: PlayerCopy
-  /** Title / metadata block, composed on the server and layered over the film. */
-  children: React.ReactNode
 }) {
   const videoRef = useRef<HTMLVideoElement>(null)
-  const { openPreview, download } = useConversion()
+  const { openPreview } = useConversion()
 
   const [playing, setPlaying] = useState(false)
   const [muted, setMuted] = useState(true)
@@ -189,32 +184,6 @@ export function ImmersivePlayer({
         aria-label={playing ? copy.pause : copy.play}
       />
 
-      <div className="zx-stage-flags">
-        <span className="zx-flag">
-          <md-icon aria-hidden="true">lock_clock</md-icon>
-          <span>{copy.previewLabel}</span>
-        </span>
-        <span className="zx-flag">
-          <md-icon aria-hidden="true">verified</md-icon>
-          <span>{copy.licensed}</span>
-        </span>
-      </div>
-
-      <span className="zx-watermark" aria-hidden="true">
-        {copy.watermark}
-      </span>
-
-      {/* Persistent in-player CTA — visible during the whole preview. */}
-      <md-filled-button
-        className="zx-float-cta"
-        onClick={() => download('player_float')}
-      >
-        <md-icon slot="icon" aria-hidden="true">
-          android
-        </md-icon>
-        {copy.floatingCta}
-      </md-filled-button>
-
       {!playing && !gateHit ? (
         <div className="zx-bigplay" aria-hidden="true">
           <md-fab size="large">
@@ -233,8 +202,6 @@ export function ImmersivePlayer({
       ) : null}
 
       <div className="zx-hero-copy">
-        {children}
-
         <div className="zx-controls">
           <div className="zx-scrub">
             <md-slider

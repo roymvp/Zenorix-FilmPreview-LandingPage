@@ -1,5 +1,4 @@
 import { LanguageSwitcher } from '@/components/landing/language-switcher'
-import { SITE } from '@/lib/config/site'
 import type { Locale } from '@/lib/i18n/config'
 
 /** Transparent bar layered over the film — chrome must never steal from the art. */
@@ -20,11 +19,12 @@ export function TopBar({
 }) {
   return (
     <header className="zx-topbar">
+      {/* Home mark only — the wordmark is redundant next to it and competes
+          with the film art for attention. */}
       <a className="zx-brand" href={homeHref} aria-label={homeLabel}>
         <span className="zx-brand-mark" aria-hidden="true">
           Z
         </span>
-        <span className="zx-brand-name">{SITE.name}</span>
       </a>
 
       <div className="zx-topbar-actions">

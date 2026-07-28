@@ -4,7 +4,6 @@ import { FaqSection } from '@/components/landing/faq-section'
 import { FilmInfo } from '@/components/landing/film-info'
 import { FinalCta } from '@/components/landing/final-cta'
 import { ImmersivePlayer } from '@/components/landing/immersive-player'
-import { PriceCompare, type CompareRow } from '@/components/landing/price-compare'
 import { SiteFooter } from '@/components/landing/site-footer'
 import { StickyDownloadBar } from '@/components/landing/sticky-download-bar'
 import { TopBar } from '@/components/landing/top-bar'
@@ -21,8 +20,10 @@ import { buildStructuredData, marketValues } from '@/lib/seo'
  * /movie/[slug] routes.
  *
  * Section order is the funnel: cinematic hook -> what it is -> social proof ->
- * why switch -> price proof -> objections -> close. A download CTA appears in
- * six of those seven zones, all wired to one handler.
+ * why switch -> objections -> close, all wired to one download handler.
+ *
+ * The layout is mobile-only by design: `.zx-page` caps itself at a phone width
+ * and centers, so the page never stretches into a desktop composition.
  */
 export function FilmLanding({
   movie,
@@ -46,16 +47,6 @@ export function FilmLanding({
   } as const
 
   const runtimeSeconds = movie.runtimeMinutes * 60
-  const previewMinutes = Math.round(movie.previewLimitSeconds / 60)
-
-  const compareRows: CompareRow[] = dict.compare.rows.map((row) => ({
-    service: row.service,
-    price: fill(row.price, values),
-    titles: row.titles,
-    liveTv: row.liveTv,
-    quality: row.quality,
-    highlight: 'highlight' in row ? Boolean(row.highlight) : false,
-  }))
 
   const structuredData = buildStructuredData({ movie, locale, dict, path })
 
@@ -96,47 +87,16 @@ export function FilmLanding({
               unmute: dict.player.unmute,
               seek: dict.player.seek,
               tapForSound: dict.player.tapForSound,
-              previewLabel: fill(dict.player.previewLabel, {
-                minutes: previewMinutes,
-              }),
-              floatingCta: dict.player.floatingCta,
-              watermark: dict.player.watermark,
-              licensed: dict.info.licensed,
             }}
-          >
-            <h1 className="zx-hero-title">{copy.title}</h1>
-            <p className="zx-hero-tagline md-typescale-body-large">
-              {copy.tagline}
-            </p>
-            <p className="zx-hero-meta">
-              <span>{movie.releaseYear}</span>
-              <span className="zx-dot" aria-hidden="true" />
-              <span>
-                {Math.floor(movie.runtimeMinutes / 60)}h {movie.runtimeMinutes % 60}m
-              </span>
-              <span className="zx-dot" aria-hidden="true" />
-              {movie.qualityTags.map((tag) => (
-                <span key={tag} className="zx-tag">
-                  {tag}
-                </span>
-              ))}
-            </p>
-          </ImmersivePlayer>
-
-          <p className="zx-scroll-hint">
-            <span>
-              {dict.player.scrollHint}
-              <md-icon aria-hidden="true">keyboard_double_arrow_down</md-icon>
-            </span>
-          </p>
+          />
         </section>
 
         <main>
           <FilmInfo
-            heading={dict.info.heading}
             title={copy.title}
-            poster={movie.poster}
-            posterAlt={fill(dict.a11y.posterAlt, values)}
+            releaseYear={movie.releaseYear}
+            runtimeMinutes={movie.runtimeMinutes}
+            qualityTags={movie.qualityTags}
             synopsis={copy.synopsis}
             genres={copy.genres}
             cta={dict.info.cta}
@@ -147,10 +107,7 @@ export function FilmLanding({
           <TopChart
             entries={getChart(locale)}
             heading={fill(dict.chart.heading, values)}
-            sub={dict.chart.sub}
             rankLabel={dict.chart.rank}
-            seeAllLabel={fill(dict.chart.seeAll, values)}
-            kindLabels={dict.chart.kind}
           />
 
           <ValueProps
@@ -160,18 +117,6 @@ export function FilmLanding({
               title: fill(item.title, values),
               body: fill(item.body, values),
             }))}
-          />
-
-          <PriceCompare
-            heading={dict.compare.heading}
-            sub={dict.compare.sub}
-            labels={dict.compare.labels}
-            rows={compareRows}
-            totalLabel={dict.compare.totalLabel}
-            totalPrice={dict.compare.totalPrice}
-            footnote={fill(dict.compare.footnote, values)}
-            cta={dict.info.cta}
-            ctaSub={fill(dict.info.ctaSub, values)}
           />
 
           <FaqSection

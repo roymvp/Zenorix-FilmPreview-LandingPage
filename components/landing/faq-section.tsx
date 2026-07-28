@@ -15,15 +15,9 @@ export function FaqSection({
   return (
     <section className="zx-section" aria-labelledby="zx-faq-heading">
       <div className="zx-shell">
-        <div className="zx-section-head">
-          <span className="zx-eyebrow md-typescale-label-small">
-            <md-icon aria-hidden="true">help</md-icon>
-            FAQ
-          </span>
-          <h2 id="zx-faq-heading" className="md-typescale-headline-medium">
-            {heading}
-          </h2>
-        </div>
+        <h2 id="zx-faq-heading" className="zx-section-title">
+          {heading}
+        </h2>
 
         <div className="zx-faq-list">
           {items.map((item, index) => (

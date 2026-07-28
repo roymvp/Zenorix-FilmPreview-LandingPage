@@ -2,67 +2,68 @@ import { DownloadCta } from '@/components/landing/download-cta'
 import { PlatformStrip } from '@/components/landing/platform-strip'
 
 /**
- * The first thing below the fold: enough about the film to justify the install,
- * then the CTA. Kept short on purpose — this is a conversion step, not a wiki.
+ * The film's identity block, directly below the player.
+ *
+ * This is the ONLY place the title, specs, genres and synopsis appear — the
+ * player frame is left clean and there is no second "about this film" section
+ * repeating the same facts further down the page.
  */
 export function FilmInfo({
-  heading,
   title,
-  poster,
-  posterAlt,
+  releaseYear,
+  runtimeMinutes,
+  qualityTags,
   synopsis,
   genres,
   cta,
   ctaSub,
   stripLabel,
 }: {
-  heading: string
   title: string
-  poster: string
-  posterAlt: string
+  releaseYear: number
+  runtimeMinutes: number
+  /** 4K / HDR / Dolby-style specs, shown inline with year and runtime. */
+  qualityTags: string[]
   synopsis: string
   genres: string[]
   cta: string
   ctaSub: string
   stripLabel: string
 }) {
+  const hours = Math.floor(runtimeMinutes / 60)
+  const minutes = runtimeMinutes % 60
+
   return (
     <section className="zx-info" id="zx-details" aria-labelledby="zx-info-heading">
       <div className="zx-shell">
-        <div className="zx-info-grid">
-          <div className="zx-info-poster">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={poster} alt={posterAlt} />
-          </div>
+        <h1 id="zx-info-heading" className="zx-film-title">
+          {title}
+        </h1>
 
-          <div className="zx-info-body">
-            <div>
-              <span className="zx-eyebrow md-typescale-label-small">
-                <md-icon aria-hidden="true">movie</md-icon>
-                {heading}
-              </span>
-              <h2
-                id="zx-info-heading"
-                className="md-typescale-headline-medium"
-                style={{ marginBlockStart: 6 }}
-              >
-                {title}
-              </h2>
-            </div>
+        <p className="zx-film-meta">
+          <span>{releaseYear}</span>
+          <span className="zx-dot" aria-hidden="true" />
+          <span>
+            {hours}h {minutes}m
+          </span>
+          {qualityTags.map((tag) => (
+            <span key={tag} className="zx-tag">
+              {tag}
+            </span>
+          ))}
+        </p>
 
-            <ul className="zx-genres" aria-label={heading}>
-              {genres.map((genre) => (
-                <li key={genre} className="zx-genre">
-                  {genre}
-                </li>
-              ))}
-            </ul>
+        <ul className="zx-genres">
+          {genres.map((genre) => (
+            <li key={genre} className="zx-genre">
+              {genre}
+            </li>
+          ))}
+        </ul>
 
-            <p className="zx-synopsis md-typescale-body-large">{synopsis}</p>
+        <p className="zx-synopsis md-typescale-body-medium">{synopsis}</p>
 
-            <DownloadCta label={cta} sub={ctaSub} source="film_info" icon="android" />
-          </div>
-        </div>
+        <DownloadCta label={cta} sub={ctaSub} source="film_info" icon="android" />
 
         <PlatformStrip label={stripLabel} />
       </div>

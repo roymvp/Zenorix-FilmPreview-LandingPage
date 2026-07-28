@@ -1,40 +1,40 @@
 /*
  * Zenorix landing layout.
  * Plain CSS (flexbox / grid) over M3 tokens — no utility framework.
- * Mobile-first; M3 breakpoints: compact < 600, medium 600, expanded 840, large 1200.
+ *
+ * MOBILE-ONLY BY DESIGN. There is exactly one layout: the phone one. The page
+ * caps itself at --zx-page-max and centers on wider screens rather than
+ * reflowing into a desktop composition.
+ *
+ * Consequence, and the reason this file has no `min-width` media queries:
+ * media queries match the VIEWPORT, not this capped container, so any
+ * `min-width` rule would fire on a desktop viewport and restyle a 420px-wide
+ * column with desktop values. Keep all sizing unconditional.
  */
 
 .zx-page {
   --zx-gutter: 20px;
-  --zx-max: 1120px;
-  --zx-section-y: 56px;
+  /* Content width cap. Also the width of the fixed download bar. */
+  --zx-page-max: 420px;
+  --zx-section-y: 44px;
   --zx-radius-lg: 28px;
   --zx-radius-md: 20px;
   --zx-radius-sm: 12px;
+
+  width: 100%;
+  max-width: var(--zx-page-max);
+  margin-inline: auto;
   display: flex;
   flex-direction: column;
-  /* Horizontal scrollers (the Top 10 rail, the compare table) must scroll
-     inside themselves and never widen the document. */
+  /* The Top 10 rail scrolls inside itself and must never widen the document. */
   overflow-x: clip;
-}
-
-@media (min-width: 600px) {
-  .zx-page {
-    --zx-gutter: 32px;
-    --zx-section-y: 72px;
-  }
-}
-
-@media (min-width: 840px) {
-  .zx-page {
-    --zx-gutter: 40px;
-    --zx-section-y: 96px;
-  }
+  /* Frames the phone column against the page backdrop on wide screens. */
+  border-inline: 1px solid var(--md-sys-color-outline-variant);
+  background: var(--md-sys-color-surface);
 }
 
 /* Semantic lists are used throughout; none of them want default list styling. */
 .zx-rail,
-.zx-values,
 .zx-genres,
 .zx-badges,
 .zx-strip-logos,
@@ -42,8 +42,6 @@
 .zx-dialog-bullets {
   list-style: none;
 }
-
-.zx-values,
 .zx-genres,
 .zx-badges,
 .zx-strip-logos {
@@ -51,10 +49,9 @@
   padding: 0;
 }
 
+/* The page itself is already capped, so the shell only owns the side gutter. */
 .zx-shell {
   width: 100%;
-  max-width: var(--zx-max);
-  margin-inline: auto;
   padding-inline: var(--zx-gutter);
 }
 
@@ -62,24 +59,15 @@
   padding-block: var(--zx-section-y);
 }
 
-.zx-section-head {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-block-end: 28px;
-}
-
-.zx-section-head h2 {
-  margin: 0;
+/* One heading treatment for every section: no eyebrows, no sub-decks. */
+.zx-section-title {
+  margin: 0 0 18px;
+  font-size: 21px;
+  line-height: 1.25;
+  font-weight: 600;
+  letter-spacing: -0.01em;
   text-wrap: balance;
   color: var(--md-sys-color-on-surface);
-}
-
-.zx-section-head p {
-  margin: 0;
-  color: var(--md-sys-color-on-surface-variant);
-  max-width: 62ch;
-  text-wrap: pretty;
 }
 
 .zx-eyebrow {
@@ -100,17 +88,19 @@
 
 /* ---------------------------------------------------------------- top bar */
 
+/* In normal flow above the player, not overlaid on it: the frame is now a
+   16/9 video rather than a full-height hero, so floating chrome over it would
+   collide with the playback controls. */
 .zx-topbar {
-  position: absolute;
-  inset-block-start: 0;
-  inset-inline: 0;
+  position: relative;
   z-index: 4;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 12px var(--zx-gutter);
-  padding-block-start: max(12px, env(safe-area-inset-top));
+  padding: 10px var(--zx-gutter);
+  padding-block-start: max(10px, env(safe-area-inset-top));
+  background: #060504;
 }
 
 .zx-brand {
@@ -134,12 +124,6 @@
   line-height: 1;
 }
 
-.zx-brand-name {
-  font-weight: 700;
-  letter-spacing: 0.055em;
-  font-size: 17px;
-}
-
 .zx-topbar-actions {
   display: flex;
   align-items: center;
@@ -158,17 +142,13 @@
   overflow: hidden;
 }
 
+/* The stage is now just the video frame: the title, specs and synopsis moved
+   out from over the film into .zx-info below, so it no longer needs to reserve
+   near-viewport height for an overlaid copy block. */
 .zx-stage {
   position: relative;
   width: 100%;
-  height: min(84svh, 660px);
-  min-height: 480px;
-}
-
-@media (min-width: 840px) {
-  .zx-stage {
-    height: min(90svh, 780px);
-  }
+  aspect-ratio: 16 / 9;
 }
 
 .zx-stage-media,
@@ -248,72 +228,6 @@
   outline-offset: -6px;
 }
 
-/* Preview badge + watermark */
-
-.zx-stage-flags {
-  position: absolute;
-  z-index: 4;
-  inset-block-start: max(64px, calc(env(safe-area-inset-top) + 58px));
-  inset-inline-start: var(--zx-gutter);
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  pointer-events: none;
-  /* Leaves room for the floating CTA so long translations (th) never slide
-     under it; the row wraps instead of colliding. */
-  max-width: min(58%, 260px);
-}
-
-@media (min-width: 600px) {
-  .zx-stage-flags {
-    max-width: min(70%, 460px);
-  }
-}
-
-.zx-flag {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 5px 11px 5px 9px;
-  border-radius: 999px;
-  background: rgba(6, 5, 4, 0.55);
-  border: 1px solid var(--zx-media-outline);
-  backdrop-filter: blur(10px);
-  color: var(--zx-on-media);
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-}
-
-.zx-flag md-icon {
-  font-size: 14px;
-  width: 14px;
-  height: 14px;
-  /* The icon must never be squeezed out by a long label. */
-  flex: 0 0 auto;
-  color: var(--md-sys-color-primary);
-}
-
-/* Wrap long localized labels rather than clipping them to an empty pill. */
-.zx-flag span {
-  min-width: 0;
-  text-wrap: pretty;
-}
-
-.zx-watermark {
-  position: absolute;
-  z-index: 4;
-  inset-block-start: max(64px, calc(env(safe-area-inset-top) + 58px));
-  inset-inline-end: var(--zx-gutter);
-  color: var(--zx-on-media);
-  opacity: 0.5;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  pointer-events: none;
-}
-
 /* Hero title block */
 
 .zx-hero-copy {
@@ -332,50 +246,26 @@
   pointer-events: auto;
 }
 
-.zx-hero-title {
-  margin: 0;
-  color: var(--zx-on-media);
-  text-wrap: balance;
-  text-shadow: 0 2px 24px rgba(0, 0, 0, 0.6);
-  font-size: clamp(2.1rem, 9vw, 4.25rem);
-  line-height: 1.03;
-  letter-spacing: -0.02em;
+/* A/V spec chips (4K, HDR, Atmos). These sit on the page surface now that the
+   metadata line moved out of the player overlay, so they use on-surface colors
+   rather than the --zx-on-media pair. */
+.zx-tag {
+  padding: 2px 7px;
+  border-radius: 5px;
+  border: 1px solid var(--md-sys-color-outline-variant);
+  color: var(--md-sys-color-on-surface-variant);
+  font-size: 10px;
   font-weight: 700;
+  letter-spacing: 0.05em;
 }
 
-.zx-hero-tagline {
-  margin: 0;
-  color: var(--zx-on-media-variant);
-  text-wrap: pretty;
-  max-width: 42ch;
-}
-
-.zx-hero-meta {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px;
-  color: var(--zx-on-media-variant);
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.03em;
-}
-
-.zx-hero-meta .zx-dot {
+/* Separator between year and runtime. */
+.zx-dot {
   width: 3px;
   height: 3px;
   border-radius: 50%;
   background: currentColor;
-  opacity: 0.6;
-}
-
-.zx-tag {
-  padding: 3px 8px;
-  border-radius: 6px;
-  border: 1px solid var(--zx-media-outline);
-  color: var(--zx-on-media);
-  font-size: 11px;
-  letter-spacing: 0.06em;
+  opacity: 0.5;
 }
 
 /* Player controls */
@@ -516,61 +406,6 @@
   --md-fab-container-shape: 999px;
 }
 
-/* Floating in-player CTA */
-
-.zx-float-cta {
-  position: absolute;
-  z-index: 5;
-  inset-block-start: max(56px, calc(env(safe-area-inset-top) + 50px));
-  inset-inline-end: var(--zx-gutter);
-  --md-filled-button-container-height: 38px;
-  --md-filled-button-label-text-weight: 700;
-}
-
-@media (min-width: 600px) {
-  .zx-watermark {
-    inset-inline-end: calc(var(--zx-gutter) + 150px);
-  }
-}
-
-/* Scroll hint */
-
-.zx-scroll-hint {
-  position: relative;
-  z-index: 4;
-  display: flex;
-  justify-content: center;
-  padding-block: 10px 16px;
-  background: var(--zx-media-scrim-strong);
-}
-
-.zx-scroll-hint span {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  color: var(--zx-on-media-variant);
-  font-size: 11px;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-}
-
-.zx-scroll-hint md-icon {
-  font-size: 15px;
-  width: 15px;
-  height: 15px;
-  animation: zx-bob 1.9s ease-in-out infinite;
-}
-
-@keyframes zx-bob {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(4px);
-  }
-}
-
 /* --------------------------------------------------------------- film info */
 
 .zx-info {
@@ -580,62 +415,35 @@
     var(--md-sys-color-surface-container-lowest),
     var(--md-sys-color-surface)
   );
-  padding-block: 32px var(--zx-section-y);
+  padding-block: 18px var(--zx-section-y);
 }
 
-.zx-info-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 28px;
-}
-
-@media (min-width: 840px) {
-  .zx-info-grid {
-    flex-direction: row;
-    align-items: flex-start;
-    gap: 44px;
-  }
-}
-
-.zx-info-poster {
-  display: none;
-}
-
-@media (min-width: 840px) {
-  .zx-info-poster {
-    display: block;
-    flex: 0 0 232px;
-    position: relative;
-    aspect-ratio: 2 / 3;
-    border-radius: var(--zx-radius-md);
-    overflow: hidden;
-    box-shadow: 0 18px 44px rgba(0, 0, 0, 0.32);
-  }
-
-  .zx-info-poster img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-}
-
-.zx-info-body {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.zx-info-body h2 {
+/* The film title now lives here rather than over the video, so it is the page's
+   real <h1> and is set on the surface instead of on media. */
+.zx-film-title {
   margin: 0;
+  font-size: 27px;
+  line-height: 1.15;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
   color: var(--md-sys-color-on-surface);
 }
 
-.zx-synopsis {
-  margin: 0;
+/* Year · runtime · A/V specs, all on one wrapping line. */
+.zx-film-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 7px;
+  margin: 8px 0 0;
+  font-size: 13px;
   color: var(--md-sys-color-on-surface-variant);
-  max-width: 64ch;
+}
+
+.zx-synopsis {
+  margin: 14px 0 20px;
+  color: var(--md-sys-color-on-surface-variant);
   text-wrap: pretty;
 }
 
@@ -643,6 +451,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
+  margin-block-start: 12px;
 }
 
 .zx-genre {
@@ -664,25 +473,12 @@
   align-items: stretch;
 }
 
-@media (min-width: 600px) {
-  .zx-cta {
-    align-items: flex-start;
-  }
-}
-
 .zx-cta-button {
   --md-filled-button-container-height: 56px;
   --md-filled-button-label-text-size: 16px;
   --md-filled-button-label-text-weight: 700;
   --md-filled-button-container-shape: 16px;
   width: 100%;
-}
-
-@media (min-width: 600px) {
-  .zx-cta-button {
-    width: auto;
-    min-width: 340px;
-  }
 }
 
 .zx-cta-sub {
@@ -693,12 +489,6 @@
   margin: 0;
   color: var(--md-sys-color-on-surface-variant);
   font-size: 12.5px;
-}
-
-@media (min-width: 600px) {
-  .zx-cta-sub {
-    justify-content: flex-start;
-  }
 }
 
 .zx-cta-sub md-icon {
@@ -759,23 +549,10 @@
   --zx-logo-invert: 1;
 }
 
-@media (min-width: 600px) {
-  .zx-strip-logos img {
-    height: 24px;
-  }
-}
-
 /* --------------------------------------------------------------- top chart */
 
 .zx-chart {
   background: var(--md-sys-color-surface-container-low);
-}
-
-.zx-chart-head {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 16px;
 }
 
 .zx-rail {
@@ -787,8 +564,8 @@
      which widens the document instead of scrolling inside the rail.
      min-width:0 keeps the overflow local to this scroller. */
   min-width: 0;
-  grid-auto-columns: 148px;
-  gap: 14px;
+  grid-auto-columns: 124px;
+  gap: 12px;
   overflow-x: auto;
   scroll-snap-type: x mandatory;
   padding-block-end: 10px;
@@ -801,41 +578,28 @@
   display: none;
 }
 
-@media (min-width: 600px) {
-  .zx-rail {
-    grid-auto-columns: 176px;
-    gap: 18px;
-  }
-}
-
-@media (min-width: 1200px) {
-  .zx-rail {
-    grid-auto-flow: row;
-    grid-template-columns: repeat(5, 1fr);
-    grid-auto-columns: auto;
-    overflow: visible;
-    padding-inline: 0;
-    margin-inline: 0;
-    row-gap: 26px;
-  }
-}
-
-.zx-chart-card {
-  scroll-snap-align: start;
+.zx-rail-item {
   display: flex;
-  flex-direction: column;
-  gap: 9px;
+  min-width: 0;
+}
+
+/* Poster + rank only. `position: relative` anchors the rank numeral, which is
+   a sibling of the artwork rather than a child of it. */
+.zx-chart-card {
+  position: relative;
+  scroll-snap-align: start;
+  display: block;
+  width: 100%;
   border: 0;
   padding: 0;
   background: none;
-  text-align: start;
   cursor: pointer;
   color: inherit;
   font: inherit;
 }
 
 .zx-chart-art {
-  position: relative;
+  display: block;
   aspect-ratio: 2 / 3;
   border-radius: var(--zx-radius-sm);
   overflow: hidden;
@@ -878,13 +642,14 @@
   );
 }
 
-/* Oversized rank numeral — the streaming-chart visual language. */
+/* Oversized rank numeral — the streaming-chart visual language. It is the only
+   label on the card, so it carries the whole hierarchy. */
 .zx-rank {
   position: absolute;
   z-index: 1;
-  inset-block-end: -6px;
-  inset-inline-start: 4px;
-  font-size: 62px;
+  inset-block-end: -4px;
+  inset-inline-start: 3px;
+  font-size: 54px;
   font-weight: 700;
   line-height: 0.78;
   color: var(--zx-on-media);
@@ -893,182 +658,53 @@
   paint-order: stroke fill;
 }
 
-.zx-chart-lock {
-  position: absolute;
-  z-index: 1;
-  inset-block-start: 7px;
-  inset-inline-end: 7px;
-  display: grid;
-  place-items: center;
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-  background: rgba(6, 5, 4, 0.6);
-  border: 1px solid var(--zx-media-outline);
-  color: var(--zx-on-media);
-}
+/* ------------------------------------------------------------- value props */
 
-.zx-chart-lock md-icon {
-  font-size: 15px;
-  width: 15px;
-  height: 15px;
-}
-
-.zx-chart-title {
-  display: block;
-  color: var(--md-sys-color-on-surface);
-  font-size: 13.5px;
-  font-weight: 600;
-  line-height: 1.3;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.zx-chart-kind {
-  display: block;
-  color: var(--md-sys-color-on-surface-variant);
-  font-size: 11.5px;
-  letter-spacing: 0.05em;
-}
-
-/* -------------------------------------------------------------- value props */
-
+/* Three bullets, not cards: the claims are short, so card chrome was pure
+   weight. The icon column keeps the text block aligned as rows wrap. */
 .zx-values {
-  display: grid;
-  gap: 16px;
-}
-
-@media (min-width: 600px) {
-  .zx-values {
-    grid-template-columns: repeat(3, 1fr);
-    gap: 20px;
-  }
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
 
 .zx-value {
   display: flex;
-  flex-direction: column;
-  gap: 12px;
-  padding: 24px;
-  border-radius: var(--zx-radius-md);
-  background: var(--md-sys-color-surface-container-low);
-  border: 1px solid var(--md-sys-color-outline-variant);
+  align-items: flex-start;
+  gap: 13px;
 }
 
 .zx-value-icon {
-  display: grid;
-  place-items: center;
-  width: 44px;
-  height: 44px;
-  border-radius: 14px;
-  background: var(--md-sys-color-primary-container);
-  color: var(--md-sys-color-on-primary-container);
+  flex: none;
+  margin-block-start: 1px;
+  font-size: 22px;
+  width: 22px;
+  height: 22px;
+  color: var(--md-sys-color-primary);
 }
 
-.zx-value-icon md-icon {
-  font-size: 24px;
-  width: 24px;
-  height: 24px;
+.zx-value-text {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
 }
 
-.zx-value h3 {
-  margin: 0;
+.zx-value-text strong {
+  font-size: 15px;
+  font-weight: 650;
+  line-height: 1.3;
   color: var(--md-sys-color-on-surface);
-  text-wrap: balance;
 }
 
-.zx-value p {
-  margin: 0;
+.zx-value-text span {
+  font-size: 13px;
+  line-height: 1.5;
   color: var(--md-sys-color-on-surface-variant);
   text-wrap: pretty;
-}
-
-/* ----------------------------------------------------------------- compare */
-
-.zx-compare {
-  background: var(--md-sys-color-surface-container-low);
-}
-
-.zx-table-wrap {
-  border-radius: var(--zx-radius-md);
-  border: 1px solid var(--md-sys-color-outline-variant);
-  background: var(--md-sys-color-surface);
-  overflow-x: auto;
-}
-
-.zx-table {
-  width: 100%;
-  min-width: 560px;
-  border-collapse: collapse;
-  font-size: 13.5px;
-}
-
-.zx-table th,
-.zx-table td {
-  padding: 14px 16px;
-  text-align: start;
-  border-block-end: 1px solid var(--md-sys-color-outline-variant);
-  white-space: nowrap;
-}
-
-.zx-table thead th {
-  color: var(--md-sys-color-on-surface-variant);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  background: var(--md-sys-color-surface-container);
-}
-
-.zx-table tbody th {
-  color: var(--md-sys-color-on-surface);
-  font-weight: 600;
-}
-
-.zx-table td {
-  color: var(--md-sys-color-on-surface-variant);
-  font-variant-numeric: tabular-nums;
-}
-
-.zx-table tr[data-highlight='true'] {
-  background: var(--md-sys-color-primary-container);
-}
-
-.zx-table tr[data-highlight='true'] th,
-.zx-table tr[data-highlight='true'] td {
-  color: var(--md-sys-color-on-primary-container);
-  font-weight: 700;
-}
-
-.zx-table tbody tr:last-child th,
-.zx-table tbody tr:last-child td {
-  border-block-end: 0;
-}
-
-.zx-table-brand {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.zx-table-price {
-  font-size: 15px;
-  font-weight: 700;
-  color: var(--md-sys-color-on-surface);
-}
-
-.zx-strike {
-  text-decoration: line-through;
-  opacity: 0.75;
-}
-
-.zx-footnote {
-  margin: 14px 0 0;
-  color: var(--md-sys-color-on-surface-variant);
-  font-size: 11.5px;
-  line-height: 1.6;
-  max-width: 78ch;
 }
 
 /* --------------------------------------------------------------------- faq */
@@ -1227,14 +863,6 @@
   align-items: flex-start;
 }
 
-@media (min-width: 600px) {
-  .zx-footer-top {
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-  }
-}
-
 .zx-footer .zx-brand {
   color: var(--md-sys-color-on-surface);
 }
@@ -1317,7 +945,11 @@
 .zx-sticky {
   position: fixed;
   z-index: 20;
+  /* Fixed positioning is viewport-relative, so the bar has to repeat the page
+     cap itself to stay aligned with the phone column on wide screens. */
   inset-inline: 0;
+  max-width: var(--zx-page-max);
+  margin-inline: auto;
   inset-block-end: 0;
   transform: translateY(110%);
   transition: transform 320ms cubic-bezier(0.2, 0, 0, 1);
@@ -1345,8 +977,6 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  max-width: var(--zx-max);
-  margin-inline: auto;
 }
 
 .zx-sticky-inner .zx-cta-button {
@@ -1356,38 +986,8 @@
   --md-filled-button-label-text-size: 14.5px;
 }
 
-@media (min-width: 600px) {
-  .zx-sticky-inner .zx-cta-button {
-    min-width: 0;
-  }
-}
-
 .zx-sticky-meta {
   display: none;
-}
-
-@media (min-width: 840px) {
-  .zx-sticky-meta {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    flex: 1;
-  }
-
-  .zx-sticky-meta strong {
-    color: var(--md-sys-color-on-surface);
-    font-size: 14px;
-  }
-
-  .zx-sticky-meta span {
-    color: var(--md-sys-color-on-surface-variant);
-    font-size: 12px;
-  }
-
-  .zx-sticky-inner .zx-cta-button {
-    flex: 0 0 auto;
-    min-width: 300px;
-  }
 }
 
 /* ----------------------------------------------------------------- dialogs */
@@ -1451,12 +1051,6 @@
   margin: 0;
   padding: 0;
   list-style: none;
-}
-
-@media (min-width: 400px) {
-  .zx-dialog-bullets {
-    grid-template-columns: 1fr 1fr;
-  }
 }
 
 .zx-dialog-bullets li {

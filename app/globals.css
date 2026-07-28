@@ -134,7 +134,10 @@ html {
 }
 
 body {
-  background: var(--md-sys-color-background);
+  /* The layout is a fixed-width phone column (see .zx-page). This darker
+     backdrop sits behind it so the capped width reads as a deliberate frame
+     rather than a page that failed to fill the window. */
+  background: var(--md-sys-color-surface-container-lowest);
   color: var(--md-sys-color-on-background);
   font-family: var(--md-ref-typeface-plain);
   -webkit-font-smoothing: antialiased;
