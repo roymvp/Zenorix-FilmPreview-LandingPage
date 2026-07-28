@@ -90,10 +90,30 @@
    16/9 video rather than a full-height hero, so floating chrome over it would
    collide with the playback controls.
 
-   Because it is a real bar rather than an overlay, it sits on the LIGHT page
-   surface (not cinema black) and everything inside it uses on-surface colors.
-   The hairline is what separates it from the video frame below. */
+   Because it is a real bar rather than an overlay it is a LIGHT surface, even
+   though the rest of the landing page is dark-first cinema.
+
+   The app runs the dark scheme, so a light bar cannot simply set a background:
+   its children (brand text, language trigger + menu, icon buttons, install
+   button) would keep painting dark-scheme on-dark colors and go invisible.
+   Instead this re-declares the LIGHT scheme tokens from globals.css on the bar
+   itself, making it a self-contained light island — every Material child inside
+   resolves correct on-light colors automatically, with no per-component
+   overrides. Keep these values in sync with the :root block in globals.css. */
 .zx-topbar {
+  color-scheme: light;
+
+  --md-sys-color-primary: #8a5100;
+  --md-sys-color-on-primary: #ffffff;
+  --md-sys-color-surface: #fff8f3;
+  --md-sys-color-on-surface: #201b13;
+  --md-sys-color-on-surface-variant: #4f4539;
+  --md-sys-color-outline: #817567;
+  --md-sys-color-outline-variant: #d3c4b4;
+  --md-sys-color-surface-container: #fcebdd;
+  --md-sys-color-surface-container-high: #f6e6d7;
+  --md-sys-color-surface-container-highest: #f0e0d1;
+
   position: relative;
   z-index: 4;
   display: flex;
@@ -102,8 +122,8 @@
   gap: 12px;
   padding: 10px var(--zx-gutter);
   padding-block-start: max(10px, env(safe-area-inset-top));
-  background: var(--md-sys-color-surface-container-lowest);
-  border-block-end: 1px solid var(--md-sys-color-outline-variant);
+  background: var(--md-sys-color-surface);
+  color: var(--md-sys-color-on-surface);
 }
 
 .zx-brand {
