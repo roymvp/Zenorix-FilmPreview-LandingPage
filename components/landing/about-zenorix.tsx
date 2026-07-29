@@ -24,15 +24,32 @@ const VIEWING_SPECS = [
  *
  * Four outlined cards, all on the page's single surface: the border is the only
  * container (no fill), so the cards group the claims without introducing a
- * second background. Each card is chip-then-proof — a filled pill label, then
- * the answer in ONE shared type treatment (same size, weight and color across
- * all four rows). That uniformity is the point: with nothing competing on
- * emphasis, the four cards read as one balanced set of facts rather than a
- * ranked list.
+ * second background.
  *
- * The price card is the deliberate exception. A bare "$1.25/mo" has no anchor,
- * so it renders as a two-row comparison against the subscription stack it
- * replaces — the bars make the gap legible before either number is read.
+ * CARD CONTRACT — every card obeys all four rules, which is what makes four
+ * different kinds of content read as one set:
+ *
+ *   1. Exactly TWO slots: a filled pill chip, then ONE payload element. Cards that
+ *      need several pieces (the trial's value + caveat) wrap them in a single
+ *      payload element rather than adding a third slot to the card.
+ *   2. ONE axis: left. The chip, the payload and the section title all start on the
+ *      same line, so the eye tracks a single edge down the whole stack.
+ *   3. ONE answer treatment: the card's headline figure uses `--zx-text-amount`
+ *      wherever it appears. The price and the trial length are the same rank, so
+ *      they are literally the same token — they used to be 20px and 22px.
+ *   4. ONE joint ladder, set in CSS and shared by every payload: 8px binds a thing
+ *      to its own caption/track/glyph, 12px separates sibling rows, 16px separates
+ *      the chip from the payload.
+ *
+ * Heights still differ between cards, and that is not a defect being tolerated:
+ * these are four different kinds of evidence, and padding a 1-line marquee out to
+ * the height of a 2-row bar chart would add dead space, not order. Cohesion comes
+ * from the shared skeleton above, not from forcing one height.
+ *
+ * The price card is the one content exception. A bare "$1.25/mo" has no anchor, so
+ * it renders as a two-row comparison against the subscription stack it replaces —
+ * the bars make the gap legible before either number is read. It still obeys all
+ * four contract rules.
  */
 export function AboutZenorix({
   heading,
@@ -205,14 +222,24 @@ export function AboutZenorix({
             </ul>
           </li>
 
-          {/* Centered, unlike the other three: this is the card the section
-              resolves into, and it sits directly above the centered install
-              button — so centering it lets the chip, the offer, the caveat and
-              the CTA share one axis straight down to the tap target. */}
-          <li className="zx-about-card zx-about-card--centered">
+          {/* Same chip-then-payload shape as the other three. This card used to be
+              the odd one out: centered, and three children instead of two. The
+              centering was justified by "it shares an axis with the install button",
+              but the button is a full-width pill whose box starts at the same left
+              edge as the cards — the section's real axis is left, which is where the
+              title and all four chips already sit. So centering only this card made
+              the reading axis jump on the last row.
+
+              Wrapping the value and its caveat in one payload element is what lets
+              the axis come back: the card is now chip + payload like its siblings, and
+              the value/caveat joint is set by `.zx-about-offer` instead of by a
+              negative margin fighting the card's own gap. */}
+          <li className="zx-about-card">
             <p className="zx-about-label">{trial.label}</p>
-            <p className="zx-about-value">{trial.value}</p>
-            <p className="zx-about-note">{trial.note}</p>
+            <div className="zx-about-offer">
+              <p className="zx-about-value">{trial.value}</p>
+              <p className="zx-about-note">{trial.note}</p>
+            </div>
           </li>
         </ul>
 

@@ -41,9 +41,11 @@
   /* read as equally important they MUST share a tier.                      */
   /* ===================================================================== */
   --zx-text-h1: 26px;      /* page <h1>: the film title. Only one per page. */
-  --zx-text-stat: 22px;    /* hero numeral inside a card ("30 DAYS FREE")   */
   --zx-text-h2: 21px;      /* every section title + both dialog titles      */
-  --zx-text-amount: 20px;  /* numeric callout in a row ("$1.25/mo")         */
+  /* Every card's headline answer: "$1.25/mo" AND "30 DAYS FREE". There used to be
+     a separate 22px `stat` step for the latter, which split one rank across two
+     tiers and made the trial outrank the price. Deleted, per the rule above.     */
+  --zx-text-amount: 20px;
   --zx-text-lg: 15px;      /* brand wordmark, rank badge                    */
   --zx-text-body: 14px;    /* body copy, bullets, FAQ, all button labels    */
   --zx-text-meta: 13px;    /* captions, footer links, spec + compare rows   */
@@ -990,10 +992,10 @@
 /* Outlined cards, no fill: the border alone does the grouping so the section
    still sits on the page's single surface. */
 /* The one section whose title needs more than the shared 16px, and for a structural
-   reason rather than taste: its children are separated from EACH OTHER by 16px, so at
-   the shared step the heading sat exactly as far from the first card as the cards sit
-   from one another — making it read as a fifth item in the stack instead of the label
-   for all four. A heading must always out-space the gaps within the group it labels.
+   reason rather than taste: its children are separated from EACH OTHER by 20px, so at
+   the shared step the heading would sit CLOSER to the first card than the cards sit to
+   one another — making it read as a fifth item in the stack instead of the label for
+   all four. A heading must always out-space the gaps within the group it labels.
    Other sections keep 16px because their content is a single block with no internal
    gap to compete with. */
 .zx-section--about .zx-section-title {
@@ -1003,17 +1005,16 @@
 .zx-about {
   display: flex;
   flex-direction: column;
-  /* 16px between cards. Card-to-card must stay a step looser than the widest joint
-     INSIDE a card (now 12px), or the four outlined boxes read as one block — at 12px
-     it exactly equalled that joint, so a card boundary carried no more separation
-     than a line break within a card. */
-  gap: var(--zx-space-4);
+  /* 20px between cards — one step clear of the 16px chip-to-payload joint, which is
+     the widest joint INSIDE a card. A card boundary has to out-space every gap within
+     a card, or the four outlined boxes collapse into one block. */
+  gap: var(--zx-space-5);
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
-/* 20px inner padding against the 16px gap BETWEEN cards. Inner must stay larger than
+/* 24px inner padding against the 20px gap BETWEEN cards. Inner must stay larger than
    outer — that ratio is what keeps four adjacent cards reading as four objects
    rather than one continuous block.
 
@@ -1023,62 +1024,44 @@
    marquee did not, leaving the strip 2px shy of the border on both sides. A variable
    makes the two impossible to desynchronise. */
 .zx-about-card {
-  --zx-about-card-pad: var(--zx-space-5);
+  --zx-about-card-pad: var(--zx-space-6);
 
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  /* 12px from the eyebrow chip to the card's payload, up from 8px. 8px is the
-     icon-to-its-own-label distance used inside the spec row, so at 8px the chip was
-     bound to its content as tightly as an icon is to its caption. The chip titles the
-     card, so it needs the looser step. */
-  gap: var(--zx-space-3);
+  /* Contract rule 4, outermost in-card step: 16px from the chip to the payload. It
+     has to clear the 12px that separates sibling rows INSIDE the payload, or the chip
+     reads as just another row of the payload rather than as its title. */
+  gap: var(--zx-space-4);
   padding: var(--zx-about-card-pad);
   border: 1px solid var(--md-sys-color-outline-variant);
   border-radius: var(--zx-radius-sm);
   background: transparent;
 }
 
-/* Overrides the shared `align-items: flex-start`. `text-align` has to come too:
-   flex centering only centers each block, it does not center the lines of text
-   inside the two-line note. */
-.zx-about-card--centered {
-  align-items: center;
-  text-align: center;
+/* The trial card's payload: the offer and the caveat that qualifies it.
+   Contract rule 1 — one payload element per card, so this card has two slots like
+   its siblings instead of three.
+
+   This replaces three special-case rules that all existed to patch the same
+   irregularity: `align-items: center` + `text-align: center` on the card, an
+   `align-self: flex-start` to opt the chip back out of that centering, and a
+   negative `margin-block-start` on the caveat to undo the card's own gap. Making
+   the structure regular removed all three — the caveat's 8px joint is now stated
+   here, positively, as the pair-joint step every other payload uses. */
+.zx-about-offer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--zx-space-2);
 }
 
-/* The chip stays hard left even though this card's prose is centered, so all
-   four labels sit on one vertical line down the section — the chips are the
-   section's index, and an index that jogs inward on the last row stops scanning
-   as a column. `align-self` is what opts this one child out of the parent's
-   centering. */
-.zx-about-card--centered .zx-about-label {
-  align-self: flex-start;
-}
-
-/* Pulls the caveat up under "30 DAYS FREE" so the two read as one offer rather
-   than as two stacked statements — the note only qualifies the value above it,
-   and at the card's full joint it floated equidistant between the value and the
-   card edge, reading as an independent third line.
-
-   Negative margin because `gap` cannot be varied per item: the card is a flex
-   column, so its joint applies to every child equally. Offsetting the one child
-   is the only way to tighten a single joint without giving up gap entirely and
-   hand-spacing all three.
-
-   Written as `space-2 - space-3` rather than a hand-computed `-4px` so it states the
-   intent — "this joint is 8px, one step tighter than the card's 12px" — and follows
-   the card if that joint ever changes. Not 0: the lines must still separate as two
-   distinct pieces of information. */
-.zx-about-card--centered .zx-about-note {
-  margin-block-start: calc(var(--zx-space-2) - var(--zx-space-3));
-}
-
-/* Clear of the last card so the button reads as the whole section's conclusion
-   rather than as part of the trial card. 20px: it has to beat the 16px that separates
-   one card from the next, otherwise the button is just a fifth item in the stack. */
+/* Clear of the last card so the button reads as the whole section's conclusion rather
+   than as part of the trial card. 24px: it has to beat the 20px that separates one card
+   from the next, otherwise the button is just a fifth item in the stack. Same step as
+   the title above, which is correct — the heading and the button are both section-level
+   members standing off the card group, so they stand off it equally. */
 .zx-about-cta {
-  margin-block-start: var(--zx-space-5);
+  margin-block-start: var(--zx-space-6);
 }
 
 /* Filled pill. `align-items: flex-start` on the card keeps it hugging its own
@@ -1099,15 +1082,16 @@
   text-transform: uppercase;
 }
 
-/* ONE treatment for all four cards' content — same size, weight and color, so
-   no single claim outranks the others. Tight leading and negative tracking keep
-   a longer value ("30 DAYS FREE") reading as one confident block at 420px. */
+/* Contract rule 3: the card's headline figure. Tight leading and negative tracking
+   keep a longer value ("30 DAYS FREE") reading as one confident block at 420px.
+
+   `--zx-text-amount`, the same token as `.zx-compare-amount`. These two are the same
+   rank — each is the answer its card exists to deliver — but were 22px and 20px, so
+   the trial length silently outranked the price, which is the section's single most
+   important number. One token now makes that impossible to drift again. */
 .zx-about-value {
   margin: 0;
-  /* 22px `stat` step, was an off-scale 23px. Deliberately below the 26px h1 and
-     above the 21px section titles: it is the loudest thing INSIDE a card but must
-     not compete with the page title. */
-  font-size: var(--zx-text-stat);
+  font-size: var(--zx-text-amount);
   font-weight: var(--zx-weight-bold);
   line-height: var(--zx-lh-tight);
   letter-spacing: -0.02em;
@@ -1123,16 +1107,20 @@
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: var(--zx-space-25);
+  /* Contract rule 4, sibling-row step: 12px, was 10px. */
+  gap: var(--zx-space-3);
   margin: 0;
 }
 
-/* The 6px inside a row stays smaller than the 10px between rows, so each
-   name/amount/bar trio still groups as one unit at this tighter spacing. */
+/* Contract rule 4, pair step: 8px binds the name/amount head to its own bar, was
+   6px. 6px was `--zx-space-15`, the "icon <-> its own label" step — a different
+   depth doing a different job. The ladder inside a card is now 8 (a thing and its
+   own bar/glyph/caption) < 12 (sibling rows) < 16 (chip to payload), so each level
+   of the structure is a distinct, perceivable step rather than a 2px nuance. */
 .zx-compare-row {
   display: flex;
   flex-direction: column;
-  gap: var(--zx-space-15);
+  gap: var(--zx-space-2);
 }
 
 /* Baseline alignment, not center: the name and the amount are different sizes,
@@ -1227,7 +1215,10 @@
   width: 100%;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: var(--zx-space-25) var(--zx-space-2);
+  /* Sibling step, matching the compare card's row gap. Was `10px 8px` — an 8px
+     column gap put these three siblings at the SAME distance as each badge is from
+     its own label, so the row read as six loose items instead of three pairs. */
+  gap: var(--zx-space-3);
   margin: 0;
   padding: 0;
   list-style: none;
@@ -1237,7 +1228,8 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--zx-space-15);
+  /* Pair step: the badge and the label it belongs to. Was 6px. */
+  gap: var(--zx-space-2);
   text-align: center;
 }
 
