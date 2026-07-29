@@ -114,6 +114,64 @@ md-icon {
   font-family: 'Material Symbols Outlined';
 }
 
+/* ---------------------------------------------------------------------------
+   UNUPGRADED CUSTOM ELEMENT GUARD — do not remove.
+
+   Every `md-*` tag is server-rendered as an UNKNOWN element: the definitions are
+   registered on the client by MaterialWebLoader, so between first paint and that
+   registration the browser treats each one as a plain inline box that simply
+   shows its own children. Without the rules below that window renders as a badly
+   broken page: both `md-dialog`s dump their full contents inline at the bottom of
+   the document, `md-filled-button` loses all button chrome and survives as bare
+   text, and the language `md-menu` prints every locale at once. If a definition
+   chunk ever fails to load, the page stays stuck in exactly that state.
+
+   `:defined` matches only once an element has been upgraded, so `:not(:defined)`
+   targets precisely that pre-registration window and nothing else — these rules
+   stop applying by themselves the moment the definitions land. No JS, no class
+   toggling, and no hydration involvement.
+   --------------------------------------------------------------------------- */
+
+/* Overlays must NEVER occupy layout while unupgraded. `display: none`, not
+   `visibility: hidden`: a dialog's contents are full-page-height, so merely
+   making them invisible would still reserve a huge empty gap at the end of the
+   page and leave its links in the tab order. */
+md-dialog:not(:defined),
+md-menu:not(:defined) {
+  display: none;
+}
+
+/* Non-overlay elements only need their unstyled intermediate state hidden. They
+   keep `display` so the surrounding layout does not reflow when they upgrade;
+   `visibility: hidden` also removes them from the accessibility tree and from
+   hit-testing, so nothing can be clicked before it works. */
+md-filled-button:not(:defined),
+md-outlined-button:not(:defined),
+md-text-button:not(:defined),
+md-icon-button:not(:defined),
+md-icon:not(:defined),
+md-list:not(:defined),
+md-list-item:not(:defined),
+md-menu-item:not(:defined),
+md-elevated-card:not(:defined),
+md-outlined-card:not(:defined),
+md-filled-card:not(:defined),
+md-badge:not(:defined),
+md-linear-progress:not(:defined),
+md-circular-progress:not(:defined),
+md-slider:not(:defined),
+md-switch:not(:defined),
+md-checkbox:not(:defined),
+md-radio:not(:defined),
+md-chip-set:not(:defined),
+md-assist-chip:not(:defined),
+md-filter-chip:not(:defined),
+md-divider:not(:defined),
+md-ripple:not(:defined),
+md-focus-ring:not(:defined) {
+  visibility: hidden;
+}
+
 /* Thai needs a slightly taller line box than the Latin type scale allows. */
 html[lang='th-TH'] body {
   line-height: 1.75;
