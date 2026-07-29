@@ -620,9 +620,16 @@
 }
 
 /* Fully rounded (pill). The label is a sentence, so the text size is a touch
-   smaller than a typical 56px button to keep it on one or two lines. */
+   smaller than a typical filled button to keep it on one or two lines.
+
+   46px is matched to .zx-chart-more's min-height, NOT chosen independently: the
+   filled install pill and the outlined "see more" pill are the same shape at the
+   same full width, so any height difference between the two read as a
+   misalignment rather than as hierarchy. Filled-vs-outlined already carries
+   primary vs. secondary; it does not need 10px of extra bulk on top. Still well
+   clear of the 44px minimum tap target. Keep the two values in sync. */
 .zx-cta-button {
-  --md-filled-button-container-height: 56px;
+  --md-filled-button-container-height: 46px;
   --md-filled-button-label-text-size: 15px;
   --md-filled-button-label-text-weight: 700;
   --md-filled-button-container-shape: 999px;
@@ -1516,10 +1523,13 @@
   width: 100%;
 }
 
+/* No height override: this used to trim the CTA to 52px because the in-page base
+   was 56px, but the base is now 46px and the override would silently make the
+   dialog button the TALLEST install button in the app. It inherits the base
+   height instead, so the dialog CTA and the in-page CTAs stay one control. */
 .zx-dialog-actions .zx-cta-button {
   width: 100%;
   min-width: 0;
-  --md-filled-button-container-height: 52px;
 }
 
 .zx-dialog-actions .zx-cta-sub {
