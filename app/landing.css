@@ -1106,12 +1106,12 @@
 }
 
 /* --- price anchor -----------------------------------------------------------
-   A two-row bar chart plus a caption. Each row is a plan name, then that plan's
-   monthly cost beside a bar sized to it. The card sets `align-items: flex-start`,
-   so this block has to claim full width itself for the bars to be measurable
-   against each other.
+   A two-row bar chart plus a caption. Each row is a bar labelled with the plan it
+   represents, and that plan's monthly cost beside it. The card sets
+   `align-items: flex-start`, so this block has to claim full width itself for the
+   bars to be measurable against each other.
 
-   The two figures are deliberately bare ("$1.25", "> $80") and identically styled,
+   The two figures are deliberately bare ("$1.25", "~ $80") and identically styled,
    differing only in color. Dropping "/mo" into the caption is what allows that: with
    the suffix, the strings were long enough that the rival price had to be shrunk to
    fit, which ranked the two costs instead of comparing them. */
@@ -1127,44 +1127,16 @@
 .zx-compare-rows {
   display: grid;
   grid-template-columns: auto 1fr;
+  /* `dense` lets the `dt` (the bar, column 2) come first in the DOM while its `dd`
+     (the price, column 1) backfills the empty cell to its left on the same row.
+     That DOM order is what keeps this a valid definition list — a `dd` may not
+     precede its `dt` — while the price still reads on the left. */
+  grid-auto-flow: row dense;
   align-items: center;
   /* Contract rule 4: 12px between the rows, and the same 12px setting each price
      off its own bar. */
   gap: var(--zx-space-3);
   margin: 0;
-}
-
-/* The name spans BOTH columns so it sits above the price/bar pair rather than in
-   the price column. It has to be the `dt` (and the pair the `dd`) for the list to
-   stay valid, and spanning is what lets that semantic order also be the visual
-   order — no `dense` backfilling needed now that nothing reads right-to-left. */
-.zx-compare-name {
-  grid-column: 1 / -1;
-  margin: 0;
-  font-size: var(--zx-text-meta);
-  line-height: 1.35;
-  color: var(--md-sys-color-on-surface-variant);
-  text-wrap: pretty;
-}
-
-/* Our name is the only colored text in the card, which is what makes the eye start
-   on our row rather than on the bigger rival figure. */
-.zx-compare-name--ours {
-  color: var(--md-sys-color-primary);
-  /* Semibold, was a one-off `650`. That value is not a real step in most variable
-     UI stacks, so it silently snapped to 600 or 700 depending on the font actually
-     loaded — an unpredictable weight for the card's most important label. */
-  font-weight: var(--zx-weight-semibold);
-}
-
-/* `display: contents` dissolves this wrapper, so the price and the bar become items
-   of `.zx-compare-rows` itself. That is the whole reason the two rows can share one
-   price column and one bar start edge — a real box here would let each row size its
-   own columns independently, which is exactly what went wrong before.
-
-   `dd`'s default indent is dropped with it, so there is no margin to reset. */
-.zx-compare-pair {
-  display: contents;
 }
 
 /* Identical in every respect except length, which is what makes the pair read as
@@ -1174,24 +1146,78 @@
    fraction of theirs". With no track, length alone carries the quantity.
 
    `surface-variant` for both. Neutral rather than brand orange: the card already
-   has one accent (the "Zenorix" name), and coloring the bar too would make the
+   has one accent (the "Zenorix" label), and coloring the bar too would make the
    chart argue for attention with the price it is supporting. Distinguishing the
-   two rows is left to the figures on the left, per the same logic as rule 3. */
+   two rows is left to the figures on the left.
+
+   Now a flex container, because each bar holds its own label. The bar is the `dt`
+   for that reason: the term is the plan, drawn as the bar that represents it. */
 .zx-compare-bar {
   grid-column: 2;
-  height: 20px;
+  display: flex;
+  align-items: center;
+  /* Tall enough to hold 13px text with 8px of breathing room, up from the 20px it
+     was as a bare bar. */
+  min-height: 34px;
+  padding-inline: var(--zx-space-3);
   /* 4px, well under the 12px `radius-sm`. The radius has to stay small relative to
-     the bar's own height or a 20px-tall bar turns into a lozenge whose rounded ends
-     eat into the length being compared — at the 10% width that is a real
-     misreading, not just a style preference. */
+     the bar's own height or the bar turns into a lozenge whose rounded ends eat
+     into the length being compared. */
   border-radius: 4px;
   background: var(--md-sys-color-surface-variant);
+}
+
+/* 30% of the rival bar, set as a variable by the component.
+   `min-width: max-content` is the guard that keeps the label from being clipped: on
+   a narrow card 30% can be less than the word "Zenorix" plus its padding, so the bar
+   grows to its content there rather than cropping the label it exists to carry. At
+   every width where the ratio fits, the ratio wins.
+
+   This is deliberately TWO declarations rather than `max(30%, max-content)`, which
+   is what it was first written as. `max-content` is a sizing keyword, not a length,
+   so it is invalid inside `max()` — the whole `width` was dropped and both bars
+   stretched to a full 265.6px, drawing a 100% ratio. `min-width` accepts the keyword
+   and expresses the same floor correctly. */
+.zx-compare-bar--ours {
+  width: var(--zx-bar-share, 30%);
+  min-width: max-content;
+}
+
+/* Full width by definition — it is the 100% the bar above is measured against. */
+.zx-compare-bar--rival {
+  width: 100%;
+}
+
+/* Never wraps: these labels are identities, not prose, and a two-line label would
+   change the bar's height and break the pair's shared geometry. */
+.zx-compare-name {
+  margin: 0;
+  font-size: var(--zx-text-meta);
+  line-height: 1.35;
+  color: var(--md-sys-color-on-surface-variant);
+  white-space: nowrap;
+}
+
+/* Our label is the only colored text in the card, which is what makes the eye start
+   on our row rather than on the bigger rival figure. `primary` on the bar's
+   `surface-variant` is the pairing to watch here — it is verified above the contrast
+   floor at this size, which is why the bar can stay neutral and still carry brand
+   color as text. */
+.zx-compare-name--ours {
+  color: var(--md-sys-color-primary);
+  /* Semibold, was a one-off `650`. That value is not a real step in most variable
+     UI stacks, so it silently snapped to 600 or 700 depending on the font actually
+     loaded — an unpredictable weight for the card's most important label. */
+  font-weight: var(--zx-weight-semibold);
 }
 
 /* Tabular figures keep the two amounts on a shared digit grid, and right alignment
    puts each price against the bar it belongs to. */
 .zx-compare-amount {
   grid-column: 1;
+  /* `dd` carries a default inline indent that would push every price off the
+     column the `auto` track measured for it. */
+  margin: 0;
   font-size: var(--zx-text-amount);
   font-weight: var(--zx-weight-bold);
   line-height: 1.2;

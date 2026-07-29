@@ -1,3 +1,5 @@
+import type { CSSProperties } from 'react'
+
 import { DownloadCta } from '@/components/landing/download-cta'
 import { PLATFORMS, PLATFORM_ORDER } from '@/lib/content/platforms'
 
@@ -94,16 +96,18 @@ export function AboutZenorix({
   /** APK facts rendered directly beneath that button. */
   ctaMeta: string
 }) {
-  // The rival bar is always full, so our bar is our share of its cost. The 10%
-  // floor is a legibility guard, not a fudge: at the real US ratio (1.25 / 80 =
-  // 1.6%) the bar collapses into its own border radius and reads as a rendering
-  // bug rather than as a tiny price. This stays a floor rather than a multiplier:
-  // no real ratio is inflated, the sliver is just given a readable minimum.
+  // The rival bar is always full, so our bar is our share of its cost. The 30%
+  // floor is what makes the label fit inside the bar: at the real US ratio
+  // (1.25 / 80 = 1.6%) the bar is a few pixels wide, and even at a legibility-only
+  // minimum it could not hold the word "Zenorix".
   //
-  // The floor only has to clear the corner radius, never fit text, which is what
-  // keeps it this close to the truth — the label sits above the bar, so the bar
-  // is free to be as short as the data says.
-  const ourShare = Math.max(10, (price.ourAmount / price.rivalAmount) * 100)
+  // Worth being clear-eyed about the trade: this draws a ~1/64 price as ~1/3 of
+  // the bar, so the bars now read as "much cheaper" rather than as a measurable
+  // ratio. The exact figures beside them carry the real magnitude, which is why
+  // both are stated in full and at the same size. It stays a floor rather than a
+  // multiplier, so a market where the true ratio is larger is drawn at its own
+  // honest value instead of being scaled.
+  const ourShare = Math.max(30, (price.ourAmount / price.rivalAmount) * 100)
 
   return (
     // Tighter than the shared section rhythm: four cards plus a CTA is the
@@ -175,12 +179,11 @@ export function AboutZenorix({
                 the two costs sit in one column the eye can compare directly and
                 the bars carry the gap pre-attentively.
 
-                The name sits ABOVE its bar rather than inside it. Once the bars
-                lost their background track, our bar is only its true ~10% wide —
-                about 37px — which cannot hold the word "Zenorix". Keeping the
-                label inside would have meant widening the bar to ~33% to fit
-                text, restating a 1/64 price as 1/3 and arguing against the card's
-                own claim. Above the bar, the bar stays honest.
+                Each name sits INSIDE its own bar, which is why the bar is the
+                `dt`: the term is the plan, drawn as the bar that represents it,
+                and the `dd` beside it is what that plan costs. Keeping `dt`/`dd`
+                as direct children of the grid is what lets one grid own both rows,
+                so every price shares a column and both bars share a start edge.
 
                 `figure` + `figcaption` because that is what this is: a chart plus
                 a caption naming the unit both figures are in. Moving the unit into
@@ -188,34 +191,26 @@ export function AboutZenorix({
                 enough to compare at a glance. */}
             <figure className="zx-compare">
               <dl className="zx-compare-rows">
-                <dt className="zx-compare-name zx-compare-name--ours">
-                  {price.ourLabel}
-                </dt>
-                {/* `display: contents` in CSS, so the amount and the bar become
-                    items of the OUTER grid rather than of a per-row box. That is
-                    what keeps every price in one column and both bars starting on
-                    one edge — a nested box would let each row size itself. */}
-                <dd className="zx-compare-pair">
-                  <span className="zx-compare-amount zx-compare-amount--ours">
-                    {price.value}
+                {/* The share sizes the bar via a variable rather than a plain
+                    width, so the CSS can hold it against `max-content` and stop a
+                    narrow card from cropping the label inside. */}
+                <dt
+                  className="zx-compare-bar zx-compare-bar--ours"
+                  style={{ '--zx-bar-share': `${ourShare}%` } as CSSProperties}
+                >
+                  <span className="zx-compare-name zx-compare-name--ours">
+                    {price.ourLabel}
                   </span>
-                  {/* Decorative: the figure beside it already states the value, so
-                      re-announcing the bar would only duplicate it. */}
-                  <span
-                    className="zx-compare-bar"
-                    style={{ width: `${ourShare}%` }}
-                    aria-hidden="true"
-                  />
+                </dt>
+                <dd className="zx-compare-amount zx-compare-amount--ours">
+                  {price.value}
                 </dd>
 
-                <dt className="zx-compare-name">{price.rivalLabel}</dt>
-                <dd className="zx-compare-pair">
-                  <span className="zx-compare-amount zx-compare-amount--rival">
-                    {price.rivalValue}
-                  </span>
-                  {/* No width: full by definition, since it is the 100% the bar
-                      above is measured against. */}
-                  <span className="zx-compare-bar" aria-hidden="true" />
+                <dt className="zx-compare-bar zx-compare-bar--rival">
+                  <span className="zx-compare-name">{price.rivalLabel}</span>
+                </dt>
+                <dd className="zx-compare-amount zx-compare-amount--rival">
+                  {price.rivalValue}
                 </dd>
               </dl>
 
