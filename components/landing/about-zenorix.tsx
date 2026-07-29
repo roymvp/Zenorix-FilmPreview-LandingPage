@@ -88,24 +88,50 @@ export function AboutZenorix({
         <ul className="zx-about">
           <li className="zx-about-card">
             <p className="zx-about-label">{apps.label}</p>
-            <ul className="zx-about-logos">
-              {PLATFORM_ORDER.map((id) => {
-                const platform = PLATFORMS[id]
-                return (
-                  <li key={platform.id}>
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={platform.icon || '/placeholder.svg'}
-                      alt={platform.name}
-                      width={44}
-                      height={44}
-                      loading="lazy"
-                      decoding="async"
-                    />
-                  </li>
-                )
-              })}
-            </ul>
+            {/* All 11 services on ONE line that drifts right-to-left forever,
+                instead of a wrapped 3-row block. The motion is what says "and
+                more" — a static grid of 11 icons at 420px reads as a complete,
+                countable list, while a moving strip implies a catalogue.
+                `tabindex`/`role` because the strip is also a real scroll
+                container: it must be reachable by keyboard, not only by drag. */}
+            <div
+              className="zx-logo-marquee"
+              role="group"
+              aria-label={apps.label}
+              tabIndex={0}
+            >
+              <div className="zx-logo-track">
+                {/* Two identical sets are what make the loop seamless: the
+                    animation travels exactly one set's width, so the moment it
+                    resets, set 2 is already sitting where set 1 was and the
+                    jump is invisible. The copy is aria-hidden so the 11 service
+                    names are announced once, not twice. */}
+                {[0, 1].map((copy) => (
+                  <ul
+                    key={copy}
+                    className="zx-logo-set"
+                    aria-hidden={copy === 1 || undefined}
+                  >
+                    {PLATFORM_ORDER.map((id) => {
+                      const platform = PLATFORMS[id]
+                      return (
+                        <li key={platform.id}>
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={platform.icon || '/placeholder.svg'}
+                            alt={copy === 0 ? platform.name : ''}
+                            width={44}
+                            height={44}
+                            loading="lazy"
+                            decoding="async"
+                          />
+                        </li>
+                      )
+                    })}
+                  </ul>
+                ))}
+              </div>
+            </div>
           </li>
 
           <li className="zx-about-card">
@@ -134,9 +160,16 @@ export function AboutZenorix({
               </div>
 
               <div className="zx-compare-row">
+                {/* The rival row is reference, not headline: its label and its
+                    price share one quiet 13px treatment, so the only large
+                    number in the card is ours. */}
                 <div className="zx-compare-head">
-                  <dt className="zx-compare-name">{price.rivalLabel}</dt>
-                  <dd className="zx-compare-amount">{price.rivalValue}</dd>
+                  <dt className="zx-compare-name zx-compare-name--rival">
+                    {price.rivalLabel}
+                  </dt>
+                  <dd className="zx-compare-amount zx-compare-amount--rival">
+                    {price.rivalValue}
+                  </dd>
                 </div>
                 <div className="zx-compare-track" aria-hidden="true">
                   <div className="zx-compare-fill zx-compare-fill--rival" />
@@ -162,7 +195,11 @@ export function AboutZenorix({
             </ul>
           </li>
 
-          <li className="zx-about-card">
+          {/* Centered, unlike the other three: this is the card the section
+              resolves into, and it sits directly above the centered install
+              button — so centering it lets the chip, the offer, the caveat and
+              the CTA share one axis straight down to the tap target. */}
+          <li className="zx-about-card zx-about-card--centered">
             <p className="zx-about-label">{trial.label}</p>
             <p className="zx-about-value">{trial.value}</p>
             <p className="zx-about-note">{trial.note}</p>

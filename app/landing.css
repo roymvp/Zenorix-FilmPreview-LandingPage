@@ -890,6 +890,14 @@
   background: transparent;
 }
 
+/* Overrides the shared `align-items: flex-start`. `text-align` has to come too:
+   flex centering only centers each block, it does not center the lines of text
+   inside the two-line note. */
+.zx-about-card--centered {
+  align-items: center;
+  text-align: center;
+}
+
 /* Clear of the last card so the button reads as the whole section's conclusion
    rather than as part of the trial card. */
 .zx-about-cta {
@@ -965,6 +973,13 @@
   font-weight: 650;
 }
 
+/* Dimmer than the row above: outline sits below on-surface-variant in the token
+   ramp, which is enough to push the rival stack into the background without
+   dropping it under the contrast floor for 13px text. */
+.zx-compare-name--rival {
+  color: var(--md-sys-color-outline);
+}
+
 /* `dd` carries a default indent that would break the right edge alignment.
    Tabular figures keep the two amounts on a shared digit grid. */
 .zx-compare-amount {
@@ -976,6 +991,17 @@
   color: var(--md-sys-color-on-surface);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
+}
+
+/* Matched to .zx-compare-name (13px, regular weight, same muted color) so the
+   rival row reads as one flat line of reference text. Dropping it from 20px/700
+   is what leaves our price as the single figure with any weight in the card. */
+.zx-compare-amount--rival {
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.35;
+  letter-spacing: 0;
+  color: var(--md-sys-color-outline);
 }
 
 .zx-compare-track {
@@ -995,10 +1021,12 @@
 }
 
 /* Full width by definition — it is the 100% the other bar is measured against.
-   Neutral, so "more expensive" reads as heavier rather than as an error state. */
+   Only a step above the empty track it sits in: the rival bar just needs to read
+   as "the whole span", and any more contrast would make the expensive option the
+   loudest thing in the card. */
 .zx-compare-fill--rival {
   width: 100%;
-  background: var(--md-sys-color-outline);
+  background: var(--md-sys-color-surface-variant);
 }
 
 /* Grid rather than flex: three EQUAL tracks are what keep the badges optically
@@ -1051,21 +1079,111 @@
   text-wrap: pretty;
 }
 
-/* Real store app icons, unmodified and in full color — they read as the apps
-   themselves, not as an abstract logo wall. Clipped to the platform icon shape
-   with a hairline ring so dark icons keep an edge against the page. */
-.zx-about-logos {
+/* --- platform marquee -------------------------------------------------------
+   One endless line of service icons. Three jobs are split across three
+   elements: this one is the WINDOW (clips, fades, and scrolls by drag),
+   .zx-logo-track is the moving belt, .zx-logo-set is one run of 11 icons.
+
+   Negative margin cancels the card's 18px padding so the strip runs the full
+   width of the card — a marquee that stops short of its container reads as a
+   clipped grid instead of a continuous feed. The mask then fades both ends, so
+   icons dissolve rather than being guillotined by the border.
+
+   `overflow-x: auto` keeps it a genuine scroll container: the animation is the
+   idle state, but the user can still flick it left/right. Touch drag and the
+   CSS transform coexist because scrollLeft and transform are independent. */
+.zx-logo-marquee {
+  align-self: stretch;
+  margin-inline: -18px;
+  overflow-x: auto;
+  /* Fade both ends. WebKit prefix first for older iOS Safari. */
+  -webkit-mask-image: linear-gradient(
+    90deg,
+    transparent,
+    #000 26px,
+    #000 calc(100% - 26px),
+    transparent
+  );
+  mask-image: linear-gradient(
+    90deg,
+    transparent,
+    #000 26px,
+    #000 calc(100% - 26px),
+    transparent
+  );
+  /* A visible bar under a decorative strip is noise; the drag affordance is the
+     motion itself. */
+  scrollbar-width: none;
+}
+
+.zx-logo-marquee::-webkit-scrollbar {
+  display: none;
+}
+
+.zx-logo-marquee:focus-visible {
+  outline: 2px solid var(--md-sys-color-primary);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* `width: max-content` is load-bearing: without it the track would shrink to
+   the card and both sets would compress instead of queueing up off-screen. */
+.zx-logo-track {
   display: flex;
-  flex-wrap: wrap;
+  width: max-content;
+  animation: zx-logo-drift 34s linear infinite;
+}
+
+/* Paused on hover and while focused, so anyone reading a specific icon or
+   scrolling by hand is not fighting the animation. */
+.zx-logo-marquee:hover .zx-logo-track,
+.zx-logo-marquee:focus-within .zx-logo-track {
+  animation-play-state: paused;
+}
+
+/* The trailing padding — NOT a track-level `gap` — is what makes the loop
+   seamless. Each set is then exactly one repeat wide (11 icons + 11 gaps), so
+   translating by 50% of a two-set track lands pixel-perfectly on the start of
+   set 2. A track `gap` would add one extra unaccounted gap and the strip would
+   visibly stutter once per cycle. */
+.zx-logo-set {
+  display: flex;
   align-items: center;
   gap: 10px;
+  padding-inline-end: 10px;
   margin: 0;
-  padding: 0;
+  padding-block: 0;
+  padding-inline-start: 0;
   list-style: none;
 }
 
-.zx-about-logos img {
+@keyframes zx-logo-drift {
+  from {
+    transform: translateX(0);
+  }
+  /* Exactly one set's width. Set 2 is sitting there already, so the reset is
+     invisible. */
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+/* Motion is decoration here, so it goes away entirely when asked — the strip
+   stays a scrollable row and loses nothing but the drift. */
+@media (prefers-reduced-motion: reduce) {
+  .zx-logo-track {
+    animation: none;
+  }
+}
+
+/* Real store app icons, unmodified and in full color — they read as the apps
+   themselves, not as an abstract logo wall. Clipped to the platform icon shape
+   with a hairline ring so dark icons keep an edge against the page. */
+.zx-logo-set img {
   display: block;
+  /* Never let an icon squeeze — the set's width must stay predictable for the
+     50% translate to line up. */
+  flex: 0 0 auto;
   width: 44px;
   height: 44px;
   border-radius: 11px;
