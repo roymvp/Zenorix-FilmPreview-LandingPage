@@ -1106,127 +1106,50 @@
 }
 
 /* --- price anchor -----------------------------------------------------------
-   A two-row bar chart: each row is "price ─ bar", with the plan name inside its
-   own bar. The card sets `align-items: flex-start`, so this block has to claim
-   full width itself for the bars to be measurable against each other.
+   A two-row bar chart plus a caption. Each row is a plan name, then that plan's
+   monthly cost beside a bar sized to it. The card sets `align-items: flex-start`,
+   so this block has to claim full width itself for the bars to be measurable
+   against each other.
 
-   ONE grid owns both rows, which is the point of the structure. The price column
-   is `auto`, so it sizes to the WIDEST price across both rows and both bars start
-   on the same edge — in every locale, with no fixed width to maintain. That
-   matters here because the prices are not comparable strings: "$1.25/mo" is 85px
-   while "> 1,000 บาท/เดือน" is far wider, so any hardcoded column would either
-   clip Thai or leave a gap in English. The previous markup wrapped each row in
-   its own flex column, so each row sized its price independently and the two bars
-   could not share a start edge at all. */
+   The two figures are deliberately bare ("$1.25", "> $80") and identically styled,
+   differing only in color. Dropping "/mo" into the caption is what allows that: with
+   the suffix, the strings were long enough that the rival price had to be shrunk to
+   fit, which ranked the two costs instead of comparing them. */
 .zx-compare {
   width: 100%;
+  margin: 0;
+}
+
+/* ONE grid owns both rows: each row is a full-width name, then a price and a bar.
+   The price column is `auto`, so it sizes to the WIDEST price across both rows and
+   both bars start on the same edge — in every locale, with no fixed width to
+   maintain. */
+.zx-compare-rows {
   display: grid;
   grid-template-columns: auto 1fr;
-  /* `dense` lets the `dt` (the bar, column 2) come first in the DOM while its
-     `dd` (the price, column 1) backfills the empty cell to its left on the same
-     row. That DOM order is what keeps this a valid definition list — `dd` may not
-     precede its `dt` — while the price still reads on the left. */
-  grid-auto-flow: row dense;
   align-items: center;
-  /* Contract rule 4: 12px sibling step between rows, and the same 12px setting
-     the price off its bar. */
+  /* Contract rule 4: 12px between the rows, and the same 12px setting each price
+     off its own bar. */
   gap: var(--zx-space-3);
   margin: 0;
 }
 
-/* The bar. Tall enough to hold its own label, which is what lets the fill beside
-   it stay proportionally honest instead of being inflated to fit text. */
-.zx-compare-bar {
-  grid-column: 2;
-  position: relative;
-  display: flex;
-  align-items: center;
-  min-height: 34px;
-  /* Uniform 12px, then overridden per row below. Our row needs a bigger start
-     inset to clear its own tick mark; the rival row does not. */
-  padding: var(--zx-space-2) var(--zx-space-3);
-  border-radius: var(--zx-radius-sm);
-  /* The unfilled span every bar is measured against. */
-  background: var(--md-sys-color-surface-container-highest);
-  overflow: hidden;
-}
-
-/* Absolute so the label never has to flow around it: the fill is free to be 10%
-   or 100% wide without moving the name a single pixel. */
-.zx-compare-fill {
-  position: absolute;
-  inset-block: 0;
-  inset-inline-start: 0;
-  border-radius: inherit;
-}
-
-/* A tint rather than solid `primary`, and that is what makes the whole layout
-   work: the name sits ON the fill at 100% and OFF it at 10%, so the fill has to
-   be a colour the label reads against either way. Solid primary would have left
-   the first characters of "Zenorix" invisible — primary text on a primary fill.
-   Against `primary-container` the label clears 5.4:1, and 7.5:1 on the bare bar
-   beside it.
-
-   The bright edge is what actually makes the quantity readable. Measured, the tint
-   `#6a3d00` against the bar's own `#363128` is ~1.3:1 — two dark browns the eye
-   cannot separate, so the fill alone left the bar looking uniformly filled and the
-   10% communicated nothing. A 2px `primary` rule marks where the fill ENDS, so the
-   proportion is carried by a crisp high-contrast tick instead of by a fill/track
-   difference that is invisible. This is also what keeps the fill honest: the tick
-   can sit at a truthful 10% without the label having to fit inside it. */
-.zx-compare-fill--ours {
-  /* Same variable the bar uses to inset the label, so the tick and the text it must
-     clear can never disagree. */
-  width: var(--zx-fill-share, 10%);
-  background: var(--md-sys-color-primary-container);
-  border-inline-end: 2px solid var(--md-sys-color-primary);
-}
-
-/* Full width by definition — it is the 100% the other bar is measured against.
-   Only a step above the empty bar it sits in: the rival bar just needs to read as
-   "the whole span", and any more contrast would make the expensive option the
-   loudest thing in the card.
-
-   Same invisibility problem as our fill, measured at 1.38:1 against the bar, but the
-   opposite fix. This one spans the full width, so it has no meaningful END to tick —
-   marking its right edge would just draw a line on the bar's own corner. Instead
-   `outline` traces the whole span at the same 2px weight, so both rows are keyed the
-   same way: a visible boundary at the extent of the quantity. `outline` rather than
-   `border` because a border would inset the fill by 2px inside its own bar. */
-.zx-compare-fill--rival {
-  width: 100%;
-  background: var(--md-sys-color-surface-variant);
-  outline: 2px solid var(--md-sys-color-outline);
-  outline-offset: -2px;
-}
-
-/* Above the fill, and `position: relative` is what puts it there — the fill is
-   absolutely positioned, so without a stacking context of its own the label
-   would be painted under it. */
+/* The name spans BOTH columns so it sits above the price/bar pair rather than in
+   the price column. It has to be the `dt` (and the pair the `dd`) for the list to
+   stay valid, and spanning is what lets that semantic order also be the visual
+   order — no `dense` backfilling needed now that nothing reads right-to-left. */
 .zx-compare-name {
-  position: relative;
+  grid-column: 1 / -1;
   margin: 0;
   font-size: var(--zx-text-meta);
   line-height: 1.35;
+  color: var(--md-sys-color-on-surface-variant);
   text-wrap: pretty;
 }
 
-/* Starts after the tick, not under it. At the real 10% ratio the fill is only 23px
-   wide, so a label starting at the bar's own 12px padding had the 2px tick landing
-   straight through the "Z" — the mark that carries the quantity was colliding with
-   the word that names it. The inset is expressed as the fill's own width plus the
-   standard 12px gap, so the label keeps clearing the tick at any ratio: cheaper
-   plans push it right, and it never has to be re-tuned by hand.
-
-   `--zx-fill-share` is set inline by the component (the same value that sizes the
-   fill), which is what lets one CSS rule stay correct across every locale's price. */
-.zx-compare-bar--ours {
-  padding-inline-start: calc(var(--zx-fill-share, 10%) + var(--zx-space-3));
-}
-
-/* Our bar is the only colored text in the card, which is what makes the eye start
-   here rather than on the bigger rival number. */
-.zx-compare-bar--ours .zx-compare-name {
+/* Our name is the only colored text in the card, which is what makes the eye start
+   on our row rather than on the bigger rival figure. */
+.zx-compare-name--ours {
   color: var(--md-sys-color-primary);
   /* Semibold, was a one-off `650`. That value is not a real step in most variable
      UI stacks, so it silently snapped to 600 or 700 depending on the font actually
@@ -1234,43 +1157,74 @@
   font-weight: var(--zx-weight-semibold);
 }
 
-/* `on-surface-variant`, not the dimmer `outline`: the rival name now sits on the
-   filled `surface-variant` bar rather than on the card, and `outline` on that
-   fill falls under the contrast floor for 13px text. This pairing clears 5.5:1. */
-.zx-compare-bar--rival .zx-compare-name {
-  color: var(--md-sys-color-on-surface-variant);
+/* `display: contents` dissolves this wrapper, so the price and the bar become items
+   of `.zx-compare-rows` itself. That is the whole reason the two rows can share one
+   price column and one bar start edge — a real box here would let each row size its
+   own columns independently, which is exactly what went wrong before.
+
+   `dd`'s default indent is dropped with it, so there is no margin to reset. */
+.zx-compare-pair {
+  display: contents;
 }
 
-/* `dd` carries a default indent that would break the column alignment. Tabular
-   figures keep the two amounts on a shared digit grid, and right alignment puts
-   both prices against the bars they belong to. */
+/* Identical in every respect except length, which is what makes the pair read as
+   one chart rather than as two unrelated meters. No background track: an unfilled
+   track behind a short bar reads as a STACKED bar — as if the remainder were
+   another segment of the same total — which is the opposite of "ours is a small
+   fraction of theirs". With no track, length alone carries the quantity.
+
+   `surface-variant` for both. Neutral rather than brand orange: the card already
+   has one accent (the "Zenorix" name), and coloring the bar too would make the
+   chart argue for attention with the price it is supporting. Distinguishing the
+   two rows is left to the figures on the left, per the same logic as rule 3. */
+.zx-compare-bar {
+  grid-column: 2;
+  height: 20px;
+  /* 4px, well under the 12px `radius-sm`. The radius has to stay small relative to
+     the bar's own height or a 20px-tall bar turns into a lozenge whose rounded ends
+     eat into the length being compared — at the 10% width that is a real
+     misreading, not just a style preference. */
+  border-radius: 4px;
+  background: var(--md-sys-color-surface-variant);
+}
+
+/* Tabular figures keep the two amounts on a shared digit grid, and right alignment
+   puts each price against the bar it belongs to. */
 .zx-compare-amount {
   grid-column: 1;
-  margin: 0;
   font-size: var(--zx-text-amount);
   font-weight: var(--zx-weight-bold);
   line-height: 1.2;
   letter-spacing: -0.02em;
   text-align: right;
-  color: var(--md-sys-color-on-surface);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
 
-/* Kept at the 13px meta size so our price stays the only large figure, but bold:
-   at regular weight the number stopped working as the thing being compared
-   against. Weight makes it findable, size keeps it subordinate — the de-emphasis
-   is carried by scale and color, which is why it can afford to be bold here. */
+/* Same size and weight as the rival figure, differing ONLY in color. The two are
+   the same kind of fact — a monthly cost — so scaling one down would rank them
+   instead of comparing them, and the comparison is the entire point of the card.
+   `on-surface` is the brightest body color available, so ours still reads first. */
+.zx-compare-amount--ours {
+  color: var(--md-sys-color-on-surface);
+}
+
+/* Dimmer, not smaller. `outline` is the quietest token that still clears the
+   contrast floor at this size, so the expensive option recedes without becoming
+   unreadable. */
 .zx-compare-amount--rival {
-  font-size: var(--zx-text-meta);
-  font-weight: var(--zx-weight-bold);
-  line-height: 1.35;
-  letter-spacing: 0;
   color: var(--md-sys-color-outline);
-  /* The one price that may wrap: "> 1,000 บาท/เดือน" is the longest string in the
-     column, and letting it wrap is what keeps the `auto` column from squeezing
-     the bars on a 390px screen. */
-  white-space: normal;
+}
+
+/* Names the unit both figures are in, so neither price has to carry "/mo" itself —
+   that suffix is what made the figures long enough to need two different sizes.
+   Sits at the chip-to-payload 16px so it reads as the chart's footer rather than as
+   a third row of it. */
+.zx-compare-caption {
+  margin-block-start: var(--zx-space-4);
+  font-size: var(--zx-text-meta);
+  line-height: 1.35;
+  color: var(--md-sys-color-on-surface-variant);
 }
 
 /* Grid rather than flex: three EQUAL tracks are what keep the tiles the same
