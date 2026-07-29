@@ -127,8 +127,7 @@
         "30 dias grátis - depois {annualPerMonth}/mês"
       ],
       "cta": "Baixar o app Zenorix",
-      "ctaMeta": "APK Android · {size} · {downloads}",
-      "close": "Fechar"
+      "ctaMeta": "APK Android · {size} · {downloads}"
     },
     "preview": {
       "headingLines": [
@@ -142,8 +141,7 @@
         "30 dias grátis - sem cartão para começar"
       ],
       "cta": "Baixar o app Zenorix",
-      "ctaMeta": "APK Android · {size} · {downloads}",
-      "close": "Fechar"
+      "ctaMeta": "APK Android · {size} · {downloads}"
     }
   },
   "footer": {

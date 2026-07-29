@@ -133,8 +133,6 @@ export type DialogCopy = {
     bullets: string[]
     cta: string
     ctaMeta: string
-    /** Accessible name for the corner close button. */
-    close: string
   }
   preview: {
     /**
@@ -148,41 +146,16 @@ export type DialogCopy = {
     bullets: string[]
     cta: string
     ctaMeta: string
-    close: string
   }
 }
 
-/**
- * Top-right dismiss affordance, replacing the full-width "Close" text button
- * that used to sit under each CTA.
- *
- * A plain <button>, not `md-icon-button`: the icon button renders its own 48px
- * touch-target box and ripple, which cannot be positioned into the sheet's
- * corner without fighting Material's internals, and it also exposes `form` as a
- * getter-only property (the same trap documented on the content dialog below).
- * A native button keeps the 44px tap target and full styling control.
- *
- * Absolutely positioned against `.zx-dialog-headline`, so it never takes part in
- * the headline's flex flow and therefore cannot push the heading text sideways.
- */
-function CornerClose({
-  label,
-  onClose,
-}: {
-  label: string
-  onClose: () => void
-}) {
-  return (
-    <button
-      type="button"
-      className="zx-dialog-close"
-      onClick={onClose}
-      aria-label={label}
-    >
-      <md-icon aria-hidden="true">close</md-icon>
-    </button>
-  )
-}
+/* NOTE: `CornerClose` lived here — a top-right dismiss disc. Both sheets now rely
+   on md-dialog's own light dismiss instead: `handleDialogClick` fires `cancel` and
+   closes whenever the click did not originate inside `.container`, so tapping the
+   scrim (and Escape, which stays for keyboard users) already routed through the
+   same `closed` event the provider listens to. The button was a second, redundant
+   path to a behaviour the component gave us for free, and removing it hands the
+   corner back to the title. */
 
 /**
  * Both upsell dialogs. They share one mount point so the page has exactly one
@@ -211,8 +184,9 @@ export function ConversionDialogs({
   const contentRef = useRef<HTMLElement | null>(null)
   const previewRef = useRef<HTMLElement | null>(null)
 
-  // Catches every dismissal route the dialog owns itself: scrim tap and Escape.
-  // The corner close button calls the provider directly instead.
+  // The ONLY dismissal route now, and it covers both: md-dialog fires `closed`
+  // after an outside/scrim click and after Escape, so this single listener resets
+  // the provider state for either gesture.
   useClosedEvent(contentRef, closeContent)
   useClosedEvent(previewRef, closePreview)
 
@@ -229,10 +203,7 @@ export function ConversionDialogs({
         aria-label={copy.content.heading}
       >
         <div slot="headline" className="zx-dialog-headline">
-          <CornerClose label={copy.content.close} onClose={closeContent} />
-          <strong className="md-typescale-headline-small">
-            {copy.content.heading}
-          </strong>
+          <strong className="zx-dialog-title">{copy.content.heading}</strong>
         </div>
 
         {/* A plain div, not a `<form method="dialog">`. The form only existed so
@@ -285,13 +256,8 @@ export function ConversionDialogs({
           {/* One heading, two lines, one <strong> per line so both inherit the
               exact same typescale — see the note on `headingLines`. */}
           <span className="zx-dialog-heading-stack">
-            {/* Inside the heading stack, NOT a sibling of the art above it: the
-                close button positions against its nearest positioned ancestor,
-                and anchoring it to the headline box put it ~130px up on the
-                artwork instead of beside the title. */}
-            <CornerClose label={copy.preview.close} onClose={closePreview} />
             {copy.preview.headingLines.map((line) => (
-              <strong key={line} className="md-typescale-headline-small">
+              <strong key={line} className="zx-dialog-title">
                 {line}
               </strong>
             ))}

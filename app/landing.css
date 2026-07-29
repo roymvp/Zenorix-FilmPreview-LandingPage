@@ -1514,8 +1514,6 @@
 }
 
 .zx-dialog-headline {
-  /* Anchor for the absolutely positioned .zx-dialog-close. */
-  position: relative;
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -1527,39 +1525,24 @@
      instead of a full-bleed header. Stretch also left-aligns the eyebrow and
      heading, matching the body copy below them. */
   align-items: stretch;
-  /* Pushes the heading down by 9px so the corner close button — which sits at
-     inset 0 — ends up optically centered on the title's first line. See the
-     centering math on .zx-dialog-close. Only applies when the headline STARTS
-     with the heading; the poster sheet overrides it below, because there the
-     first child is the full-bleed art. */
-  padding-block-start: 9px;
 }
 
-/* The poster sheet's art is pulled up by -24px to bleed off the top edge, so any
-   top padding here would show as a band of container color above it. */
-.zx-dialog-headline:has(> .zx-dialog-art) {
-  padding-block-start: 0;
-}
+/* The sheet title, deliberately identical to `.zx-section-title` ("About Zenorix",
+   "Top 10 This Week", the FAQ heading): 21px / 600 / 1.25 / -0.01em. These sheets
+   are a peer of those page sections, not a louder interruption, so they share one
+   title rank. It replaces `md-typescale-headline-small`, whose 24px/400 was both
+   larger AND lighter than the page's own headings — visually louder while reading
+   less deliberate. Any change here should be mirrored on `.zx-section-title`.
 
-/* On the poster sheet the close button must align to the HEADING, not to the
-   headline box — the box starts at the art, ~130px higher, which left the disc
-   stranded mid-artwork far from any text (measured at -111px off).
-
-   `.zx-dialog-heading-stack` is the heading's own wrapper and sits directly
-   below the art, so re-anchoring to it reuses the exact same centering math as
-   the no-art sheet. `position: relative` alone does that, because the button
-   resolves against its nearest positioned ancestor. */
-.zx-dialog-heading-stack {
-  position: relative;
-  padding-block-start: 9px;
-}
-
-/* The close button is a flex child of the stack but absolutely positioned, so it
-   is out of flow and contributes no gap of its own — no `:first-of-type` shift
-   to compensate for. This is why the clearance rule above targets
-   `strong:first-of-type` rather than `:first-child`. */
-
-.zx-dialog-headline strong {
+   The title is the sheet's primary message (it explains what the user just hit),
+   so it sits at the top of the hierarchy alongside the CTA, with the benefit panel
+   below deliberately quieter. */
+.zx-dialog-title {
+  margin: 0;
+  font-size: 21px;
+  line-height: 1.25;
+  font-weight: 600;
+  letter-spacing: -0.01em;
   color: var(--md-sys-color-on-surface);
   /* `pretty`, not `balance`. Balance equalizes line lengths, which on a 372px
      sheet split these headings at arbitrary mid-phrase points to even out the
@@ -1567,39 +1550,16 @@
      natural greedy break and only resolves orphans, so lines break where the
      sentence does. */
   text-wrap: pretty;
-  /* Overrides md-typescale-headline-small's 24px. Each of these headings wraps to
-     two visual lines, and the poster sheet stacks TWO of them — at 24px that was
-     four lines of large type filling half the sheet before a single benefit was
-     visible. 21px keeps the heading clearly dominant over the 15px body while
-     letting the CTA back into view. */
-  font-size: 21px;
-  /* Tighter than the 32px typescale default, and paired with a hair of negative
-     tracking so the wrapped lines read as one confident block. */
-  line-height: 1.28;
-  letter-spacing: -0.01em;
 }
 
-/* Close-button clearance, applied ONLY to the line that actually sits beside it.
-   It was previously on every `strong`, costing all lines 40px of measure even
-   though the button occupies just the top-right corner — that lost width is what
-   forced the extra, awkward wraps. */
-.zx-dialog-headline > strong:first-of-type,
-.zx-dialog-heading-stack > strong:first-of-type {
-  /* 56px = the 44px disc + its 8px inset + 4px of breathing room. The earlier
-     44px only covered the disc itself, so the glyph sat directly on top of the
-     heading's last word ("...the first" ran under the X). Text clears an
-     absolutely positioned sibling only by reserved padding, never automatically. */
-  padding-inline-end: 56px;
-}
-
-/* The two-line heading on the poster sheet. Both lines are <strong> with the
-   same typescale class, so this only owns the spacing between them — no
-   font-size or weight here, which is what keeps the lines truly equal rank.
+/* The two-line heading on the poster sheet. Both lines carry `.zx-dialog-title`,
+   so this only owns the spacing between them — no font-size or weight here, which
+   is what keeps the lines truly equal rank.
 
    The gap is 14px, not the 2px first tried: each line wraps to two visual lines
    on a 420px sheet, and at 2px the four resulting lines read as one paragraph
    with no visible break between the two statements. It needs to beat the text's
-   own ~27px line spacing to register as a break at all — 10px was still too close
+   own ~26px line spacing to register as a break at all — 10px was still too close
    to that to separate them cleanly. */
 .zx-dialog-heading-stack {
   display: flex;
@@ -1607,74 +1567,12 @@
   gap: 14px;
 }
 
-/* Corner dismiss, replacing the old full-width "Close" text button.
-
-   Anchored to the HEADING's wrapper in both sheets, not to the headline box: on
-   the poster sheet the box begins at the full-bleed art, which stranded the disc
-   ~130px up in the middle of the artwork instead of beside the title.
-
-   Offsets are POSITIVE, never negative. Negative values (tried -8px) push the
-   disc past the sheet's 28px rounded corner so it renders half outside, floating
-   on the page. */
-.zx-dialog-close {
-  position: absolute;
-  z-index: 2;
-  /* OPTICALLY CENTERED ON THE TITLE'S FIRST LINE, not pinned to the headline box.
-
-     A fixed `8px` top put the disc's center 10px ABOVE that first line (measured),
-     which is what read as "close button and title are misaligned": the disc
-     floated between the sheet's top edge and the text.
-
-     The centering math, relative to the headline's own top edge:
-       first line's center = (21px font x 1.28 line-height) / 2 = 13.4px
-       disc's own center    = 44px / 2                          = 22px
-       offset               = 13.4px - 22px                     = -8.6px
-     A negative value would escape the sheet's rounded corner (documented above),
-     so instead the headline reserves 9px of top padding and the disc sits at 0 —
-     same optical result, nothing outside the sheet. Re-derive both if the heading
-     font-size or line-height changes. */
-  inset-block-start: 0;
-  inset-inline-end: 8px;
-  display: grid;
-  place-items: center;
-  /* 44px BOX for the tap target, 36px VISIBLE disc: `background-clip: content-box`
-     keeps the 4px padding ring transparent, so the full 44px stays touchable while
-     the painted circle shrinks. At a full 44px the filled disc was a heavy grey
-     blob that pulled attention away from the CTA. */
-  width: 44px;
-  height: 44px;
-  padding: 4px;
-  border: 0;
-  border-radius: 50%;
-  background-clip: content-box;
-  /* Now sits on the sheet's container color in BOTH dialogs (it used to land on
-     the poster art, which is why it carried a dark scrim disc and a white glyph).
-     A quiet surface tint with the normal low-emphasis on-surface glyph keeps it
-     legible without competing with the CTA for attention. */
-  background: var(--md-sys-color-surface-container-highest);
-  color: var(--md-sys-color-on-surface-variant);
-  cursor: pointer;
-  appearance: none;
-  transition:
-    background-color 180ms ease,
-    color 180ms ease;
-}
-
-.zx-dialog-close md-icon {
-  font-size: 20px;
-  width: 20px;
-  height: 20px;
-}
-
-.zx-dialog-close:hover {
-  background: var(--md-sys-color-surface-container-high);
-  color: var(--md-sys-color-on-surface);
-}
-
-.zx-dialog-close:focus-visible {
-  outline: 2px solid var(--md-sys-color-primary);
-  outline-offset: 2px;
-}
+/* NOTE: `.zx-dialog-close` and its md-icon/hover/focus rules lived here. The
+   corner dismiss disc is gone — md-dialog already light-dismisses on any click
+   outside `.container` (and on Escape), so the button duplicated behaviour the
+   component provides, while occupying the one corner the title wants. Dropping it
+   also retired the 56px inline clearance and the 9px block offsets that existed
+   purely to position and clear it. */
 
 /* The "More features in app:" / "Beyond this movie on the app:" line.
 
@@ -1693,20 +1591,24 @@
   color: var(--md-sys-color-primary);
 }
 
-/* The benefit block, given the same container treatment as `.zx-about-card`
-   (1px hairline, 14px radius, 14px padding). Previously the label and bullets
-   floated loose in the sheet with nothing tying them together, which is what made
-   the sheets feel unfinished next to the carded page behind them. Boxing them
-   turns "label + list" into one deliberate unit and visually separates the offer
-   from the heading above and the CTA below. */
+/* The benefit block: TINTED FILL, NO BORDER.
+
+   These bullets are the rationale that supports the download, not the message
+   itself — the title and the CTA are. An outlined panel gave them a hard, drawn
+   edge that competed with the CTA for attention and made all three levels read as
+   equally important. A borderless fill one step up from the sheet's own
+   `surface-container-high` recedes into the surface: it still groups the label
+   with its list, but as a quiet backdrop rather than a framed object. */
 .zx-dialog-body {
   display: flex;
   flex-direction: column;
   /* 10px: the label sits directly above the list it names, so the two must group. */
   gap: 10px;
-  padding: 14px;
-  border: 1px solid var(--md-sys-color-outline-variant);
+  /* Slightly more generous than the old 14px now that no border draws the bounds —
+     a fill needs a little more inset to read as a deliberate panel. */
+  padding: 14px 16px;
   border-radius: 14px;
+  background: var(--md-sys-color-surface-container-highest);
   color: var(--md-sys-color-on-surface-variant);
   /* Explicit, because md-dialog's content slot inherits the host's centering in
      some engines and the whole block is specified as left aligned. */

@@ -177,7 +177,6 @@ export function FilmLanding({
               bullets: dict.modals.content.bullets.map((b) => fill(b, values)),
               cta: dict.modals.content.cta,
               ctaMeta: fill(dict.modals.content.ctaMeta, values),
-              close: dict.modals.content.close,
             },
             preview: {
               // `previewMinutes` is derived from the film's own gate rather than
@@ -190,7 +189,6 @@ export function FilmLanding({
               bullets: dict.modals.preview.bullets.map((b) => fill(b, values)),
               cta: dict.modals.preview.cta,
               ctaMeta: fill(dict.modals.preview.ctaMeta, values),
-              close: dict.modals.preview.close,
             },
           }}
         />

@@ -127,8 +127,7 @@
         "30 Days Free - Then {annualPerMonth}/mo"
       ],
       "cta": "Get the Zenorix App",
-      "ctaMeta": "Android APK · {size} · {downloads}",
-      "close": "Close"
+      "ctaMeta": "Android APK · {size} · {downloads}"
     },
     "preview": {
       "headingLines": [
@@ -142,8 +141,7 @@
         "30 Days Free - No card needed to start"
       ],
       "cta": "Get the Zenorix App",
-      "ctaMeta": "Android APK · {size} · {downloads}",
-      "close": "Close"
+      "ctaMeta": "Android APK · {size} · {downloads}"
     }
   },
   "footer": {

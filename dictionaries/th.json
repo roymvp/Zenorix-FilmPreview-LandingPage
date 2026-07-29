@@ -127,8 +127,7 @@
         "ฟรี 30 วัน - หลังจากนั้น {annualPerMonth}/เดือน"
       ],
       "cta": "ดาวน์โหลดแอป Zenorix",
-      "ctaMeta": "APK Android · {size} · {downloads}",
-      "close": "ปิด"
+      "ctaMeta": "APK Android · {size} · {downloads}"
     },
     "preview": {
       "headingLines": [
@@ -142,8 +141,7 @@
         "ฟรี 30 วัน - เริ่มได้เลย ไม่ต้องใช้บัตร"
       ],
       "cta": "ดาวน์โหลดแอป Zenorix",
-      "ctaMeta": "APK Android · {size} · {downloads}",
-      "close": "ปิด"
+      "ctaMeta": "APK Android · {size} · {downloads}"
     }
   },
   "footer": {
