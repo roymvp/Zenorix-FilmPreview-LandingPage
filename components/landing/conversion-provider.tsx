@@ -59,10 +59,14 @@ export function ConversionProvider({ children }: { children: ReactNode }) {
     setContentTitle(title)
   }, [])
 
+  // Guarded so it is idempotent. Dismissal arrives from two places — the Close
+  // button and the dialog's own `closed` event (scrim tap, Escape) — and the
+  // button path triggers the event path too, which would double-report.
   const closeContent = useCallback(() => {
+    if (contentTitle === null) return
     trackEvent('modal_dismiss', { modal: 'content_lock' })
     setContentTitle(null)
-  }, [])
+  }, [contentTitle])
 
   const openPreview = useCallback((reason: PreviewReason) => {
     trackEvent('modal_view', { modal: 'preview_gate', reason })
@@ -70,10 +74,16 @@ export function ConversionProvider({ children }: { children: ReactNode }) {
     setUrgent(true)
   }, [])
 
+  /**
+   * Must actually run for the gate to keep working: the player refuses to
+   * re-open the upsell while `previewReason` is non-null, so a dismissal that
+   * never reaches this function latches the gate permanently shut.
+   */
   const closePreview = useCallback(() => {
+    if (previewReason === null) return
     trackEvent('modal_dismiss', { modal: 'preview_gate' })
     setPreviewReason(null)
-  }, [])
+  }, [previewReason])
 
   const value = useMemo<ConversionState>(
     () => ({

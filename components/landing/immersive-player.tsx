@@ -1,7 +1,10 @@
 'use client'
 
 import { useCallback, useEffect, useRef, useState, type CSSProperties } from 'react'
-import { useConversion } from '@/components/landing/conversion-provider'
+import {
+  useConversion,
+  type PreviewReason,
+} from '@/components/landing/conversion-provider'
 import { trackEvent } from '@/lib/analytics'
 
 /** m:ss, or h:mm:ss once the film runs past an hour. */
@@ -64,7 +67,7 @@ export function ImmersivePlayer({
   copy: PlayerCopy
 }) {
   const videoRef = useRef<HTMLVideoElement>(null)
-  const { openPreview } = useConversion()
+  const { openPreview, previewReason } = useConversion()
 
   const [playing, setPlaying] = useState(false)
   const [muted, setMuted] = useState(true)
@@ -87,8 +90,6 @@ export function ImmersivePlayer({
    * safePause below, which serialize the pair and swallow the expected reject.
    */
   const playPromiseRef = useRef<Promise<void> | null>(null)
-  /** Guards against re-entrant gating while an awaited pause settles. */
-  const gatingRef = useRef(false)
 
   /** Resolves true if playback actually started. Never rejects. */
   const safePlay = useCallback(async () => {
@@ -123,12 +124,19 @@ export function ImmersivePlayer({
     [],
   )
 
-  /** Waits for any pending play() so pause() cannot interrupt it. */
-  const safePause = useCallback(async () => {
+  /**
+   * Pauses immediately.
+   *
+   * This used to await the in-flight `play()` promise first, on the theory that
+   * pausing mid-play throws `AbortError`. It does — but that rejection is
+   * already handled inside `safePlay`, so awaiting bought nothing and cost a
+   * hang: an unresolved media element leaves `play()` pending indefinitely, and
+   * a user tapping pause would be ignored forever. Pausing is a direct response
+   * to a tap and must never wait on the network.
+   */
+  const safePause = useCallback(() => {
     const video = videoRef.current
     if (!video) return
-    const pending = playPromiseRef.current
-    if (pending) await pending
     playPromiseRef.current = null
     video.pause()
   }, [])
@@ -154,29 +162,55 @@ export function ImmersivePlayer({
     }
   }, [safePlay, revealControls])
 
-  const enforceGate = useCallback(async () => {
-    const video = videoRef.current
-    if (!video || gatingRef.current) return
-    gatingRef.current = true
-    // `timeupdate` keeps firing until the pause lands, so the ref above stops
-    // this from re-entering and opening the upsell dialog several times.
-    await safePause()
-    video.currentTime = cap
-    setPlaying(false)
-    setCurrent(cap)
-    if (!gateHit) {
-      setGateHit(true)
-      trackEvent('preview_limit_reached', { seconds: cap })
-    }
-    openPreview('limit')
-    gatingRef.current = false
-  }, [cap, gateHit, openPreview, safePause])
+  /**
+   * The 10-minute wall. Pauses, snaps back to the cap and hands off to the
+   * upsell dialog.
+   *
+   * Deliberately SYNCHRONOUS. This used to `await safePause()` first, which
+   * deadlocked the entire gate: `safePause` awaits the pending `play()` promise,
+   * and `play()` never settles while the media is still unresolved
+   * (`readyState 0` — offline, a blocked CDN, a slow stream). The await then
+   * never returned, so `openPreview()` was never reached AND `gatingRef` stayed
+   * latched `true`, permanently disabling both triggers. The dialog is the whole
+   * point of the feature, so nothing here may sit behind an await on the
+   * network. `video.pause()` is safe to call directly because `safePlay`
+   * already attached a rejection handler to that promise, so the resulting
+   * AbortError is caught there rather than surfacing as an unhandled rejection.
+   *
+   * `reason` distinguishes the two entry points the spec calls for: running out
+   * the preview vs. trying to scrub past it.
+   */
+  const enforceGate = useCallback(
+    (reason: PreviewReason) => {
+      const video = videoRef.current
+      if (!video) return
+      // The dialog is already up: `timeupdate` fires several times before the
+      // pause lands, and this keeps those from re-reporting `modal_view`.
+      // Reading live dialog state rather than a ref means dismissing the dialog
+      // re-arms the gate, so hitting the wall again still converts.
+      if (previewReason !== null) return
+
+      video.pause()
+      // Clamp only when past the wall; `onEnded` on a source shorter than the
+      // cap must not seek forward into a black frame.
+      if (video.currentTime > cap) video.currentTime = cap
+      setPlaying(false)
+      setCurrent(Math.min(video.currentTime, cap))
+      if (!gateHit) {
+        setGateHit(true)
+        trackEvent('preview_limit_reached', { seconds: cap })
+      }
+      openPreview(reason)
+    },
+    [cap, gateHit, openPreview, previewReason],
+  )
 
   function handleTimeUpdate() {
     const video = videoRef.current
     if (!video) return
     if (video.currentTime >= cap) {
-      void enforceGate()
+      // Trigger 1: the preview simply ran out.
+      enforceGate('limit')
       return
     }
     setCurrent(video.currentTime)
@@ -186,7 +220,8 @@ export function ImmersivePlayer({
     const video = videoRef.current
     if (!video) return
     if (video.currentTime >= cap) {
-      void enforceGate()
+      // Already parked at the wall: re-surface the upsell instead of resuming.
+      enforceGate('limit')
       return
     }
     // If the controls are currently hidden mid-playback, the first tap only
@@ -210,7 +245,7 @@ export function ImmersivePlayer({
       // Paused: controls stay up, so cancel the pending hide.
       if (hideTimerRef.current) clearTimeout(hideTimerRef.current)
       setShowControls(true)
-      void safePause()
+      safePause()
     }
   }
 
@@ -242,7 +277,10 @@ export function ImmersivePlayer({
     if (requested >= cap) {
       trackEvent('preview_scrub_locked', { requested: Math.round(requested) })
       target.value = String(Math.floor(cap))
-      void enforceGate()
+      // Trigger 2: dragged to or past the wall. Reported as 'scrub', not
+      // 'limit' — this path used to mislabel itself, so the dialog and the
+      // download attribution both blamed the wrong trigger.
+      enforceGate('scrub')
       return
     }
     video.currentTime = requested
@@ -273,7 +311,9 @@ export function ImmersivePlayer({
         loop={false}
         preload="metadata"
         onTimeUpdate={handleTimeUpdate}
-        onEnded={() => void enforceGate()}
+        // Backstop for a source shorter than the cap (the template's sample MP4
+        // ends at ~9:56, just under the 10:00 wall), so the gate still fires.
+        onEnded={() => enforceGate('limit')}
         aria-label={posterAlt}
         tabIndex={-1}
       >
