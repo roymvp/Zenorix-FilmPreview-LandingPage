@@ -1440,10 +1440,37 @@
 
 /* ----------------------------------------------------------------- dialogs */
 
+/* Bottom sheet, not a centered dialog.
+   
+   md-dialog exposes no `::part`, so this reaches the real box indirectly: the
+   `:host` carries all the positioning and the internal `<dialog>` inherits it
+   (`margin: inherit; width: inherit; max-height: inherit; border-radius:
+   inherit`). Styling the host therefore drives the actual sheet.
+   
+   `margin: auto auto 0` is the whole trick. The UA gives a modal `<dialog>`
+   `inset: 0`, so `auto` on top and the sides with `0` at the bottom pins the
+   sheet flush to the bottom edge and centers it horizontally — replacing the
+   host's default `margin: auto`, which is what centered it vertically. */
 .zx-dialog {
   --md-dialog-container-color: var(--md-sys-color-surface-container-high);
-  --md-dialog-container-shape: 28px;
+  /* Top corners only: the bottom edge is flush with the viewport, so rounding
+     it would leave two slivers of scrim under the sheet. Logical names —
+     `start-*` is the top pair in horizontal-tb. */
+  --md-dialog-container-shape-start-start: 28px;
+  --md-dialog-container-shape-start-end: 28px;
+  --md-dialog-container-shape-end-end: 0;
+  --md-dialog-container-shape-end-start: 0;
+
+  margin: auto auto 0;
+  /* Tracks the page column (--zx-page-max) so the sheet lines up with the
+     content above it on desktop, and goes edge-to-edge on any phone narrower
+     than that. */
+  width: 100%;
   max-width: 420px;
+  /* Half-screen: tall enough for the copy, never more than half the viewport.
+     `svh` avoids the mobile-browser bar resize that makes `vh` jump mid-scroll.
+     Content beyond this scrolls, which md-dialog already handles. */
+  max-height: min(560px, 50svh);
 }
 
 .zx-dialog-art {
@@ -1474,6 +1501,14 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
+  /* Neutralizes md-dialog's `slot[name=headline]::slotted(*){align-items:center}`.
+     That rule is written for a ROW of icon + text, but this slot is a COLUMN, so
+     the cross axis is horizontal and it was centering everything sideways — the
+     key art has no width of its own, so it collapsed to the image's intrinsic
+     size and rendered as a narrow strip floating in the middle of the sheet
+     instead of a full-bleed header. Stretch also left-aligns the eyebrow and
+     heading, matching the body copy below them. */
+  align-items: stretch;
 }
 
 .zx-dialog-headline strong {
@@ -1521,6 +1556,11 @@
   flex-direction: column;
   gap: 8px;
   width: 100%;
+  /* The sheet sits flush against the bottom edge, so the install button would
+     land under the home indicator / gesture bar without this. Overrides only the
+     bottom of md-dialog's `::slotted` padding shorthand — document styles beat
+     `::slotted`, so the other three sides still come from the component. */
+  padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
 }
 
 /* No height override: this used to trim the CTA to 52px because the in-page base
