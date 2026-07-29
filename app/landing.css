@@ -113,8 +113,21 @@
   padding-inline: var(--zx-gutter);
 }
 
+/* SECTION RHYTHM — single-owner model.
+   Each section owns ONLY the space above itself, and never below. That is the whole
+   reason this is `var(--zx-section-y) 0` and not a symmetric `var(--zx-section-y)`.
+
+   Symmetric padding is what made the page's spacing look arbitrary: two adjacent
+   sections each paid the full step, so every boundary SUMMED to double. Measured
+   before this change, the section boundaries ran 20 / 100 / 56 / 56 / 79 / 65px —
+   the 100px hole under the synopsis was 40px of `.zx-info` bottom + a 20px trailing
+   margin + 40px of `.zx-chart` top, while `About` (which overrode the step down to
+   16px) got barely half that. Nobody chose either number; they were byproducts.
+
+   With one owner, any boundary is exactly one step, whatever order the sections are
+   in and whatever gets added later. */
 .zx-section {
-  padding-block: var(--zx-section-y);
+  padding-block: var(--zx-section-y) 0;
 }
 
 /* One heading treatment for every section: no eyebrows, no sub-decks.
@@ -358,7 +371,11 @@
    metadata line moved out of the player overlay, so they use on-surface colors
    rather than the --zx-on-media pair. */
 .zx-tag {
-  padding: 2px 7px;
+  /* 8px inline, matching `.zx-genre`. These two chip types sit side by side in the
+     same metadata row, so they were 7px vs 9px against each other — a difference with
+     no meaning that just made the row look unevenly set. They stay distinguishable by
+     SHAPE and fill (outlined 5px rect vs filled pill), not by padding. */
+  padding: var(--zx-space-05) var(--zx-space-2);
   border-radius: 5px;
   border: 1px solid var(--md-sys-color-outline-variant);
   color: var(--md-sys-color-on-surface-variant);
@@ -428,7 +445,7 @@
 .zx-player-time {
   display: flex;
   justify-content: space-between;
-  margin: 0 0 5px;
+  margin: 0 0 var(--zx-space-1);
   font-size: var(--zx-text-label);
   font-weight: var(--zx-weight-semibold);
   font-variant-numeric: tabular-nums;
@@ -572,10 +589,11 @@
 /* No gradient blend out of the player: the page has ONE background color and
    the video frame's own edge is the transition. */
 .zx-info {
-  /* Asymmetric on purpose: 20px above (the video frame's own edge already separates
-     this from the player, so it needs less) and a full section step below. Was an
-     off-scale 18px. */
-  padding-block: var(--zx-space-5) var(--zx-section-y);
+  /* The one deliberate exception to the 40px step: 20px below the player. The video
+     frame has its own hard edge that already reads as a separator, so a full step
+     here just detaches the title from the film it belongs to.
+     Bottom is 0 — the following section owns that gap. */
+  padding-block: var(--zx-space-5) 0;
 }
 
 /* The film title now lives here rather than over the video, so it is the page's
@@ -605,9 +623,11 @@
 }
 
 .zx-synopsis-wrap {
-  /* 16px above / 20px below, was 14/20. The synopsis is a separate block from the
-     metadata line above it, so it takes the section-internal `space-4` step. */
-  margin: var(--zx-space-4) 0 var(--zx-space-5);
+  /* Bottom margin is 0, not 20px. As the section's LAST child, any bottom margin here
+     is invisible on its own and simply adds to the following section's step — it was
+     20px of the old 100px gap. Trailing space belongs to the section rhythm, not to
+     the last element inside a section. */
+  margin: var(--zx-space-4) 0 0;
 }
 
 /* Clamped to 2 lines and expanded in place by the toggle below: the synopsis is
@@ -641,8 +661,8 @@
   display: inline-flex;
   align-items: center;
   gap: var(--zx-space-05);
-  margin-block-start: 4px;
-  padding: 4px 0;
+  margin-block-start: var(--zx-space-1);
+  padding: var(--zx-space-1) 0;
   border: 0;
   background: transparent;
   color: var(--md-sys-color-primary);
@@ -667,7 +687,8 @@
 /* Genre chips. These now sit inline in .zx-film-meta (after the runtime), so
    they are sized to that 13px line rather than as standalone pills. */
 .zx-genre {
-  padding: 2px 9px;
+  /* 8px inline, matching `.zx-tag` — see the note there. */
+  padding: var(--zx-space-05) var(--zx-space-2);
   border-radius: 999px;
   background: var(--md-sys-color-surface-container-high);
   color: var(--md-sys-color-on-surface-variant);
@@ -886,7 +907,10 @@
    read as secondary to the filled install CTA above it while still being an
    obvious tap target at the end of the list. */
 .zx-chart-more-wrap {
-  margin-block-start: 14px;
+  /* 20px, was an off-scale 14px. The button is its own block concluding the section,
+     so it must sit LOOSER than the 16px that binds the title to the rail — at 14px it
+     was tighter than that bond and read as part of the rail. */
+  margin-block-start: var(--zx-space-5);
 }
 
 .zx-chart-more {
@@ -941,7 +965,7 @@
 /* The button states the action; this line states the size of the payoff. Kept
    quiet and centred under the pill so it reads as a caption, not a second CTA. */
 .zx-chart-more-hint {
-  margin: 8px 0 0;
+  margin: var(--zx-space-2) 0 0;
   color: var(--md-sys-color-on-surface-variant);
   font-size: var(--zx-text-caption);
   line-height: 1.45;
@@ -951,38 +975,36 @@
 
 /* ------------------------------------------------------------ about zenorix */
 
-/* Density pass, scoped to this section only. The goal is the whole argument —
-   four claims plus the install button — landing inside one phone screen, since a
-   comparison the reader has to scroll through loses the comparison. Trimmed from
-   the shared 44px band and the title's 18px gap; the other sections keep the
-   page's looser rhythm because none of them need to be read as a single unit. */
-/* 16px `space-4`, down from an off-scale 18px. Moving DOWN the scale rather than up
-   is deliberate: Thai sets taller than Latin at the same font-size, so this section
-   runs ~7px longer in th, and the height budget is set by the tallest locale. */
-.zx-section--about {
-  padding-block: var(--zx-space-4);
-}
+/* This section used to run a "density pass": `padding-block` overridden down to 16px
+   and its title pulled to 10px, chasing the goal of fitting all four claims plus the
+   button on one screen. That is what made the page read as unevenly spaced — `About`
+   sat 16px from its neighbours while every other boundary was 40-100px, so the
+   densest part of the page also had the least air around it, and the cards ran
+   together into one grey mass.
 
-/* This section's title sits closer to its cards than the page default, because the
-   cards are a tight visual set rather than prose. `space-25`, was a raw 10px. */
-.zx-section--about .zx-section-title {
-  margin-block-end: var(--zx-space-25);
-}
+   Both overrides are gone; it uses the shared section rhythm and the shared 16px
+   title step. The one-screen goal is still met, but by the rhythm fix rather than by
+   local squeezing: dropping the double-paid boundaries removed ~150px of dead space
+   from the page, which buys far more than these two overrides ever did. */
 
 /* Outlined cards, no fill: the border alone does the grouping so the section
    still sits on the page's single surface. */
 .zx-about {
   display: flex;
   flex-direction: column;
-  gap: var(--zx-space-2);
+  /* 12px between cards, up from 8px. 8px was the same value used for items INSIDE a
+     card, so card-to-card and item-to-item were indistinguishable and the four
+     outlined boxes read as one block. Card-to-card must be a step looser than
+     anything within a card. */
+  gap: var(--zx-space-3);
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
-/* 16px inner padding against the 8px gap BETWEEN cards. Inner must stay larger than
+/* 16px inner padding against the 12px gap BETWEEN cards. Inner must stay larger than
    outer — that ratio is what keeps four adjacent cards reading as four objects
-   rather than one continuous block. Was an off-scale 14px. */
+   rather than one continuous block. */
 .zx-about-card {
   display: flex;
   flex-direction: column;
@@ -1028,7 +1050,7 @@
 /* Clear of the last card so the button reads as the whole section's conclusion
    rather than as part of the trial card. */
 .zx-about-cta {
-  margin-block-start: 12px;
+  margin-block-start: var(--zx-space-3);
 }
 
 /* Filled pill. `align-items: flex-start` on the card keeps it hugging its own
@@ -1353,7 +1375,7 @@
   align-items: center;
   justify-content: space-between;
   gap: var(--zx-space-4);
-  padding-block: 16px;
+  padding-block: var(--zx-space-4);
   cursor: pointer;
   color: var(--md-sys-color-on-surface);
   font-weight: var(--zx-weight-semibold);
@@ -1407,6 +1429,12 @@
    top of this file. No backdrop image, no tint, no gradient. */
 .zx-final {
   text-align: center;
+  /* The single documented exception to "never pay below". Every other section can
+     leave its trailing space to the next section, but the footer is not a peer
+     section — it is a terminal band whose own padding is measured from its top
+     border inward. So the last content section has to close itself, or the CTA
+     caption would sit only 24px from the footer rule. */
+  padding-block-end: var(--zx-section-y);
 }
 
 /* Button-only section now that the headline is gone, so it needs no internal
@@ -1494,7 +1522,7 @@
   align-items: center;
   gap: 1px;
   height: 32px;
-  padding: 0 4px;
+  padding: 0 var(--zx-space-1);
   border: 0;
   background: transparent;
   color: var(--md-sys-color-on-surface-variant);
