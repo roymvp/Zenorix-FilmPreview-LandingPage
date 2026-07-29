@@ -1,4 +1,3 @@
-import { DownloadCta } from '@/components/landing/download-cta'
 import { FilmSynopsis } from '@/components/landing/film-synopsis'
 
 /** Genre chips shown in the metadata row. More than two wraps the line. */
@@ -10,6 +9,9 @@ const MAX_GENRES = 2
  * This is the ONLY place the title, specs, genres and synopsis appear — the
  * player frame is left clean and there is no second "about this film" section
  * repeating the same facts further down the page.
+ *
+ * Deliberately has NO install button: the first ask now comes after the Top 10
+ * and the About section have given the reader a reason to say yes.
  */
 export function FilmInfo({
   title,
@@ -18,8 +20,6 @@ export function FilmInfo({
   qualityTags,
   synopsis,
   genres,
-  cta,
-  ctaSub,
   expandLabel,
   collapseLabel,
 }: {
@@ -35,8 +35,6 @@ export function FilmInfo({
    * here is a layout choice and costs nothing in SEO.
    */
   genres: string[]
-  cta: string
-  ctaSub: string
   /** Labels for the synopsis show-more / show-less toggle. */
   expandLabel: string
   collapseLabel: string
@@ -76,8 +74,6 @@ export function FilmInfo({
           expandLabel={expandLabel}
           collapseLabel={collapseLabel}
         />
-
-        <DownloadCta label={cta} sub={ctaSub} source="film_info" />
       </div>
     </section>
   )

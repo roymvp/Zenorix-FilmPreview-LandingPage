@@ -32,8 +32,6 @@
     "seek": "Avançar dentro da prévia gratuita"
   },
   "info": {
-    "cta": "Install Zenorix. Watch Full Moive Free.",
-    "ctaSub": "Android APK · {size} · {downloads}",
     "synopsisExpand": "Mais",
     "synopsisCollapse": "Menos"
   },
@@ -47,7 +45,7 @@
   "about": {
     "heading": "Sobre a Zenorix",
     "apps": {
-      "label": "Mais de 20 apps top em um só"
+      "label": "Mais de 20 canais premium em um só"
     },
     "price": {
       "label": "Preço imbatível",
@@ -55,13 +53,14 @@
     },
     "viewing": {
       "label": "Experiência de cinema",
-      "items": ["4K Ultra HD", "Dolby Atmos", "Zero travamento"]
+      "items": ["4K Ultra HD", "Dolby Atmos", "Sem travar"]
     },
     "trial": {
       "label": "Teste fácil",
-      "value": "30 DIAS GRÁTIS.",
-      "note": "Não precisa de cartão de crédito."
-    }
+      "value": "30 DIAS GRÁTIS",
+      "note": "Não precisa de cartão para começar."
+    },
+    "cta": "Gostou? Baixe o app Zenorix"
   },
   "faq": {
     "heading": "FAQ",

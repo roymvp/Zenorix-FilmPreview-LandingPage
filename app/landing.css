@@ -868,74 +868,69 @@
 
 /* ------------------------------------------------------------ about zenorix */
 
-/* Quiet label, loud answer. The whole section runs on ONE contrast rule: the
-   label is 11px uppercase muted, the proof beneath it is display-scale. Rows
-   are separated by hairlines only — no cards, matching the page's single
-   surface. */
+/* Outlined cards, no fill: the border alone does the grouping so the section
+   still sits on the page's single surface. */
 .zx-about {
   display: flex;
   flex-direction: column;
+  gap: 12px;
   margin: 0;
   padding: 0;
   list-style: none;
-  border-block-start: 1px solid var(--md-sys-color-outline-variant);
 }
 
-.zx-about-row {
+.zx-about-card {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  padding-block: 22px;
-  border-block-end: 1px solid var(--md-sys-color-outline-variant);
+  align-items: flex-start;
+  gap: 12px;
+  padding: 18px;
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: 16px;
+  background: transparent;
 }
 
-/* The section's own bottom padding already separates it from the FAQ, so a
-   closing hairline would just float above a dead gap. */
-.zx-about-row:last-child {
-  border-block-end: 0;
-  padding-block-end: 0;
-}
-
-/* Clear of the last row's proof text so the button reads as the whole section's
-   conclusion rather than as part of the trial row. */
+/* Clear of the last card so the button reads as the whole section's conclusion
+   rather than as part of the trial card. */
 .zx-about-cta {
-  margin-block-start: 24px;
+  margin-block-start: 20px;
 }
 
+/* Filled pill. `align-items: flex-start` on the card keeps it hugging its own
+   text instead of stretching the full card width. */
 .zx-about-label {
   margin: 0;
-  color: var(--md-sys-color-on-surface-variant);
+  padding: 5px 10px;
+  border-radius: 8px;
+  background: var(--md-sys-color-primary-container);
+  color: var(--md-sys-color-on-primary-container);
   font-size: 11px;
   font-weight: 600;
-  letter-spacing: 0.11em;
-  line-height: 1.3;
+  letter-spacing: 0.09em;
+  line-height: 1.25;
   text-transform: uppercase;
 }
 
-/* The shared display treatment. Tight leading and negative tracking so a long
-   value ("30 DAYS FREE.") still reads as one confident block at 420px. */
-.zx-about-display {
+/* ONE treatment for all four cards' content — same size, weight and color, so
+   no single claim outranks the others. Tight leading and negative tracking keep
+   a longer value ("30 DAYS FREE") reading as one confident block at 420px. */
+.zx-about-value {
   margin: 0;
-  font-size: 27px;
+  font-size: 26px;
   font-weight: 700;
-  line-height: 1.12;
+  line-height: 1.15;
   letter-spacing: -0.02em;
   color: var(--md-sys-color-on-surface);
   text-wrap: balance;
 }
 
-/* The price is the wedge, so it gets the one size nothing else on the page
-   uses, plus the accent color to break the neutral run. */
-.zx-about-price {
-  font-size: 40px;
-  letter-spacing: -0.03em;
-  color: var(--md-sys-color-primary);
-}
-
+/* Inline run, wrapping as needed. The column gap is wide enough to separate the
+   specs without punctuation. */
 .zx-about-specs {
   display: flex;
-  flex-direction: column;
-  gap: 4px;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 14px;
   margin: 0;
   padding: 0;
   list-style: none;

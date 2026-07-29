@@ -5,16 +5,13 @@ import { PLATFORMS, PLATFORM_ORDER } from '@/lib/content/platforms'
  * About Zenorix — the merged replacement for the old brand strip and the
  * "three reasons people switch" bullets.
  *
- * Both predecessors said the same four things in two different visual
- * languages, so they are now one section with one rule: the LABEL is quiet
- * (small, uppercase, muted) and the ANSWER is loud. Every row therefore reads
- * as claim-then-proof at a glance while scrolling, and no row needs body copy
- * to carry it.
- *
- * The four rows deliberately use four different proof shapes — a logo wall, a
- * price, a spec list, a trial offer — because the type scale alone is what
- * unifies them; repeating one card shape would flatten the contrast that makes
- * the price and the trial land.
+ * Four outlined cards, all on the page's single surface: the border is the only
+ * container (no fill), so the cards group the claims without introducing a
+ * second background. Each card is chip-then-proof — a filled pill label, then
+ * the answer in ONE shared type treatment (same size, weight and color across
+ * all four rows). That uniformity is the point: with nothing competing on
+ * emphasis, the four cards read as one balanced set of facts rather than a
+ * ranked list, and the only accent left on the section is the closing CTA.
  */
 export function AboutZenorix({
   heading,
@@ -25,15 +22,15 @@ export function AboutZenorix({
   cta,
 }: {
   heading: string
-  /** Row 1 label. Its "content" is the platform icon wall itself. */
+  /** Card 1 label. Its "content" is the platform icon matrix itself. */
   apps: { label: string }
-  /** Row 2: the wedge. Rendered at the largest size on the page. */
+  /** Card 2: the price wedge. */
   price: { label: string; value: string }
-  /** Row 3: playback specs, one per line so each gets display weight. */
+  /** Card 3: playback specs, laid out as one inline run. */
   viewing: { label: string; items: string[] }
-  /** Row 4: the offer, plus the objection it removes. */
+  /** Card 4: the offer, plus the objection it removes. */
   trial: { label: string; value: string; note: string }
-  /** Short install label for the section-closing button. */
+  /** Label for the section-closing install button. */
   cta: string
 }) {
   return (
@@ -44,10 +41,8 @@ export function AboutZenorix({
         </h2>
 
         <ul className="zx-about">
-          <li className="zx-about-row">
+          <li className="zx-about-card">
             <p className="zx-about-label">{apps.label}</p>
-            {/* The icons ARE the headline here: at 44px the wall carries the
-                same visual weight as the display type in the other rows. */}
             <ul className="zx-about-logos">
               {PLATFORM_ORDER.map((id) => {
                 const platform = PLATFORMS[id]
@@ -68,32 +63,34 @@ export function AboutZenorix({
             </ul>
           </li>
 
-          <li className="zx-about-row">
+          <li className="zx-about-card">
             <p className="zx-about-label">{price.label}</p>
-            <p className="zx-about-display zx-about-price">{price.value}</p>
+            <p className="zx-about-value">{price.value}</p>
           </li>
 
-          <li className="zx-about-row">
+          <li className="zx-about-card">
             <p className="zx-about-label">{viewing.label}</p>
+            {/* Wrapping inline run rather than stacked lines: three short specs
+                stacked read as a ranked list, side by side they read as one
+                combined claim. */}
             <ul className="zx-about-specs">
               {viewing.items.map((item) => (
-                <li key={item} className="zx-about-display">
+                <li key={item} className="zx-about-value">
                   {item}
                 </li>
               ))}
             </ul>
           </li>
 
-          <li className="zx-about-row">
+          <li className="zx-about-card">
             <p className="zx-about-label">{trial.label}</p>
-            <p className="zx-about-display">{trial.value}</p>
+            <p className="zx-about-value">{trial.value}</p>
             <p className="zx-about-note">{trial.note}</p>
           </li>
         </ul>
 
         {/* The four claims build to a decision, so the section closes on the
-            action instead of making the reader scroll back for one. Short label
-            here — the long sentence CTA stays reserved for the final close. */}
+            action instead of making the reader scroll back for one. */}
         <div className="zx-about-cta">
           <DownloadCta label={cta} source="about" />
         </div>

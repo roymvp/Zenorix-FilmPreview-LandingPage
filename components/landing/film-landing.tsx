@@ -98,8 +98,6 @@ export function FilmLanding({
             qualityTags={movie.qualityTags}
             synopsis={copy.synopsis}
             genres={copy.genres}
-            cta={dict.info.cta}
-            ctaSub={fill(dict.info.ctaSub, values)}
             expandLabel={dict.info.synopsisExpand}
             collapseLabel={dict.info.synopsisCollapse}
           />
@@ -124,6 +122,7 @@ export function FilmLanding({
             }}
             viewing={dict.about.viewing}
             trial={dict.about.trial}
+            cta={dict.about.cta}
           />
 
           <FaqSection
