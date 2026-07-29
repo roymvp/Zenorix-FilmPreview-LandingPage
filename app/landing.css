@@ -1470,12 +1470,25 @@
      `svh` avoids the mobile-browser bar resize that makes `vh` jump mid-scroll.
      Content beyond this still scrolls, which md-dialog already handles. */
   max-height: min(680px, 86svh);
+  /* The page behind is near-black and the sheet's container color is only a few
+     steps lighter, so without these the sheet's top edge dissolved into the page
+     and it stopped reading as a raised surface. A hairline defines the edge and
+     the lift comes from a large soft shadow, matching how `.zx-chart-card` and
+     the About cards are separated elsewhere on the page. */
+  box-shadow:
+    0 -1px 0 var(--md-sys-color-outline-variant),
+    0 -18px 48px rgba(0, 0, 0, 0.55);
 }
 
 .zx-dialog-art {
   position: relative;
-  height: 132px;
-  margin: -24px -24px 4px;
+  /* 116px of FULLY VISIBLE art. It was 132px with a `-24px` top margin, but the
+     headline slot's padding is `0 24px` — no top padding to cancel — so that
+     margin only shoved the top 24px of the poster up into the container's
+     `overflow: hidden` clip and threw it away, leaving 108px actually on screen.
+     Only the horizontal bleed was ever doing real work. */
+  height: 116px;
+  margin: 0 -24px 4px;
   overflow: hidden;
 }
 
@@ -1514,12 +1527,12 @@
      instead of a full-bleed header. Stretch also left-aligns the eyebrow and
      heading, matching the body copy below them. */
   align-items: stretch;
-  /* Pushes the heading down by 7px so the corner close button — which sits at
+  /* Pushes the heading down by 9px so the corner close button — which sits at
      inset 0 — ends up optically centered on the title's first line. See the
      centering math on .zx-dialog-close. Only applies when the headline STARTS
      with the heading; the poster sheet overrides it below, because there the
      first child is the full-bleed art. */
-  padding-block-start: 7px;
+  padding-block-start: 9px;
 }
 
 /* The poster sheet's art is pulled up by -24px to bleed off the top edge, so any
@@ -1538,7 +1551,7 @@
    resolves against its nearest positioned ancestor. */
 .zx-dialog-heading-stack {
   position: relative;
-  padding-block-start: 7px;
+  padding-block-start: 9px;
 }
 
 /* The close button is a flex child of the stack but absolutely positioned, so it
@@ -1554,10 +1567,16 @@
      natural greedy break and only resolves orphans, so lines break where the
      sentence does. */
   text-wrap: pretty;
-  /* Slightly tighter than the 32px typescale default: at 24px these headings run
-     to two visual lines, and the roomier default made a single heading read as
-     two separate statements. */
-  line-height: 1.25;
+  /* Overrides md-typescale-headline-small's 24px. Each of these headings wraps to
+     two visual lines, and the poster sheet stacks TWO of them — at 24px that was
+     four lines of large type filling half the sheet before a single benefit was
+     visible. 21px keeps the heading clearly dominant over the 15px body while
+     letting the CTA back into view. */
+  font-size: 21px;
+  /* Tighter than the 32px typescale default, and paired with a hair of negative
+     tracking so the wrapped lines read as one confident block. */
+  line-height: 1.28;
+  letter-spacing: -0.01em;
 }
 
 /* Close-button clearance, applied ONLY to the line that actually sits beside it.
@@ -1577,15 +1596,15 @@
    same typescale class, so this only owns the spacing between them — no
    font-size or weight here, which is what keeps the lines truly equal rank.
 
-   The gap is 10px, not the 2px first tried: each line is long enough to wrap to
-   two visual lines on a 420px sheet, and at 2px the four resulting lines read as
-   one paragraph with no visible break between the two statements. 10px is wider
-   than the text's own line spacing, so the split stays legible while the two
-   still group as a single heading block. */
+   The gap is 14px, not the 2px first tried: each line wraps to two visual lines
+   on a 420px sheet, and at 2px the four resulting lines read as one paragraph
+   with no visible break between the two statements. It needs to beat the text's
+   own ~27px line spacing to register as a break at all — 10px was still too close
+   to that to separate them cleanly. */
 .zx-dialog-heading-stack {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 14px;
 }
 
 /* Corner dismiss, replacing the old full-width "Close" text button.
@@ -1607,23 +1626,27 @@
      floated between the sheet's top edge and the text.
 
      The centering math, relative to the headline's own top edge:
-       first line's center = (24px font x 1.25 line-height) / 2 = 15px
+       first line's center = (21px font x 1.28 line-height) / 2 = 13.4px
        disc's own center    = 44px / 2                          = 22px
-       offset               = 15px - 22px                       = -7px
+       offset               = 13.4px - 22px                     = -8.6px
      A negative value would escape the sheet's rounded corner (documented above),
-     so instead the headline reserves 7px of top padding and the disc sits at 0 —
-     same optical result, nothing outside the sheet. */
+     so instead the headline reserves 9px of top padding and the disc sits at 0 —
+     same optical result, nothing outside the sheet. Re-derive both if the heading
+     font-size or line-height changes. */
   inset-block-start: 0;
   inset-inline-end: 8px;
   display: grid;
   place-items: center;
-  /* 44px: the minimum comfortable tap target, kept even though the glyph
-     inside is 20px. */
+  /* 44px BOX for the tap target, 36px VISIBLE disc: `background-clip: content-box`
+     keeps the 4px padding ring transparent, so the full 44px stays touchable while
+     the painted circle shrinks. At a full 44px the filled disc was a heavy grey
+     blob that pulled attention away from the CTA. */
   width: 44px;
   height: 44px;
-  padding: 0;
+  padding: 4px;
   border: 0;
   border-radius: 50%;
+  background-clip: content-box;
   /* Now sits on the sheet's container color in BOTH dialogs (it used to land on
      the poster art, which is why it carried a dark scrim disc and a white glyph).
      A quiet surface tint with the normal low-emphasis on-surface glyph keeps it
@@ -1653,25 +1676,37 @@
   outline-offset: 2px;
 }
 
-/* The "More features in app:" / "Beyond this movie on the app:" line. Left
-   aligned like the heading and bullets above/below it, and set at the same size
-   as the bullet rows so the whole block reads as one list with a label. */
+/* The "More features in app:" / "Beyond this movie on the app:" line.
+
+   Styled as the page's small-caps eyebrow rather than as body text. At 15px/600 it
+   was the same size as the bullets it labels and nearly as loud as the heading
+   above, so the sheet had three competing levels of emphasis. Borrowing
+   `.zx-about-label`'s uppercase-11px-tracked treatment makes it read as a section
+   label — the same role it plays in the About cards — and lets the bullets
+   themselves carry the weight. */
 .zx-dialog-lead {
-  /* 15px, up from 13px. These sheets are the page's conversion moment and 13px
-     was noticeably smaller than the 15px CTA label right below them, so the
-     value props read as fine print. Matches .zx-dialog-bullets li. */
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--md-sys-color-on-surface);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  line-height: 1.25;
+  text-transform: uppercase;
+  color: var(--md-sys-color-primary);
 }
 
+/* The benefit block, given the same container treatment as `.zx-about-card`
+   (1px hairline, 14px radius, 14px padding). Previously the label and bullets
+   floated loose in the sheet with nothing tying them together, which is what made
+   the sheets feel unfinished next to the carded page behind them. Boxing them
+   turns "label + list" into one deliberate unit and visually separates the offer
+   from the heading above and the CTA below. */
 .zx-dialog-body {
   display: flex;
   flex-direction: column;
-  /* 10px, down from 16px: the lead line is now a LABEL for the bullet list
-     directly under it, not a standalone paragraph, so the two have to group
-     visually. The old gap made them read as two separate blocks. */
+  /* 10px: the label sits directly above the list it names, so the two must group. */
   gap: 10px;
+  padding: 14px;
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: 14px;
   color: var(--md-sys-color-on-surface-variant);
   /* Explicit, because md-dialog's content slot inherits the host's centering in
      some engines and the whole block is specified as left aligned. */
@@ -1685,9 +1720,9 @@
 
 .zx-dialog-bullets {
   display: grid;
-  /* 11px, up from 9px: the rows are 15px now, and the old gap left them too
-     tightly packed to scan as separate value props. */
-  gap: 11px;
+  /* 9px: the rows now carry 1.45 internal leading of their own, so the earlier
+     11px on top of that spread the list taller than the heading above it. */
+  gap: 9px;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -1695,20 +1730,26 @@
 
 .zx-dialog-bullets li {
   display: flex;
-  align-items: center;
-  gap: 9px;
+  /* `flex-start`, not `center`: a bullet that wraps to two lines would otherwise
+     float its check against the middle of the block instead of the first line. */
+  align-items: flex-start;
+  gap: 8px;
   color: var(--md-sys-color-on-surface);
-  /* 15px, up from 13px — see the note on .zx-dialog-lead. */
-  font-size: 15px;
-  line-height: 1.35;
+  /* 14.5px: still clearly above the old 13px fine-print, but no longer identical
+     to the CTA label — inside the bordered panel these are supporting detail, not
+     the primary action. */
+  font-size: 14.5px;
+  line-height: 1.45;
 }
 
 .zx-dialog-bullets md-icon {
-  /* Grown with the label text so the check does not look undersized beside it,
-     and pinned with flex-shrink so a wrapping bullet cannot squash the glyph. */
-  font-size: 19px;
-  width: 19px;
-  height: 19px;
+  /* 18px and nudged down 1px so the check's optical center lands on the first
+     line's x-height rather than its ascender. `flex-shrink: 0` stops a wrapping
+     bullet from squashing the glyph. */
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  margin-block-start: 1px;
   flex-shrink: 0;
   color: var(--md-sys-color-primary);
 }
