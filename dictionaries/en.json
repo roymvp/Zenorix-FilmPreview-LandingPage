@@ -38,7 +38,7 @@
     "heading": "Top 10 in {country} This Week",
     "rank": "Number {rank}",
     "seeAllShort": "See all",
-    "more": "See more hit movies & shows",
+    "more": "Install Zenorix App for More Hits",
     "moreHint": "28,000+ movies, 8,000+ shows & live TV channels"
   },
   "about": {
@@ -118,23 +118,31 @@
   },
   "modals": {
     "content": {
-      "eyebrow": "Available in the app",
-      "heading": "Unlock Every Movie & Show",
-      "body": "Get instant access to all 28,000+ titles, including every title on this Top 10 list. First month completely free.",
+      "heading": "Get the app to watch this movie FREE.",
+      "body": "Beyond this movie on the app:",
       "bullets": [
-        "All platforms in one app",
-        "4K Ultra HD",
-        "Multi-language subtitles",
-        "Cancel anytime"
+        "20+ Premium Movie Networks",
+        "28,000+ Movies & Series",
+        "4K Ultra HD & Dolby Atmos",
+        "30 Days Free - Then {annualPerMonth}/mo"
       ],
-      "cta": "Install Zenorix. Watch Full Moive Free.",
+      "cta": "GET THE ZENORIX APP",
+      "ctaMeta": "Android APK · {size} · {downloads}",
       "close": "Close"
     },
     "preview": {
-      "heading": "Love What You're Watching?",
-      "sub": "Finish this entire movie free — plus 28,000 more. Your first month costs {zero}.",
-      "cta": "Install Zenorix. Watch Full Moive Free.",
-      "secondary": "30-second install · No credit card required",
+      "headingLines": [
+        "Web viewing limited to the first {previewMinutes} mins.",
+        "Get the app to watch the FULL movie FREE."
+      ],
+      "body": "More features in app:",
+      "bullets": [
+        "Unlock 28,000+ movies & series",
+        "4K Ultra HD & Dolby Atmos",
+        "30 Days Free - No card needed to start"
+      ],
+      "cta": "Get the Zenorix App",
+      "ctaMeta": "Android APK · {size} · {downloads}",
       "close": "Close"
     }
   },

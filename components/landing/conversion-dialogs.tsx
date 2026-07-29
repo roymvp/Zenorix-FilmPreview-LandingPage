@@ -128,20 +128,60 @@ function useSheetAnimation(ref: React.RefObject<HTMLElement | null>) {
 
 export type DialogCopy = {
   content: {
-    eyebrow: string
     heading: string
     body: string
     bullets: string[]
     cta: string
+    ctaMeta: string
+    /** Accessible name for the corner close button. */
     close: string
   }
   preview: {
-    heading: string
-    sub: string
+    /**
+     * Two lines rendered at IDENTICAL weight and size — they are one heading
+     * split for line control, not a heading plus a subheading. Kept as an array
+     * rather than one string with a `\n` so the break is structural (two
+     * elements) instead of depending on `white-space` styling.
+     */
+    headingLines: string[]
+    body: string
+    bullets: string[]
     cta: string
-    secondary: string
+    ctaMeta: string
     close: string
   }
+}
+
+/**
+ * Top-right dismiss affordance, replacing the full-width "Close" text button
+ * that used to sit under each CTA.
+ *
+ * A plain <button>, not `md-icon-button`: the icon button renders its own 48px
+ * touch-target box and ripple, which cannot be positioned into the sheet's
+ * corner without fighting Material's internals, and it also exposes `form` as a
+ * getter-only property (the same trap documented on the content dialog below).
+ * A native button keeps the 44px tap target and full styling control.
+ *
+ * Absolutely positioned against `.zx-dialog-headline`, so it never takes part in
+ * the headline's flex flow and therefore cannot push the heading text sideways.
+ */
+function CornerClose({
+  label,
+  onClose,
+}: {
+  label: string
+  onClose: () => void
+}) {
+  return (
+    <button
+      type="button"
+      className="zx-dialog-close"
+      onClick={onClose}
+      aria-label={label}
+    >
+      <md-icon aria-hidden="true">close</md-icon>
+    </button>
+  )
 }
 
 /**
@@ -189,28 +229,25 @@ export function ConversionDialogs({
         aria-label={copy.content.heading}
       >
         <div slot="headline" className="zx-dialog-headline">
-          <span className="zx-eyebrow md-typescale-label-small">
-            <md-icon aria-hidden="true">lock_open</md-icon>
-            {copy.content.eyebrow}
-          </span>
+          <CornerClose label={copy.content.close} onClose={closeContent} />
           <strong className="md-typescale-headline-small">
             {copy.content.heading}
           </strong>
         </div>
 
         {/* A plain div, not a `<form method="dialog">`. The form only existed so
-            the Close button could submit it via `form="…"`, but React assigns
-            that prop as a PROPERTY on the custom element and `md-text-button`
-            exposes `form` as getter-only — it threw "Cannot set property form of
+            a Close button could submit it via `form="…"`, but React assigns that
+            prop as a PROPERTY on the custom element and Material's buttons
+            expose `form` as getter-only — it threw "Cannot set property form of
             #<Button> which has only a getter" and the association never
             happened. An explicit onClick is both simpler and actually works. */}
         <div slot="content">
           <div className="zx-dialog-body">
-            <p className="md-typescale-body-medium">{copy.content.body}</p>
+            <p className="zx-dialog-lead">{copy.content.body}</p>
             <ul className="zx-dialog-bullets">
               {copy.content.bullets.map((bullet) => (
                 <li key={bullet}>
-                  <md-icon aria-hidden="true">check_circle</md-icon>
+                  <md-icon aria-hidden="true">check</md-icon>
                   {bullet}
                 </li>
               ))}
@@ -221,11 +258,9 @@ export function ConversionDialogs({
         <div slot="actions" className="zx-dialog-actions">
           <DownloadCta
             label={copy.content.cta}
+            sub={copy.content.ctaMeta}
             source={`content_lock:${contentTitle ?? 'unknown'}`}
           />
-          <md-text-button onClick={closeContent}>
-            {copy.content.close}
-          </md-text-button>
         </div>
       </md-dialog>
 
@@ -234,35 +269,50 @@ export function ConversionDialogs({
         ref={previewRef}
         className="zx-dialog"
         open={previewReason !== null}
-        aria-label={copy.preview.heading}
+        /* Both heading lines, joined: the accessible name has to carry the whole
+           message, and the visual break between them is not meaningful to a
+           screen reader. */
+        aria-label={copy.preview.headingLines.join(' ')}
       >
         <div slot="headline" className="zx-dialog-headline">
           <span className="zx-dialog-art">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            {/* Decorative: the heading beside it already names the film, so alt
-                text here would only repeat it for screen readers. */}
+            {/* Decorative: the heading below already carries the whole message,
+                so alt text here would add nothing for screen readers. */}
             <img src={previewFrame} alt="" />
           </span>
-          <strong className="md-typescale-headline-small">
-            {copy.preview.heading}
-          </strong>
+          <CornerClose label={copy.preview.close} onClose={closePreview} />
+          {/* One heading, two lines, one <strong> per line so both inherit the
+              exact same typescale — see the note on `headingLines`. */}
+          <span className="zx-dialog-heading-stack">
+            {copy.preview.headingLines.map((line) => (
+              <strong key={line} className="md-typescale-headline-small">
+                {line}
+              </strong>
+            ))}
+          </span>
         </div>
 
         <div slot="content">
           <div className="zx-dialog-body">
-            <p className="md-typescale-body-medium">{copy.preview.sub}</p>
+            <p className="zx-dialog-lead">{copy.preview.body}</p>
+            <ul className="zx-dialog-bullets">
+              {copy.preview.bullets.map((bullet) => (
+                <li key={bullet}>
+                  <md-icon aria-hidden="true">check</md-icon>
+                  {bullet}
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
 
         <div slot="actions" className="zx-dialog-actions">
           <DownloadCta
             label={copy.preview.cta}
-            sub={copy.preview.secondary}
+            sub={copy.preview.ctaMeta}
             source={`preview_gate:${previewReason ?? 'limit'}`}
           />
-          <md-text-button onClick={closePreview}>
-            {copy.preview.close}
-          </md-text-button>
         </div>
       </md-dialog>
     </>

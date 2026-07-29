@@ -69,21 +69,9 @@
   color: var(--md-sys-color-on-surface);
 }
 
-.zx-eyebrow {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  color: var(--md-sys-color-primary);
-  text-transform: uppercase;
-  letter-spacing: 0.09em;
-  font-weight: 700;
-}
-
-.zx-eyebrow md-icon {
-  font-size: 16px;
-  width: 16px;
-  height: 16px;
-}
+/* NOTE: `.zx-eyebrow` lived here. Its only user was the locked-title dialog's
+   "Available in the app" kicker, which was removed when that sheet's copy was
+   reduced to a heading + bullet list, so the rule went with it. */
 
 /* ---------------------------------------------------------------- top bar */
 
@@ -828,7 +816,14 @@
   width: 100%;
   min-height: 46px;
   padding: 0 18px;
-  border: 1px solid var(--md-sys-color-outline);
+  /* Bright border, not the muted `outline` token. This pill is the rail's tail
+     action and sits alone on the page surface, where a low-contrast hairline
+     read as a disabled input rather than a button. `on-surface` is the body-text
+     color, so the edge is now as legible as the label inside it — while staying
+     outlined, since filled-vs-outlined is what keeps the install CTA primary. */
+  /* 2px, not 1.5px: a fractional border snaps back to 1px at common DPRs, which
+     silently defeated the whole point of brightening it. */
+  border: 2px solid var(--md-sys-color-on-surface);
   border-radius: 999px;
   background: transparent;
   color: var(--md-sys-color-on-surface);
@@ -1467,10 +1462,14 @@
      than that. */
   width: 100%;
   max-width: 420px;
-  /* Half-screen: tall enough for the copy, never more than half the viewport.
+  /* Raised from 50svh: both sheets now carry a heading, a lead line, a 3-4 item
+     bullet list, the CTA and its meta line, and at half a viewport the bullets
+     became an internal scroller — which hides exactly the value props the sheet
+     exists to show. 86svh keeps a clear band of scrim above it so it still reads
+     as a sheet over the page rather than a full-screen takeover.
      `svh` avoids the mobile-browser bar resize that makes `vh` jump mid-scroll.
-     Content beyond this scrolls, which md-dialog already handles. */
-  max-height: min(560px, 50svh);
+     Content beyond this still scrolls, which md-dialog already handles. */
+  max-height: min(680px, 86svh);
 }
 
 .zx-dialog-art {
@@ -1498,6 +1497,8 @@
 }
 
 .zx-dialog-headline {
+  /* Anchor for the absolutely positioned .zx-dialog-close. */
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -1514,13 +1515,98 @@
 .zx-dialog-headline strong {
   color: var(--md-sys-color-on-surface);
   text-wrap: balance;
+  /* Keeps the heading clear of the corner close button, which is absolutely
+     positioned and so contributes no width of its own to reflow around. */
+  padding-inline-end: 40px;
+}
+
+/* The two-line heading on the poster sheet. Both lines are <strong> with the
+   same typescale class, so this only owns the spacing between them — no
+   font-size or weight here, which is what keeps the lines truly equal rank.
+
+   The gap is 10px, not the 2px first tried: each line is long enough to wrap to
+   two visual lines on a 420px sheet, and at 2px the four resulting lines read as
+   one paragraph with no visible break between the two statements. 10px is wider
+   than the text's own line spacing, so the split stays legible while the two
+   still group as a single heading block. */
+.zx-dialog-heading-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Corner dismiss, replacing the old full-width "Close" text button.
+
+   On the poster sheet it lands ON the key art, so it carries its own scrim disc
+   — without one the glyph disappeared against a bright frame. The disc is dark
+   and the glyph light in both sheets, since a single treatment that works over
+   art also works over the container color and avoids an art-only variant.
+
+   Offsets are POSITIVE, never negative. Negative values (tried -8px) push the
+   disc past the sheet's 28px rounded corner so it renders half outside, floating
+   on the page. Even `0` is not safe on the poster sheet: `.zx-dialog-art` is
+   pulled up by -24px to bleed the art, which drags the headline's own top edge
+   above the sheet's, and the button went with it. The +8px block offset re-enters
+   the sheet in both dialogs, and stays clear of the corner curve. */
+.zx-dialog-close {
+  position: absolute;
+  z-index: 2;
+  /* Measured, not guessed: these put the disc 8px from the sheet's top edge and
+     8px from its right edge. `end: 0` alone sat flush against the right edge
+     because md-dialog's slot padding is already consumed by the art bleed. */
+  inset-block-start: 8px;
+  inset-inline-end: 8px;
+  display: grid;
+  place-items: center;
+  /* 44px: the minimum comfortable tap target, kept even though the glyph
+     inside is 20px. */
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(6, 5, 4, 0.55);
+  color: #fff;
+  cursor: pointer;
+  appearance: none;
+  transition: background-color 180ms ease;
+}
+
+.zx-dialog-close md-icon {
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+}
+
+.zx-dialog-close:hover {
+  background: rgba(6, 5, 4, 0.75);
+}
+
+.zx-dialog-close:focus-visible {
+  outline: 2px solid var(--md-sys-color-primary);
+  outline-offset: 2px;
+}
+
+/* The "More features in app:" / "Beyond this movie on the app:" line. Left
+   aligned like the heading and bullets above/below it, and set at the same size
+   as the bullet rows so the whole block reads as one list with a label. */
+.zx-dialog-lead {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--md-sys-color-on-surface);
 }
 
 .zx-dialog-body {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  /* 10px, down from 16px: the lead line is now a LABEL for the bullet list
+     directly under it, not a standalone paragraph, so the two have to group
+     visually. The old gap made them read as two separate blocks. */
+  gap: 10px;
   color: var(--md-sys-color-on-surface-variant);
+  /* Explicit, because md-dialog's content slot inherits the host's centering in
+     some engines and the whole block is specified as left aligned. */
+  text-align: start;
 }
 
 .zx-dialog-body p {

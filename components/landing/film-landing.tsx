@@ -37,7 +37,15 @@ export function FilmLanding({
   path: (locale: Locale) => string
 }) {
   const copy = movie.copy[locale]
-  const values = { ...marketValues(dict), title: copy.title, year: movie.releaseYear }
+  const values = {
+    ...marketValues(dict),
+    title: copy.title,
+    year: movie.releaseYear,
+    /* The web preview length, in whole minutes, for the gate dialog's headline.
+       Rounded because the copy reads "the first N mins" — a fractional limit
+       would otherwise print as "9.5". */
+    previewMinutes: Math.round(movie.previewLimitSeconds / 60),
+  }
 
   const localeHrefs = {
     en: path('en'),
@@ -164,18 +172,24 @@ export function FilmLanding({
           previewFrame={movie.previewFrame}
           copy={{
             content: {
-              eyebrow: dict.modals.content.eyebrow,
               heading: dict.modals.content.heading,
-              body: fill(dict.modals.content.body, values),
-              bullets: dict.modals.content.bullets,
+              body: dict.modals.content.body,
+              bullets: dict.modals.content.bullets.map((b) => fill(b, values)),
               cta: dict.modals.content.cta,
+              ctaMeta: fill(dict.modals.content.ctaMeta, values),
               close: dict.modals.content.close,
             },
             preview: {
-              heading: dict.modals.preview.heading,
-              sub: fill(dict.modals.preview.sub, values),
+              // `previewMinutes` is derived from the film's own gate rather than
+              // hardcoded as "10" in copy, so a movie with a different
+              // previewLimitSeconds can never contradict its own dialog.
+              headingLines: dict.modals.preview.headingLines.map((line) =>
+                fill(line, values),
+              ),
+              body: dict.modals.preview.body,
+              bullets: dict.modals.preview.bullets.map((b) => fill(b, values)),
               cta: dict.modals.preview.cta,
-              secondary: dict.modals.preview.secondary,
+              ctaMeta: fill(dict.modals.preview.ctaMeta, values),
               close: dict.modals.preview.close,
             },
           }}
