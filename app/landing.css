@@ -926,6 +926,20 @@
   align-self: flex-start;
 }
 
+/* Pulls the caveat up under "30 DAYS FREE" so the two read as one offer rather
+   than as two stacked statements — the note only qualifies the value above it,
+   and at the card's full 8px it floated equidistant between the value and the
+   card edge, reading as an independent third line.
+
+   Negative margin because `gap` cannot be varied per item: the card is a flex
+   column, so the 8px applies to every child equally. Offsetting the one child
+   is the only way to tighten a single joint without giving up gap entirely and
+   hand-spacing all three. Kept at -4px (4px effective) rather than 0 so the
+   lines still separate as two distinct pieces of information. */
+.zx-about-card--centered .zx-about-note {
+  margin-block-start: -4px;
+}
+
 /* Clear of the last card so the button reads as the whole section's conclusion
    rather than as part of the trial card. */
 .zx-about-cta {
