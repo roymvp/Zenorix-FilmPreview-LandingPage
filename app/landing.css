@@ -1100,106 +1100,70 @@
 }
 
 /* --- price anchor -----------------------------------------------------------
-   Two rows, each "name ... amount" over a proportional bar. The card sets
-   `align-items: flex-start`, so this block has to claim full width itself for
-   the bars to be measurable against each other. */
+   A two-row bar chart: each row is "price ─ bar", with the plan name inside its
+   own bar. The card sets `align-items: flex-start`, so this block has to claim
+   full width itself for the bars to be measurable against each other.
+
+   ONE grid owns both rows, which is the point of the structure. The price column
+   is `auto`, so it sizes to the WIDEST price across both rows and both bars start
+   on the same edge — in every locale, with no fixed width to maintain. That
+   matters here because the prices are not comparable strings: "$1.25/mo" is 85px
+   while "> 1,000 บาท/เดือน" is far wider, so any hardcoded column would either
+   clip Thai or leave a gap in English. The previous markup wrapped each row in
+   its own flex column, so each row sized its price independently and the two bars
+   could not share a start edge at all. */
 .zx-compare {
   width: 100%;
-  display: flex;
-  flex-direction: column;
-  /* Contract rule 4, sibling-row step: 12px, was 10px. */
+  display: grid;
+  grid-template-columns: auto 1fr;
+  /* `dense` lets the `dt` (the bar, column 2) come first in the DOM while its
+     `dd` (the price, column 1) backfills the empty cell to its left on the same
+     row. That DOM order is what keeps this a valid definition list — `dd` may not
+     precede its `dt` — while the price still reads on the left. */
+  grid-auto-flow: row dense;
+  align-items: center;
+  /* Contract rule 4: 12px sibling step between rows, and the same 12px setting
+     the price off its bar. */
   gap: var(--zx-space-3);
   margin: 0;
 }
 
-/* Contract rule 4, pair step: 8px binds the name/amount head to its own bar, was
-   6px. 6px was `--zx-space-15`, the "icon <-> its own label" step — a different
-   depth doing a different job. The ladder inside a card is now 8 (a thing and its
-   own bar/glyph/caption) < 12 (sibling rows) < 16 (chip to payload), so each level
-   of the structure is a distinct, perceivable step rather than a 2px nuance. */
-.zx-compare-row {
+/* The bar. Tall enough to hold its own label, which is what lets the fill beside
+   it stay proportionally honest instead of being inflated to fit text. */
+.zx-compare-bar {
+  grid-column: 2;
+  position: relative;
   display: flex;
-  flex-direction: column;
-  gap: var(--zx-space-2);
-}
-
-/* Baseline alignment, not center: the name and the amount are different sizes,
-   so their baselines are what should line up. */
-.zx-compare-head {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: var(--zx-space-3);
-}
-
-.zx-compare-name {
-  margin: 0;
-  color: var(--md-sys-color-on-surface-variant);
-  font-size: var(--zx-text-meta);
-  line-height: 1.35;
-}
-
-/* Our row is the only colored text in the card, which is what makes the eye
-   start here rather than on the bigger rival number. */
-.zx-compare-name--ours {
-  color: var(--md-sys-color-primary);
-  /* Semibold, was a one-off `650`. That value is not a real step in most variable
-     UI stacks, so it silently snapped to 600 or 700 depending on the font actually
-     loaded — an unpredictable weight for the card's most important label. */
-  font-weight: var(--zx-weight-semibold);
-}
-
-/* Dimmer than the row above: outline sits below on-surface-variant in the token
-   ramp, which is enough to push the rival stack into the background without
-   dropping it under the contrast floor for 13px text. */
-.zx-compare-name--rival {
-  color: var(--md-sys-color-outline);
-}
-
-/* `dd` carries a default indent that would break the right edge alignment.
-   Tabular figures keep the two amounts on a shared digit grid. */
-.zx-compare-amount {
-  margin: 0;
-  font-size: var(--zx-text-amount);
-  font-weight: var(--zx-weight-bold);
-  line-height: 1.2;
-  letter-spacing: -0.02em;
-  color: var(--md-sys-color-on-surface);
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
-}
-
-/* Kept at .zx-compare-name's 13px so our price stays the only large figure, but
-   bold: at regular weight the number disappeared into its own label and stopped
-   working as the thing being compared against. Weight makes it findable, size
-   keeps it subordinate — the de-emphasis is carried by scale and color, which is
-   why it can afford to be bold here. */
-.zx-compare-amount--rival {
-  font-size: var(--zx-text-meta);
-  font-weight: var(--zx-weight-bold);
-  line-height: 1.35;
-  letter-spacing: 0;
-  color: var(--md-sys-color-outline);
-}
-
-.zx-compare-track {
-  height: 10px;
-  border-radius: 999px;
+  align-items: center;
+  min-height: 34px;
+  padding: var(--zx-space-2) var(--zx-space-3);
+  border-radius: var(--zx-radius-sm);
+  /* The unfilled span every bar is measured against. */
   background: var(--md-sys-color-surface-container-highest);
   overflow: hidden;
 }
 
+/* Absolute so the label never has to flow around it: the fill is free to be 10%
+   or 100% wide without moving the name a single pixel. */
 .zx-compare-fill {
-  height: 100%;
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0;
   border-radius: inherit;
 }
 
+/* A tint rather than solid `primary`, and that is what makes the whole layout
+   work: the name sits ON the fill at 100% and OFF it at 10%, so the fill has to
+   be a colour the label reads against either way. Solid primary would have left
+   the first characters of "Zenorix" invisible — primary text on a primary fill.
+   Against `primary-container` the label clears 5.4:1, and 7.5:1 on the bare bar
+   beside it. */
 .zx-compare-fill--ours {
-  background: var(--md-sys-color-primary);
+  background: var(--md-sys-color-primary-container);
 }
 
 /* Full width by definition — it is the 100% the other bar is measured against.
-   Only a step above the empty track it sits in: the rival bar just needs to read
+   Only a step above the empty bar it sits in: the rival bar just needs to read
    as "the whole span", and any more contrast would make the expensive option the
    loudest thing in the card. */
 .zx-compare-fill--rival {
@@ -1207,30 +1171,100 @@
   background: var(--md-sys-color-surface-variant);
 }
 
-/* Grid rather than flex: three EQUAL tracks are what keep the badges optically
-   evenly spaced across the card. With flex the columns would size to their own
-   label widths, so "Lag-Free" would sit closer to its neighbour than "4K Ultra
-   HD" does and the row would look accidentally ragged. */
+/* Above the fill, and `position: relative` is what puts it there — the fill is
+   absolutely positioned, so without a stacking context of its own the label
+   would be painted under it. */
+.zx-compare-name {
+  position: relative;
+  margin: 0;
+  font-size: var(--zx-text-meta);
+  line-height: 1.35;
+  text-wrap: pretty;
+}
+
+/* Our bar is the only colored text in the card, which is what makes the eye start
+   here rather than on the bigger rival number. */
+.zx-compare-bar--ours .zx-compare-name {
+  color: var(--md-sys-color-primary);
+  /* Semibold, was a one-off `650`. That value is not a real step in most variable
+     UI stacks, so it silently snapped to 600 or 700 depending on the font actually
+     loaded — an unpredictable weight for the card's most important label. */
+  font-weight: var(--zx-weight-semibold);
+}
+
+/* `on-surface-variant`, not the dimmer `outline`: the rival name now sits on the
+   filled `surface-variant` bar rather than on the card, and `outline` on that
+   fill falls under the contrast floor for 13px text. This pairing clears 5.5:1. */
+.zx-compare-bar--rival .zx-compare-name {
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+/* `dd` carries a default indent that would break the column alignment. Tabular
+   figures keep the two amounts on a shared digit grid, and right alignment puts
+   both prices against the bars they belong to. */
+.zx-compare-amount {
+  grid-column: 1;
+  margin: 0;
+  font-size: var(--zx-text-amount);
+  font-weight: var(--zx-weight-bold);
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  text-align: right;
+  color: var(--md-sys-color-on-surface);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* Kept at the 13px meta size so our price stays the only large figure, but bold:
+   at regular weight the number stopped working as the thing being compared
+   against. Weight makes it findable, size keeps it subordinate — the de-emphasis
+   is carried by scale and color, which is why it can afford to be bold here. */
+.zx-compare-amount--rival {
+  font-size: var(--zx-text-meta);
+  font-weight: var(--zx-weight-bold);
+  line-height: 1.35;
+  letter-spacing: 0;
+  color: var(--md-sys-color-outline);
+  /* The one price that may wrap: "> 1,000 บาท/เดือน" is the longest string in the
+     column, and letting it wrap is what keeps the `auto` column from squeezing
+     the bars on a 390px screen. */
+  white-space: normal;
+}
+
+/* Grid rather than flex: three EQUAL tracks are what keep the tiles the same
+   width. With flex each tile would size to its own label, so "Lag-Free" would be
+   visibly narrower than "4K Ultra HD" and three equal-rank specs would read as
+   three different-rank ones. */
 .zx-about-specs {
   width: 100%;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  /* Sibling step, matching the compare card's row gap. Was `10px 8px` — an 8px
-     column gap put these three siblings at the SAME distance as each badge is from
-     its own label, so the row read as six loose items instead of three pairs. */
+  /* Sibling step, matching the compare card's row gap. */
   gap: var(--zx-space-3);
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
+/* Each spec is its own tile, left-aligned on its own edge. Filled rather than
+   outlined: the parent card is already a 1px outline with no fill, so bordering
+   these too would stack a border directly inside a border. The fill separates
+   them instead, which is also why the 12px gap can equal the 12px padding here —
+   the tile boundary is drawn, so it does not have to be implied by whitespace.
+
+   `align-items: stretch` from the grid keeps all three the same height even
+   though "Lag-Free" is one line where "4K Ultra HD" wraps to two, so the badges
+   still sit on one line across the row. */
 .zx-spec {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  /* Pair step: the badge and the label it belongs to. Was 6px. */
+  align-items: flex-start;
+  /* Pair step: the badge and the label it belongs to. */
   gap: var(--zx-space-2);
-  text-align: center;
+  padding: var(--zx-space-3);
+  border-radius: var(--zx-radius-sm);
+  background: var(--md-sys-color-surface-container-low);
+  text-align: start;
 }
 
 .zx-about-specs md-icon {

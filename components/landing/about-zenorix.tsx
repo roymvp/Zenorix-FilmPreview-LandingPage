@@ -91,11 +91,16 @@ export function AboutZenorix({
 }) {
   // The rival bar is always full, so our bar is our share of its cost. The 10%
   // floor is a legibility guard, not a fudge: at the real US ratio (1.25 / 80 =
-  // 1.6%) the fill collapses into the track's own border radius and reads as a
-  // rendering bug rather than as a tiny price. Doubled from 5% — at 5% the fill
-  // was barely wider than the track is tall, so it read as a dot rather than as
-  // a bar being compared. This stays a floor rather than a multiplier: no real
-  // ratio is inflated, the sliver is just given a readable minimum.
+  // 1.6%) the fill collapses into the bar's own border radius and reads as a
+  // rendering bug rather than as a tiny price. This stays a floor rather than a
+  // multiplier: no real ratio is inflated, the sliver is just given a readable
+  // minimum.
+  //
+  // The floor no longer has to be large enough to hold a label, which is what
+  // keeps it this close to the truth. The name sits in the full-width bar rather
+  // than in the proportional fill, so the fill is free to be tiny — sizing the
+  // fill to fit "Zenorix" would have needed ~33%, quietly restating a 1/64 price
+  // as 1/3 and arguing against the card's own claim.
   const ourShare = Math.max(10, (price.ourAmount / price.rivalAmount) * 100)
 
   return (
@@ -164,54 +169,53 @@ export function AboutZenorix({
           <li className="zx-about-card">
             <p className="zx-about-label">{price.label}</p>
             {/* A price alone is just a number; against the stack it replaces it
-                becomes a saving. The bars carry that comparison pre-attentively,
-                so the reader gets the gap before reading either figure. A
-                definition list is the honest structure here: each row is a
-                name (who) paired with a value (what it costs). */}
-            <dl className="zx-compare">
-              <div className="zx-compare-row">
-                <div className="zx-compare-head">
-                  <dt className="zx-compare-name zx-compare-name--ours">
-                    {price.ourLabel}
-                  </dt>
-                  <dd className="zx-compare-amount">{price.value}</dd>
-                </div>
-                {/* Decorative: the figure above already states the value, so a
-                    screen reader gains nothing from re-announcing the bar. */}
-                <div className="zx-compare-track" aria-hidden="true">
-                  <div
-                    className="zx-compare-fill zx-compare-fill--ours"
-                    style={{ width: `${ourShare}%` }}
-                  />
-                </div>
-              </div>
+                becomes a saving. Two rows, each "price ─ bar", so the two costs
+                sit in one column the eye can compare directly and the bars carry
+                the gap pre-attentively.
 
-              <div className="zx-compare-row">
-                {/* The rival row is reference, not headline: its label and its
-                    price share one quiet 13px treatment, so the only large
-                    number in the card is ours. */}
-                <div className="zx-compare-head">
-                  <dt className="zx-compare-name zx-compare-name--rival">
-                    {price.rivalLabel}
-                  </dt>
-                  <dd className="zx-compare-amount zx-compare-amount--rival">
-                    {price.rivalValue}
-                  </dd>
-                </div>
-                <div className="zx-compare-track" aria-hidden="true">
-                  <div className="zx-compare-fill zx-compare-fill--rival" />
-                </div>
-              </div>
+                The name lives INSIDE its own bar, which is why the bar is the
+                `dt`: the term is the plan, styled as the bar that represents it,
+                and the `dd` beside it is what that plan costs. Keeping `dt`/`dd`
+                as direct children is what allows one grid to own both rows — the
+                previous markup wrapped each row in its own flex box, so the two
+                bars could not share a start edge and each row sized its own price
+                column independently. */}
+            <dl className="zx-compare">
+              <dt className="zx-compare-bar zx-compare-bar--ours">
+                {/* Decorative: the figure beside it already states the value, so
+                    re-announcing the bar would only duplicate it. */}
+                <span
+                  className="zx-compare-fill zx-compare-fill--ours"
+                  style={{ width: `${ourShare}%` }}
+                  aria-hidden="true"
+                />
+                <span className="zx-compare-name">{price.ourLabel}</span>
+              </dt>
+              <dd className="zx-compare-amount">{price.value}</dd>
+
+              {/* The rival row is reference, not headline: its price stays at the
+                  quiet 13px so the only large figure in the card is ours. */}
+              <dt className="zx-compare-bar zx-compare-bar--rival">
+                <span
+                  className="zx-compare-fill zx-compare-fill--rival"
+                  aria-hidden="true"
+                />
+                <span className="zx-compare-name">{price.rivalLabel}</span>
+              </dt>
+              <dd className="zx-compare-amount zx-compare-amount--rival">
+                {price.rivalValue}
+              </dd>
             </dl>
           </li>
 
           <li className="zx-about-card">
             <p className="zx-about-label">{viewing.label}</p>
-            {/* Three equal columns, badge over label. Icons are the industry's
-                own marks (a 4K plate, a surround-sound speaker), so the claim is
-                recognized before it is read. Decorative by design: each label
-                already states its spec, so announcing the glyph too would only
-                double up for screen readers. */}
+            {/* Three equal tiles side by side, each with its badge over its label
+                and both left-aligned to the tile's own edge. Icons are the
+                industry's own marks (a 4K plate, a surround-sound speaker), so the
+                claim is recognized before it is read. Decorative by design: each
+                label already states its spec, so announcing the glyph too would
+                only double up for screen readers. */}
             <ul className="zx-about-specs">
               {VIEWING_SPECS.map((spec) => (
                 <li key={spec.id} className="zx-spec">
