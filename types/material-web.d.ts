@@ -32,6 +32,13 @@ type ButtonLike = {
   name?: string
   /** Associates the button with a <form> by id, used to close md-dialog. */
   form?: string
+  /**
+   * Marks this button as md-dialog's initial focus target. Typed as a string so
+   * React writes a real `autofocus` ATTRIBUTE on the custom element — md-dialog
+   * locates its focus target with `querySelector('[autofocus]')`, which only
+   * sees attributes, not React props. Pass `""`.
+   */
+  autofocus?: string
   'trailing-icon'?: boolean
 }
 

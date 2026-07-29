@@ -16,6 +16,7 @@ export function DownloadCta({
   source,
   className = 'zx-cta-button',
   bare = false,
+  autoFocus = false,
 }: {
   label: string
   /** Risk-reducing microcopy directly under the button. */
@@ -23,6 +24,13 @@ export function DownloadCta({
   /** Funnel position, reported with the conversion event. */
   source: string
   className?: string
+  /**
+   * Make this the initial focus target inside an md-dialog. Only the dialog
+   * instances set it: md-dialog otherwise focuses the first focusable child,
+   * which is the corner close button, putting a bright focus ring on "dismiss"
+   * and making it the visual focal point instead of this CTA.
+   */
+  autoFocus?: boolean
   /**
    * Render just the button, without the `.zx-cta` column wrapper. Used by the
    * compact top-bar instance, which sits in a flex row of its own.
@@ -36,6 +44,9 @@ export function DownloadCta({
       className={className}
       onClick={() => download(source)}
       aria-label={label}
+      /* Empty string, and omitted entirely when false: md-dialog matches on the
+         attribute's PRESENCE, so `autofocus="false"` would still be picked up. */
+      {...(autoFocus ? { autofocus: '' } : {})}
     >
       {label}
     </md-filled-button>

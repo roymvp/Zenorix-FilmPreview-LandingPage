@@ -211,8 +211,8 @@ export function ConversionDialogs({
   const contentRef = useRef<HTMLElement | null>(null)
   const previewRef = useRef<HTMLElement | null>(null)
 
-  // Catches every dismissal route the dialog owns itself: scrim tap, Escape,
-  // and the animated close that follows the Close button.
+  // Catches every dismissal route the dialog owns itself: scrim tap and Escape.
+  // The corner close button calls the provider directly instead.
   useClosedEvent(contentRef, closeContent)
   useClosedEvent(previewRef, closePreview)
 
@@ -260,6 +260,7 @@ export function ConversionDialogs({
             label={copy.content.cta}
             sub={copy.content.ctaMeta}
             source={`content_lock:${contentTitle ?? 'unknown'}`}
+            autoFocus
           />
         </div>
       </md-dialog>
@@ -312,6 +313,7 @@ export function ConversionDialogs({
             label={copy.preview.cta}
             sub={copy.preview.ctaMeta}
             source={`preview_gate:${previewReason ?? 'limit'}`}
+            autoFocus
           />
         </div>
       </md-dialog>
