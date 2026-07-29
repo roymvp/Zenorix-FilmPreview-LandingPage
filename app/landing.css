@@ -572,7 +572,10 @@
 /* No gradient blend out of the player: the page has ONE background color and
    the video frame's own edge is the transition. */
 .zx-info {
-  padding-block: 18px var(--zx-section-y);
+  /* Asymmetric on purpose: 20px above (the video frame's own edge already separates
+     this from the player, so it needs less) and a full section step below. Was an
+     off-scale 18px. */
+  padding-block: var(--zx-space-5) var(--zx-section-y);
 }
 
 /* The film title now lives here rather than over the video, so it is the page's
@@ -893,7 +896,7 @@
   gap: var(--zx-space-15);
   width: 100%;
   min-height: 46px;
-  padding: 0 18px;
+  padding: 0 var(--zx-space-5);
   /* Bright border, not the muted `outline` token. This pill is the rail's tail
      action and sits alone on the page surface, where a low-contrast hairline
      read as a disabled input rather than a button. `on-surface` is the body-text
@@ -953,15 +956,17 @@
    comparison the reader has to scroll through loses the comparison. Trimmed from
    the shared 44px band and the title's 18px gap; the other sections keep the
    page's looser rhythm because none of them need to be read as a single unit. */
-/* 18px, not 20: Thai sets taller than Latin at the same font-size, so the
-   section is ~7px longer in th. The budget is set by the tallest locale, not by
-   English. */
+/* 16px `space-4`, down from an off-scale 18px. Moving DOWN the scale rather than up
+   is deliberate: Thai sets taller than Latin at the same font-size, so this section
+   runs ~7px longer in th, and the height budget is set by the tallest locale. */
 .zx-section--about {
-  padding-block: 18px;
+  padding-block: var(--zx-space-4);
 }
 
+/* This section's title sits closer to its cards than the page default, because the
+   cards are a tight visual set rather than prose. `space-25`, was a raw 10px. */
 .zx-section--about .zx-section-title {
-  margin-block-end: 10px;
+  margin-block-end: var(--zx-space-25);
 }
 
 /* Outlined cards, no fill: the border alone does the grouping so the section
@@ -975,17 +980,17 @@
   list-style: none;
 }
 
-/* 14px padding with an 8px outer gap keeps the card's inner breathing room
-   larger than the space between cards, which is what stops four tightened
-   cards from reading as one continuous block. */
+/* 16px inner padding against the 8px gap BETWEEN cards. Inner must stay larger than
+   outer — that ratio is what keeps four adjacent cards reading as four objects
+   rather than one continuous block. Was an off-scale 14px. */
 .zx-about-card {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   gap: var(--zx-space-2);
-  padding: 14px;
+  padding: var(--zx-space-4);
   border: 1px solid var(--md-sys-color-outline-variant);
-  border-radius: 14px;
+  border-radius: var(--zx-radius-sm);
   background: transparent;
 }
 
@@ -1389,7 +1394,9 @@
 
 .zx-faq-answer {
   margin: 0;
-  padding-block-end: 18px;
+  /* 16px `space-4`, was an off-scale 18px. Pairs with the 16px `padding-block` on
+     the summary above so an open row is evenly inset top and bottom. */
+  padding-block-end: var(--zx-space-4);
   color: var(--md-sys-color-on-surface-variant);
   text-wrap: pretty;
 }
@@ -1423,7 +1430,9 @@
 
 .zx-footer {
   border-block-start: 1px solid var(--md-sys-color-outline-variant);
-  padding-block: 22px max(22px, env(safe-area-inset-bottom));
+  /* 24px `space-6`, was an off-scale 22px. The `max()` keeps the bottom inset at
+     least 24px while still yielding to a larger home-indicator safe area. */
+  padding-block: var(--zx-space-6) max(var(--zx-space-6), env(safe-area-inset-bottom));
 }
 
 /* Two centered lines, links then copyright. No internal divider and no split
@@ -1512,6 +1521,15 @@
   border-radius: 8px;
 }
 
+/* The locale options in the dropdown. Without this they fall through to
+   `md-menu-item`'s own 16px default — a size that appears nowhere else on the page
+   and made a tertiary control's options larger than the body copy and every button
+   label. `body` tier brings them in line with the rest of the interface. */
+.zx-lang md-menu-item {
+  --md-menu-item-label-text-size: var(--zx-text-body);
+  --md-menu-item-label-text-weight: var(--zx-weight-regular);
+}
+
 /* NOTE: the top bar used to be cinema black and needed an --zx-on-media
    override here. It is a light surface now, so the base on-surface color above
    is correct in both the top bar and the footer. */
@@ -1576,11 +1594,11 @@
      both reveals the full height and sits the art flush against the sheet's edge.
      Only the HORIZONTAL bleed below is still doing real work. */
   height: 116px;
-  /* Bottom margin 14px (was 4px). Combined with the headline's own 6px flex gap
-     that puts 20px between the artwork and the title, up from a cramped 10px — the
-     art is a full-bleed 116px band, so the title needs real clearance to stop
-     looking glued to it. Horizontal `-24px` is the bleed and must not change. */
-  margin: 0 -24px 14px;
+  /* Bottom margin `space-4`. Combined with the headline's own 6px flex gap that puts
+     22px between the artwork and the title, up from a cramped 10px — the art is a
+     full-bleed 116px band, so the title needs real clearance to stop looking glued
+     to it. Horizontal `-24px` is the full-width bleed and must not change. */
+  margin: 0 -24px var(--zx-space-4);
   overflow: hidden;
 }
 
@@ -1722,18 +1740,20 @@
      now 8px (check icon <-> its text) < 12px (bullet <-> bullet) < 16px
      (label <-> list). */
   gap: var(--zx-space-4);
-  /* 18px all round, up from `14px 16px`. A borderless fill has no drawn edge to
-     define it, so the inset IS the panel — at 14px the text was nearly touching
-     the tint's boundary. Even padding also lets the 16px radius read cleanly.
-     Overrides md-dialog's `slot[name=content]::slotted(*){padding:24px}`, which
-     document styles beat. */
-  padding: 18px;
+  /* 20px `space-5` all round, up from `14px 16px` and now on-scale (it was briefly
+     an off-scale 18px). A borderless fill has no drawn edge to define it, so the
+     inset IS the panel — at 14px the text nearly touched the tint's boundary. Even
+     padding also lets the radius read cleanly. Overrides md-dialog's
+     `slot[name=content]::slotted(*){padding:24px}`, which document styles beat. */
+  padding: var(--zx-space-5);
   /* Nudges the panel 4px further from the title above it (24px slot gap -> 28px),
      reinforcing that the title is a separate, higher tier than this support copy. */
-  margin-block-start: 4px;
-  /* 16px to stay concentric-ish inside the sheet's 28px corners now that padding
-     grew; 14px looked slightly tight against the larger inset. */
-  border-radius: 16px;
+  margin-block-start: var(--zx-space-1);
+  /* `radius-sm`, the shared token for any card nested inside a surface — the same
+     one `.zx-about-card` uses, so nested panels are consistent across page and
+     sheet. Clearly tighter than the sheet's own `radius-lg` corners, which is what
+     keeps the outer sheet reading as the dominant shape. */
+  border-radius: var(--zx-radius-sm);
   background: var(--md-sys-color-surface-container-highest);
   color: var(--md-sys-color-on-surface-variant);
   /* Explicit, because md-dialog's content slot inherits the host's centering in
@@ -1792,16 +1812,15 @@
      crowding, it does not separate them into two blocks. */
   gap: var(--zx-space-25);
   width: 100%;
-  /* Raises md-dialog's slotted 16px to 22px, so the primary action gets ~30px of
-     clear space below the support panel instead of 24px. The CTA is one of the two
-     things that matter here; isolating it slightly makes it read as the conclusion
-     of the sheet rather than the next item in a list. */
-  padding-block-start: 22px;
+  /* 24px `space-6`, raising md-dialog's slotted 16px. The CTA is the conclusion of
+     the sheet, so it gets the major-separation step from the support panel above
+     rather than the smaller within-group spacing. */
+  padding-block-start: var(--zx-space-6);
   /* The sheet sits flush against the bottom edge, so the install button would
      land under the home indicator / gesture bar without this. Overrides only the
      bottom of md-dialog's `::slotted` padding shorthand — document styles beat
      `::slotted`, so the other three sides still come from the component. */
-  padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+  padding-bottom: calc(var(--zx-space-6) + env(safe-area-inset-bottom, 0px));
 }
 
 /* No height override: this used to trim the CTA to 52px because the in-page base
