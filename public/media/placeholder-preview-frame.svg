@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Placeholder for a film's landscape opening frame (`Movie.previewFrame`).
+
+  Hand-authored SVG rather than a raster image on purpose: it has to READ as an
+  unfilled asset slot, and the explicit label is what does that — a generated
+  image cannot render reliable text, and a purely abstract mark just looks like
+  dim art. Also stays crisp at any size and is a few hundred bytes.
+
+  Consumed by the player poster and the preview-gate sheet header. Both crop
+  with `object-fit: cover`, and the sheet's slot is a short wide band (132px),
+  so everything that must survive cropping is kept near the vertical centre.
+  The corner marks are expected to be cropped away there.
+
+  RESERVED: delete this file once every title in lib/content/movies.ts carries a
+  real per-film frame.
+-->
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  viewBox="0 0 1600 900"
+  width="1600"
+  height="900"
+  role="img"
+  aria-label="Placeholder for the film's opening frame"
+>
+  <defs>
+    <!-- The diagonal hatch is the primary "nothing here yet" signal. -->
+    <pattern
+      id="hatch"
+      width="28"
+      height="28"
+      patternTransform="rotate(45)"
+      patternUnits="userSpaceOnUse"
+    >
+      <line x1="0" y1="0" x2="0" y2="28" stroke="#3b4250" stroke-width="9" />
+    </pattern>
+  </defs>
+
+  <!-- Dark enough to sit inside the player without flashing bright on load. -->
+  <rect width="1600" height="900" fill="#15181e" />
+  <rect width="1600" height="900" fill="url(#hatch)" opacity="0.5" />
+
+  <!-- Dashed bounds: the standard "empty container" convention. -->
+  <rect
+    x="28"
+    y="28"
+    width="1544"
+    height="844"
+    fill="none"
+    stroke="#7d879a"
+    stroke-width="4"
+    stroke-dasharray="24 18"
+  />
+
+  <!-- Crop marks, as on an unfilled artwork spec. -->
+  <g stroke="#7d879a" stroke-width="5" fill="none" opacity="0.85">
+    <path d="M84 148V84h64" />
+    <path d="M1452 84h64v64" />
+    <path d="M1516 752v64h-64" />
+    <path d="M148 816H84v-64" />
+  </g>
+
+  <!--
+    Sits in the upper third, which is the only band that is clean in BOTH
+    placements. Constraints, in source coordinates:
+      - below y=199, because the sheet's 132px-tall slot cover-crops to y 199-701;
+      - above y=345, where the player's centred play button starts (dead centre
+        would put the label behind it);
+      - clear of the sheet's bottom-up gradient, which washes out the lower half.
+  -->
+  <g
+    font-family="ui-monospace, 'SF Mono', 'Cascadia Mono', Menlo, Consolas, monospace"
+    text-anchor="middle"
+    fill="#aab3c2"
+  >
+    <text x="800" y="270" font-size="64" letter-spacing="8">PREVIEW FRAME</text>
+    <text x="800" y="326" font-size="36" letter-spacing="6" fill="#7d879a">
+      16 : 9 PLACEHOLDER
+    </text>
+  </g>
+</svg>

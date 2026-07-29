@@ -76,7 +76,7 @@ const SAMPLE_STREAM =
  * RESERVED: replace per film by setting `previewFrame` below; delete this
  * constant once all titles carry their own frame.
  */
-const PLACEHOLDER_PREVIEW_FRAME = '/media/placeholder-preview-frame.png'
+const PLACEHOLDER_PREVIEW_FRAME = '/media/placeholder-preview-frame.svg'
 
 export const movies: Movie[] = [
   {
