@@ -607,23 +607,6 @@
   align-items: stretch;
 }
 
-/* Fully rounded (pill). The label is a sentence, so the text size is a touch
-   smaller than a typical filled button to keep it on one or two lines.
-
-   46px is matched to .zx-chart-more's min-height, NOT chosen independently: the
-   filled install pill and the outlined "see more" pill are the same shape at the
-   same full width, so any height difference between the two read as a
-   misalignment rather than as hierarchy. Filled-vs-outlined already carries
-   primary vs. secondary; it does not need 10px of extra bulk on top. Still well
-   clear of the 44px minimum tap target. Keep the two values in sync. */
-.zx-cta-button {
-  --md-filled-button-container-height: 46px;
-  --md-filled-button-label-text-size: 15px;
-  --md-filled-button-label-text-weight: 700;
-  --md-filled-button-container-shape: 999px;
-  width: 100%;
-}
-
 .zx-cta-sub {
   display: flex;
   align-items: center;
@@ -1482,11 +1465,12 @@
 
 .zx-dialog-art {
   position: relative;
-  /* 116px of FULLY VISIBLE art. It was 132px with a `-24px` top margin, but the
-     headline slot's padding is `0 24px` — no top padding to cancel — so that
-     margin only shoved the top 24px of the poster up into the container's
-     `overflow: hidden` clip and threw it away, leaving 108px actually on screen.
-     Only the horizontal bleed was ever doing real work. */
+  /* 116px of FULLY VISIBLE art. It was 132px with a `-24px` TOP margin, which did
+     not bleed upward as intended: `.container` is `overflow: hidden`, so those 24px
+     were clipped away and only 108px ever reached the screen. The top padding it
+     was fighting is instead zeroed on the parent (see the `:has` rule below), which
+     both reveals the full height and sits the art flush against the sheet's edge.
+     Only the HORIZONTAL bleed below is still doing real work. */
   height: 116px;
   margin: 0 -24px 4px;
   overflow: hidden;
@@ -1525,6 +1509,24 @@
      instead of a full-bleed header. Stretch also left-aligns the eyebrow and
      heading, matching the body copy below them. */
   align-items: stretch;
+}
+
+/* Flush-to-the-top key art.
+
+   md-dialog ships `slot[name=headline]::slotted(*){padding:24px 24px 0}`, so this
+   element inherits 24px of TOP padding from the component. On the poster sheet that
+   renders as a 24px band of container color above the artwork, which is what made
+   the image look detached from the sheet's top edge.
+
+   Zeroing the padding is the right fix, NOT pulling the art up with a negative
+   margin: `.container` is `overflow: hidden`, so a `-24px` margin does not reveal
+   those pixels, it pushes them outside the box and discards them — exactly the
+   earlier bug where a 132px poster only ever showed 108px on screen.
+
+   The 24px INLINE padding deliberately stays; that is what `.zx-dialog-art`'s
+   `0 -24px` side margins bleed back out against to reach full sheet width. */
+.zx-dialog-headline:has(> .zx-dialog-art) {
+  padding-block-start: 0;
 }
 
 /* The sheet title, deliberately identical to `.zx-section-title` ("About Zenorix",
