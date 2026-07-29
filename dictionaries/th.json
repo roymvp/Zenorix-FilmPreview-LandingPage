@@ -48,7 +48,11 @@
     },
     "price": {
       "label": "ราคาที่ไม่มีใครสู้ได้",
-      "value": "{annualPerMonth}/เดือน"
+      "ourLabel": "ราคาของเรา",
+      "value": "{annualPerMonth}/เดือน",
+      "rivalLabel": "Disney + HBO + Netflix รวมกัน",
+      "rivalValue": "> 1,000 บาท/เดือน",
+      "rivalAmount": 1000
     },
     "viewing": {
       "label": "อรรถรสระดับโรงหนัง",

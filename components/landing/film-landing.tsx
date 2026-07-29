@@ -117,7 +117,15 @@ export function FilmLanding({
             apps={dict.about.apps}
             price={{
               label: dict.about.price.label,
+              ourLabel: dict.about.price.ourLabel,
               value: fill(dict.about.price.value, values),
+              rivalLabel: dict.about.price.rivalLabel,
+              rivalValue: dict.about.price.rivalValue,
+              // Bar widths come from the numeric market values, not from the
+              // formatted strings, so currency symbols and separators (R$, บาท,
+              // "> ") never have to be parsed back out.
+              ourAmount: dict.market.annualPerMonthValue,
+              rivalAmount: dict.about.price.rivalAmount,
             }}
             viewing={dict.about.viewing}
             trial={dict.about.trial}

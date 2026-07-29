@@ -48,7 +48,11 @@
     },
     "price": {
       "label": "Preço imbatível",
-      "value": "{annualPerMonth}/mês"
+      "ourLabel": "Nosso preço",
+      "value": "{annualPerMonth}/mês",
+      "rivalLabel": "Disney + HBO + Netflix juntos",
+      "rivalValue": "> R$ 150,00/mês",
+      "rivalAmount": 150
     },
     "viewing": {
       "label": "Experiência de cinema",

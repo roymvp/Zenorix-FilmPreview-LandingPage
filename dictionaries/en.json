@@ -48,7 +48,11 @@
     },
     "price": {
       "label": "Unbeatable Price",
-      "value": "{annualPerMonth}/mo"
+      "ourLabel": "Our price",
+      "value": "{annualPerMonth}/mo",
+      "rivalLabel": "Disney + HBO + Netflix combined",
+      "rivalValue": "> $80.00/mo",
+      "rivalAmount": 80
     },
     "viewing": {
       "label": "Cinematic Viewing",

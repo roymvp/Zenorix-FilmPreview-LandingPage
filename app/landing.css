@@ -924,6 +924,83 @@
   text-wrap: balance;
 }
 
+/* --- price anchor -----------------------------------------------------------
+   Two rows, each "name ... amount" over a proportional bar. The card sets
+   `align-items: flex-start`, so this block has to claim full width itself for
+   the bars to be measurable against each other. */
+.zx-compare {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin: 0;
+}
+
+.zx-compare-row {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Baseline alignment, not center: the name and the amount are different sizes,
+   so their baselines are what should line up. */
+.zx-compare-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.zx-compare-name {
+  margin: 0;
+  color: var(--md-sys-color-on-surface-variant);
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+/* Our row is the only colored text in the card, which is what makes the eye
+   start here rather than on the bigger rival number. */
+.zx-compare-name--ours {
+  color: var(--md-sys-color-primary);
+  font-weight: 650;
+}
+
+/* `dd` carries a default indent that would break the right edge alignment.
+   Tabular figures keep the two amounts on a shared digit grid. */
+.zx-compare-amount {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  color: var(--md-sys-color-on-surface);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.zx-compare-track {
+  height: 10px;
+  border-radius: 999px;
+  background: var(--md-sys-color-surface-container-highest);
+  overflow: hidden;
+}
+
+.zx-compare-fill {
+  height: 100%;
+  border-radius: inherit;
+}
+
+.zx-compare-fill--ours {
+  background: var(--md-sys-color-primary);
+}
+
+/* Full width by definition — it is the 100% the other bar is measured against.
+   Neutral, so "more expensive" reads as heavier rather than as an error state. */
+.zx-compare-fill--rival {
+  width: 100%;
+  background: var(--md-sys-color-outline);
+}
+
 /* Inline run, wrapping as needed. The column gap is wide enough to separate the
    specs without punctuation. */
 .zx-about-specs {
