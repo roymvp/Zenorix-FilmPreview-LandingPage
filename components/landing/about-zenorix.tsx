@@ -20,6 +20,7 @@ export function AboutZenorix({
   viewing,
   trial,
   cta,
+  ctaMeta,
 }: {
   heading: string
   /** Card 1 label. Its "content" is the platform icon matrix itself. */
@@ -32,6 +33,8 @@ export function AboutZenorix({
   trial: { label: string; value: string; note: string }
   /** Label for the section-closing install button. */
   cta: string
+  /** APK facts rendered directly beneath that button. */
+  ctaMeta: string
 }) {
   return (
     <section className="zx-section" aria-labelledby="zx-about-heading">
@@ -90,9 +93,11 @@ export function AboutZenorix({
         </ul>
 
         {/* The four claims build to a decision, so the section closes on the
-            action instead of making the reader scroll back for one. */}
+            action instead of making the reader scroll back for one. The APK
+            meta line answers the "what am I actually installing?" question at
+            the exact moment the reader is deciding. */}
         <div className="zx-about-cta">
-          <DownloadCta label={cta} source="about" />
+          <DownloadCta label={cta} sub={ctaMeta} source="about" />
         </div>
       </div>
     </section>

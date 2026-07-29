@@ -20,7 +20,6 @@
   },
   "nav": {
     "home": "Página inicial da Zenorix",
-    "language": "Idioma",
     "languageMenu": "Escolha seu idioma",
     "install": "Instalar"
   },
@@ -60,7 +59,8 @@
       "value": "30 DIAS GRÁTIS",
       "note": "Não precisa de cartão para começar."
     },
-    "cta": "Gostou? Baixe o app Zenorix"
+    "cta": "Gostou? Baixe o app Zenorix",
+    "ctaMeta": "APK Android · {size} · {downloads}"
   },
   "faq": {
     "heading": "FAQ",
@@ -104,9 +104,9 @@
     ]
   },
   "finalCta": {
-    "heading": "Termine {title} de graça hoje",
+    "srHeading": "Baixe o Zenorix",
     "cta": "Install Zenorix. Watch Full Moive Free.",
-    "meta": "v{version} · {size} · Android {minAndroid}+"
+    "meta": "APK Android · {size} · {downloads}"
   },
   "modals": {
     "content": {
@@ -134,8 +134,7 @@
     "privacy": "Privacidade",
     "terms": "Termos",
     "dmca": "DMCA",
-    "copyright": "© {year} Zenorix",
-    "language": "Idioma"
+    "copyright": "© {year} Zenorix"
   },
   "a11y": {
     "skipToContent": "Ir para os detalhes do filme",

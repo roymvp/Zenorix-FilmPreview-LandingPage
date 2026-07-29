@@ -67,8 +67,7 @@ export function FilmLanding({
             locale={locale}
             homeHref={`/${locale}`}
             homeLabel={dict.nav.home}
-            languageLabel={dict.nav.language}
-            languageMenuLabel={dict.nav.languageMenu}
+          languageMenuLabel={dict.nav.languageMenu}
             installLabel={dict.nav.install}
             localeHrefs={localeHrefs}
           />
@@ -123,6 +122,7 @@ export function FilmLanding({
             viewing={dict.about.viewing}
             trial={dict.about.trial}
             cta={dict.about.cta}
+            ctaMeta={fill(dict.about.ctaMeta, values)}
           />
 
           <FaqSection
@@ -134,23 +134,19 @@ export function FilmLanding({
           />
 
           <FinalCta
-            heading={fill(dict.finalCta.heading, values)}
+            srHeading={fill(dict.finalCta.srHeading, values)}
             cta={dict.finalCta.cta}
             meta={fill(dict.finalCta.meta, values)}
           />
         </main>
 
         <SiteFooter
-          locale={locale}
-          localeHrefs={localeHrefs}
           links={[
             { label: dict.footer.privacy, href: `/${locale}#privacy` },
             { label: dict.footer.terms, href: `/${locale}#terms` },
             { label: dict.footer.dmca, href: `/${locale}#dmca` },
           ]}
           copyright={fill(dict.footer.copyright, { year: 2026 })}
-          languageLabel={dict.footer.language}
-          languageMenuLabel={dict.nav.languageMenu}
           themeLabel={dict.a11y.theme}
         />
 

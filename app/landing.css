@@ -1022,25 +1022,12 @@
   text-align: center;
 }
 
+/* Button-only section now that the headline is gone, so it needs no internal
+   gap — the flex column just centers the single child. */
 .zx-final-inner {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 18px;
-}
-
-.zx-final h2 {
-  margin: 0;
-  color: var(--md-sys-color-on-surface);
-  text-wrap: balance;
-  max-width: 24ch;
-}
-
-.zx-final p {
-  margin: 0;
-  color: var(--md-sys-color-on-surface-variant);
-  max-width: 52ch;
-  text-wrap: pretty;
 }
 
 .zx-final .zx-cta {
@@ -1056,13 +1043,22 @@
 
 .zx-footer {
   border-block-start: 1px solid var(--md-sys-color-outline-variant);
-  padding-block: 20px max(20px, env(safe-area-inset-bottom));
+  padding-block: 22px max(22px, env(safe-area-inset-bottom));
 }
 
+.zx-footer-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* Centered: three short legal links left-aligned under a full-width CTA read as
+   a ragged fragment, and this page has no wider layout to design for. */
 .zx-footer-links {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px 20px;
+  justify-content: center;
+  gap: 10px 22px;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -1071,38 +1067,40 @@
 .zx-footer-links a {
   color: var(--md-sys-color-on-surface-variant);
   font-size: 13px;
+  line-height: 1.4;
   text-decoration: none;
+  transition: color 120ms ease;
 }
 
 .zx-footer-links a:hover {
-  color: var(--md-sys-color-primary);
-  text-decoration: underline;
+  color: var(--md-sys-color-on-surface);
 }
 
-/* Copyright and the utility controls share one row: at phone width the two
-   blocks are short enough that stacking them only added height. */
+.zx-footer-links a:focus-visible {
+  outline: 2px solid var(--md-sys-color-primary);
+  outline-offset: 3px;
+  border-radius: 3px;
+}
+
+/* Copyright and the theme toggle share one row. A hairline above it separates
+   the legal links from the utility row without adding a second border color. */
 .zx-footer-bottom {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  margin-block-start: 12px;
+  padding-block-start: 14px;
+  border-block-start: 1px solid var(--md-sys-color-outline-variant);
 }
 
 .zx-footer-copy {
   margin: 0;
   color: var(--md-sys-color-on-surface-variant);
-  font-size: 11.5px;
+  font-size: 12px;
   line-height: 1.5;
 }
 
 /* ------------------------------------------------------- language selector */
-
-.zx-footer-actions {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
 
 .zx-theme-toggle {
   --md-icon-button-icon-color: var(--md-sys-color-on-surface-variant);

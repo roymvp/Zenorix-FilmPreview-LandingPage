@@ -11,17 +11,13 @@ import { locales, localeMeta, type Locale } from '@/lib/i18n/config'
  */
 export function LanguageSwitcher({
   current,
-  label,
   menuLabel,
   /** Same film, localized path, one per market. */
   hrefs,
-  variant = 'topbar',
 }: {
   current: Locale
-  label: string
   menuLabel: string
   hrefs: Record<Locale, string>
-  variant?: 'topbar' | 'footer'
 }) {
   const [open, setOpen] = useState(false)
   const anchorId = useId().replace(/:/g, '')
@@ -41,9 +37,7 @@ export function LanguageSwitcher({
         aria-label={menuLabel}
         onClick={() => setOpen((value) => !value)}
       >
-        {variant === 'footer'
-          ? `${label}: ${localeMeta[current].name}`
-          : localeMeta[current].short}
+        {localeMeta[current].short}
         <md-icon aria-hidden="true">expand_more</md-icon>
       </button>
 

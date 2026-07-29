@@ -20,7 +20,6 @@
   },
   "nav": {
     "home": "Zenorix home",
-    "language": "Language",
     "languageMenu": "Choose your language",
     "install": "Install"
   },
@@ -60,7 +59,8 @@
       "value": "30 DAYS FREE",
       "note": "No card needed to start."
     },
-    "cta": "Like it? Get the Zenorix App"
+    "cta": "Like it? Get the Zenorix App",
+    "ctaMeta": "Android APK · {size} · {downloads}"
   },
   "faq": {
     "heading": "FAQ",
@@ -104,9 +104,9 @@
     ]
   },
   "finalCta": {
-    "heading": "Finish {title} free tonight",
+    "srHeading": "Get Zenorix",
     "cta": "Install Zenorix. Watch Full Moive Free.",
-    "meta": "v{version} · {size} · Android {minAndroid}+"
+    "meta": "Android APK · {size} · {downloads}"
   },
   "modals": {
     "content": {
@@ -134,8 +134,7 @@
     "privacy": "Privacy",
     "terms": "Terms",
     "dmca": "DMCA",
-    "copyright": "© {year} Zenorix",
-    "language": "Language"
+    "copyright": "© {year} Zenorix"
   },
   "a11y": {
     "skipToContent": "Skip to film details",

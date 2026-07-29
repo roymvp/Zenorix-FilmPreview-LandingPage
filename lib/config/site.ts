@@ -13,7 +13,7 @@ export const SITE = {
   /** RESERVED: point at the signed APK on the CDN. */
   apkUrl: process.env.NEXT_PUBLIC_APK_URL ?? '/download/zenorix.apk',
   apkVersion: '3.4.1',
-  apkSize: '28 MB',
+  apkSize: '14MB',
   /** Install count shown under the download CTAs. RESERVED: feed from analytics. */
   apkDownloads: '3M+ Downloads',
   minAndroid: '7.0',

@@ -8,7 +8,6 @@ export function TopBar({
   locale,
   homeHref,
   homeLabel,
-  languageLabel,
   languageMenuLabel,
   installLabel,
   localeHrefs,
@@ -16,7 +15,6 @@ export function TopBar({
   locale: Locale
   homeHref: string
   homeLabel: string
-  languageLabel: string
   languageMenuLabel: string
   /** Short label for the compact install button (the long sentence is used
       by the in-page CTAs, which have a full row to themselves). */
@@ -44,7 +42,6 @@ export function TopBar({
       <div className="zx-topbar-actions">
         <LanguageSwitcher
           current={locale}
-          label={languageLabel}
           menuLabel={languageMenuLabel}
           hrefs={localeHrefs}
         />

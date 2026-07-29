@@ -20,7 +20,6 @@
   },
   "nav": {
     "home": "หน้าแรก Zenorix",
-    "language": "ภาษา",
     "languageMenu": "เลือกภาษาของคุณ",
     "install": "ติดตั้ง"
   },
@@ -60,7 +59,8 @@
       "value": "ฟรี 30 วัน",
       "note": "เริ่มได้เลย ไม่ต้องใช้บัตร"
     },
-    "cta": "ถูกใจไหม ดาวน์โหลดแอป Zenorix"
+    "cta": "ถูกใจไหม ดาวน์โหลดแอป Zenorix",
+    "ctaMeta": "APK Android · {size} · {downloads}"
   },
   "faq": {
     "heading": "FAQ",
@@ -98,15 +98,15 @@
         "a": "ได้แน่นอน ใช้ได้กับทุกอุปกรณ์ Android ทั้งมือถือ แท็บเล็ต Android TV box และ Fire stick หนึ่งบัญชีใช้ได้ทุกจอ ติดตั้งครั้งเดียว ดูได้ทุกที่"
       },
       {
-        "q": "ยกเลิกแพ็กเกจเมื่อ���หร่ก็ได้ไหม",
+        "q": "ยกเลิกแพ็กเกจเม��่อ���หร่ก็ได้ไหม",
         "a": "ได้ ยกเลิกด้วยการแตะครั้งเดียว ไม่ต้องทำเรื่องยุ่งยาก ไม่มีค่าธรรมเนียมยกเลิก ไม่มีสัญญาผูกมัด อยู่กับเราเท่าที่คุณยังชอบบริการนี้"
       }
     ]
   },
   "finalCta": {
-    "heading": "ดู {title} ให้จบคืนนี้ ฟรี",
+    "srHeading": "ดาวน์โหลด Zenorix",
     "cta": "Install Zenorix. Watch Full Moive Free.",
-    "meta": "v{version} · {size} · Android {minAndroid} ขึ้นไป"
+    "meta": "APK Android · {size} · {downloads}"
   },
   "modals": {
     "content": {
@@ -134,8 +134,7 @@
     "privacy": "ความเป็นส่วนตัว",
     "terms": "ข้อกำหนด",
     "dmca": "DMCA",
-    "copyright": "© {year} Zenorix",
-    "language": "ภาษา"
+    "copyright": "© {year} Zenorix"
   },
   "a11y": {
     "skipToContent": "ไปที่รายละเอียดภาพยนตร์",
