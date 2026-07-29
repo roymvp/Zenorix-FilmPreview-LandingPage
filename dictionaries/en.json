@@ -49,10 +49,9 @@
     "price": {
       "label": "Unbeatable Price",
       "ourLabel": "Zenorix",
-      "value": "{annualPerMonth}",
+      "value": "{annualPerMonth}/mo",
       "rivalLabel": "Disney + HBO + Netflix",
-      "rivalValue": "~ $80",
-      "caption": "Monthly cost comparison",
+      "rivalValue": "~ $80/mo",
       "rivalAmount": 80
     },
     "viewing": {

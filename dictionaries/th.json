@@ -49,10 +49,9 @@
     "price": {
       "label": "ราคาที่ไม่มีใครสู้ได้",
       "ourLabel": "Zenorix",
-      "value": "{annualPerMonth}",
+      "value": "{annualPerMonth}/เดือน",
       "rivalLabel": "Disney + HBO + Netflix",
-      "rivalValue": "~ 1,000 บาท",
-      "caption": "เปรียบเทียบค่าใช้จ่ายต่อเดือน",
+      "rivalValue": "~ 1,000 บาท/เดือน",
       "rivalAmount": 1000
     },
     "viewing": {

@@ -74,11 +74,6 @@ export function AboutZenorix({
     /** Row 2: the rival stack, and its formatted combined monthly cost. */
     rivalLabel: string
     rivalValue: string
-    /**
-     * Names the unit both figures share ("Monthly cost comparison"), so neither
-     * price has to carry "/mo" itself.
-     */
-    caption: string
     /** Same two costs as plain numbers, used only to size the bars. */
     ourAmount: number
     rivalAmount: number
@@ -185,39 +180,34 @@ export function AboutZenorix({
                 as direct children of the grid is what lets one grid own both rows,
                 so every price shares a column and both bars share a start edge.
 
-                `figure` + `figcaption` because that is what this is: a chart plus
-                a caption naming the unit both figures are in. Moving the unit into
-                the caption is what lets the figures drop "/mo" and stay short
-                enough to compare at a glance. */}
-            <figure className="zx-compare">
-              <dl className="zx-compare-rows">
-                {/* The share sizes the bar via a variable rather than a plain
-                    width, so the CSS can hold it against `max-content` and stop a
-                    narrow card from cropping the label inside. */}
-                <dt
-                  className="zx-compare-bar zx-compare-bar--ours"
-                  style={{ '--zx-bar-share': `${ourShare}%` } as CSSProperties}
-                >
-                  <span className="zx-compare-name zx-compare-name--ours">
-                    {price.ourLabel}
-                  </span>
-                </dt>
-                <dd className="zx-compare-amount zx-compare-amount--ours">
-                  {price.value}
-                </dd>
+                Each figure carries its own "/mo" rather than deferring to a caption
+                under the chart. The caption was accurate but cost 34px of card
+                height for one line of text, which made this card visibly taller
+                than its three neighbours — and the unit is only four characters, so
+                repeating it is cheaper than explaining it. */}
+            <dl className="zx-compare">
+              {/* The share sizes the bar via a variable rather than a plain width,
+                  so the CSS can hold it against `max-content` and stop a narrow
+                  card from cropping the label inside. */}
+              <dt
+                className="zx-compare-bar zx-compare-bar--ours"
+                style={{ '--zx-bar-share': `${ourShare}%` } as CSSProperties}
+              >
+                <span className="zx-compare-name zx-compare-name--ours">
+                  {price.ourLabel}
+                </span>
+              </dt>
+              <dd className="zx-compare-amount zx-compare-amount--ours">
+                {price.value}
+              </dd>
 
-                <dt className="zx-compare-bar zx-compare-bar--rival">
-                  <span className="zx-compare-name">{price.rivalLabel}</span>
-                </dt>
-                <dd className="zx-compare-amount zx-compare-amount--rival">
-                  {price.rivalValue}
-                </dd>
-              </dl>
-
-              <figcaption className="zx-compare-caption">
-                {price.caption}
-              </figcaption>
-            </figure>
+              <dt className="zx-compare-bar zx-compare-bar--rival">
+                <span className="zx-compare-name">{price.rivalLabel}</span>
+              </dt>
+              <dd className="zx-compare-amount zx-compare-amount--rival">
+                {price.rivalValue}
+              </dd>
+            </dl>
           </li>
 
           <li className="zx-about-card">
