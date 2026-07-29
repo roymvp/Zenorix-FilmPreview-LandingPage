@@ -75,7 +75,7 @@ export function FilmLanding({
           <ImmersivePlayer
             src={movie.videoSrc}
             type={movie.videoType}
-            poster={movie.backdrop}
+            poster={movie.previewFrame}
             posterAlt={fill(dict.meta.imageAlt, values)}
             runtimeSeconds={runtimeSeconds}
             limitSeconds={movie.previewLimitSeconds}
@@ -157,8 +157,11 @@ export function FilmLanding({
           copyright={fill(dict.footer.copyright, { year: 2026 })}
         />
 
+        {/* previewFrame is the same asset the player shows as its poster, so the
+            upsell sheet reads as a continuation of the frame the viewer was
+            just watching. */}
         <ConversionDialogs
-          backdrop={movie.backdrop}
+          previewFrame={movie.previewFrame}
           copy={{
             content: {
               eyebrow: dict.modals.content.eyebrow,

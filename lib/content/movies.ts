@@ -32,8 +32,30 @@ export type Movie = {
    * badge pushes it to wrap.
    */
   qualityTags: string[]
+  /** Portrait key art (2:3). Not used by the player — see `previewFrame`. */
   poster: string
+  /** Landscape key art, used for the og:image / twitter:image share card. */
   backdrop: string
+  /**
+   * Landscape (16:9) opening frame of the film.
+   *
+   * RESERVED INTEGRATION POINT (artwork): currently
+   * `PLACEHOLDER_PREVIEW_FRAME` for every title. Drop the real per-film frame
+   * into `public/media/` and point this field at it — no component changes.
+   *
+   * ONE image, TWO placements, on purpose:
+   *  1. the player's `poster`, i.e. what the viewer sees before playback
+   *     resolves (and again behind the fade while it buffers);
+   *  2. the preview-gate sheet's header art.
+   * Sharing the asset is what makes the sheet feel like it grew out of the
+   * frame the viewer was just watching, so keep these two in sync.
+   *
+   * Must be landscape: both placements crop with `object-fit: cover`, so a
+   * portrait source loses most of its height. (This is why the field exists —
+   * the player used to borrow `backdrop`, which on two of the three titles
+   * pointed at a 2:3 poster and got cropped to a narrow center strip.)
+   */
+  previewFrame: string
   /** RESERVED: production HLS/DASH manifest or MP4 from the media CDN. */
   videoSrc: string
   videoType: string
@@ -46,6 +68,16 @@ export type Movie = {
 const SAMPLE_STREAM =
   'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4'
 
+/**
+ * Neutral stand-in for the opening frame — deliberately an empty asset slot
+ * rather than art, so an unconfigured film is obvious instead of looking
+ * finished. Every title points here until real frames are supplied.
+ *
+ * RESERVED: replace per film by setting `previewFrame` below; delete this
+ * constant once all titles carry their own frame.
+ */
+const PLACEHOLDER_PREVIEW_FRAME = '/media/placeholder-preview-frame.png'
+
 export const movies: Movie[] = [
   {
     slug: 'nocturne-protocol',
@@ -54,6 +86,7 @@ export const movies: Movie[] = [
     qualityTags: ['4K', 'Dolby'],
     poster: '/media/poster-nocturne-protocol.png',
     backdrop: '/media/nocturne-protocol-backdrop.png',
+    previewFrame: PLACEHOLDER_PREVIEW_FRAME,
     videoSrc: SAMPLE_STREAM,
     videoType: 'video/mp4',
     previewLimitSeconds: 600,
@@ -88,6 +121,7 @@ export const movies: Movie[] = [
     qualityTags: ['4K', 'Dolby'],
     poster: '/media/poster-crimson-harbor.png',
     backdrop: '/media/poster-crimson-harbor.png',
+    previewFrame: PLACEHOLDER_PREVIEW_FRAME,
     videoSrc: SAMPLE_STREAM,
     videoType: 'video/mp4',
     previewLimitSeconds: 600,
@@ -122,6 +156,7 @@ export const movies: Movie[] = [
     qualityTags: ['4K', 'Dolby'],
     poster: '/media/poster-the-last-signal.png',
     backdrop: '/media/poster-the-last-signal.png',
+    previewFrame: PLACEHOLDER_PREVIEW_FRAME,
     videoSrc: SAMPLE_STREAM,
     videoType: 'video/mp4',
     previewLimitSeconds: 600,

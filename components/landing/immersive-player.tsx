@@ -60,6 +60,14 @@ export function ImmersivePlayer({
 }: {
   src: string
   type: string
+  /**
+   * Landscape opening frame (`Movie.previewFrame`), shown before playback
+   * resolves and behind the fade while it buffers. Set on BOTH the `<video
+   * poster>` and the `.zx-stage-poster` <img>: the img is what actually renders
+   * (and cross-fades out via `[data-playing]`), while the poster attribute
+   * covers the moment before React paints and any state where the video shows
+   * its own frame. Both must point at the same asset or the fade flickers.
+   */
   poster: string
   posterAlt: string
   runtimeSeconds: number

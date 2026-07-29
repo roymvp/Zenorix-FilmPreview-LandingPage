@@ -150,11 +150,16 @@ export type DialogCopy = {
  */
 export function ConversionDialogs({
   copy,
-  backdrop,
+  previewFrame,
 }: {
   copy: DialogCopy
-  /** Key art reused as the dialog header, keeping the cinematic frame intact. */
-  backdrop: string
+  /**
+   * The film's opening frame (`Movie.previewFrame`) — the same asset the player
+   * uses as its poster, reused here as the sheet's header art so the upsell
+   * reads as a continuation of the frame rather than a new screen. Landscape;
+   * it is cropped with `object-fit: cover`.
+   */
+  previewFrame: string
 }) {
   const {
     contentTitle,
@@ -234,7 +239,9 @@ export function ConversionDialogs({
         <div slot="headline" className="zx-dialog-headline">
           <span className="zx-dialog-art">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={backdrop} alt="" />
+            {/* Decorative: the heading beside it already names the film, so alt
+                text here would only repeat it for screen readers. */}
+            <img src={previewFrame} alt="" />
           </span>
           <strong className="md-typescale-headline-small">
             {copy.preview.heading}
