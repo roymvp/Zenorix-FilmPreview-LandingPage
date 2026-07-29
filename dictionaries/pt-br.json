@@ -74,16 +74,16 @@
     "heading": "FAQ",
     "items": [
       {
-        "q": "Tenho acesso total a tudo durante o mês grátis?",
+        "q": "Tenho acesso total a tudo durante os 30 dias grátis?",
         "a": "Acesso 100% completo e sem restrições. Nenhum título bloqueado, nenhum recurso pago, nenhum plano escondido. Todos os filmes, todas as séries, todos os canais ao vivo, qualidade 4K completa — tudo liberado no segundo em que você instala o app. Sem letras miúdas, sem limitações."
       },
       {
-        "q": "Quanto custa depois do primeiro mês grátis?",
+        "q": "Quanto custa depois dos 30 dias grátis?",
         "a": "Dois planos simples. O plano mensal custa {monthly} depois do período grátis. O plano anual sai por apenas {annualPerMonth} por mês — o streaming mais barato do mercado, muito abaixo de Netflix, Disney+ ou qualquer outro serviço grande."
       },
       {
-        "q": "Vou ser cobrado automaticamente quando o mês grátis terminar?",
-        "a": "Só se você mantiver a assinatura. Cancele a qualquer momento antes do fim do mês grátis e você não paga absolutamente nada. Sem taxas escondidas, sem letras miúdas, sem truque de renovação automática."
+        "q": "Preciso cadastrar um cartão para começar os 30 dias grátis?",
+        "a": "Nenhum cartão, e nenhum dado de pagamento. Seus 30 dias grátis começam no momento em que você instala o app. Você só escolhe um plano e cadastra a forma de pagamento depois que esses 30 dias terminam — então não existe cobrança automática para se preocupar, porque nunca guardamos seu cartão durante o período grátis, e não há nada para cancelar se você decidir não continuar."
       },
       {
         "q": "Como instalo o APK no meu Android?",
@@ -146,7 +146,6 @@
   },
   "a11y": {
     "skipToContent": "Ir para os detalhes do filme",
-    "posterAlt": "Pôster de {title}",
-    "theme": "Alternar entre tema claro e escuro"
+    "posterAlt": "Pôster de {title}"
   }
 }

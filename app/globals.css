@@ -2,60 +2,19 @@
 @import '@material/web/typography/md-typescale-styles.css';
 
 /*
- * Zenorix — Material 3 color schemes generated from the brand source color
- * #E08B1E (ember amber). Light scheme on :root, dark scheme on .dark.
- * The landing experience is dark-first (cinema), but both schemes are complete
- * so the theme toggle never produces an unreadable surface.
+ * Zenorix — Material 3 dark scheme generated from the brand source color
+ * #E08B1E (ember amber).
+ *
+ * DARK ONLY, by design. This is a cinema product whose hero is film footage, so
+ * there is no light scheme and no theme toggle: one scheme means one set of
+ * tokens to reason about, and every surface can be tuned against the video
+ * rather than compromised to work on white too.
+ *
+ * `color-scheme: dark` is what tells the browser to render form controls,
+ * scrollbars and the <video> letterbox dark, so it must stay even though there
+ * is nothing left to switch between.
  */
 :root {
-  color-scheme: light;
-
-  --md-sys-color-primary: #8a5100;
-  --md-sys-color-on-primary: #ffffff;
-  --md-sys-color-primary-container: #ffddb8;
-  --md-sys-color-on-primary-container: #2c1600;
-  --md-sys-color-secondary: #715b2e;
-  --md-sys-color-on-secondary: #ffffff;
-  --md-sys-color-secondary-container: #fddec0;
-  --md-sys-color-on-secondary-container: #271904;
-  --md-sys-color-tertiary: #8f4c38;
-  --md-sys-color-on-tertiary: #ffffff;
-  --md-sys-color-tertiary-container: #ffdbd1;
-  --md-sys-color-on-tertiary-container: #3a0b01;
-  --md-sys-color-error: #ba1a1a;
-  --md-sys-color-on-error: #ffffff;
-  --md-sys-color-error-container: #ffdad6;
-  --md-sys-color-on-error-container: #410002;
-  --md-sys-color-background: #fff8f3;
-  --md-sys-color-on-background: #201b13;
-  --md-sys-color-surface: #fff8f3;
-  --md-sys-color-on-surface: #201b13;
-  --md-sys-color-surface-variant: #f0e0cf;
-  --md-sys-color-on-surface-variant: #4f4539;
-  --md-sys-color-outline: #817567;
-  --md-sys-color-outline-variant: #d3c4b4;
-  --md-sys-color-shadow: #000000;
-  --md-sys-color-scrim: #000000;
-  --md-sys-color-inverse-surface: #352f27;
-  --md-sys-color-inverse-on-surface: #faefe2;
-  --md-sys-color-inverse-primary: #ffb868;
-  --md-sys-color-surface-dim: #e3d7cb;
-  --md-sys-color-surface-bright: #fff8f3;
-  --md-sys-color-surface-container-lowest: #ffffff;
-  --md-sys-color-surface-container-low: #fff1e3;
-  --md-sys-color-surface-container: #fcebdd;
-  --md-sys-color-surface-container-high: #f6e6d7;
-  --md-sys-color-surface-container-highest: #f0e0d1;
-
-  /* Typefaces: applied to every system and component token.
-     Noto Sans Thai follows Roboto because Roboto ships no Thai subset. The
-     browser resolves font-family per glyph, so Latin/Portuguese stay in Roboto
-     and only Thai codepoints fall through to the Thai face. */
-  --md-ref-typeface-brand: var(--font-roboto), Roboto, var(--font-noto-thai), system-ui, sans-serif;
-  --md-ref-typeface-plain: var(--font-roboto), Roboto, var(--font-noto-thai), system-ui, sans-serif;
-}
-
-.dark {
   color-scheme: dark;
 
   --md-sys-color-primary: #ffb868;
@@ -94,16 +53,22 @@
   --md-sys-color-surface-container: #201d19;
   --md-sys-color-surface-container-high: #2b2723;
   --md-sys-color-surface-container-highest: #363128;
+
+  /* Typefaces: applied to every system and component token.
+     Noto Sans Thai follows Roboto because Roboto ships no Thai subset. The
+     browser resolves font-family per glyph, so Latin/Portuguese stay in Roboto
+     and only Thai codepoints fall through to the Thai face. */
+  --md-ref-typeface-brand: var(--font-roboto), Roboto, var(--font-noto-thai), system-ui, sans-serif;
+  --md-ref-typeface-plain: var(--font-roboto), Roboto, var(--font-noto-thai), system-ui, sans-serif;
 }
 
 /*
  * Media-surface tokens.
- * Content layered over film footage is always light-on-dark regardless of the
- * active scheme, because the underlying pixels are the video. These are the
- * only fixed color values in the app and they exist for exactly that reason.
+ * Content layered over film footage is always light-on-dark because the
+ * underlying pixels are the video. These are the only fixed color values in the
+ * app and they exist for exactly that reason.
  */
-:root,
-.dark {
+:root {
   --zx-media-scrim: #06050400;
   --zx-media-scrim-strong: #060504;
   --zx-on-media: #ffffff;

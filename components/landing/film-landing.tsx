@@ -155,7 +155,6 @@ export function FilmLanding({
             { label: dict.footer.dmca, href: `/${locale}#dmca` },
           ]}
           copyright={fill(dict.footer.copyright, { year: 2026 })}
-          themeLabel={dict.a11y.theme}
         />
 
         <ConversionDialogs

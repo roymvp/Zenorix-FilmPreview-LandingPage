@@ -1075,17 +1075,18 @@
 
 /* --------------------------------------------------------------------- faq */
 
+/* Hairline-divided list, not a stack of outlined cards. Eight bordered boxes
+   drew eight rectangles the reader had to parse before reaching any question;
+   single dividers carry the same separation with a fraction of the ink, and drop
+   the horizontal padding so questions align with every other section's text. */
 .zx-faq-list {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  border-block-start: 1px solid var(--md-sys-color-outline-variant);
 }
 
-/* Outline only, no fill: the card sits on the same surface as the page. */
 .zx-faq-item {
-  border-radius: var(--zx-radius-md);
-  border: 1px solid var(--md-sys-color-outline-variant);
-  overflow: hidden;
+  border-block-end: 1px solid var(--md-sys-color-outline-variant);
 }
 
 .zx-faq-item summary {
@@ -1093,10 +1094,11 @@
   align-items: center;
   justify-content: space-between;
   gap: 14px;
-  padding: 18px 20px;
+  padding-block: 16px;
   cursor: pointer;
   color: var(--md-sys-color-on-surface);
   font-weight: 600;
+  /* Both are required to suppress the native disclosure triangle. */
   list-style: none;
 }
 
@@ -1104,9 +1106,20 @@
   display: none;
 }
 
+.zx-faq-item summary:focus-visible {
+  outline: 2px solid var(--md-sys-color-primary);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+/* Muted rather than accent-colored: the chevron is an affordance, not something
+   that should pull the eye away from the question text itself. */
 .zx-faq-item summary md-icon {
   flex: 0 0 auto;
-  color: var(--md-sys-color-primary);
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+  color: var(--md-sys-color-on-surface-variant);
   transition: transform 200ms cubic-bezier(0.2, 0, 0, 1);
 }
 
@@ -1114,9 +1127,15 @@
   transform: rotate(180deg);
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .zx-faq-item summary md-icon {
+    transition: none;
+  }
+}
+
 .zx-faq-answer {
   margin: 0;
-  padding: 0 20px 20px;
+  padding-block-end: 18px;
   color: var(--md-sys-color-on-surface-variant);
   text-wrap: pretty;
 }
@@ -1153,19 +1172,22 @@
   padding-block: 22px max(22px, env(safe-area-inset-bottom));
 }
 
+/* Two centered lines, links then copyright. No internal divider and no split
+   utility row: with the theme toggle gone there is only legal text down here,
+   and a hairline between two centered lines would imply two groups where there
+   is really one. */
 .zx-footer-inner {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  align-items: center;
+  gap: 10px;
 }
 
-/* Centered: three short legal links left-aligned under a full-width CTA read as
-   a ragged fragment, and this page has no wider layout to design for. */
 .zx-footer-links {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 10px 22px;
+  gap: 8px 20px;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -1189,17 +1211,6 @@
   border-radius: 3px;
 }
 
-/* Copyright and the theme toggle share one row. A hairline above it separates
-   the legal links from the utility row without adding a second border color. */
-.zx-footer-bottom {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding-block-start: 14px;
-  border-block-start: 1px solid var(--md-sys-color-outline-variant);
-}
-
 .zx-footer-copy {
   margin: 0;
   color: var(--md-sys-color-on-surface-variant);
@@ -1208,11 +1219,6 @@
 }
 
 /* ------------------------------------------------------- language selector */
-
-.zx-theme-toggle {
-  --md-icon-button-icon-color: var(--md-sys-color-on-surface-variant);
-  --md-icon-button-icon-size: 20px;
-}
 
 .zx-lang {
   position: relative;

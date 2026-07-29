@@ -48,19 +48,23 @@ export const viewport: Viewport = {
   maximumScale: 5,
   userScalable: true,
   themeColor: '#060504',
-  colorScheme: 'dark light',
+  colorScheme: 'dark',
 }
 
 /**
  * The <html lang> attribute is set per market by app/[lang]/layout.tsx, which
  * rewrites it on the client before paint via a tiny inline script — Next only
- * allows one <html> element, and it lives here.
+ * allows one <html> element, and it lives here. `suppressHydrationWarning`
+ * exists for exactly that rewrite; it is not theme-related.
+ *
+ * No `dark` class: the app is dark-only and the scheme now lives on :root, so
+ * there is no class to apply and no pre-paint script needed to avoid a flash.
  */
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html
       lang="en-US"
-      className={`${roboto.variable} ${notoSansThai.variable} dark`}
+      className={`${roboto.variable} ${notoSansThai.variable}`}
       suppressHydrationWarning
     >
       <head>
@@ -68,13 +72,6 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <link
           rel="stylesheet"
           href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
-        />
-        <script
-          // Applies the stored theme before first paint to avoid a flash.
-          // Dark is the default because the hero is film footage.
-          dangerouslySetInnerHTML={{
-            __html: `(function(){try{var t=localStorage.getItem('theme');document.documentElement.classList.toggle('dark',t!=='light')}catch(e){}})()`,
-          }}
         />
       </head>
       <body>

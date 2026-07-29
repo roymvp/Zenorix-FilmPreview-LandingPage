@@ -74,16 +74,16 @@
     "heading": "FAQ",
     "items": [
       {
-        "q": "Do I get full access to everything during the free month?",
+        "q": "Do I get full access to everything during the 30 free days?",
         "a": "100% full, unrestricted access. Zero locked titles, zero paywalled features, zero hidden tiers. Every movie, every show, every live channel, full 4K quality — all unlocked the second you install the app. No fine print, no limitations."
       },
       {
-        "q": "How much does it cost after the first free month?",
+        "q": "How much does it cost after the 30 free days?",
         "a": "Two straightforward plans. The monthly plan is {monthly} after your free trial. The annual plan works out to just {annualPerMonth} per month — the cheapest streaming price on the market, way lower than Netflix, Disney+ or any other major service."
       },
       {
-        "q": "Will I get charged automatically when the free month ends?",
-        "a": "Only if you keep your subscription. Cancel anytime before your free month wraps up and you pay absolutely nothing. No hidden fees, no fine print, no sneaky auto-renewal tricks."
+        "q": "Do I need to add a card to start the 30-day free trial?",
+        "a": "No card, and no payment details of any kind. Your 30 free days start the moment you install the app. You only pick a plan and add a payment method after those 30 days are up — so there is no auto-charge to worry about, because we never hold your card during the trial, and nothing to cancel if you decide not to continue."
       },
       {
         "q": "How do I install the APK on my Android phone?",
@@ -146,7 +146,6 @@
   },
   "a11y": {
     "skipToContent": "Skip to film details",
-    "posterAlt": "Poster for {title}",
-    "theme": "Switch between light and dark theme"
+    "posterAlt": "Poster for {title}"
   }
 }
