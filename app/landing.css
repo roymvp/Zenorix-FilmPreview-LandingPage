@@ -875,71 +875,44 @@
 
 /* ------------------------------------------------------------ about zenorix */
 
-/* Scoped to this section only, still tighter than the page's shared 44px band.
-
-   NOTE: this used to be squeezed to fit all four claims plus the install button
-   inside one phone screen. The 160px card band gives that up deliberately — the
-   section is now ~825px against ~664px of usable phone viewport, so the last card
-   and the CTA sit below the fold and the reader scrolls. Breathing room inside
-   each card was chosen over the single-screen read; if one-screen ever becomes
-   the priority again, the card band is the lever, not this padding. */
+/* Density pass, scoped to this section only. The goal is the whole argument —
+   four claims plus the install button — landing inside one phone screen, since a
+   comparison the reader has to scroll through loses the comparison. Trimmed from
+   the shared 44px band and the title's 18px gap; the other sections keep the
+   page's looser rhythm because none of them need to be read as a single unit. */
+/* 18px, not 20: Thai sets taller than Latin at the same font-size, so the
+   section is ~7px longer in th. The budget is set by the tallest locale, not by
+   English. */
 .zx-section--about {
-  padding-block: 22px;
+  padding-block: 18px;
 }
 
 .zx-section--about .zx-section-title {
-  margin-block-end: 12px;
+  margin-block-end: 10px;
 }
 
 /* Outlined cards, no fill: the border alone does the grouping so the section
-   still sits on the page's single surface.
-
-   Grid, not flex, to give every card one shared 160px band. `minmax(160px, auto)`
-   rather than a flat `160px`: the floor is what makes the four cards uniform,
-   and the `auto` ceiling is the safety valve — Thai sets taller than Latin, so a
-   fixed row would clip its own content the moment the locale changed. Every card
-   is comfortably under the floor today, so all four resolve to exactly 160px.
-
-   The extra room is the point: at the previous 110px the cards were sized to
-   their text with nothing to spare, and the section read as a dense stack of
-   receipts. 160px gives each claim air around it, and one shared band means the
-   four read as a set of equal-weight claims rather than as four different-sized
-   ones. */
+   still sits on the page's single surface. */
 .zx-about {
-  display: grid;
-  /* `minmax(0, 1fr)`, never the implicit `auto`. A grid's auto column is floored
-     at the widest item's min-content, and two cards here have a very wide
-     min-content (the marquee's max-content track, and the 3-column specs row).
-     Left as `auto` the single column blows out past the viewport — measured
-     1058px inside a 390px phone — dragging all four cards with it and pushing
-     the centered content off-screen. The 0 minimum lets the column take the
-     container's width and makes the cards shrink normally instead. */
-  grid-template-columns: minmax(0, 1fr);
-  grid-template-rows: repeat(4, minmax(160px, auto));
-  gap: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
-/* 18px padding against a 10px outer gap: the inside of a card must stay roomier
-   than the space between cards, or the four stop reading as separate cards. Both
-   grew with the taller band — inner space has to scale with the box, otherwise
-   160px cards with 14px padding just look like small cards with a large empty
-   hole punched in the middle. */
+/* 14px padding with an 8px outer gap keeps the card's inner breathing room
+   larger than the space between cards, which is what stops four tightened
+   cards from reading as one continuous block. */
 .zx-about-card {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  /* Splits the height each card gains from the 160px band evenly above and below
-     its content instead of letting it pool under the last line — with a fixed
-     band this is what turns the extra room into symmetric breathing space rather
-     than a bottom-weighted gap. */
-  justify-content: center;
-  gap: 12px;
-  padding: 18px;
+  gap: 8px;
+  padding: 14px;
   border: 1px solid var(--md-sys-color-outline-variant);
-  border-radius: 16px;
+  border-radius: 14px;
   background: transparent;
 }
 
@@ -968,21 +941,16 @@
    Negative margin because `gap` cannot be varied per item: the card is a flex
    column, so the 8px applies to every child equally. Offsetting the one child
    is the only way to tighten a single joint without giving up gap entirely and
-   hand-spacing all three. Tracks the card's gap at roughly half of it (-6px on a
-   12px gap = 6px effective, as -4px on 8px was): the pair has to stay visibly
-   tighter than the card's own rhythm to keep reading as one offer, so this value
-   must be revisited whenever .zx-about-card's gap changes. Not 0 — the lines
-   still need to separate as two distinct pieces of information. */
+   hand-spacing all three. Kept at -4px (4px effective) rather than 0 so the
+   lines still separate as two distinct pieces of information. */
 .zx-about-card--centered .zx-about-note {
-  margin-block-start: -6px;
+  margin-block-start: -4px;
 }
 
 /* Clear of the last card so the button reads as the whole section's conclusion
    rather than as part of the trial card. */
-/* Larger than the 10px between cards so the button separates from the stack and
-   reads as the section's conclusion rather than as a fifth card. */
 .zx-about-cta {
-  margin-block-start: 16px;
+  margin-block-start: 12px;
 }
 
 /* Filled pill. `align-items: flex-start` on the card keeps it hugging its own
@@ -1180,7 +1148,7 @@
    CSS transform coexist because scrollLeft and transform are independent. */
 .zx-logo-marquee {
   align-self: stretch;
-  margin-inline: -18px;
+  margin-inline: -14px;
   overflow-x: auto;
   /* Fade both ends. WebKit prefix first for older iOS Safari. */
   -webkit-mask-image: linear-gradient(
