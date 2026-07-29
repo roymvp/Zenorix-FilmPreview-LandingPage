@@ -1472,7 +1472,11 @@
      both reveals the full height and sits the art flush against the sheet's edge.
      Only the HORIZONTAL bleed below is still doing real work. */
   height: 116px;
-  margin: 0 -24px 4px;
+  /* Bottom margin 14px (was 4px). Combined with the headline's own 6px flex gap
+     that puts 20px between the artwork and the title, up from a cramped 10px — the
+     art is a full-bleed 116px band, so the title needs real clearance to stop
+     looking glued to it. Horizontal `-24px` is the bleed and must not change. */
+  margin: 0 -24px 14px;
   overflow: hidden;
 }
 
@@ -1604,12 +1608,22 @@
 .zx-dialog-body {
   display: flex;
   flex-direction: column;
-  /* 10px: the label sits directly above the list it names, so the two must group. */
-  gap: 10px;
-  /* Slightly more generous than the old 14px now that no border draws the bounds —
-     a fill needs a little more inset to read as a deliberate panel. */
-  padding: 14px 16px;
-  border-radius: 14px;
+  /* 13px: the label still reads as belonging to the list it names, but no longer
+     sits right on top of it. Kept well below the 12px inter-bullet gap's visual
+     weight so label+list remain one group rather than four peers. */
+  gap: 13px;
+  /* 18px all round, up from `14px 16px`. A borderless fill has no drawn edge to
+     define it, so the inset IS the panel — at 14px the text was nearly touching
+     the tint's boundary. Even padding also lets the 16px radius read cleanly.
+     Overrides md-dialog's `slot[name=content]::slotted(*){padding:24px}`, which
+     document styles beat. */
+  padding: 18px;
+  /* Nudges the panel 4px further from the title above it (24px slot gap -> 28px),
+     reinforcing that the title is a separate, higher tier than this support copy. */
+  margin-block-start: 4px;
+  /* 16px to stay concentric-ish inside the sheet's 28px corners now that padding
+     grew; 14px looked slightly tight against the larger inset. */
+  border-radius: 16px;
   background: var(--md-sys-color-surface-container-highest);
   color: var(--md-sys-color-on-surface-variant);
   /* Explicit, because md-dialog's content slot inherits the host's centering in
@@ -1624,9 +1638,12 @@
 
 .zx-dialog-bullets {
   display: grid;
-  /* 9px: the rows now carry 1.45 internal leading of their own, so the earlier
-     11px on top of that spread the list taller than the heading above it. */
-  gap: 9px;
+  /* 12px. The earlier 9px was chosen to keep the list from out-measuring the
+     heading, but that was while the panel was outlined and every level competed;
+     now that the fill has visually demoted this block, the rows can breathe. 12px
+     is comfortably more than the ~7px of leading between wrapped lines inside a
+     single bullet, so multi-line bullets still read as one item each. */
+  gap: 12px;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -1661,8 +1678,16 @@
 .zx-dialog-actions {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  /* 10px: the meta line ("Android APK · size · downloads") is a caption for the
+     button directly above it, so it stays tightly coupled — this only relieves the
+     crowding, it does not separate them into two blocks. */
+  gap: 10px;
   width: 100%;
+  /* Raises md-dialog's slotted 16px to 22px, so the primary action gets ~30px of
+     clear space below the support panel instead of 24px. The CTA is one of the two
+     things that matter here; isolating it slightly makes it read as the conclusion
+     of the sheet rather than the next item in a list. */
+  padding-block-start: 22px;
   /* The sheet sits flush against the bottom edge, so the install button would
      land under the home indicator / gesture bar without this. Overrides only the
      bottom of md-dialog's `::slotted` padding shorthand — document styles beat
