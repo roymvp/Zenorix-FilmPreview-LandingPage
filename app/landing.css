@@ -722,6 +722,12 @@
    secondary action mattered more. Both are now `body`/semibold, and primacy is
    carried by fill-vs-outline where it belongs. */
 .zx-cta-button {
+  /* 46px, matching `.zx-chart-more` — the one height every install control on the page
+     shares, and the number the dialog rule below already documents as "the base".
+     Nothing set it here, so these buttons silently took Material's 40px default and
+     the SECONDARY outlined button ended up 6px taller than the primary filled ones:
+     a size hierarchy inversion, exactly the kind the label-weight note above fixed. */
+  --md-filled-button-container-height: 46px;
   --md-filled-button-label-text-size: var(--zx-text-body);
   --md-filled-button-label-text-weight: var(--zx-weight-semibold);
 }
@@ -740,6 +746,11 @@
   margin: 0;
   color: var(--md-sys-color-on-surface-variant);
   font-size: var(--zx-text-caption);
+  /* Was unset, so it resolved to the UA's `normal` (~1.2) while the otherwise
+     identical caption under the chart button declared 1.45 — the same 12px string in
+     two different line boxes, 15px tall here and 17.4px there. Stating it puts all
+     five install captions on one leading. */
+  line-height: var(--zx-lh-body);
 }
 
 .zx-cta-sub md-icon {
@@ -973,10 +984,14 @@
 /* The button states the action; this line states the size of the payoff. Kept
    quiet and centred under the pill so it reads as a caption, not a second CTA. */
 .zx-chart-more-hint {
-  margin: var(--zx-space-2) 0 0;
+  /* 10px, was 8px. The scale documents `space-25` as exactly this relationship — a
+     control to its OWN caption — and the four `.zx-cta-sub` captions already sit at
+     10px under their buttons. At 8px this one caption was 2px tighter than its four
+     siblings for no reason anyone chose. */
+  margin: var(--zx-space-25) 0 0;
   color: var(--md-sys-color-on-surface-variant);
   font-size: var(--zx-text-caption);
-  line-height: 1.45;
+  line-height: var(--zx-lh-body);
   text-align: center;
   text-wrap: balance;
 }
@@ -1325,20 +1340,26 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  /* Pair step: the badge and the label it belongs to. */
-  gap: var(--zx-space-2);
-  padding: var(--zx-space-3);
+  /* 6px, was 8px. Icon and label are the tightest possible pair — a glyph and the
+     two words naming it — so this is where height comes out of this card first. */
+  gap: var(--zx-space-15);
+  /* 10px, was 12px. The tile keeps its own fill, so its edge is still drawn rather
+     than implied; 10px is enough inset to read as a tile at this size. */
+  padding: var(--zx-space-25);
   border-radius: var(--zx-radius-sm);
   background: var(--md-sys-color-surface-container-low);
   text-align: start;
 }
 
 .zx-about-specs md-icon {
-  font-size: 26px;
+  /* 24px, was 26px. Together with the tile's tighter gap and padding this takes the
+     card from 163px to roughly 153px, close to its neighbours, without touching the
+     label size — the badges are supporting marks here, not the card's argument. */
+  font-size: 24px;
   /* md-icon sizes its own box from these, so all three must move together or
      the glyphs crop. */
-  width: 26px;
-  height: 26px;
+  width: 24px;
+  height: 24px;
   color: var(--md-sys-color-on-surface);
 }
 
@@ -1432,10 +1453,17 @@
 .zx-logo-set {
   display: flex;
   align-items: center;
-  gap: var(--zx-space-25);
-  padding-inline-end: 10px;
+  /* 12px, up from 10px, to keep the gaps in proportion with the now-48px icons.
+     The trailing padding MUST stay identical to this gap — that equality is what
+     makes one set exactly one repeat wide, per the note above. Both are the same
+     token for that reason, so they cannot drift apart. */
+  gap: var(--zx-space-3);
+  padding-inline-end: var(--zx-space-3);
   margin: 0;
-  padding-block: 0;
+  /* Vertical air inside the strip. The marquee bleeds past the card's padding on
+     both sides, so without this the enlarged icons sit hard against the rows above
+     and below — the 16px chip gap was doing all the work alone. */
+  padding-block: var(--zx-space-2);
   padding-inline-start: 0;
   list-style: none;
 }
@@ -1467,9 +1495,13 @@
   /* Never let an icon squeeze — the set's width must stay predictable for the
      50% translate to line up. */
   flex: 0 0 auto;
-  width: 38px;
-  height: 38px;
-  border-radius: 11px;
+  /* 48px, up from 38px. This card held the shortest payload of the four (38px against
+     the price chart's 80px) and read as the runt of the set; the logos are also its
+     entire argument, so they were the right thing to spend the height on. The radius
+     moves with the size to keep the same corner-to-edge proportion. */
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
   object-fit: cover;
   box-shadow: 0 0 0 1px var(--md-sys-color-outline-variant);
 }
