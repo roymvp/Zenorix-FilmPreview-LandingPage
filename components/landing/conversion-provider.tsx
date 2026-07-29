@@ -20,7 +20,8 @@ import { SITE } from '@/lib/config/site'
  * event exist in exactly one place. Dialog state lives here too, which is what
  * lets the player trigger the upsell without knowing the dialog exists.
  */
-type PreviewReason = 'limit' | 'scrub'
+/** Exported so the player names the two triggers from this one source. */
+export type PreviewReason = 'limit' | 'scrub'
 
 type ConversionState = {
   /** Fires the APK download and reports the source that earned the click. */
