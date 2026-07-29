@@ -1,3 +1,5 @@
+import type { CSSProperties } from 'react'
+
 import { DownloadCta } from '@/components/landing/download-cta'
 import { PLATFORMS, PLATFORM_ORDER } from '@/lib/content/platforms'
 
@@ -181,12 +183,19 @@ export function AboutZenorix({
                 bars could not share a start edge and each row sized its own price
                 column independently. */}
             <dl className="zx-compare">
-              <dt className="zx-compare-bar zx-compare-bar--ours">
+              {/* The share is set once, on the bar, and used twice: it sizes the
+                  fill and it insets the label so the label always starts clear of
+                  the fill's tick mark. Passing it as a variable rather than styling
+                  the fill directly is what keeps those two in step — at the real
+                  10% the tick was otherwise landing through the "Z" of "Zenorix". */}
+              <dt
+                className="zx-compare-bar zx-compare-bar--ours"
+                style={{ '--zx-fill-share': `${ourShare}%` } as CSSProperties}
+              >
                 {/* Decorative: the figure beside it already states the value, so
                     re-announcing the bar would only duplicate it. */}
                 <span
                   className="zx-compare-fill zx-compare-fill--ours"
-                  style={{ width: `${ourShare}%` }}
                   aria-hidden="true"
                 />
                 <span className="zx-compare-name">{price.ourLabel}</span>

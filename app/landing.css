@@ -1136,6 +1136,8 @@
   display: flex;
   align-items: center;
   min-height: 34px;
+  /* Uniform 12px, then overridden per row below. Our row needs a bigger start
+     inset to clear its own tick mark; the rival row does not. */
   padding: var(--zx-space-2) var(--zx-space-3);
   border-radius: var(--zx-radius-sm);
   /* The unfilled span every bar is measured against. */
@@ -1157,18 +1159,39 @@
    be a colour the label reads against either way. Solid primary would have left
    the first characters of "Zenorix" invisible — primary text on a primary fill.
    Against `primary-container` the label clears 5.4:1, and 7.5:1 on the bare bar
-   beside it. */
+   beside it.
+
+   The bright edge is what actually makes the quantity readable. Measured, the tint
+   `#6a3d00` against the bar's own `#363128` is ~1.3:1 — two dark browns the eye
+   cannot separate, so the fill alone left the bar looking uniformly filled and the
+   10% communicated nothing. A 2px `primary` rule marks where the fill ENDS, so the
+   proportion is carried by a crisp high-contrast tick instead of by a fill/track
+   difference that is invisible. This is also what keeps the fill honest: the tick
+   can sit at a truthful 10% without the label having to fit inside it. */
 .zx-compare-fill--ours {
+  /* Same variable the bar uses to inset the label, so the tick and the text it must
+     clear can never disagree. */
+  width: var(--zx-fill-share, 10%);
   background: var(--md-sys-color-primary-container);
+  border-inline-end: 2px solid var(--md-sys-color-primary);
 }
 
 /* Full width by definition — it is the 100% the other bar is measured against.
-   Only a step above the empty bar it sits in: the rival bar just needs to read
-   as "the whole span", and any more contrast would make the expensive option the
-   loudest thing in the card. */
+   Only a step above the empty bar it sits in: the rival bar just needs to read as
+   "the whole span", and any more contrast would make the expensive option the
+   loudest thing in the card.
+
+   Same invisibility problem as our fill, measured at 1.38:1 against the bar, but the
+   opposite fix. This one spans the full width, so it has no meaningful END to tick —
+   marking its right edge would just draw a line on the bar's own corner. Instead
+   `outline` traces the whole span at the same 2px weight, so both rows are keyed the
+   same way: a visible boundary at the extent of the quantity. `outline` rather than
+   `border` because a border would inset the fill by 2px inside its own bar. */
 .zx-compare-fill--rival {
   width: 100%;
   background: var(--md-sys-color-surface-variant);
+  outline: 2px solid var(--md-sys-color-outline);
+  outline-offset: -2px;
 }
 
 /* Above the fill, and `position: relative` is what puts it there — the fill is
@@ -1180,6 +1203,19 @@
   font-size: var(--zx-text-meta);
   line-height: 1.35;
   text-wrap: pretty;
+}
+
+/* Starts after the tick, not under it. At the real 10% ratio the fill is only 23px
+   wide, so a label starting at the bar's own 12px padding had the 2px tick landing
+   straight through the "Z" — the mark that carries the quantity was colliding with
+   the word that names it. The inset is expressed as the fill's own width plus the
+   standard 12px gap, so the label keeps clearing the tick at any ratio: cheaper
+   plans push it right, and it never has to be re-tuned by hand.
+
+   `--zx-fill-share` is set inline by the component (the same value that sizes the
+   fill), which is what lets one CSS rule stay correct across every locale's price. */
+.zx-compare-bar--ours {
+  padding-inline-start: calc(var(--zx-fill-share, 10%) + var(--zx-space-3));
 }
 
 /* Our bar is the only colored text in the card, which is what makes the eye start
