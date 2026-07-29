@@ -282,10 +282,14 @@ export function ConversionDialogs({
                 so alt text here would add nothing for screen readers. */}
             <img src={previewFrame} alt="" />
           </span>
-          <CornerClose label={copy.preview.close} onClose={closePreview} />
           {/* One heading, two lines, one <strong> per line so both inherit the
               exact same typescale — see the note on `headingLines`. */}
           <span className="zx-dialog-heading-stack">
+            {/* Inside the heading stack, NOT a sibling of the art above it: the
+                close button positions against its nearest positioned ancestor,
+                and anchoring it to the headline box put it ~130px up on the
+                artwork instead of beside the title. */}
+            <CornerClose label={copy.preview.close} onClose={closePreview} />
             {copy.preview.headingLines.map((line) => (
               <strong key={line} className="md-typescale-headline-small">
                 {line}

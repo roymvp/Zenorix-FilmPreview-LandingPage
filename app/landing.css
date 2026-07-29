@@ -1485,6 +1485,10 @@
   object-fit: cover;
 }
 
+/* Blends the art's bottom edge into the sheet so it reads as one surface. Only
+   the lower ~55% is tinted: at `88%` the gradient covered nearly the entire strip
+   and the frame was reduced to a dark band, which wasted 132px of sheet height
+   on something the viewer could not actually see. */
 .zx-dialog-art::after {
   content: '';
   position: absolute;
@@ -1492,7 +1496,7 @@
   background: linear-gradient(
     to top,
     var(--md-sys-color-surface-container-high) 0%,
-    rgba(0, 0, 0, 0) 88%
+    rgba(0, 0, 0, 0) 55%
   );
 }
 
@@ -1510,14 +1514,63 @@
      instead of a full-bleed header. Stretch also left-aligns the eyebrow and
      heading, matching the body copy below them. */
   align-items: stretch;
+  /* Pushes the heading down by 7px so the corner close button — which sits at
+     inset 0 — ends up optically centered on the title's first line. See the
+     centering math on .zx-dialog-close. Only applies when the headline STARTS
+     with the heading; the poster sheet overrides it below, because there the
+     first child is the full-bleed art. */
+  padding-block-start: 7px;
 }
+
+/* The poster sheet's art is pulled up by -24px to bleed off the top edge, so any
+   top padding here would show as a band of container color above it. */
+.zx-dialog-headline:has(> .zx-dialog-art) {
+  padding-block-start: 0;
+}
+
+/* On the poster sheet the close button must align to the HEADING, not to the
+   headline box — the box starts at the art, ~130px higher, which left the disc
+   stranded mid-artwork far from any text (measured at -111px off).
+
+   `.zx-dialog-heading-stack` is the heading's own wrapper and sits directly
+   below the art, so re-anchoring to it reuses the exact same centering math as
+   the no-art sheet. `position: relative` alone does that, because the button
+   resolves against its nearest positioned ancestor. */
+.zx-dialog-heading-stack {
+  position: relative;
+  padding-block-start: 7px;
+}
+
+/* The close button is a flex child of the stack but absolutely positioned, so it
+   is out of flow and contributes no gap of its own — no `:first-of-type` shift
+   to compensate for. This is why the clearance rule above targets
+   `strong:first-of-type` rather than `:first-child`. */
 
 .zx-dialog-headline strong {
   color: var(--md-sys-color-on-surface);
-  text-wrap: balance;
-  /* Keeps the heading clear of the corner close button, which is absolutely
-     positioned and so contributes no width of its own to reflow around. */
-  padding-inline-end: 40px;
+  /* `pretty`, not `balance`. Balance equalizes line lengths, which on a 372px
+     sheet split these headings at arbitrary mid-phrase points to even out the
+     ragged edge ("...to watch the FULL" / "movie FREE."). `pretty` keeps the
+     natural greedy break and only resolves orphans, so lines break where the
+     sentence does. */
+  text-wrap: pretty;
+  /* Slightly tighter than the 32px typescale default: at 24px these headings run
+     to two visual lines, and the roomier default made a single heading read as
+     two separate statements. */
+  line-height: 1.25;
+}
+
+/* Close-button clearance, applied ONLY to the line that actually sits beside it.
+   It was previously on every `strong`, costing all lines 40px of measure even
+   though the button occupies just the top-right corner — that lost width is what
+   forced the extra, awkward wraps. */
+.zx-dialog-headline > strong:first-of-type,
+.zx-dialog-heading-stack > strong:first-of-type {
+  /* 56px = the 44px disc + its 8px inset + 4px of breathing room. The earlier
+     44px only covered the disc itself, so the glyph sat directly on top of the
+     heading's last word ("...the first" ran under the X). Text clears an
+     absolutely positioned sibling only by reserved padding, never automatically. */
+  padding-inline-end: 56px;
 }
 
 /* The two-line heading on the poster sheet. Both lines are <strong> with the
@@ -1537,24 +1590,30 @@
 
 /* Corner dismiss, replacing the old full-width "Close" text button.
 
-   On the poster sheet it lands ON the key art, so it carries its own scrim disc
-   — without one the glyph disappeared against a bright frame. The disc is dark
-   and the glyph light in both sheets, since a single treatment that works over
-   art also works over the container color and avoids an art-only variant.
+   Anchored to the HEADING's wrapper in both sheets, not to the headline box: on
+   the poster sheet the box begins at the full-bleed art, which stranded the disc
+   ~130px up in the middle of the artwork instead of beside the title.
 
    Offsets are POSITIVE, never negative. Negative values (tried -8px) push the
    disc past the sheet's 28px rounded corner so it renders half outside, floating
-   on the page. Even `0` is not safe on the poster sheet: `.zx-dialog-art` is
-   pulled up by -24px to bleed the art, which drags the headline's own top edge
-   above the sheet's, and the button went with it. The +8px block offset re-enters
-   the sheet in both dialogs, and stays clear of the corner curve. */
+   on the page. */
 .zx-dialog-close {
   position: absolute;
   z-index: 2;
-  /* Measured, not guessed: these put the disc 8px from the sheet's top edge and
-     8px from its right edge. `end: 0` alone sat flush against the right edge
-     because md-dialog's slot padding is already consumed by the art bleed. */
-  inset-block-start: 8px;
+  /* OPTICALLY CENTERED ON THE TITLE'S FIRST LINE, not pinned to the headline box.
+
+     A fixed `8px` top put the disc's center 10px ABOVE that first line (measured),
+     which is what read as "close button and title are misaligned": the disc
+     floated between the sheet's top edge and the text.
+
+     The centering math, relative to the headline's own top edge:
+       first line's center = (24px font x 1.25 line-height) / 2 = 15px
+       disc's own center    = 44px / 2                          = 22px
+       offset               = 15px - 22px                       = -7px
+     A negative value would escape the sheet's rounded corner (documented above),
+     so instead the headline reserves 7px of top padding and the disc sits at 0 —
+     same optical result, nothing outside the sheet. */
+  inset-block-start: 0;
   inset-inline-end: 8px;
   display: grid;
   place-items: center;
@@ -1565,11 +1624,17 @@
   padding: 0;
   border: 0;
   border-radius: 50%;
-  background: rgba(6, 5, 4, 0.55);
-  color: #fff;
+  /* Now sits on the sheet's container color in BOTH dialogs (it used to land on
+     the poster art, which is why it carried a dark scrim disc and a white glyph).
+     A quiet surface tint with the normal low-emphasis on-surface glyph keeps it
+     legible without competing with the CTA for attention. */
+  background: var(--md-sys-color-surface-container-highest);
+  color: var(--md-sys-color-on-surface-variant);
   cursor: pointer;
   appearance: none;
-  transition: background-color 180ms ease;
+  transition:
+    background-color 180ms ease,
+    color 180ms ease;
 }
 
 .zx-dialog-close md-icon {
@@ -1579,7 +1644,8 @@
 }
 
 .zx-dialog-close:hover {
-  background: rgba(6, 5, 4, 0.75);
+  background: var(--md-sys-color-surface-container-high);
+  color: var(--md-sys-color-on-surface);
 }
 
 .zx-dialog-close:focus-visible {
@@ -1591,7 +1657,10 @@
    aligned like the heading and bullets above/below it, and set at the same size
    as the bullet rows so the whole block reads as one list with a label. */
 .zx-dialog-lead {
-  font-size: 13px;
+  /* 15px, up from 13px. These sheets are the page's conversion moment and 13px
+     was noticeably smaller than the 15px CTA label right below them, so the
+     value props read as fine print. Matches .zx-dialog-bullets li. */
+  font-size: 15px;
   font-weight: 600;
   color: var(--md-sys-color-on-surface);
 }
@@ -1616,7 +1685,9 @@
 
 .zx-dialog-bullets {
   display: grid;
-  gap: 9px;
+  /* 11px, up from 9px: the rows are 15px now, and the old gap left them too
+     tightly packed to scan as separate value props. */
+  gap: 11px;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -1625,15 +1696,20 @@
 .zx-dialog-bullets li {
   display: flex;
   align-items: center;
-  gap: 7px;
+  gap: 9px;
   color: var(--md-sys-color-on-surface);
-  font-size: 13px;
+  /* 15px, up from 13px — see the note on .zx-dialog-lead. */
+  font-size: 15px;
+  line-height: 1.35;
 }
 
 .zx-dialog-bullets md-icon {
-  font-size: 17px;
-  width: 17px;
-  height: 17px;
+  /* Grown with the label text so the check does not look undersized beside it,
+     and pinned with flex-shrink so a wrapping bullet cannot squash the glyph. */
+  font-size: 19px;
+  width: 19px;
+  height: 19px;
+  flex-shrink: 0;
   color: var(--md-sys-color-primary);
 }
 
@@ -1660,4 +1736,8 @@
 
 .zx-dialog-actions .zx-cta-sub {
   justify-content: center;
+  /* Scoped to the dialog on purpose: `.zx-cta-sub` is shared with the in-page and
+     final CTAs, where 12.5px is correct. Only the sheets needed a lift, so the
+     rest of the page is left alone. */
+  font-size: 13.5px;
 }
