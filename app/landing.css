@@ -989,28 +989,51 @@
 
 /* Outlined cards, no fill: the border alone does the grouping so the section
    still sits on the page's single surface. */
+/* The one section whose title needs more than the shared 16px, and for a structural
+   reason rather than taste: its children are separated from EACH OTHER by 16px, so at
+   the shared step the heading sat exactly as far from the first card as the cards sit
+   from one another — making it read as a fifth item in the stack instead of the label
+   for all four. A heading must always out-space the gaps within the group it labels.
+   Other sections keep 16px because their content is a single block with no internal
+   gap to compete with. */
+.zx-section--about .zx-section-title {
+  margin-block-end: var(--zx-space-6);
+}
+
 .zx-about {
   display: flex;
   flex-direction: column;
-  /* 12px between cards, up from 8px. 8px was the same value used for items INSIDE a
-     card, so card-to-card and item-to-item were indistinguishable and the four
-     outlined boxes read as one block. Card-to-card must be a step looser than
-     anything within a card. */
-  gap: var(--zx-space-3);
+  /* 16px between cards. Card-to-card must stay a step looser than the widest joint
+     INSIDE a card (now 12px), or the four outlined boxes read as one block — at 12px
+     it exactly equalled that joint, so a card boundary carried no more separation
+     than a line break within a card. */
+  gap: var(--zx-space-4);
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
-/* 16px inner padding against the 12px gap BETWEEN cards. Inner must stay larger than
+/* 20px inner padding against the 16px gap BETWEEN cards. Inner must stay larger than
    outer — that ratio is what keeps four adjacent cards reading as four objects
-   rather than one continuous block. */
+   rather than one continuous block.
+
+   Padding is exposed as a custom property because `.zx-logo-marquee` has to bleed by
+   exactly the negative of it. That used to be a hardcoded `-14px` plus a comment
+   asking whoever edits this to remember; the padding then moved to 16px and the
+   marquee did not, leaving the strip 2px shy of the border on both sides. A variable
+   makes the two impossible to desynchronise. */
 .zx-about-card {
+  --zx-about-card-pad: var(--zx-space-5);
+
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: var(--zx-space-2);
-  padding: var(--zx-space-4);
+  /* 12px from the eyebrow chip to the card's payload, up from 8px. 8px is the
+     icon-to-its-own-label distance used inside the spec row, so at 8px the chip was
+     bound to its content as tightly as an icon is to its caption. The chip titles the
+     card, so it needs the looser step. */
+  gap: var(--zx-space-3);
+  padding: var(--zx-about-card-pad);
   border: 1px solid var(--md-sys-color-outline-variant);
   border-radius: var(--zx-radius-sm);
   background: transparent;
@@ -1035,22 +1058,27 @@
 
 /* Pulls the caveat up under "30 DAYS FREE" so the two read as one offer rather
    than as two stacked statements — the note only qualifies the value above it,
-   and at the card's full 8px it floated equidistant between the value and the
+   and at the card's full joint it floated equidistant between the value and the
    card edge, reading as an independent third line.
 
    Negative margin because `gap` cannot be varied per item: the card is a flex
-   column, so the 8px applies to every child equally. Offsetting the one child
+   column, so its joint applies to every child equally. Offsetting the one child
    is the only way to tighten a single joint without giving up gap entirely and
-   hand-spacing all three. Kept at -4px (4px effective) rather than 0 so the
-   lines still separate as two distinct pieces of information. */
+   hand-spacing all three.
+
+   Written as `space-2 - space-3` rather than a hand-computed `-4px` so it states the
+   intent — "this joint is 8px, one step tighter than the card's 12px" — and follows
+   the card if that joint ever changes. Not 0: the lines must still separate as two
+   distinct pieces of information. */
 .zx-about-card--centered .zx-about-note {
-  margin-block-start: -4px;
+  margin-block-start: calc(var(--zx-space-2) - var(--zx-space-3));
 }
 
 /* Clear of the last card so the button reads as the whole section's conclusion
-   rather than as part of the trial card. */
+   rather than as part of the trial card. 20px: it has to beat the 16px that separates
+   one card from the next, otherwise the button is just a fifth item in the stack. */
 .zx-about-cta {
-  margin-block-start: var(--zx-space-3);
+  margin-block-start: var(--zx-space-5);
 }
 
 /* Filled pill. `align-items: flex-start` on the card keeps it hugging its own
@@ -1248,16 +1276,16 @@
 
    Negative margin cancels the card's padding so the strip runs the full width of
    the card — a marquee that stops short of its container reads as a clipped grid
-   instead of a continuous feed. It MUST stay the exact negative of
-   .zx-about-card's padding or the strip will under/overhang the border. The mask
-   then fades both ends, so icons dissolve rather than being guillotined.
+   instead of a continuous feed. It derives from `--zx-about-card-pad` rather than
+   restating the number, so changing the card's padding moves the bleed with it. The
+   mask then fades both ends, so icons dissolve rather than being guillotined.
 
    `overflow-x: auto` keeps it a genuine scroll container: the animation is the
    idle state, but the user can still flick it left/right. Touch drag and the
    CSS transform coexist because scrollLeft and transform are independent. */
 .zx-logo-marquee {
   align-self: stretch;
-  margin-inline: -14px;
+  margin-inline: calc(-1 * var(--zx-about-card-pad));
   overflow-x: auto;
   /* Fade both ends. WebKit prefix first for older iOS Safari. */
   -webkit-mask-image: linear-gradient(
