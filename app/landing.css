@@ -1565,13 +1565,16 @@
   align-items: center;
 }
 
-.zx-final .zx-cta {
-  align-items: center;
-  width: 100%;
-}
+/* Width only. `align-items: center` used to live here too, and it was the reason this
+   button measured 288px while the two above it measured 378px: centering made the
+   flex column hug the label instead of stretching it, so the page's LAST and most
+   decisive CTA was its smallest tap target. Inheriting the base `stretch` puts all
+   three install buttons on one width.
 
-.zx-final .zx-cta-sub {
-  justify-content: center;
+   The `.zx-final .zx-cta-sub { justify-content: center }` rule that followed is gone
+   with it — `.zx-cta-sub` centers itself in the base rule, so it only restated it. */
+.zx-final .zx-cta {
+  width: 100%;
 }
 
 /* ------------------------------------------------------------------ footer */
