@@ -56,7 +56,11 @@
     },
     "viewing": {
       "label": "Cinematic Viewing",
-      "items": ["4K Ultra HD", "Dolby Atmos", "Lag-Free"]
+      "specs": {
+        "resolution": "4K Ultra HD",
+        "audio": "Dolby Atmos",
+        "playback": "Lag-Free"
+      }
     },
     "trial": {
       "label": "Easy Try",

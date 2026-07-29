@@ -56,7 +56,11 @@
     },
     "viewing": {
       "label": "Experiência de cinema",
-      "items": ["4K Ultra HD", "Dolby Atmos", "Sem travar"]
+      "specs": {
+        "resolution": "4K Ultra HD",
+        "audio": "Dolby Atmos",
+        "playback": "Sem travar"
+      }
     },
     "trial": {
       "label": "Teste fácil",

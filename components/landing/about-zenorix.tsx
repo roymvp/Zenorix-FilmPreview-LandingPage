@@ -2,6 +2,23 @@ import { DownloadCta } from '@/components/landing/download-cta'
 import { PLATFORMS, PLATFORM_ORDER } from '@/lib/content/platforms'
 
 /**
+ * Playback specs, in display order, each paired with its Material Symbols
+ * badge. Icons live here rather than in the dictionaries because a glyph is
+ * presentation, not copy — there is nothing for a translator to localize. Rows
+ * are keyed rather than index-matched so reordering or retranslating a label can
+ * never silently pair "Dolby Atmos" with the 4K plate.
+ */
+const VIEWING_SPECS = [
+  // The literal 4K plate broadcasters and disc cases use.
+  { id: 'resolution', icon: '4k' },
+  // Speaker throwing concentric arcs — the standard surround/spatial mark.
+  { id: 'audio', icon: 'surround_sound' },
+  // Smooth playback has no industry plate, so this borrows the universal
+  // "instant" bolt instead of inventing a fake certification mark.
+  { id: 'playback', icon: 'bolt' },
+] as const
+
+/**
  * About Zenorix — the merged replacement for the old brand strip and the
  * "three reasons people switch" bullets.
  *
@@ -42,8 +59,12 @@ export function AboutZenorix({
     ourAmount: number
     rivalAmount: number
   }
-  /** Card 3: playback specs, laid out as one inline run. */
-  viewing: { label: string; items: string[] }
+  /** Card 3: playback specs, each rendered as a badge over its label. */
+  viewing: {
+    label: string
+    /** Keyed to VIEWING_SPECS so every badge is guaranteed a matching label. */
+    specs: Record<(typeof VIEWING_SPECS)[number]['id'], string>
+  }
   /** Card 4: the offer, plus the objection it removes. */
   trial: { label: string; value: string; note: string }
   /** Label for the section-closing install button. */
@@ -126,13 +147,16 @@ export function AboutZenorix({
 
           <li className="zx-about-card">
             <p className="zx-about-label">{viewing.label}</p>
-            {/* Wrapping inline run rather than stacked lines: three short specs
-                stacked read as a ranked list, side by side they read as one
-                combined claim. */}
+            {/* Three equal columns, badge over label. Icons are the industry's
+                own marks (a 4K plate, a surround-sound speaker), so the claim is
+                recognized before it is read. Decorative by design: each label
+                already states its spec, so announcing the glyph too would only
+                double up for screen readers. */}
             <ul className="zx-about-specs">
-              {viewing.items.map((item) => (
-                <li key={item} className="zx-about-value">
-                  {item}
+              {VIEWING_SPECS.map((spec) => (
+                <li key={spec.id} className="zx-spec">
+                  <md-icon aria-hidden="true">{spec.icon}</md-icon>
+                  <span className="zx-spec-label">{viewing.specs[spec.id]}</span>
                 </li>
               ))}
             </ul>

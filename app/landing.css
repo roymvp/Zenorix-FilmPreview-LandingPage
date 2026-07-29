@@ -1001,16 +1001,46 @@
   background: var(--md-sys-color-outline);
 }
 
-/* Inline run, wrapping as needed. The column gap is wide enough to separate the
-   specs without punctuation. */
+/* Grid rather than flex: three EQUAL tracks are what keep the badges optically
+   evenly spaced across the card. With flex the columns would size to their own
+   label widths, so "Lag-Free" would sit closer to its neighbour than "4K Ultra
+   HD" does and the row would look accidentally ragged. */
 .zx-about-specs {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 4px 14px;
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px 8px;
   margin: 0;
   padding: 0;
   list-style: none;
+}
+
+.zx-spec {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  text-align: center;
+}
+
+.zx-about-specs md-icon {
+  font-size: 28px;
+  /* md-icon sizes its own box from these, so all three must move together or
+     the glyphs crop. */
+  width: 28px;
+  height: 28px;
+  color: var(--md-sys-color-on-surface);
+}
+
+/* Same weight and color as .zx-about-value so this card still belongs to the
+   set; only the size drops, because three labels have to share one row. */
+.zx-spec-label {
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+  color: var(--md-sys-color-on-surface);
+  text-wrap: balance;
 }
 
 .zx-about-note {

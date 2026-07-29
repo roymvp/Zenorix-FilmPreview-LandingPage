@@ -56,7 +56,11 @@
     },
     "viewing": {
       "label": "อรรถรสระดับโรงหนัง",
-      "items": ["4K Ultra HD", "Dolby Atmos", "ไม่มีสะดุด"]
+      "specs": {
+        "resolution": "4K Ultra HD",
+        "audio": "Dolby Atmos",
+        "playback": "ไม่มีสะดุด"
+      }
     },
     "trial": {
       "label": "ลองง่าย",
