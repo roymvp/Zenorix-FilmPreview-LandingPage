@@ -1119,13 +1119,12 @@
 /* ONE grid owns both rows: each row is a price and the bar it measures. Both bars
    therefore start on the same edge in every locale, with no fixed width to maintain.
 
-   The price column is capped rather than free (`auto` at first). Left to size itself
-   it took whatever its longest string needed — 85px in English, far more in Thai —
-   and every pixel it took came out of the bar track, which is where the card's
-   meaning lives. At 390px that starved our 30% bar down to 40px and truncated
-   "Zenorix" inside it. `minmax(0, 6.5rem)` lets the column shrink freely but never
-   grow past 104px, so the long Thai price wraps within its own column instead of
-   eating the chart.
+   The price column is `auto`: it sizes to the WIDEST price across both rows, so the
+   two bars share a start edge in any locale with no fixed width to maintain. It was
+   briefly capped at 6.5rem to hand more width to the bar track, which backfired —
+   the long Thai and Portuguese prices wrapped to two lines inside the capped column
+   and drove this card to 196px, taller than the 201px problem the cap was meant to
+   solve. Width for the bars is taken from their own padding instead, below.
 
    These declarations live on `.zx-compare` itself. They were briefly split onto a
    `.zx-compare-rows` inner element, and when the wrapper was removed the class went
@@ -1143,7 +1142,7 @@
      pushing each price onto its own row, silently turning a 2-row chart into a 4-row
      one and adding 24px of gap that read as the card being too tall. Allowing the
      bar track to shrink below its content keeps each price beside its own bar. */
-  grid-template-columns: minmax(0, 6.5rem) minmax(0, 1fr);
+  grid-template-columns: auto minmax(0, 1fr);
   /* Two explicit rows, with every cell pinned below. Auto-placement cannot express
      this layout: the DOM order has to be bar-then-price for the definition list to
      stay valid (a `dd` may not precede its `dt`), but the price has to PAINT to the
@@ -1180,7 +1179,11 @@
   /* Tall enough to hold 13px text with 8px of breathing room, up from the 20px it
      was as a bare bar. */
   min-height: 34px;
-  padding-inline: var(--zx-space-3);
+  /* 8px, not the 12px used elsewhere. Our bar is only 30% wide by design, so every
+     pixel of padding is taken directly out of the room its label has to fit in — at
+     12px a side the word "Zenorix" ellipsized at every width. This is the one place
+     in the card where padding competes with legibility rather than supporting it. */
+  padding-inline: var(--zx-space-2);
   /* 4px, well under the 12px `radius-sm`. The radius has to stay small relative to
      the bar's own height or the bar turns into a lozenge whose rounded ends eat
      into the length being compared. */
@@ -1188,17 +1191,14 @@
   background: var(--md-sys-color-surface-variant);
 }
 
-/* 30% of the rival bar, set as a variable by the component.
-   `min-width: max-content` is the guard that keeps the label from being clipped: on
-   a narrow card 30% can be less than the word "Zenorix" plus its padding, so the bar
-   grows to its content there rather than cropping the label it exists to carry. At
-   every width where the ratio fits, the ratio wins.
-
-   This is deliberately TWO declarations rather than `max(30%, max-content)`, which
-   is what it was first written as. `max-content` is a sizing keyword, not a length,
-   so it is invalid inside `max()` — the whole `width` was dropped and both bars
-   stretched to a full 265.6px, drawing a 100% ratio. `min-width` accepts the keyword
-   and expresses the same floor correctly. */
+/* 30% of the rival bar, set as a variable by the component. The share is the one
+   number here that must not drift, so it is expressed as a plain percentage with
+   nothing allowed to override it — two earlier attempts to also guarantee the label
+   fits (`max(30%, max-content)`, then `min-width: max-content` with a `max-width`
+   ceiling) each broke the ratio instead: the first was invalid CSS and silently
+   dropped the whole `width`, the second outranked its own ceiling and inflated the
+   bar past half the rival's. Fitting the label is handled by padding and ellipsis,
+   which cannot distort the quantity. */
 .zx-compare-bar--ours {
   grid-row: 1;
   /* A plain percentage of the track, with `border-box` so the share describes the
@@ -1274,12 +1274,10 @@
   letter-spacing: -0.02em;
   text-align: right;
   font-variant-numeric: tabular-nums;
-  /* Wraps, where it used to be `nowrap`. Now that the column is capped, `nowrap`
-     would push the longest price (Thai, "~ 1,000 บาท/เดือน") straight out of its
-     track and over the bar beside it. Wrapping to a second line inside the column is
-     contained; the row simply grows to fit, and both rows grow together because the
-     grid rows share a size. */
-  overflow-wrap: break-word;
+  /* One line always. These are short figures meant to be compared at a glance, and a
+     wrapped price doubles the chart's row height — that is what made this card 196px
+     when the price column was capped. The `auto` column above is sized to fit them. */
+  white-space: nowrap;
 }
 
 /* Same size and weight as the rival figure, differing ONLY in color. The two are
