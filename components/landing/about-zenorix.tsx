@@ -72,14 +72,24 @@ export function AboutZenorix({
   /** APK facts rendered directly beneath that button. */
   ctaMeta: string
 }) {
-  // The rival bar is always full, so our bar is our share of its cost. The 5%
+  // The rival bar is always full, so our bar is our share of its cost. The 10%
   // floor is a legibility guard, not a fudge: at the real US ratio (1.25 / 80 =
   // 1.6%) the fill collapses into the track's own border radius and reads as a
-  // rendering bug rather than as a tiny price.
-  const ourShare = Math.max(5, (price.ourAmount / price.rivalAmount) * 100)
+  // rendering bug rather than as a tiny price. Doubled from 5% — at 5% the fill
+  // was barely wider than the track is tall, so it read as a dot rather than as
+  // a bar being compared. This stays a floor rather than a multiplier: no real
+  // ratio is inflated, the sliver is just given a readable minimum.
+  const ourShare = Math.max(10, (price.ourAmount / price.rivalAmount) * 100)
 
   return (
-    <section className="zx-section" aria-labelledby="zx-about-heading">
+    // Tighter than the shared section rhythm: four cards plus a CTA is the
+    // longest stack on the page, and the whole argument only works if it can be
+    // taken in at once. The modifier keeps that compression local so the other
+    // sections keep the page's normal breathing room.
+    <section
+      className="zx-section zx-section--about"
+      aria-labelledby="zx-about-heading"
+    >
       <div className="zx-shell">
         <h2 id="zx-about-heading" className="zx-section-title">
           {heading}

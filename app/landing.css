@@ -868,25 +868,44 @@
 
 /* ------------------------------------------------------------ about zenorix */
 
+/* Density pass, scoped to this section only. The goal is the whole argument —
+   four claims plus the install button — landing inside one phone screen, since a
+   comparison the reader has to scroll through loses the comparison. Trimmed from
+   the shared 44px band and the title's 18px gap; the other sections keep the
+   page's looser rhythm because none of them need to be read as a single unit. */
+/* 18px, not 20: Thai sets taller than Latin at the same font-size, so the
+   section is ~7px longer in th. The budget is set by the tallest locale, not by
+   English. */
+.zx-section--about {
+  padding-block: 18px;
+}
+
+.zx-section--about .zx-section-title {
+  margin-block-end: 10px;
+}
+
 /* Outlined cards, no fill: the border alone does the grouping so the section
    still sits on the page's single surface. */
 .zx-about {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 8px;
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
+/* 14px padding with an 8px outer gap keeps the card's inner breathing room
+   larger than the space between cards, which is what stops four tightened
+   cards from reading as one continuous block. */
 .zx-about-card {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 12px;
-  padding: 18px;
+  gap: 8px;
+  padding: 14px;
   border: 1px solid var(--md-sys-color-outline-variant);
-  border-radius: 16px;
+  border-radius: 14px;
   background: transparent;
 }
 
@@ -898,18 +917,27 @@
   text-align: center;
 }
 
+/* The chip stays hard left even though this card's prose is centered, so all
+   four labels sit on one vertical line down the section — the chips are the
+   section's index, and an index that jogs inward on the last row stops scanning
+   as a column. `align-self` is what opts this one child out of the parent's
+   centering. */
+.zx-about-card--centered .zx-about-label {
+  align-self: flex-start;
+}
+
 /* Clear of the last card so the button reads as the whole section's conclusion
    rather than as part of the trial card. */
 .zx-about-cta {
-  margin-block-start: 20px;
+  margin-block-start: 12px;
 }
 
 /* Filled pill. `align-items: flex-start` on the card keeps it hugging its own
    text instead of stretching the full card width. */
 .zx-about-label {
   margin: 0;
-  padding: 5px 10px;
-  border-radius: 8px;
+  padding: 4px 9px;
+  border-radius: 7px;
   background: var(--md-sys-color-primary-container);
   color: var(--md-sys-color-on-primary-container);
   font-size: 11px;
@@ -924,7 +952,7 @@
    a longer value ("30 DAYS FREE") reading as one confident block at 420px. */
 .zx-about-value {
   margin: 0;
-  font-size: 26px;
+  font-size: 23px;
   font-weight: 700;
   line-height: 1.15;
   letter-spacing: -0.02em;
@@ -940,14 +968,16 @@
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 10px;
   margin: 0;
 }
 
+/* The 6px inside a row stays smaller than the 10px between rows, so each
+   name/amount/bar trio still groups as one unit at this tighter spacing. */
 .zx-compare-row {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
 }
 
 /* Baseline alignment, not center: the name and the amount are different sizes,
@@ -993,12 +1023,14 @@
   white-space: nowrap;
 }
 
-/* Matched to .zx-compare-name (13px, regular weight, same muted color) so the
-   rival row reads as one flat line of reference text. Dropping it from 20px/700
-   is what leaves our price as the single figure with any weight in the card. */
+/* Kept at .zx-compare-name's 13px so our price stays the only large figure, but
+   bold: at regular weight the number disappeared into its own label and stopped
+   working as the thing being compared against. Weight makes it findable, size
+   keeps it subordinate — the de-emphasis is carried by scale and color, which is
+   why it can afford to be bold here. */
 .zx-compare-amount--rival {
   font-size: 13px;
-  font-weight: 400;
+  font-weight: 700;
   line-height: 1.35;
   letter-spacing: 0;
   color: var(--md-sys-color-outline);
@@ -1047,16 +1079,16 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   text-align: center;
 }
 
 .zx-about-specs md-icon {
-  font-size: 28px;
+  font-size: 26px;
   /* md-icon sizes its own box from these, so all three must move together or
      the glyphs crop. */
-  width: 28px;
-  height: 28px;
+  width: 26px;
+  height: 26px;
   color: var(--md-sys-color-on-surface);
 }
 
@@ -1084,17 +1116,18 @@
    elements: this one is the WINDOW (clips, fades, and scrolls by drag),
    .zx-logo-track is the moving belt, .zx-logo-set is one run of 11 icons.
 
-   Negative margin cancels the card's 18px padding so the strip runs the full
-   width of the card — a marquee that stops short of its container reads as a
-   clipped grid instead of a continuous feed. The mask then fades both ends, so
-   icons dissolve rather than being guillotined by the border.
+   Negative margin cancels the card's padding so the strip runs the full width of
+   the card — a marquee that stops short of its container reads as a clipped grid
+   instead of a continuous feed. It MUST stay the exact negative of
+   .zx-about-card's padding or the strip will under/overhang the border. The mask
+   then fades both ends, so icons dissolve rather than being guillotined.
 
    `overflow-x: auto` keeps it a genuine scroll container: the animation is the
    idle state, but the user can still flick it left/right. Touch drag and the
    CSS transform coexist because scrollLeft and transform are independent. */
 .zx-logo-marquee {
   align-self: stretch;
-  margin-inline: -18px;
+  margin-inline: -14px;
   overflow-x: auto;
   /* Fade both ends. WebKit prefix first for older iOS Safari. */
   -webkit-mask-image: linear-gradient(
@@ -1184,8 +1217,8 @@
   /* Never let an icon squeeze — the set's width must stay predictable for the
      50% translate to line up. */
   flex: 0 0 auto;
-  width: 44px;
-  height: 44px;
+  width: 38px;
+  height: 38px;
   border-radius: 11px;
   object-fit: cover;
   box-shadow: 0 0 0 1px var(--md-sys-color-outline-variant);
