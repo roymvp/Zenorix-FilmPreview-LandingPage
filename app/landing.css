@@ -163,10 +163,16 @@
    The app runs the dark scheme, so a light bar cannot simply set a background:
    its children (brand text, language trigger + menu, icon buttons, install
    button) would keep painting dark-scheme on-dark colors and go invisible.
-   Instead this re-declares the LIGHT scheme tokens from globals.css on the bar
-   itself, making it a self-contained light island — every Material child inside
-   resolves correct on-light colors automatically, with no per-component
-   overrides. Keep these values in sync with the :root block in globals.css. */
+   Instead this re-declares the LIGHT scheme tokens on the bar itself, making it a
+   self-contained light island — every Material child inside resolves correct
+   on-light colors automatically, with no per-component overrides.
+
+   These values are DELIBERATELY local and have no counterpart to track. An earlier
+   note here said to keep them in sync with the `:root` block in globals.css, which
+   was true only while a light scheme still existed there; globals.css is now
+   dark-only, so following that instruction would repaint this bar dark and make its
+   own contents invisible. This is the app's only light surface — if the brand's
+   light palette ever changes, edit it here. */
 .zx-topbar {
   color-scheme: light;
 
