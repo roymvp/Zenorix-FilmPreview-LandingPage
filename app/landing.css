@@ -24,10 +24,69 @@
   --zx-gutter: 20px;
   /* Content width cap. Also the width of the fixed download bar. */
   --zx-page-max: 420px;
-  --zx-section-y: 44px;
   --zx-radius-lg: 28px;
   --zx-radius-md: 20px;
   --zx-radius-sm: 12px;
+
+  /* ===================================================================== */
+  /* TYPE SCALE — the only font sizes allowed in this file.                 */
+  /*                                                                       */
+  /* Before this existed the page used 18 different sizes, including 14.5,  */
+  /* 13.5, 12.5, 27, 23 and 17px chosen per-component. Half-pixel sizes are */
+  /* the worst of those: they land text on half-device-pixel baselines and  */
+  /* render visibly softer than their neighbours. Ten steps cover every use */
+  /* on the page, so a new component picks a TIER rather than a number.     */
+  /*                                                                       */
+  /* One tier == one rank in the reading order. If two things should be     */
+  /* read as equally important they MUST share a tier.                      */
+  /* ===================================================================== */
+  --zx-text-h1: 26px;      /* page <h1>: the film title. Only one per page. */
+  --zx-text-stat: 22px;    /* hero numeral inside a card ("30 DAYS FREE")   */
+  --zx-text-h2: 21px;      /* every section title + both dialog titles      */
+  --zx-text-amount: 20px;  /* numeric callout in a row ("$1.25/mo")         */
+  --zx-text-lg: 15px;      /* brand wordmark, rank badge                    */
+  --zx-text-body: 14px;    /* body copy, bullets, FAQ, all button labels    */
+  --zx-text-meta: 13px;    /* captions, footer links, spec + compare rows   */
+  --zx-text-caption: 12px; /* lowest-emphasis support text                   */
+  --zx-text-label: 11px;   /* uppercase eyebrows, genre chips, timecodes    */
+  --zx-text-micro: 10px;   /* A/V tags ("4K", "Dolby")                      */
+
+  /* THREE weights, deliberately. The page had 400/500/600/650/700, where   */
+  /* 650 was a one-off and 500 made the PRIMARY install button lighter than */
+  /* the secondary outlined button next to it. */
+  --zx-weight-regular: 400;
+  --zx-weight-semibold: 600; /* labels, buttons, any emphasis */
+  --zx-weight-bold: 700;     /* h1, numerals, tags */
+
+  /* Leading, by role. Tight for large type that already reads as a block,  */
+  /* loose for multi-line copy. Unitless so it scales with font-size.       */
+  --zx-lh-tight: 1.15; /* h1, stat */
+  --zx-lh-snug: 1.25;  /* titles, uppercase labels */
+  --zx-lh-body: 1.45;  /* paragraphs, bullets */
+
+  /* ===================================================================== */
+  /* SPACING SCALE — 4px based, with 2px/6px half-steps for icon pairs.     */
+  /* Replaces the ad-hoc 1/2/4/6/7/8/10/12/13/14/18px set. Gaps now encode  */
+  /* HIERARCHY: the closer two things sit, the more tightly related they    */
+  /* are, and that relationship is consistent across every section.        */
+  /* ===================================================================== */
+  --zx-space-05: 2px; /* glued: text + its caret */
+  --zx-space-1: 4px;  /* tightest pair inside one line */
+  --zx-space-15: 6px; /* icon <-> its own label */
+  --zx-space-2: 8px;  /* items within one group (chips, bullets, cards) */
+  /* 10px is a real tier here, not a stray value: it is the distance from a control
+     to its OWN caption (install button -> "Android APK · 14MB"), and between rows
+     that read as one table. Used consistently in 6 places, so it earns a step. */
+  --zx-space-25: 10px;
+  --zx-space-3: 12px; /* group <-> group inside a card */
+  --zx-space-4: 16px; /* section title <-> its content */
+  --zx-space-5: 20px; /* block <-> block inside a section */
+  --zx-space-6: 24px; /* major block separation */
+  --zx-space-8: 32px; /* sub-section separation */
+  --zx-space-10: 40px; /* section <-> section */
+
+  /* Section rhythm, now a scale step rather than a standalone 44px. */
+  --zx-section-y: var(--zx-space-10);
 
   width: 100%;
   max-width: var(--zx-page-max);
@@ -58,12 +117,16 @@
   padding-block: var(--zx-section-y);
 }
 
-/* One heading treatment for every section: no eyebrows, no sub-decks. */
+/* One heading treatment for every section: no eyebrows, no sub-decks.
+   Shares the h2 tier with both dialog titles — see `.zx-dialog-title`, which must
+   stay in lockstep with this rule so a sheet never outranks a page section. */
 .zx-section-title {
-  margin: 0 0 18px;
-  font-size: 21px;
-  line-height: 1.25;
-  font-weight: 600;
+  /* 16px (was 18px): a title binds to the content it introduces, so this must stay
+     clearly tighter than the 40px between sections. */
+  margin: 0 0 var(--zx-space-4);
+  font-size: var(--zx-text-h2);
+  line-height: var(--zx-lh-snug);
+  font-weight: var(--zx-weight-semibold);
   letter-spacing: -0.01em;
   text-wrap: balance;
   color: var(--md-sys-color-on-surface);
@@ -108,7 +171,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: var(--zx-space-3);
   padding: 10px var(--zx-gutter);
   padding-block-start: max(10px, env(safe-area-inset-top));
   background: var(--md-sys-color-surface);
@@ -118,7 +181,7 @@
 .zx-brand {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--zx-space-2);
   text-decoration: none;
   color: var(--md-sys-color-on-surface);
 }
@@ -134,8 +197,10 @@
   object-fit: cover;
   background: var(--md-sys-color-primary);
   color: var(--md-sys-color-on-primary);
-  font-weight: 700;
-  font-size: 17px;
+  font-weight: var(--zx-weight-bold);
+  /* 16px, off the scale's `lg` step rather than the old one-off 17px. This is a
+     single glyph in a 30px box, so the exact size is not load-bearing. */
+  font-size: var(--zx-text-lg);
   line-height: 1;
 }
 
@@ -156,15 +221,15 @@
 
 /* Wordmark, paired with the mark in both the top bar and the footer. */
 .zx-brand-name {
-  font-size: 15px;
-  font-weight: 700;
+  font-size: var(--zx-text-lg);
+  font-weight: var(--zx-weight-bold);
   letter-spacing: -0.01em;
 }
 
 .zx-topbar-actions {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--zx-space-1);
   --md-icon-button-icon-color: var(--md-sys-color-on-surface-variant);
   --md-icon-button-hover-icon-color: var(--md-sys-color-primary);
   --md-icon-button-pressed-icon-color: var(--md-sys-color-primary);
@@ -179,8 +244,12 @@
    bar's primary action and echoes the 6px brand mark beside it. */
 .zx-topbar-cta {
   --md-filled-button-container-height: 32px;
-  --md-filled-button-label-text-size: 13px;
-  --md-filled-button-label-text-weight: 700;
+  /* `meta` + semibold, not the old 13px/700. Every button label on the page now
+     uses semibold; only its SIZE varies with the button's rank (this compact bar
+     button at 13px, the full-width install CTAs at 14px). Weight was previously
+     doing that job inconsistently — 700 here vs 500 on the primary CTA. */
+  --md-filled-button-label-text-size: var(--zx-text-meta);
+  --md-filled-button-label-text-weight: var(--zx-weight-semibold);
   --md-filled-button-container-shape: 8px;
   --md-filled-button-leading-space: 14px;
   --md-filled-button-trailing-space: 14px;
@@ -293,8 +362,8 @@
   border-radius: 5px;
   border: 1px solid var(--md-sys-color-outline-variant);
   color: var(--md-sys-color-on-surface-variant);
-  font-size: 10px;
-  font-weight: 700;
+  font-size: var(--zx-text-micro);
+  font-weight: var(--zx-weight-bold);
   letter-spacing: 0.05em;
 }
 
@@ -360,8 +429,8 @@
   display: flex;
   justify-content: space-between;
   margin: 0 0 5px;
-  font-size: 11px;
-  font-weight: 600;
+  font-size: var(--zx-text-label);
+  font-weight: var(--zx-weight-semibold);
   font-variant-numeric: tabular-nums;
   color: var(--zx-on-media);
   text-shadow: 0 1px 3px rgba(6, 5, 4, 0.85);
@@ -510,9 +579,11 @@
    real <h1> and is set on the surface instead of on media. */
 .zx-film-title {
   margin: 0;
-  font-size: 27px;
-  line-height: 1.15;
-  font-weight: 700;
+  /* 26px on the scale, was an off-scale 27px. Still a clear step above the 21px
+     section titles, which is what marks this as the page's single h1. */
+  font-size: var(--zx-text-h1);
+  line-height: var(--zx-lh-tight);
+  font-weight: var(--zx-weight-bold);
   letter-spacing: -0.02em;
   text-wrap: balance;
   color: var(--md-sys-color-on-surface);
@@ -523,14 +594,17 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 7px;
-  margin: 8px 0 0;
-  font-size: 13px;
+  /* 8px, was an off-scale 7px. These are peer items on one line. */
+  gap: var(--zx-space-2);
+  margin: var(--zx-space-2) 0 0;
+  font-size: var(--zx-text-meta);
   color: var(--md-sys-color-on-surface-variant);
 }
 
 .zx-synopsis-wrap {
-  margin: 14px 0 20px;
+  /* 16px above / 20px below, was 14/20. The synopsis is a separate block from the
+     metadata line above it, so it takes the section-internal `space-4` step. */
+  margin: var(--zx-space-4) 0 var(--zx-space-5);
 }
 
 /* Clamped to 2 lines and expanded in place by the toggle below: the synopsis is
@@ -563,15 +637,15 @@
 .zx-synopsis-toggle {
   display: inline-flex;
   align-items: center;
-  gap: 2px;
+  gap: var(--zx-space-05);
   margin-block-start: 4px;
   padding: 4px 0;
   border: 0;
   background: transparent;
   color: var(--md-sys-color-primary);
   font: inherit;
-  font-size: 13px;
-  font-weight: 600;
+  font-size: var(--zx-text-meta);
+  font-weight: var(--zx-weight-semibold);
   cursor: pointer;
 }
 
@@ -594,8 +668,8 @@
   border-radius: 999px;
   background: var(--md-sys-color-surface-container-high);
   color: var(--md-sys-color-on-surface-variant);
-  font-size: 11px;
-  font-weight: 600;
+  font-size: var(--zx-text-label);
+  font-weight: var(--zx-weight-semibold);
 }
 
 /* Primary CTA cluster (repeated at several scroll depths) */
@@ -603,22 +677,43 @@
 .zx-cta {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: var(--zx-space-25);
   align-items: stretch;
 }
 
+/* The primary install button, used in-page, in the sticky bar and in both dialogs.
+
+   This rule exists to pin the LABEL to the type scale. Without it the label fell
+   through to `md-filled-button`'s own default of 14px/500, which left the primary
+   CTA's label LIGHTER than the secondary outlined `.zx-chart-more` beside it at
+   14px/600 — a straight hierarchy inversion, since weight was implying the
+   secondary action mattered more. Both are now `body`/semibold, and primacy is
+   carried by fill-vs-outline where it belongs. */
+.zx-cta-button {
+  --md-filled-button-label-text-size: var(--zx-text-body);
+  --md-filled-button-label-text-weight: var(--zx-weight-semibold);
+}
+
+/* The "Android APK · 14MB · 3M+ Downloads" caption under every install button.
+
+   ONE size everywhere. This class previously rendered at 12.5px in the page and
+   13.5px inside the dialogs (a `.zx-dialog-actions` override), so the identical
+   string was two different sizes depending on where you saw it — and both were
+   half-pixel values that rendered softer than the text around them. */
 .zx-cta-sub {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: var(--zx-space-15);
   margin: 0;
   color: var(--md-sys-color-on-surface-variant);
-  font-size: 12.5px;
+  font-size: var(--zx-text-caption);
 }
 
 .zx-cta-sub md-icon {
-  font-size: 15px;
+  /* Matched to the `lg` step so the shield reads as one line with the 12px text
+     beside it without dictating the line box. */
+  font-size: var(--zx-text-lg);
   width: 15px;
   height: 15px;
   color: var(--md-sys-color-primary);
@@ -647,7 +742,7 @@
      min-width:0 keeps the overflow local to this scroller. */
   min-width: 0;
   grid-auto-columns: 124px;
-  gap: 12px;
+  gap: var(--zx-space-3);
   overflow-x: auto;
   scroll-snap-type: x mandatory;
   /* Extra inline-start padding beyond the page gutter: the cards carry a drop
@@ -776,8 +871,8 @@
   border-radius: 6px;
   background: rgba(6, 5, 4, 0.82);
   color: var(--zx-on-media);
-  font-size: 15px;
-  font-weight: 700;
+  font-size: var(--zx-text-lg);
+  font-weight: var(--zx-weight-bold);
   line-height: 1.35;
   letter-spacing: -0.02em;
   text-align: center;
@@ -795,7 +890,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: var(--zx-space-15);
   width: 100%;
   min-height: 46px;
   padding: 0 18px;
@@ -811,8 +906,8 @@
   background: transparent;
   color: var(--md-sys-color-on-surface);
   font: inherit;
-  font-size: 14px;
-  font-weight: 600;
+  font-size: var(--zx-text-body);
+  font-weight: var(--zx-weight-semibold);
   line-height: 1.2;
   text-align: center;
   cursor: pointer;
@@ -845,7 +940,7 @@
 .zx-chart-more-hint {
   margin: 8px 0 0;
   color: var(--md-sys-color-on-surface-variant);
-  font-size: 12px;
+  font-size: var(--zx-text-caption);
   line-height: 1.45;
   text-align: center;
   text-wrap: balance;
@@ -874,7 +969,7 @@
 .zx-about {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--zx-space-2);
   margin: 0;
   padding: 0;
   list-style: none;
@@ -887,7 +982,7 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 8px;
+  gap: var(--zx-space-2);
   padding: 14px;
   border: 1px solid var(--md-sys-color-outline-variant);
   border-radius: 14px;
@@ -933,16 +1028,19 @@
 
 /* Filled pill. `align-items: flex-start` on the card keeps it hugging its own
    text instead of stretching the full card width. */
+/* The page's eyebrow treatment. `.zx-dialog-lead` is the same rank and MUST keep
+   the same size/weight/tracking — it was 11px/700 against this rule's 11px/600,
+   so the two eyebrows were subtly different weights for no reason. */
 .zx-about-label {
   margin: 0;
-  padding: 4px 9px;
+  padding: var(--zx-space-1) 9px;
   border-radius: 7px;
   background: var(--md-sys-color-primary-container);
   color: var(--md-sys-color-on-primary-container);
-  font-size: 11px;
-  font-weight: 600;
+  font-size: var(--zx-text-label);
+  font-weight: var(--zx-weight-semibold);
   letter-spacing: 0.09em;
-  line-height: 1.25;
+  line-height: var(--zx-lh-snug);
   text-transform: uppercase;
 }
 
@@ -951,9 +1049,12 @@
    a longer value ("30 DAYS FREE") reading as one confident block at 420px. */
 .zx-about-value {
   margin: 0;
-  font-size: 23px;
-  font-weight: 700;
-  line-height: 1.15;
+  /* 22px `stat` step, was an off-scale 23px. Deliberately below the 26px h1 and
+     above the 21px section titles: it is the loudest thing INSIDE a card but must
+     not compete with the page title. */
+  font-size: var(--zx-text-stat);
+  font-weight: var(--zx-weight-bold);
+  line-height: var(--zx-lh-tight);
   letter-spacing: -0.02em;
   color: var(--md-sys-color-on-surface);
   text-wrap: balance;
@@ -967,7 +1068,7 @@
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: var(--zx-space-25);
   margin: 0;
 }
 
@@ -976,7 +1077,7 @@
 .zx-compare-row {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: var(--zx-space-15);
 }
 
 /* Baseline alignment, not center: the name and the amount are different sizes,
@@ -985,13 +1086,13 @@
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  gap: 12px;
+  gap: var(--zx-space-3);
 }
 
 .zx-compare-name {
   margin: 0;
   color: var(--md-sys-color-on-surface-variant);
-  font-size: 13px;
+  font-size: var(--zx-text-meta);
   line-height: 1.35;
 }
 
@@ -999,7 +1100,10 @@
    start here rather than on the bigger rival number. */
 .zx-compare-name--ours {
   color: var(--md-sys-color-primary);
-  font-weight: 650;
+  /* Semibold, was a one-off `650`. That value is not a real step in most variable
+     UI stacks, so it silently snapped to 600 or 700 depending on the font actually
+     loaded — an unpredictable weight for the card's most important label. */
+  font-weight: var(--zx-weight-semibold);
 }
 
 /* Dimmer than the row above: outline sits below on-surface-variant in the token
@@ -1013,8 +1117,8 @@
    Tabular figures keep the two amounts on a shared digit grid. */
 .zx-compare-amount {
   margin: 0;
-  font-size: 20px;
-  font-weight: 700;
+  font-size: var(--zx-text-amount);
+  font-weight: var(--zx-weight-bold);
   line-height: 1.2;
   letter-spacing: -0.02em;
   color: var(--md-sys-color-on-surface);
@@ -1028,8 +1132,8 @@
    keeps it subordinate — the de-emphasis is carried by scale and color, which is
    why it can afford to be bold here. */
 .zx-compare-amount--rival {
-  font-size: 13px;
-  font-weight: 700;
+  font-size: var(--zx-text-meta);
+  font-weight: var(--zx-weight-bold);
   line-height: 1.35;
   letter-spacing: 0;
   color: var(--md-sys-color-outline);
@@ -1068,7 +1172,7 @@
   width: 100%;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 10px 8px;
+  gap: var(--zx-space-25) var(--zx-space-2);
   margin: 0;
   padding: 0;
   list-style: none;
@@ -1078,7 +1182,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
+  gap: var(--zx-space-15);
   text-align: center;
 }
 
@@ -1094,8 +1198,8 @@
 /* Same weight and color as .zx-about-value so this card still belongs to the
    set; only the size drops, because three labels have to share one row. */
 .zx-spec-label {
-  font-size: 13px;
-  font-weight: 700;
+  font-size: var(--zx-text-meta);
+  font-weight: var(--zx-weight-bold);
   line-height: 1.3;
   letter-spacing: -0.01em;
   color: var(--md-sys-color-on-surface);
@@ -1105,7 +1209,7 @@
 .zx-about-note {
   margin: 0;
   color: var(--md-sys-color-on-surface-variant);
-  font-size: 13px;
+  font-size: var(--zx-text-meta);
   line-height: 1.5;
   text-wrap: pretty;
 }
@@ -1181,7 +1285,7 @@
 .zx-logo-set {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: var(--zx-space-25);
   padding-inline-end: 10px;
   margin: 0;
   padding-block: 0;
@@ -1243,11 +1347,11 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 14px;
+  gap: var(--zx-space-4);
   padding-block: 16px;
   cursor: pointer;
   color: var(--md-sys-color-on-surface);
-  font-weight: 600;
+  font-weight: var(--zx-weight-semibold);
   /* Both are required to suppress the native disclosure triangle. */
   list-style: none;
 }
@@ -1330,14 +1434,14 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
+  gap: var(--zx-space-25);
 }
 
 .zx-footer-links {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 8px 20px;
+  gap: var(--zx-space-2) var(--zx-space-5);
   margin: 0;
   padding: 0;
   list-style: none;
@@ -1345,7 +1449,7 @@
 
 .zx-footer-links a {
   color: var(--md-sys-color-on-surface-variant);
-  font-size: 13px;
+  font-size: var(--zx-text-meta);
   line-height: 1.4;
   text-decoration: none;
   transition: color 120ms ease;
@@ -1364,7 +1468,7 @@
 .zx-footer-copy {
   margin: 0;
   color: var(--md-sys-color-on-surface-variant);
-  font-size: 12px;
+  font-size: var(--zx-text-caption);
   line-height: 1.5;
 }
 
@@ -1386,8 +1490,8 @@
   background: transparent;
   color: var(--md-sys-color-on-surface-variant);
   font: inherit;
-  font-size: 12px;
-  font-weight: 600;
+  font-size: var(--zx-text-caption);
+  font-weight: var(--zx-weight-semibold);
   cursor: pointer;
   appearance: none;
 }
@@ -1504,7 +1608,7 @@
 .zx-dialog-headline {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: var(--zx-space-15);
   /* Neutralizes md-dialog's `slot[name=headline]::slotted(*){align-items:center}`.
      That rule is written for a ROW of icon + text, but this slot is a COLUMN, so
      the cross axis is horizontal and it was centering everything sideways — the
@@ -1545,9 +1649,11 @@
    below deliberately quieter. */
 .zx-dialog-title {
   margin: 0;
-  font-size: 21px;
-  line-height: 1.25;
-  font-weight: 600;
+  /* The h2 tier, shared with `.zx-section-title`. Both read from the same tokens
+     now, so the two can no longer drift apart. */
+  font-size: var(--zx-text-h2);
+  line-height: var(--zx-lh-snug);
+  font-weight: var(--zx-weight-semibold);
   letter-spacing: -0.01em;
   color: var(--md-sys-color-on-surface);
   /* `pretty`, not `balance`. Balance equalizes line lengths, which on a 372px
@@ -1570,7 +1676,7 @@
 .zx-dialog-heading-stack {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: var(--zx-space-4);
 }
 
 /* NOTE: `.zx-dialog-close` and its md-icon/hover/focus rules lived here. The
@@ -1589,10 +1695,12 @@
    label — the same role it plays in the About cards — and lets the bullets
    themselves carry the weight. */
 .zx-dialog-lead {
-  font-size: 11px;
-  font-weight: 700;
+  font-size: var(--zx-text-label);
+  /* Semibold to match `.zx-about-label` exactly. It was 700 here and 600 there,
+     which made the same eyebrow rank render at two weights across the product. */
+  font-weight: var(--zx-weight-semibold);
   letter-spacing: 0.09em;
-  line-height: 1.25;
+  line-height: var(--zx-lh-snug);
   text-transform: uppercase;
   color: var(--md-sys-color-primary);
 }
@@ -1608,10 +1716,12 @@
 .zx-dialog-body {
   display: flex;
   flex-direction: column;
-  /* 13px: the label still reads as belonging to the list it names, but no longer
-     sits right on top of it. Kept well below the 12px inter-bullet gap's visual
-     weight so label+list remain one group rather than four peers. */
-  gap: 13px;
+  /* 16px (was an off-scale 13px). The eyebrow labels the whole list, so this must
+     be a step LOOSER than the 12px between bullets — at 13px it was effectively
+     equal to it and the label read as just another row. The three nested tiers are
+     now 8px (check icon <-> its text) < 12px (bullet <-> bullet) < 16px
+     (label <-> list). */
+  gap: var(--zx-space-4);
   /* 18px all round, up from `14px 16px`. A borderless fill has no drawn edge to
      define it, so the inset IS the panel — at 14px the text was nearly touching
      the tint's boundary. Even padding also lets the 16px radius read cleanly.
@@ -1638,12 +1748,10 @@
 
 .zx-dialog-bullets {
   display: grid;
-  /* 12px. The earlier 9px was chosen to keep the list from out-measuring the
-     heading, but that was while the panel was outlined and every level competed;
-     now that the fill has visually demoted this block, the rows can breathe. 12px
-     is comfortably more than the ~7px of leading between wrapped lines inside a
-     single bullet, so multi-line bullets still read as one item each. */
-  gap: 12px;
+  /* 12px `space-3`. Comfortably more than the ~6px of leading between wrapped lines
+     inside a single bullet, so a two-line bullet still reads as one item, while
+     staying tighter than the 16px that separates the whole list from its label. */
+  gap: var(--zx-space-3);
   margin: 0;
   padding: 0;
   list-style: none;
@@ -1654,13 +1762,14 @@
   /* `flex-start`, not `center`: a bullet that wraps to two lines would otherwise
      float its check against the middle of the block instead of the first line. */
   align-items: flex-start;
-  gap: 8px;
+  gap: var(--zx-space-2);
   color: var(--md-sys-color-on-surface);
-  /* 14.5px: still clearly above the old 13px fine-print, but no longer identical
-     to the CTA label — inside the bordered panel these are supporting detail, not
-     the primary action. */
-  font-size: 14.5px;
-  line-height: 1.45;
+  /* 14px body tier, was a half-pixel 14.5px. These bullets are body copy and now
+     match the synopsis and FAQ answers exactly; the earlier 0.5px difference was
+     not a perceivable rank, just a blurrier baseline. Their lower rank against the
+     CTA is carried by the panel's fill and by color, not by half a pixel. */
+  font-size: var(--zx-text-body);
+  line-height: var(--zx-lh-body);
 }
 
 .zx-dialog-bullets md-icon {
@@ -1681,7 +1790,7 @@
   /* 10px: the meta line ("Android APK · size · downloads") is a caption for the
      button directly above it, so it stays tightly coupled — this only relieves the
      crowding, it does not separate them into two blocks. */
-  gap: 10px;
+  gap: var(--zx-space-25);
   width: 100%;
   /* Raises md-dialog's slotted 16px to 22px, so the primary action gets ~30px of
      clear space below the support panel instead of 24px. The CTA is one of the two
@@ -1704,10 +1813,9 @@
   min-width: 0;
 }
 
+/* NOTE: this used to also set `font-size: 13.5px`, making the dialog's install
+   caption a different size from the identical in-page one. The size now comes
+   solely from `.zx-cta-sub`; only the centering is dialog-specific. */
 .zx-dialog-actions .zx-cta-sub {
   justify-content: center;
-  /* Scoped to the dialog on purpose: `.zx-cta-sub` is shared with the in-page and
-     final CTAs, where 12.5px is correct. Only the sheets needed a lift, so the
-     rest of the page is left alone. */
-  font-size: 13.5px;
 }
