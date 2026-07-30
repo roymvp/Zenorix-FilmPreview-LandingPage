@@ -74,8 +74,8 @@ export function AboutZenorix({
     /** Row 2: the rival stack, and its formatted combined monthly cost. */
     rivalLabel: string
     rivalValue: string
-    /** States what the bars' length encodes. Visual-only; see the legend note. */
-    legend: string
+    /** Comparison marker prefixed to the rival's name. Visual-only; see its note. */
+    vs: string
     /** Same two costs as plain numbers, used only to size the bars. */
     ourAmount: number
     rivalAmount: number
@@ -97,18 +97,26 @@ export function AboutZenorix({
   // what makes the figure fit inside the bar: at the real US ratio
   // (1.25 / 80 = 1.6%) the bar is a few pixels wide and could not hold any text.
   //
-  // 38%, up from 30% when the bar only had to hold a short name. The price now sits
-  // INSIDE the bar, and the longest localized figure ("~ 1,000 บาท/เดือน" in Thai)
-  // needs more room than "Zenorix" did — at 30% it ellipsized on a 390px card, which
-  // would hide the very number the chart exists to state.
+  // 33%, down from 38%. This floor is TEXT-BOUND, not data-bound: with the price
+  // sitting inside the bar, the bar can never be narrower than that price plus its
+  // padding. Measured at the 390px breakpoint, the widest localized figure
+  // ("R$ 6,20/mês", 83px at 15px type) needed 34.4% of the track — which is what set
+  // 38%. Dropping the figure to 14px and the bar's padding to 8px cut that requirement
+  // to ~31%, and 33% is that measurement plus a safety margin for font-metric variance
+  // between locales.
   //
-  // Worth being clear-eyed about the trade: this draws a ~1/64 price as ~1/3 of
-  // the bar, so the bars read as "much cheaper" rather than as a measurable ratio.
-  // The exact figures inside them carry the real magnitude, which is why both are
-  // stated in full and at the same size. It stays a floor rather than a multiplier,
+  // So 33% is the shortest this bar can go while the price remains inside it. Going
+  // materially shorter is not a matter of tuning this number — it requires moving the
+  // figure back outside the bar, which is the trade to make if the bar's length matters
+  // more than the price being read at the point the length stops.
+  //
+  // Worth staying clear-eyed about the distortion either way: this draws a ~1/64 price
+  // as ~1/3 of the bar, so the bars read as "much cheaper" rather than as a measurable
+  // ratio. The exact figures inside them carry the real magnitude, which is why both
+  // are stated in full and at the same size. It stays a floor rather than a multiplier,
   // so a market where the true ratio is larger is drawn at its own honest value
-  // instead of being scaled.
-  const ourShare = Math.max(38, (price.ourAmount / price.rivalAmount) * 100)
+  // instead of being scaled up to meet it.
+  const ourShare = Math.max(33, (price.ourAmount / price.rivalAmount) * 100)
 
   return (
     // Tighter than the shared section rhythm: four cards plus a CTA is the
@@ -212,24 +220,32 @@ export function AboutZenorix({
                 </span>
               </dd>
 
-              <dt className="zx-compare-name">{price.rivalLabel}</dt>
+              {/* The `vs` marker states the relationship the chart depends on. Without
+                  it the card shows two named plans with two prices, and a reader
+                  skimming has to infer that the second is the alternative being
+                  replaced rather than, say, a second Zenorix tier or an add-on.
+
+                  Deliberately a PREFIX on this label rather than a badge floating
+                  between the bars: a floating element would need vertical room of its
+                  own, and the legend was just removed to reclaim exactly that space.
+                  Here it costs zero extra height and reads as one phrase —
+                  "vs Disney + HBO + Netflix".
+
+                  `aria-hidden`, because the `dl` already encodes the comparison
+                  structurally (two terms, each with its own price) and a screen reader
+                  announcing a bare "vs" mid-list would only interrupt that. */}
+              <dt className="zx-compare-name">
+                <span className="zx-compare-vs" aria-hidden="true">
+                  {price.vs}
+                </span>
+                {price.rivalLabel}
+              </dt>
               <dd className="zx-compare-bar zx-compare-bar--rival">
                 <span className="zx-compare-amount zx-compare-amount--rival">
                   {price.rivalValue}
                 </span>
               </dd>
             </dl>
-
-            {/* Legend. Both bars are now the same color and height, so nothing in
-                the chart itself states what their LENGTH encodes — this one line
-                does, and it is the reason the pair reads as a measurement rather
-                than as two decorative pills. `aria-hidden` because the `dl` above
-                already pairs each name with its own price for a screen reader, so
-                announcing the visual convention would only add noise. */}
-            <p className="zx-compare-legend" aria-hidden="true">
-              <span className="zx-compare-legend-swatch" />
-              {price.legend}
-            </p>
           </li>
 
           <li className="zx-about-card">

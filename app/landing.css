@@ -1323,13 +1323,24 @@
   margin: 0;
   display: flex;
   align-items: center;
-  /* Right-aligned figure: it sits at the bar's END, so both prices land at the tip of
-     their own bar and each number is read at the exact point the length stops. */
-  justify-content: flex-end;
+  /* LEFT-aligned figures. Both prices now start at the same x, which is what makes them
+     directly comparable: the digits line up in a column, so `$1.25` against `~ $80` is
+     read as a column of numbers rather than as two figures floating at different
+     depths. Right-aligning them (the previous behaviour) pinned each price to the tip
+     of its own bar, which tied the number's position to the bar's length and meant the
+     two never shared a reading edge.
+
+     It also removes a conflict with the shortened bar: at 33% a right-aligned figure
+     sat hard against the bar's rounded end. */
+  justify-content: flex-start;
   /* Both bars, explicitly. `min-height` alone would let the two diverge if one ever
      wrapped; a fixed height guarantees the pair stays geometrically identical. */
   height: 34px;
-  padding-inline: var(--zx-space-25);
+  /* 8px, down from 10px. Padding inside our bar is charged twice — once at each end —
+     and comes straight out of the width available to the price, which is what sets the
+     bar's minimum length. Trimming 2px a side is part of what let the floor drop from
+     38% to 33%. */
+  padding-inline: var(--zx-space-2);
   /* 4px, well under the 12px `radius-sm`. The radius has to stay small relative to
      the bar's own height or the bar turns into a lozenge whose rounded ends eat
      into the length being compared. */
@@ -1339,14 +1350,14 @@
   background: var(--md-sys-color-secondary);
 }
 
-/* 30% of the rival bar, set as a variable by the component. The share is the one
-   number here that must not drift, so it is expressed as a plain percentage with
-   nothing allowed to override it — two earlier attempts to also guarantee the label
-   fits (`max(30%, max-content)`, then `min-width: max-content` with a `max-width`
-   ceiling) each broke the ratio instead: the first was invalid CSS and silently
-   dropped the whole `width`, the second outranked its own ceiling and inflated the
-   bar past half the rival's. Fitting the label is handled by padding and ellipsis,
-   which cannot distort the quantity. */
+/* Our bar's share of the rival's, set as a variable by the component (33% floor; see
+   `ourShare`). The share is the one number here that must not drift, so it is expressed
+   as a plain percentage with nothing allowed to override it — two earlier attempts to
+   also guarantee the text inside fits (`max(30%, max-content)`, then
+   `min-width: max-content` with a `max-width` ceiling) each broke the ratio instead:
+   the first was invalid CSS and silently dropped the whole `width`, the second
+   outranked its own ceiling and inflated the bar past half the rival's. Fitting the
+   price is handled by type size and padding, which cannot distort the quantity. */
 .zx-compare-bar--ours {
   /* A plain percentage of the track, with `border-box` so the share describes the
      bar's whole painted width. That box model is the fix for a real miscount: with
@@ -1361,7 +1372,7 @@
      to make. The floor lives in the component (see `ourShare`) where it is applied to
      the RATIO itself and so cannot silently exceed 100%. */
   box-sizing: border-box;
-  width: var(--zx-bar-share, 38%);
+  width: var(--zx-bar-share, 33%);
 }
 
 /* Full width by definition — it is the 100% the bar above is measured against. Same
@@ -1374,8 +1385,8 @@
 }
 
 /* The name now sits ABOVE its bar rather than inside it, which resolves the problem
-   that shaped every earlier version of this rule: a label inside a 38%-wide bar had
-   to compete with the bar's padding for room, and in Thai "Disney + HBO + Netflix"
+   that shaped every earlier version of this rule: a label inside a one-third-width bar
+   had to compete with the bar's padding for room, and in Thai "Disney + HBO + Netflix"
    ellipsized away. Out here it has the card's full width, so the `min-width: 0` /
    `overflow` / `text-overflow` ellipsis machinery is no longer needed and is gone.
 
@@ -1413,16 +1424,17 @@
    light-on-black, and it no longer occupies a grid column of its own — the old
    `grid-column: 1` and the `dd` margin reset it needed are both gone with that column.
 
-   16px, down from the 20px `--zx-text-amount` it used as free-standing type. Inside a
-   34px bar, 20px bold left almost no optical margin above and below the digits and
-   made the bar look overstuffed; the figure is still the largest text in the card's
-   chart and reads as its headline number. `--zx-text-lg` is an existing step, so this
-   stays on the type scale rather than introducing a one-off size.
+   14px (`--zx-text-body`), stepped down from 20px -> 15px -> here. Each step was driven
+   by the same constraint: the figure lives inside a bar whose length is the chart's
+   message, so the type size directly sets how short that bar is allowed to be. At 15px
+   the widest localized price needed 34.4% of the track; at 14px it needs ~31%, which is
+   what makes the 33% bar possible. Still bold and still the largest text in the chart,
+   so it reads as the headline number despite the reduction.
 
-   Tabular figures keep both prices on a shared digit grid, so the two can be compared
-   column-by-column instead of by overall word shape. */
+   Tabular figures keep both prices on a shared digit grid — now genuinely useful, since
+   the two figures are left-aligned and their digits sit in one column. */
 .zx-compare-amount {
-  font-size: var(--zx-text-lg);
+  font-size: var(--zx-text-body);
   font-weight: var(--zx-weight-bold);
   line-height: 1;
   letter-spacing: -0.02em;
@@ -1435,31 +1447,22 @@
   color: var(--md-sys-color-on-secondary);
 }
 
-/* Legend. One line, quiet, directly under the chart — it names what the bars' length
-   encodes, which nothing else in the chart now states. */
-.zx-compare-legend {
-  /* 10px: the same "control to its own caption" step used elsewhere on the page, so
-     the legend attaches to the chart rather than floating between blocks. */
-  margin: var(--zx-space-25) 0 0;
-  display: flex;
-  align-items: center;
-  gap: var(--zx-space-15);
-  font-size: var(--zx-text-caption);
-  line-height: 1.35;
-  /* `outline`, the quietest text token. A legend is a reading aid: it has to be
-     available without competing with either the prices or the card's own label. */
-  color: var(--md-sys-color-outline);
-}
+/* The `vs` marker prefixed to the rival's name — the thing that tells a skimming reader
+   these two rows are a comparison rather than two separate offers.
 
-/* A miniature of the bar it explains — same fill, same 4px radius — so the swatch is
-   recognisably the same object as the thing above it rather than a generic dot.
-   `flex-shrink: 0` keeps it square if the legend text ever has to compress. */
-.zx-compare-legend-swatch {
-  flex-shrink: 0;
-  width: 14px;
-  height: 6px;
-  border-radius: 2px;
-  background: var(--md-sys-color-secondary);
+   Dimmer and lighter than the name it precedes: it is a connective, not a label, so it
+   has to be legible without pulling weight away from "Disney + HBO + Netflix". The 6px
+   gap is the page's existing "marker to its own text" step, tight enough that the two
+   read as one phrase.
+
+   `uppercase` is deliberately NOT used here. The page's own convention reserves caps for
+   eyebrow labels, and shouting a two-letter connective would give it more emphasis than
+   the brand names on either side of it. */
+.zx-compare-vs {
+  margin-inline-end: var(--zx-space-15);
+  font-size: var(--zx-text-caption);
+  font-weight: var(--zx-weight-semibold);
+  color: var(--md-sys-color-outline);
 }
 
 /* Grid rather than flex: three EQUAL tracks are what keep the tiles the same
