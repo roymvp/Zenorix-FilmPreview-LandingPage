@@ -1331,10 +1331,11 @@
   background: var(--md-sys-color-tertiary);
 }
 
-/* Theirs: the neutral silver the bars already used. Left unchanged deliberately — the
-   comparison target should recede to neutral while ours takes the accent. */
+/* Theirs: the dim neutral. MUST stay identical to `.zx-compare-bar--rival`'s fill — a key
+   whose swatch does not match its bar keys nothing, so these two declarations move
+   together or not at all. */
 .zx-compare-key-swatch--rival {
-  background: var(--md-sys-color-secondary);
+  background: var(--md-sys-color-outline);
 }
 
 /* The axis unit. `auto` margin pushes it to the line's far end, away from the two names
@@ -1397,9 +1398,14 @@
    two-series convention and is legible; the risk to avoid is letting hue imply a
    magnitude, which is why the swatch colors are the same size and carry no length.
 
-   14px shorter than before (34px -> 20px): with no text inside, the bar's height is free
-   to express what it is — a measurement rule — instead of being sized to hold a 14px
-   figure. The flatter pair also reads more as a chart and less as two buttons.
+   34px -> 12px, and the second half of that reduction is load-bearing rather than
+   cosmetic. With no text inside, height is free to express what the bar IS — a measurement
+   rule — but height also decides whether the SHORT bar still reads as a bar at all: at
+   20px tall, our 22px-wide bar was very nearly a square, which is exactly the "reads as a
+   dot" failure that sets the floor on `ourShare`. Flattening to 12px makes it ~2:1 and
+   unmistakably a bar, which is what lets the length stay honest at 8% instead of being
+   inflated until it looks right. The flatter pair also reads more as a chart and less as
+   two buttons.
 
    No background track behind either bar: an unfilled track behind a short bar reads as a
    STACKED bar, as if the remainder were another segment of the same total, which is the
@@ -1408,16 +1414,18 @@
 .zx-compare-bar {
   /* Both bars, explicitly. A fixed height guarantees the pair stays geometrically
      identical in every dimension except the one being compared. */
-  height: 20px;
-  /* 4px, well under the 12px `radius-sm`. The radius has to stay small relative to the
-     bar's own height or the bar turns into a lozenge whose rounded ends eat into the
-     length being compared — which matters far more now that our bar is ~26px wide. */
-  border-radius: 4px;
+  height: 12px;
+  /* 3px, well under the 12px `radius-sm`. The radius has to stay small relative to BOTH
+     of the bar's dimensions, or its rounded ends eat into the length being compared —
+     which matters far more now that our bar is only ~22px wide. Scaled down with the
+     height so the two bars keep the same corner character. */
+  border-radius: 3px;
 }
 
-/* Ours: the accent blue. The one chromatic element in an otherwise silver-on-black
-   section, which is what makes "this is us" instant. It is also the brighter of the two
-   fills, so the emphasis and the identity point the same way. */
+/* Ours: the accent blue — the one chromatic element in an otherwise silver-on-black
+   section, which is what makes "this is us" instant. It is also the BRIGHTER of the two
+   fills (1.71:1 — see the rival's note for why it is not more), so hue and brightness
+   point the same way rather than fighting each other. */
 .zx-compare-bar--ours {
   /* A plain percentage of the track, with `border-box` so the share describes the
      bar's whole painted width. That box model is the fix for a real miscount: with
@@ -1437,13 +1445,23 @@
 }
 
 /* Theirs: full width by definition — it is the 100% the bar above is measured against.
-   Neutral silver, the fill both bars previously shared, so the comparison target recedes
-   while ours takes the accent. Same `border-box` as its partner so both are measured on
-   one basis. */
+   Same `border-box` as its partner so both are measured on one basis.
+
+   `outline`, and this fill is a measured compromise between two failure modes that pull
+   in opposite directions on a dark card:
+     - Too BRIGHT and it stops differing from ours. The original `secondary` silver
+       (#d3dae4) sat at 1.06:1 against the accent — two hues at near-identical brightness,
+       a hue-only key, which fails outright for color-deficient readers.
+     - Too DARK and it stops being visible at all. `surface-container-highest` (#262b32)
+       separated from ours at 9.55:1 but fell to 1.47:1 against the card, and on screen the
+       rival bar and its key swatch nearly vanished — fatal for the bar that defines 100%.
+   #9aa3af is the step that clears both: 8.23:1 against the card so it is unmistakably
+   present, 1.71:1 against ours so brightness still reinforces hue. Dimmer than the accent
+   either way, which is the correct emphasis — ours is the one being sold. */
 .zx-compare-bar--rival {
   box-sizing: border-box;
   width: 100%;
-  background: var(--md-sys-color-secondary);
+  background: var(--md-sys-color-outline);
 }
 
 /* The figure now sits in its own grid column, to the RIGHT of the bar it labels, so it is
