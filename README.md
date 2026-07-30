@@ -1,232 +1,234 @@
 # Zenorix — Film Preview Acquisition Landing Page
 
-A multi-market, multi-film landing page whose single job is to convert paid traffic
-into **Android APK installs**. A visitor arrives from an ad, watches the first
-10 minutes of a real film for free, hits a hard wall, and is offered the app.
+**Core Goal: Convert traffic into Android APK installs**
 
-This repository is a **production-fidelity front-end**: every pixel, every string
-and every interaction of the funnel is final and verified. The data behind it is
-placeholder and is expected to be replaced by real content and real APIs.
+This is a conversion\-focused H5 landing page\. 
 
-- **Handover / integration guide → [`HANDOVER.md`](./HANDOVER.md)**
-- **Live routes:** `/en`, `/pt-br`, `/th` + 9 per-film campaign URLs (see below)
+Users arrive via ads or influencer links, and get free access to the **first 10 minutes of a hit film \(not a trailer\)**\. Playback cuts off at the time limit, and users are prompted to download the app to continue — leveraging narrative immersion to drive conversions\.
 
----
+Key page structure:
 
-## 1. Purpose & Design Intent
+- One page hosts exactly one film preview
 
-### The problem this page solves
+- Marketing team selects 3–5 top films
 
-Paid user acquisition for a streaming app normally sends traffic to a store
-listing or a feature-list landing page. Both ask the visitor to *believe* a claim
-("36,000+ titles!") before acting. This page instead **spends the product itself
-as the ad**: it gives away 10 real minutes of a real film, up front, with no
-signup, no email, no paywall interstitial.
+- Each film maps to one dedicated campaign URL
 
-By the time the wall appears, the visitor is no longer evaluating a claim — they
-are mid-story and want the rest. The install ask lands on proven intent rather
-than on a promise.
+- Every campaign URL supports 3 localized language paths
 
-### Design principles actually enforced in the code
+This repository contains a production\-ready, high\-fidelity frontend implementation\. All UI, static copy, and interaction flows are finalized and validated\. Placeholder data is included; replace with real content and assets before launch\.
 
-| Principle | How it is enforced |
-| --- | --- |
-| **The film is the hook** | The player frame carries no badge, watermark, logo or CTA. Autoplays muted (the only autoplay browsers allow) so the page opens on moving film, never a static banner. |
-| **Show the lock, don't state it** | The scrub bar spans the **full runtime** while only the first 10 min is playable. The locked remainder is visible as a distinct track segment — the visitor *sees* how much is withheld. |
-| **One funnel, one exit** | Every CTA on the page routes through a single `download()` call. There is no secondary conversion, no newsletter, no social link. The footer carries the legal minimum and nothing clickable that competes. |
-| **Three controls, no duplicates** | Play/pause (tap the frame), mute/unmute (one icon), seek (scrub bar). No fullscreen, no time readout, no second play button. |
-| **Curiosity over information** | Top 10 cards show rank + source-app badge only — no titles, no type labels. Every card is a locked door. |
-| **Dark, cinema-first, one background** | A single near-black surface (`#08090b`) runs edge to edge; the top bar's lower edge is the page's only seam. Content is centred on an uninterrupted black page so nothing frames or competes with the film. |
-| **Every market is a real page** | Language switching is *navigation* to a separate static URL, never client-side string swapping — so each market carries its own indexable URL and link equity. |
+- Full integration guide → `[HANDOVER.md](./HANDOVER.md)`
+
+- Supported routes: 3 market homepages \(`/en`, `/pt-br`, `/th`\) \+ 9 per\-film campaign pages
 
 ---
 
-## 2. Conversion / Funnel Logic
+## 1\. Non\-Negotiable Constraints
 
-> **This logic is contractual. See the "Do not change" list in §5.**
+These are hard delivery requirements\. 
 
-### The 10-minute preview gate
+**You may refactor backend logic or rewrite the frontend with a different tech stack — but the final output must match these rules 1:1\.**
 
-`previewLimitSeconds: 600` per film in `lib/content/movies.ts`. The gate has
-**exactly two trigger paths**, both landing in the same bottom-sheet upsell but
-reported under different reasons so attribution stays honest:
 
-| Trigger | Path | Event | `reason` |
-| --- | --- | --- | --- |
-| **1. Preview ran out** | `timeupdate` observes `currentTime >= cap` | `preview_limit_reached` | `limit` |
-| **2. Scrubbed past the wall** | `handleSeek` sees a requested time `>= cap` | `preview_scrub_locked` | `scrub` |
 
-On either trigger the player **pauses, clamps `currentTime` back to the cap**, and
-hands off to the dialog. Dismissing the sheet **re-arms** the gate, so a visitor
-who closes it and hits the wall again converts again.
+1. **Page UI**: Layout, spacing, color, typography, and motion must match the design exactly\.
 
-### The Top 10 content lock
+2. **Page copy**: Static UI strings in `dictionaries/*.json` \(3 locales\) must not be modified\. Dynamic film metadata \(title, runtime, synopsis, etc\.\) changes per film\.
 
-Tapping **any** Top 10 card calls `openContent(title)` → content-lock sheet.
-Cards never navigate to a detail page; there is no detail page. The rail's tail
-button ("see more") skips the sheet and goes straight to `download()`.
+3. **Funnel logic**: Preserve the full flow: 10\-minute preview cap, dual trigger paths \(playback exhaustion / seek past limit\), gate reset on modal dismiss, and Top 10 card → download upsell behavior\.
 
-### Instrumented events (8, all typed)
+4. **SEO \& performance design**: Do not remove any SEO structure or elements\. Per\-page metadata and structured data update dynamically per film\. Hreflang rules, JSON\-LD structure, sitemap/robots rules, and performance optimizations \(LCP priority, `content-visibility`, prerendering\) must remain unchanged\.
 
-`lib/analytics.ts` is the **only** module that talks to an analytics SDK:
+---
 
-```
+## 2\. Dev To\-do Tasks
+
+Ordered by dependency\. Full instructions in `[HANDOVER.md](./HANDOVER.md)`\.
+
+### A\. Firebase Analytics Integration
+
+Update only `lib/analytics.ts`\. Forward the 8 existing typed events to the Firebase SDK\. Do not scatter analytics calls across components\.
+
+### B\. Replace Placeholder Content
+
+- **Static \(no API needed\)**: Top bar brand logo, real APK URL / version / size / install count, footer legal links, localized film metadata\.
+
+- **Requires API**: Film playback stream URLs, Top 10 chart posters, per\-film landscape preview frames\.
+
+### C\. Expand Film Campaign URLs
+
+Routing is fully built\. Add new films to the `movies` array with slug, assets, stream URL, and localized copy — 3 localized URLs and SEO config generate automatically\.
+
+### D\. Production Deployment
+
+Next\.js 16 compatibility: Rename `middleware.ts` to `proxy.ts` \(current build shows a deprecation warning; functionality is unaffected\)\.
+
+---
+
+## 3\. Security Requirements
+
+### 3\.1 Deployment Isolation
+
+Landing page viewers is uncontrolled\.
+
+- Deploy this page on separate infrastructure, fully isolated from the core app backend\.
+
+- Do not expose core app server addresses, internal API domains, or backend infrastructure details\.
+
+- Prevent any ability to trace the landing page back to core business systems\.
+
+### 3\.2 Content Anti\-Tampering
+
+Protect the 10\-minute preview gate from bypass\.
+
+- Block circumvention via frontend code tampering, network request modification, or browser dev tools manipulation\.
+
+- Gate validation must use both frontend anti\-tampering checks and server\-side stream control\.
+
+---
+
+## 4\. Design Principles
+
+|Principle|Implementation|
+|---|---|
+|Film is the only conversion hook|No watermarks, logos, or CTAs on the video frame\. Autoplay on mute by default — page loads with moving footage, not a static banner\.|
+|Visualize content limits|Progress bar shows full film runtime\. Locked segment is visually distinct; users see exactly how much content is withheld\.|
+|Single funnel, single exit|All CTAs call a single `download()` function\. No secondary conversions, social links, or distractions\. Footer only holds required legal text\.|
+|Minimal playback controls|Only 3 controls: tap frame to play/pause, volume toggle, seek bar\.|
+|Curiosity\-driven discovery|Top 10 cards show only rank and source badge — no titles or categories\.|
+|Cinema\-style dark UI|Uniform near\-black background \(`#08090b`\)\. No visual noise to compete with the film\.|
+|Indexable per\-market pages|Language switch navigates to a separate static URL\. Each market page retains its own link equity and indexability\.|
+
+---
+
+## 5\. Conversion Funnel Logic
+
+### 5\.1 10\-Minute Preview Gate
+
+Preview limit per film: `previewLimitSeconds: 600`
+
+Two independent trigger paths\. Both open the same download modal, but report different reasons for accurate attribution\.
+
+|Trigger|Logic|Event|`reason` value|
+|---|---|---|---|
+|Playback runs out|`timeupdate` detects `currentTime >= cap`|`preview_limit_reached`|`limit`|
+|User seeks past the cap|`handleSeek` detects requested time `>= cap`|`preview_scrub_locked`|`scrub`|
+
+On trigger:
+
+- Player pauses immediately
+
+- Playhead clamps back to the cap position
+
+- Download modal opens
+
+Closing the modal resets the gate\. The modal will reappear if the user hits the limit again\.
+
+### 5\.2 Top 10 Content Lock
+
+- Tapping any Top 10 card opens a content\-lock modal\. There is no detail page\.
+
+- The "See more" button at the end of the list triggers `download()` directly\.
+
+### 5\.3 Analytics Events
+
+All 8 events are centralized in `lib/analytics.ts`:
+
+```Plain Text
 preview_play · preview_unmute · preview_limit_reached · preview_scrub_locked
 modal_view · modal_dismiss · apk_download_click · language_switch
 ```
 
-`apk_download_click` carries a `source` string identifying which CTA earned the
-click (`chart_more`, dialog, hero pill, etc.), so every install can be attributed
-to a position on the page.
+`apk_download_click` includes a `source` parameter to attribute clicks to specific page positions\.
 
-### Two engineering traps already fixed here — do not reintroduce
+### 5\.4 Fixed Engineering Pitfalls
 
-1. **Never `await` the network inside the gate.** An earlier version awaited a
-   pending `play()` promise before opening the dialog. On an unresolved media
-   element (`readyState 0` — offline, blocked CDN, slow stream) that promise never
-   settles, so the dialog never opened *and* the gate latched permanently shut.
-   `enforceGate` is deliberately synchronous.
-2. **`closePreview()` must actually run.** The player refuses to re-open the
-   upsell while `previewReason` is non-null. A dismissal path that doesn't reach
-   the provider latches the gate shut after one open. Material's `closed` event
-   needs a real `addEventListener` — `<md-dialog onclosed={fn}>` is silently dead.
+Do not reintroduce these issues:
+
+- **No async/await inside gate logic**: The gate runs synchronously\. Awaiting network calls or `play()` promises can permanently lock the gate if media fails to load\.
+
+- **Ensure ****`closePreview()`**** runs on modal close**: Use `addEventListener` to bind the close handler\. Inline template event bindings for Material components are unreliable\.
 
 ---
 
-## 3. What Developers Can Reuse
+## 6\. Development \& Reusability
 
-The app is deliberately split so **all replaceable data sits behind four files**.
-Search the codebase for `RESERVED` — every integration point is marked.
+You may fork this repo directly, or rewrite the frontend with a different tech stack\. All rewrites must comply with the **Non\-Negotiable Constraints** above\.
 
-| File | Owns | Replace with |
-| --- | --- | --- |
-| `lib/content/movies.ts` | Film catalog + Top 10 chart, **all** film content in all 3 languages | Content API / CMS fetch |
-| `lib/config/site.ts` | APK URL/version/size, install count, library counts | Build-time config or API |
-| `lib/analytics.ts` | The single `trackEvent()` funnel | Firebase Analytics |
-| `dictionaries/*.json` | 100% of UI copy, 3 locales, verified key-for-key identical | Translation pipeline (keep keys) |
+All replaceable business data is isolated in 4 files\. Search for `RESERVED` in the codebase to locate all integration points\.
 
-**Nothing about a specific film is hardcoded in any component.** Swapping the two
-exported constants in `movies.ts` regenerates every landing page in every language
-without touching the UI layer.
+|File|Owns|Replacement|
+|---|---|---|
+|`lib/content/movies.ts`|Film catalog \+ Top 10 chart, all locales|Content API / CMS|
+|`lib/config/site.ts`|APK config, product metrics|Build\-time injection / API|
+|`lib/analytics.ts`|Centralized event tracking|Firebase Analytics|
+|`dictionaries/*.json`|Localized UI strings|Translation pipeline \(keep keys\)|
 
-### Already built — do not rebuild
+No film\-specific content is hardcoded in components\. Swap the data to generate all landing pages automatically\.
 
-- **Per-film campaign URLs (your TODO #3 is essentially done).** 3 films × 3
-  locales = **9 static campaign pages**, plus 3 market homes = **12 static pages**,
-  all verified building and serving `200`. Adding a film is one array entry in
-  `movies.ts`; its 3 localized URLs, sitemap entries and hreflang cluster generate
-  automatically.
-- **Locale auto-detection** — `middleware.ts`: `NEXT_LOCALE` cookie → Vercel geo-IP
-  (`US→en`, `BR→pt-br`, `TH→th`) → `Accept-Language` → default.
-- **Localized URL segments** — `/en/movie/…`, `/pt-br/filme/…`, `/th/หนัง/…`, with
-  a guard that 404s any wrong locale/segment pair (verified).
-- **Full SEO/AEO layer** — canonical + reciprocal hreflang + `x-default`, OG/Twitter
-  cards, JSON-LD `@graph` (`Movie` + `SoftwareApplication`/`AggregateOffer` +
-  `FAQPage`), `sitemap.xml` (12 URLs w/ alternates), `robots.txt`.
-- **Performance layer** — `fetchPriority="high"` LCP poster, speculation-rules
-  prerender of sibling locales, `content-visibility` on the two heavy below-fold
-  sections, CSS-only `<details>` FAQ (zero JS), 48×48 minimum touch targets.
+### Built\-in Capabilities
+
+- 9 per\-film pages \+ 3 market homepages = 12 static pages total
+
+- New films auto\-generate pages and SEO configuration
+
+- Multi\-priority locale auto\-detection and redirect
+
+- Localized URL paths with validation
+
+- Full SEO/AEO suite \(canonical, hreflang, OG cards, JSON\-LD, sitemap, robots\)
+
+- Performance optimizations \(LCP priority, prerendering, `content-visibility`, pure\-CSS FAQ\)
 
 ---
 
-## 4. Tech Stack
+## 7\. Tech Stack
 
-| Layer | Choice | Notes |
-| --- | --- | --- |
-| Framework | **Next.js 16.2.9**, App Router, Turbopack | All pages SSG via `generateStaticParams` |
-| UI runtime | **React 19** | Server Components by default; 6 client islands |
-| Language | **TypeScript 5.7**, strict | `@/*` path alias |
-| Components | **`@material/web` 2.4.1** (Material 3 web components) | Registered client-side after hydration — see `material-web-loader.tsx` |
-| Styling | **Hand-written CSS, no Tailwind** | `app/globals.css` (design tokens) + `app/landing.css` (~2.3k lines, page styles) |
-| i18n | Custom, zero-dependency | `lib/i18n/` + JSON dictionaries |
-| Analytics | Stub, awaiting Firebase | `lib/analytics.ts` |
-| Package manager | **pnpm** | |
-| Runtime work | `middleware.ts` only | Every page itself is static |
+|Layer|Choice|Notes|
+|---|---|---|
+|Framework|Next\.js 16\.2\.9, App Router, Turbopack|Full\-page SSG|
+|UI Runtime|React 19|Server components by default; 6 client islands|
+|Language|TypeScript 5\.7, strict mode|`@/*` path alias|
+|Components|`@material/web` 2\.4\.1 \(Material 3\)|Registered client\-side after hydration|
+|Styling|Hand\-written vanilla CSS|Design tokens \+ page styles; no Tailwind|
+|i18n|Custom zero\-dependency implementation|JSON locale files|
+|Package Manager|pnpm||
 
 ```bash
-pnpm install
-pnpm dev     # http://localhost:3000
-pnpm build   # 16 routes, ~5.5s
-pnpm start
+pnpm install    # Install dependencies
+pnpm dev        # Local dev: http://localhost:3000
+pnpm build      # Build production bundle
+pnpm start      # Run production build locally
 ```
 
-Environment variables (both optional, both have working dev fallbacks):
+Environment variables \(both optional; dev defaults provided\):
 
-```
-NEXT_PUBLIC_SITE_URL=https://zenorix.app      # canonical origin for SEO
-NEXT_PUBLIC_APK_URL=/download/zenorix.apk     # APK download target
+```Plain Text
+NEXT_PUBLIC_SITE_URL=https://zenorix.app
+NEXT_PUBLIC_APK_URL=/download/zenorix.apk
 ```
 
 ---
 
-## 5. Constraints — Do Not Change
+## 8\. Project Structure
 
-The following are **specified deliverables**, not implementation preference. They
-have been designed, measured and verified. Rebuild the back end freely; leave
-these alone.
-
-1. **Page UI** — layout, spacing, colour, typography, motion.
-2. **Page copy** — all strings in `dictionaries/*.json`, all 3 locales.
-3. **Funnel logic** — the 10-minute preview cap, both gate triggers
-   (play-out **and** scrub-past), the re-arm-on-dismiss behaviour, and the Top 10
-   tap → download-upsell behaviour.
-4. **SEO & performance design** — metadata, hreflang, JSON-LD, sitemap/robots,
-   and the LCP/`content-visibility`/speculation-rules work.
-
-You are free to **re-implement the front end from scratch** if that suits your
-pipeline — but the result must be visually and behaviourally identical on these
-four axes.
-
----
-
-## 6. Remaining TODO
-
-Ordered by dependency. Full instructions per item in
-**[`HANDOVER.md`](./HANDOVER.md)**.
-
-### A. Firebase Analytics
-Single-file change in `lib/analytics.ts` — forward the 8 existing typed events.
-Do not scatter SDK calls into components.
-
-### B. Replace placeholder content
-**Static (no API needed):** brand logo in the top bar, real APK URL + version/size/
-install count, footer legal links, film metadata (title/tagline/synopsis/genres/
-year/runtime, ×3 locales).
-
-**Requires API support:** per-film playback URL (long-lived/signed; HLS/DASH
-attaches to the same `videoRef`), Top 10 posters (`ChartEntry` has no `poster`
-field yet — deliberately), per-film landscape opening frames (`previewFrame`,
-currently one placeholder SVG for all 3 films).
-
-### C. Multi-film campaign links
-**Routing is already done.** Remaining work is content: add each promoted film to
-the `movies` array with its own slug, artwork, stream and 3-locale copy. Each
-film automatically gets 3 localized URLs.
-
-### D. Second-phase development, QA, production deploy
-Includes one known Next.js 16 chore: rename `middleware.ts` → `proxy.ts` (the
-build currently prints a deprecation warning; behaviour is unaffected).
-
----
-
-## 7. Project Structure
-
-```
+```Plain Text
 app/
-  [lang]/page.tsx                  Market home → featured film
-  [lang]/[segment]/[slug]/page.tsx Per-film campaign page (9 static)
-  layout.tsx · [lang]/layout.tsx   Shells, fonts, <html lang>
-  globals.css · landing.css        Design tokens · page styles
-  robots.ts · sitemap.ts           Generated SEO endpoints
-components/landing/                12 components (see HANDOVER.md §3)
-  conversion-provider.tsx          ← funnel state, single download()
-  immersive-player.tsx             ← the 10-minute gate
-  conversion-dialogs.tsx           ← both upsell sheets
+  [lang]/page.tsx                  # Market homepage (featured film)
+  [lang]/[segment]/[slug]/page.tsx # Per-film campaign page
+  layout.tsx · [lang]/layout.tsx   # Global shell, locale config
+  globals.css · landing.css        # Design tokens · page styles
+  robots.ts · sitemap.ts           # Auto-generated SEO endpoints
+components/landing/                # Business components
+  conversion-provider.tsx          # Funnel state, central download()
+  immersive-player.tsx             # 10-minute preview gate core
+  conversion-dialogs.tsx           # Download prompt modals
 lib/
-  content/movies.ts                ← film catalog + Top 10
-  config/site.ts                   ← APK + product config
-  analytics.ts                     ← Firebase integration point
-  i18n/ · seo.ts                   Locale contract · metadata + JSON-LD
-dictionaries/{en,pt-br,th}.json    All UI copy
-middleware.ts                      Locale detection + redirect
+  content/movies.ts                # Film catalog + chart data
+  config/site.ts                   # Product & APK config
+  analytics.ts                     # Central analytics entry point
+  i18n/ · seo.ts                   # Locale rules · SEO generation
+dictionaries/{en,pt-br,th}.json    # Localized UI strings
+middleware.ts                      # Locale detection & redirects
 ```
