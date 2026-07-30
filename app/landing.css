@@ -182,16 +182,21 @@
    light palette ever changes, edit it here.
 
    The palette is the page's own, inverted rather than swapped: the light end of the
-   METALLIC SILVER ramp for the surface, and the SOFT TECH BLUE darkened to #1d5b92
-   for `primary`. Blue does the accent's job here specifically because silver cannot:
-   on a near-white bar the brand silver has almost no contrast, so the install button
-   would dissolve into its own background. Darkening the accent instead of inventing a
-   third hue keeps the header recognisably part of the same three-color system, and
-   white-on-#1d5b92 clears AA at the button's 13px label. */
+   METALLIC SILVER ramp for the surface, and the SOFT TECH BLUE for `primary`. Blue
+   does the accent's job here specifically because silver cannot: on a near-white bar
+   the brand silver has almost no contrast, so the install button would dissolve into
+   its own background. Reusing the accent instead of inventing a third hue keeps the
+   header recognisably part of the same three-color system.
+
+   The blue is only as dark as white-on-it needs (AA at the button's 13px label) and
+   no darker. It was #1d5b92 — a heavy navy that made the page's single most important
+   action look sombre; #1668cf is the same hue with the saturation and lightness the
+   accent carries everywhere else, so the header now matches the scrubber's blue
+   instead of reading as a duller relative of it. */
 .zx-topbar {
   color-scheme: light;
 
-  --md-sys-color-primary: #1d5b92;
+  --md-sys-color-primary: #1668cf;
   --md-sys-color-on-primary: #ffffff;
   --md-sys-color-surface: var(--zx-topbar-surface);
   --md-sys-color-on-surface: #161920;
@@ -1117,17 +1122,32 @@
   margin-block-start: var(--zx-space-6);
 }
 
-/* Filled pill. `align-items: flex-start` on the card keeps it hugging its own
-   text instead of stretching the full card width. */
+/* OUTLINED pill, transparent fill. `align-items: flex-start` on the card keeps it
+   hugging its own text instead of stretching the full card width.
+
+   It was a filled pill using `primary-container`, and on a pure-black canvas that
+   mid-grey slab (L* 35) was the muddiest object on the page — a grey block sitting on
+   black, dragging the whole section's perceived brightness down while the label inside
+   it fought its own backing for contrast. A hairline stroke with the silver text
+   showing straight through to the canvas removes the slab entirely and lets the label
+   read at full silver.
+
+   This also brings it into line with `.zx-dialog-lead`, the same eyebrow rank, which
+   is already unfilled bright silver.
+
+   `align-self: flex-start` matters now: with no fill there is no visible box, but the
+   element is still a block, so without it the invisible stroke would span the card. */
 /* The page's eyebrow treatment. `.zx-dialog-lead` is the same rank and MUST keep
    the same size/weight/tracking — it was 11px/700 against this rule's 11px/600,
    so the two eyebrows were subtly different weights for no reason. */
 .zx-about-label {
   margin: 0;
+  align-self: flex-start;
   padding: var(--zx-space-1) 9px;
   border-radius: 7px;
-  background: var(--md-sys-color-primary-container);
-  color: var(--md-sys-color-on-primary-container);
+  background: transparent;
+  border: 1px solid var(--md-sys-color-outline-variant);
+  color: var(--md-sys-color-primary);
   font-size: var(--zx-text-label);
   font-weight: var(--zx-weight-semibold);
   letter-spacing: 0.09em;
@@ -1235,7 +1255,12 @@
      the bar's own height or the bar turns into a lozenge whose rounded ends eat
      into the length being compared. */
   border-radius: 4px;
-  background: var(--md-sys-color-surface-variant);
+  /* The DIM default, which in practice means the rival's bar. Both bars used to share
+     `surface-variant`, a mid-grey (L* 35) — so the card carried two identical grey
+     slabs, the last and largest muddy objects left on the black canvas, and the chart
+     gave its own product exactly the same visual weight as the competitor it is
+     arguing against. Recessed here, brightened for `--ours` below. */
+  background: var(--md-sys-color-surface-container-high);
 }
 
 /* 30% of the rival bar, set as a variable by the component. The share is the one
@@ -1262,6 +1287,17 @@
      the reader already knows rather than the integrity of the quantity. */
   box-sizing: border-box;
   width: var(--zx-bar-share, 30%);
+  /* Brand silver, at full brightness. This bar represents Zenorix's price, so it is
+     the one element in the card that should look like the product — and being the
+     SHORT bar, it needs the brightness to stay the thing the eye lands on first. The
+     dark rival bar behind it now reads as the cost being escaped. */
+  background: var(--md-sys-color-primary);
+}
+
+/* Dark label on the silver plate. Required, not cosmetic: `.zx-compare-name` is
+   near-white by default, which on a near-white bar would be invisible. */
+.zx-compare-bar--ours .zx-compare-name {
+  color: var(--md-sys-color-on-primary);
 }
 
 /* Full width by definition — it is the 100% the bar above is measured against. Same

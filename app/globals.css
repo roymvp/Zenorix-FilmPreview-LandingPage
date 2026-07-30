@@ -35,43 +35,63 @@
 :root {
   color-scheme: dark;
 
-  /* Metallic silver. Light enough to carry `on-primary` dark text on a filled
-     button (~11:1) and to read as a link against the canvas. */
-  --md-sys-color-primary: #c8cfda;
-  --md-sys-color-on-primary: #161920;
-  --md-sys-color-primary-container: #3a414c;
-  --md-sys-color-on-primary-container: #e3e8f1;
-  /* Darker brushed steel: the same family one step down, for anything that must
-     sit beside silver without competing with it. */
-  --md-sys-color-secondary: #b3bbc7;
-  --md-sys-color-on-secondary: #222831;
-  --md-sys-color-secondary-container: #323a45;
-  --md-sys-color-on-secondary-container: #d8dfe9;
-  /* Soft tech blue — the accent. Desaturated on purpose: a pure cyan or a
-     saturated brand blue would fight the silver instead of punctuating it. */
-  --md-sys-color-tertiary: #8fbeee;
-  --md-sys-color-on-tertiary: #08243c;
-  --md-sys-color-tertiary-container: #234e71;
-  --md-sys-color-on-tertiary-container: #cfe4fa;
+  /* POLISHED metallic silver, near-white. The previous value (#c8cfda) passed
+     contrast easily — 12.7:1 as a button plate — and was still wrong: at ~82%
+     lightness it read as dull pewter, so the install CTAs looked like disabled grey
+     plates rather than the brightest, most clickable thing on the page.
+
+     That is the lesson worth keeping: a WCAG ratio measures legibility, not presence.
+     On a near-black canvas almost any light grey clears 12:1, so the ratio stops
+     discriminating and cannot tell you whether a control looks live. Silver has to be
+     pushed to the top of its ramp to read as metal rather than as grey. */
+  --md-sys-color-primary: #eef2f9;
+  --md-sys-color-on-primary: #0b0e13;
+  /* Brightened with it, so the tonal step below silver stays a step and does not
+     collapse into the surface containers. */
+  --md-sys-color-primary-container: #4a5462;
+  --md-sys-color-on-primary-container: #f1f4fa;
+  /* Brushed steel: the same family one step down, for anything that must sit beside
+     silver without competing with it. */
+  --md-sys-color-secondary: #d3dae4;
+  --md-sys-color-on-secondary: #1b2129;
+  --md-sys-color-secondary-container: #3d4653;
+  --md-sys-color-on-secondary-container: #e8edf4;
+  /* Soft tech blue — the accent, now luminous instead of subdued. #8fbeee was both
+     dark and desaturated, which is what made it read as oppressive: as the only
+     chromatic color on the page it has to glow to register at all, and a muted blue
+     on black just looks like dimmed grey. Lifted in lightness AND saturation.
+     Still soft rather than neon — it is an accent, not a warning. */
+  --md-sys-color-tertiary: #79c9ff;
+  --md-sys-color-on-tertiary: #002138;
+  --md-sys-color-tertiary-container: #2b6f9e;
+  --md-sys-color-on-tertiary-container: #dcefff;
   --md-sys-color-error: #ffb4ab;
   --md-sys-color-on-error: #690005;
   --md-sys-color-error-container: #93000a;
   --md-sys-color-on-error-container: #ffdad6;
   --md-sys-color-background: #08090b;
-  --md-sys-color-on-background: #e6e9ee;
+  --md-sys-color-on-background: #f4f7fb;
   --md-sys-color-surface: #08090b;
-  --md-sys-color-on-surface: #e6e9ee;
-  --md-sys-color-surface-variant: #3c424b;
-  --md-sys-color-on-surface-variant: #bfc6d0;
-  --md-sys-color-outline: #878e98;
+  /* Effectively white. Body copy is the page's primary payload, so it gets the top
+     of the ramp rather than a grey a shade below it. */
+  --md-sys-color-on-surface: #f4f7fb;
+  --md-sys-color-surface-variant: #454c57;
+  /* The secondary text color, and the one that mattered most here: every caption
+     under a CTA, every spec label and the synopsis use it. At #bfc6d0 those were
+     visibly greyer than the copy around them; this keeps the hierarchy (still a step
+     below `on-surface`) while letting the words actually carry. */
+  --md-sys-color-on-surface-variant: #d2d9e4;
+  --md-sys-color-outline: #9aa3af;
   /* Every hairline and the phone column's frame. Deliberately low-contrast: on a
      black canvas a divider only has to be perceptible, not visible. */
   --md-sys-color-outline-variant: #2c323a;
   --md-sys-color-shadow: #000000;
   --md-sys-color-scrim: #000000;
-  --md-sys-color-inverse-surface: #e6e9ee;
+  --md-sys-color-inverse-surface: #f4f7fb;
   --md-sys-color-inverse-on-surface: #2b3038;
-  --md-sys-color-inverse-primary: #545b66;
+  /* Silver's counterpart for use ON a light surface — kept dark for that reason.
+     It must NOT follow `primary` upward or it becomes near-white on near-white. */
+  --md-sys-color-inverse-primary: #495260;
   --md-sys-color-surface-dim: #08090b;
   --md-sys-color-surface-bright: #2c313a;
   --md-sys-color-surface-container-lowest: #030405;
@@ -107,7 +127,10 @@
   --zx-media-scrim: rgb(var(--zx-media-black-rgb) / 0);
   --zx-media-scrim-strong: rgb(var(--zx-media-black-rgb) / 1);
   --zx-on-media: #ffffff;
-  --zx-on-media-variant: #c6ccd5;
+  /* Secondary text laid over the video. Lifted from #c6ccd5: this is the hardest
+     place on the page to read anything — moving footage underneath, so the
+     background luminance is not even constant — and it was the dimmest text token. */
+  --zx-on-media-variant: #dde2ea;
   --zx-media-control: rgba(255, 255, 255, 0.14);
   --zx-media-control-hover: rgba(255, 255, 255, 0.24);
   --zx-media-outline: rgba(255, 255, 255, 0.22);
