@@ -52,6 +52,7 @@
       "value": "{annualPerMonth}/mês",
       "rivalLabel": "Disney + HBO + Netflix",
       "rivalValue": "~ R$ 150/mês",
+      "legend": "Comprimento da barra = custo mensal",
       "rivalAmount": 150
     },
     "viewing": {

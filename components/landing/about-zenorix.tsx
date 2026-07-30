@@ -74,6 +74,8 @@ export function AboutZenorix({
     /** Row 2: the rival stack, and its formatted combined monthly cost. */
     rivalLabel: string
     rivalValue: string
+    /** States what the bars' length encodes. Visual-only; see the legend note. */
+    legend: string
     /** Same two costs as plain numbers, used only to size the bars. */
     ourAmount: number
     rivalAmount: number
@@ -91,18 +93,22 @@ export function AboutZenorix({
   /** APK facts rendered directly beneath that button. */
   ctaMeta: string
 }) {
-  // The rival bar is always full, so our bar is our share of its cost. The 30%
-  // floor is what makes the label fit inside the bar: at the real US ratio
-  // (1.25 / 80 = 1.6%) the bar is a few pixels wide, and even at a legibility-only
-  // minimum it could not hold the word "Zenorix".
+  // The rival bar is always full, so our bar is our share of its cost. The floor is
+  // what makes the figure fit inside the bar: at the real US ratio
+  // (1.25 / 80 = 1.6%) the bar is a few pixels wide and could not hold any text.
+  //
+  // 38%, up from 30% when the bar only had to hold a short name. The price now sits
+  // INSIDE the bar, and the longest localized figure ("~ 1,000 บาท/เดือน" in Thai)
+  // needs more room than "Zenorix" did — at 30% it ellipsized on a 390px card, which
+  // would hide the very number the chart exists to state.
   //
   // Worth being clear-eyed about the trade: this draws a ~1/64 price as ~1/3 of
-  // the bar, so the bars now read as "much cheaper" rather than as a measurable
-  // ratio. The exact figures beside them carry the real magnitude, which is why
-  // both are stated in full and at the same size. It stays a floor rather than a
-  // multiplier, so a market where the true ratio is larger is drawn at its own
-  // honest value instead of being scaled.
-  const ourShare = Math.max(30, (price.ourAmount / price.rivalAmount) * 100)
+  // the bar, so the bars read as "much cheaper" rather than as a measurable ratio.
+  // The exact figures inside them carry the real magnitude, which is why both are
+  // stated in full and at the same size. It stays a floor rather than a multiplier,
+  // so a market where the true ratio is larger is drawn at its own honest value
+  // instead of being scaled.
+  const ourShare = Math.max(38, (price.ourAmount / price.rivalAmount) * 100)
 
   return (
     // Tighter than the shared section rhythm: four cards plus a CTA is the
@@ -170,15 +176,20 @@ export function AboutZenorix({
           <li className="zx-about-card">
             <p className="zx-about-label">{price.label}</p>
             {/* A price alone is just a number; against the stack it replaces it
-                becomes a saving. Each row is "name above, then price ─ bar", so
-                the two costs sit in one column the eye can compare directly and
-                the bars carry the gap pre-attentively.
+                becomes a saving. Each row is now "name, then a bar with its own
+                price inside it", stacked so both bars share a start edge and the
+                length difference carries the gap pre-attentively.
 
-                Each name sits INSIDE its own bar, which is why the bar is the
-                `dt`: the term is the plan, drawn as the bar that represents it,
-                and the `dd` beside it is what that plan costs. Keeping `dt`/`dd`
-                as direct children of the grid is what lets one grid own both rows,
-                so every price shares a column and both bars share a start edge.
+                The name is the `dt` and the bar is the `dd`: the term is the plan,
+                and its definition is what that plan costs — drawn as the bar, with
+                the figure sitting inside the bar it belongs to. Putting the price
+                INSIDE removes the separate price column entirely, so the full card
+                width now goes to the bars themselves and the two figures can no
+                longer drift away from the quantities they label.
+
+                Keeping `dt`/`dd` as direct children of one `dl` is what lets a
+                single grid own both rows, so the two bars are measured against the
+                same track rather than each against its own container.
 
                 Each figure carries its own "/mo" rather than deferring to a caption
                 under the chart. The caption was accurate but cost 34px of card
@@ -186,28 +197,39 @@ export function AboutZenorix({
                 than its three neighbours — and the unit is only four characters, so
                 repeating it is cheaper than explaining it. */}
             <dl className="zx-compare">
+              <dt className="zx-compare-name zx-compare-name--ours">
+                {price.ourLabel}
+              </dt>
               {/* The share sizes the bar via a variable rather than a plain width,
-                  so the CSS can hold it against `max-content` and stop a narrow
-                  card from cropping the label inside. */}
-              <dt
+                  so the CSS keeps the ratio in one place and the bar can still be
+                  floored wide enough to hold the price now sitting inside it. */}
+              <dd
                 className="zx-compare-bar zx-compare-bar--ours"
                 style={{ '--zx-bar-share': `${ourShare}%` } as CSSProperties}
               >
-                <span className="zx-compare-name zx-compare-name--ours">
-                  {price.ourLabel}
+                <span className="zx-compare-amount zx-compare-amount--ours">
+                  {price.value}
                 </span>
-              </dt>
-              <dd className="zx-compare-amount zx-compare-amount--ours">
-                {price.value}
               </dd>
 
-              <dt className="zx-compare-bar zx-compare-bar--rival">
-                <span className="zx-compare-name">{price.rivalLabel}</span>
-              </dt>
-              <dd className="zx-compare-amount zx-compare-amount--rival">
-                {price.rivalValue}
+              <dt className="zx-compare-name">{price.rivalLabel}</dt>
+              <dd className="zx-compare-bar zx-compare-bar--rival">
+                <span className="zx-compare-amount zx-compare-amount--rival">
+                  {price.rivalValue}
+                </span>
               </dd>
             </dl>
+
+            {/* Legend. Both bars are now the same color and height, so nothing in
+                the chart itself states what their LENGTH encodes — this one line
+                does, and it is the reason the pair reads as a measurement rather
+                than as two decorative pills. `aria-hidden` because the `dl` above
+                already pairs each name with its own price for a screen reader, so
+                announcing the visual convention would only add noise. */}
+            <p className="zx-compare-legend" aria-hidden="true">
+              <span className="zx-compare-legend-swatch" />
+              {price.legend}
+            </p>
           </li>
 
           <li className="zx-about-card">

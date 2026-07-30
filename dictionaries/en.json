@@ -52,6 +52,7 @@
       "value": "{annualPerMonth}/mo",
       "rivalLabel": "Disney + HBO + Netflix",
       "rivalValue": "~ $80/mo",
+      "legend": "Bar length = monthly cost",
       "rivalAmount": 80
     },
     "viewing": {
