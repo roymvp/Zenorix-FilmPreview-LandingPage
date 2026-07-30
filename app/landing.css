@@ -1332,8 +1332,15 @@
   background: var(--md-sys-color-secondary);
 }
 
+/* Mirrors the rival bar exactly: dark fill plus the same `outline` border. The border is
+   even more necessary at 14x5px than on the bar — an unbordered #3d4653 chip this small on
+   the near-black page would read as an empty gap and key nothing at all. `border-box` keeps
+   it the same 14px as its partner, so the two swatches stay equal in size and the FILL
+   remains the only difference between them. */
 .zx-compare-key-swatch--rival {
-  background: var(--md-sys-color-outline);
+  box-sizing: border-box;
+  background: var(--md-sys-color-secondary-container);
+  border: 1px solid var(--md-sys-color-outline);
 }
 
 /* The axis unit. `auto` margin pushes it to the line's far end, away from the two names
@@ -1403,8 +1410,8 @@
   border-radius: 4px;
 }
 
-/* Ours: `secondary` — the bright silver, restored after a pass in the accent blue. It is
-   the BRIGHTER of the two fills (1.81:1 apart), so emphasis and identity point the same
+/* Ours: `secondary` — the bright silver, restored after a pass in the accent blue. It is by
+   far the BRIGHTER of the two fills (6.78:1 apart), so emphasis and identity point the same
    way, and it keeps the chart in the same silver-on-black palette as the other three About
    cards instead of introducing the section's only chromatic element. */
 .zx-compare-bar--ours {
@@ -1423,26 +1430,43 @@
   box-sizing: border-box;
   width: var(--zx-bar-share, 24%);
   background: var(--md-sys-color-secondary);
+  /* The ink for the price inside, inherited by `.zx-compare-amount`. Paired token, so fill
+     and text move together and can never drift into an illegible combination. */
+  color: var(--md-sys-color-on-secondary);
 }
 
 /* Theirs: full width by definition — it is the 100% the bar above is measured against.
    Same `border-box` as its partner so both are measured on one basis.
 
-   `outline` (#9aa3af) — deliberately paler and duller than our silver, so the comparison
-   target recedes while ours stays the bright one. It is a measured compromise between two
-   failure modes that pull in opposite directions on this dark card:
-     - Too BRIGHT and it stops differing from ours. `secondary` on both bars left them
-       identical, which is what made a color key impossible in the first place.
-     - Too DARK and it stops being visible at all. `surface-container-highest` (#262b32)
-       separated from ours at 10:1 but fell to 1.14:1 against the card, and on screen the
-       rival bar and its key swatch nearly vanished — fatal for the bar that DEFINES 100%.
-   #9aa3af clears both: 6.34:1 against the card so it is unmistakably present, 1.81:1
-   against ours so the two are still told apart at a glance. It also has to stay light
-   enough to carry the dark price sitting inside it, which it does at 6.35:1 (AA). */
+   `secondary-container` (#3d4653) — the DARK step of the same token family as our
+   `secondary` fill, which is why the pair still reads as one chart rather than two unrelated
+   colors. Fill separation is now 6.78:1, up from 1.81:1 when this was `outline`.
+
+   That number was previously stuck, and it is worth recording why. Fill alone cannot get
+   there on this near-black page: every token that separates well from our silver (>=5:1)
+   also falls to <=2.6:1 against the #08090b background, and at that point the bar DEFINING
+   100% is the one that fades out — measured twice, once at 1.47:1 and once at 1.14:1, and
+   both times the rival bar and its key swatch visibly disappeared. Brighter fills fix the
+   visibility and lose the distinction; darker fills do the reverse.
+
+   The border below is what breaks that deadlock, so the two constraints stop fighting:
+   the FILL is free to go dark for maximum separation from ours, while the BORDER guarantees
+   the bar's extent stays legible. Note the card itself is transparent — an earlier round of
+   these numbers was computed against a #1d2126 card that does not exist, which made the
+   dark fills look ~1.8x safer than they are. */
 .zx-compare-bar--rival {
   box-sizing: border-box;
   width: 100%;
-  background: var(--md-sys-color-outline);
+  background: var(--md-sys-color-secondary-container);
+  /* Load-bearing, not decoration: at 2.09:1 the fill alone would leave the reference bar
+     barely distinguishable from the page. `outline` sits at 7.81:1 against that background,
+     so the bar's full length — the chart's 100% — is unambiguous no matter how dark the fill
+     goes. `border-box` above means this costs no measurable width, so the ratio is
+     untouched. Only theirs needs it; ours is bright enough to define its own edge. */
+  border: 1px solid var(--md-sys-color-outline);
+  /* Light ink here, because this fill is dark — the paired `on-*` token again, so the
+     contrast holds automatically if either value is ever retuned. */
+  color: var(--md-sys-color-on-secondary-container);
 }
 
 /* The figure sits INSIDE its bar, so it is dark ink on a light fill rather than
@@ -1465,11 +1489,14 @@
   /* One line always. These are short figures meant to be compared at a glance, and a
      wrapped price would break the bar's fixed 34px height. */
   white-space: nowrap;
-  /* One dark ink for BOTH figures, on purpose. The bars now differ in fill, but the prices
-     are the same kind of fact, so tinting each to match its bar would encode identity a
-     third time and start to suggest one price is less real than the other. It reads on
-     either fill: 11.5:1 on our silver, 6.35:1 on the dimmer rival (both AA). */
-  color: var(--md-sys-color-on-secondary);
+  /* Inherited from the bar, which sets the `on-*` token paired with its own fill. The two
+     figures are no longer the same ink, and that is forced rather than chosen: the fills now
+     sit at opposite ends of the luminance range, so one shared ink cannot be legible on
+     both — the previous dark ink would read at 1.7:1 on the new rival fill. What IS held
+     equal is everything that could imply ranking: same size, same weight, same tabular
+     figures, and both inks at full strength on their own ground (11.5:1 and 8.1:1, both
+     AAA). Legibility follows the background; it does not rank the two prices. */
+  color: inherit;
 }
 
 /* The `vs` between the two names on the key line — the thing that tells a skimming
