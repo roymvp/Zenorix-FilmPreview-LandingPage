@@ -44,8 +44,10 @@
      On a near-black canvas almost any light grey clears 12:1, so the ratio stops
      discriminating and cannot tell you whether a control looks live. Silver has to be
      pushed to the top of its ramp to read as metal rather than as grey. */
-  --md-sys-color-primary: #eef2f9;
-  --md-sys-color-on-primary: #0b0e13;
+  --md-sys-color-primary: #fbfcfe;
+  /* Near-black label on the silver plate. Deepened with the plate so the CTA's
+     label keeps the darkest possible ink against the brightest possible metal. */
+  --md-sys-color-on-primary: #05070a;
   /* Brightened with it, so the tonal step below silver stays a step and does not
      collapse into the surface containers. */
   --md-sys-color-primary-container: #4a5462;
@@ -56,12 +58,13 @@
   --md-sys-color-on-secondary: #1b2129;
   --md-sys-color-secondary-container: #3d4653;
   --md-sys-color-on-secondary-container: #e8edf4;
-  /* Soft tech blue — the accent, now luminous instead of subdued. #8fbeee was both
-     dark and desaturated, which is what made it read as oppressive: as the only
-     chromatic color on the page it has to glow to register at all, and a muted blue
-     on black just looks like dimmed grey. Lifted in lightness AND saturation.
+  /* Soft tech blue — the accent, luminous rather than subdued. It has been lifted
+     twice now, from #8fbeee to #79c9ff to this: as the only chromatic color on a black
+     page it has to glow to register at all, and each earlier value was dark enough to
+     read as dimmed grey instead of blue. Raised in lightness while KEEPING the high
+     saturation, which is what separates "bright blue" from "washed-out pale blue".
      Still soft rather than neon — it is an accent, not a warning. */
-  --md-sys-color-tertiary: #79c9ff;
+  --md-sys-color-tertiary: #9bdcff;
   --md-sys-color-on-tertiary: #002138;
   --md-sys-color-tertiary-container: #2b6f9e;
   --md-sys-color-on-tertiary-container: #dcefff;
@@ -70,17 +73,26 @@
   --md-sys-color-error-container: #93000a;
   --md-sys-color-on-error-container: #ffdad6;
   --md-sys-color-background: #08090b;
-  --md-sys-color-on-background: #f4f7fb;
+  --md-sys-color-on-background: #ffffff;
   --md-sys-color-surface: #08090b;
-  /* Effectively white. Body copy is the page's primary payload, so it gets the top
-     of the ramp rather than a grey a shade below it. */
-  --md-sys-color-on-surface: #f4f7fb;
+  /* PURE white. Titles, prices and the sentences that carry the pitch all resolve to
+     this, so it takes the very top of the ramp — on a near-black canvas there is no
+     reason to spend the brightest value on anything other than the most important
+     words, and #f4f7fb was leaving a little of that range unused. */
+  --md-sys-color-on-surface: #ffffff;
   --md-sys-color-surface-variant: #454c57;
-  /* The secondary text color, and the one that mattered most here: every caption
-     under a CTA, every spec label and the synopsis use it. At #bfc6d0 those were
-     visibly greyer than the copy around them; this keeps the hierarchy (still a step
-     below `on-surface`) while letting the words actually carry. */
-  --md-sys-color-on-surface-variant: #d2d9e4;
+  /* SECONDARY text: captions under CTAs, spec labels, FAQ answers, footer.
+     Deliberately pulled DOWN to #a4aebc (L* 71) from #d2d9e4 (L* 87). The previous
+     value was legible but nearly as bright as the body copy, so the page had two
+     ranks of text competing at the same volume and no clear reading order. Dropping
+     it widens the gap against the now-white `on-surface` above, which is what makes a
+     title feel like a title rather than just bigger text.
+
+     Still 8.9:1 on the canvas — far above AA even at the 12px caption size. This is a
+     hierarchy adjustment, NOT a legibility trade: do not push it lower to get more
+     separation, brighten nothing to compensate, and if a specific label ever needs to
+     recede further, use `--md-sys-color-outline` which exists for exactly that. */
+  --md-sys-color-on-surface-variant: #a4aebc;
   --md-sys-color-outline: #9aa3af;
   /* Every hairline and the phone column's frame. Deliberately low-contrast: on a
      black canvas a divider only has to be perceptible, not visible. */

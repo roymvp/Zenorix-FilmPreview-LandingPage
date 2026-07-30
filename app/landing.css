@@ -767,6 +767,75 @@
   --md-filled-button-container-height: 46px;
   --md-filled-button-label-text-size: var(--zx-text-body);
   --md-filled-button-label-text-weight: var(--zx-weight-semibold);
+
+  /* --- the dimensional silver plate ---------------------------------------
+     A flat `container-color` fill cannot look like brushed metal, and Material paints
+     that fill inside its own shadow DOM where a gradient cannot reach. So the fill is
+     handed to the HOST: the component's container is made transparent and this element
+     paints the plate itself. The label, ripple and state layer still come from
+     Material and simply sit on top.
+
+     `container-shape` and `border-radius` MUST stay the same value — one clips
+     Material's internals, the other clips the gradient painted here, and if they
+     diverge the plate's corners show outside the button's. They reference one custom
+     property so that cannot happen. */
+  --zx-cta-shape: 999px;
+  --md-filled-button-container-color: transparent;
+  --md-filled-button-container-shape: var(--zx-cta-shape);
+  border-radius: var(--zx-cta-shape);
+
+  /* Top-lit metal: brightest at the top edge, easing to a slightly deeper silver at
+     the bottom. The stops are tight on purpose — a wide sweep reads as a glossy
+     plastic pill, while a narrow one reads as a machined surface. */
+  background-image: linear-gradient(
+    180deg,
+    #ffffff 0%,
+    var(--md-sys-color-primary) 52%,
+    #dbe3ee 100%
+  );
+  /* Three layers doing three different jobs: a 1px inner highlight for the lit top
+     bevel, a tight contact shadow that seats the plate on the canvas, and a wider
+     ambient shadow that lifts it off the page. Together they read as raised; any one
+     alone reads as a flat rectangle with an artifact. */
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.95),
+    inset 0 -1px 0 rgba(5, 7, 10, 0.12),
+    0 1px 2px rgba(0, 0, 0, 0.55),
+    0 8px 20px -6px rgba(0, 0, 0, 0.65);
+  /* Only the shadow and the 1px press travel, so this cannot animate layout. */
+  transition:
+    box-shadow 140ms ease,
+    transform 140ms ease;
+}
+
+/* Hover lifts, press sinks — the two halves of a physical button. Without the active
+   state the raised plate would be a static illusion: it looks pressable but never
+   acknowledges the press. */
+.zx-cta-button:hover {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.95),
+    inset 0 -1px 0 rgba(5, 7, 10, 0.12),
+    0 2px 4px rgba(0, 0, 0, 0.55),
+    0 12px 26px -6px rgba(0, 0, 0, 0.7);
+}
+
+.zx-cta-button:active {
+  transform: translateY(1px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.6),
+    inset 0 2px 5px rgba(5, 7, 10, 0.22),
+    0 1px 1px rgba(0, 0, 0, 0.5);
+}
+
+/* Anyone who has asked not to see motion still gets the depth, just no travel. */
+@media (prefers-reduced-motion: reduce) {
+  .zx-cta-button {
+    transition: none;
+  }
+
+  .zx-cta-button:active {
+    transform: none;
+  }
 }
 
 /* The "Android APK · 14MB · 3M+ Downloads" caption under every install button.
