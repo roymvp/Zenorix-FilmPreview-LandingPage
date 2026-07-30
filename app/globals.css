@@ -2,13 +2,31 @@
 @import '@material/web/typography/md-typescale-styles.css';
 
 /*
- * Zenorix — Material 3 dark scheme generated from the brand source color
- * #E08B1E (ember amber).
+ * Zenorix — Material 3 dark scheme built on a premium-black canvas.
+ *
+ * THREE COLORS, and only three. Every value below is one of:
+ *   1. PREMIUM BLACK — the immersive canvas. A near-neutral black carrying a
+ *      faint COOL cast (blue channel always >= red), so it sits under silver and
+ *      blue without the muddy edge a warm black gives them. Was a warm brown-black
+ *      (#12100e) tuned for amber; every surface step is re-derived here.
+ *   2. METALLIC SILVER — the brand, and the workhorse: install CTAs, links,
+ *      focus rings, the brand mark. Silver on black is the whole identity, so it
+ *      is `primary` rather than an accent used occasionally.
+ *   3. SOFT TECH BLUE — the accent, deliberately rationed. It is `tertiary` and
+ *      earns its saturation by marking live/technical state (see the scrubber in
+ *      landing.css) rather than decorating static copy.
+ *
+ * Silver as `primary` is the load-bearing decision: M3 paints filled buttons
+ * `primary` with `on-primary` labels, so the CTAs become light-on-dark plates and
+ * the accent stays free for the few places that need it. Anything that wants to
+ * "stand out more" should earn contrast through weight or size — NOT by reaching
+ * for the blue, which stops meaning anything once it is everywhere.
  *
  * DARK ONLY, by design. This is a cinema product whose hero is film footage, so
  * there is no light scheme and no theme toggle: one scheme means one set of
  * tokens to reason about, and every surface can be tuned against the video
- * rather than compromised to work on white too.
+ * rather than compromised to work on white too. The single exception is the top
+ * bar, a self-contained light island — see `.zx-topbar` in landing.css.
  *
  * `color-scheme: dark` is what tells the browser to render form controls,
  * scrollbars and the <video> letterbox dark, so it must stay even though there
@@ -17,42 +35,50 @@
 :root {
   color-scheme: dark;
 
-  --md-sys-color-primary: #ffb868;
-  --md-sys-color-on-primary: #4a2800;
-  --md-sys-color-primary-container: #6a3d00;
-  --md-sys-color-on-primary-container: #ffddb8;
-  --md-sys-color-secondary: #e0c28e;
-  --md-sys-color-on-secondary: #3f2d05;
-  --md-sys-color-secondary-container: #574319;
-  --md-sys-color-on-secondary-container: #fddec0;
-  --md-sys-color-tertiary: #ffb5a0;
-  --md-sys-color-on-tertiary: #561f0f;
-  --md-sys-color-tertiary-container: #723523;
-  --md-sys-color-on-tertiary-container: #ffdbd1;
+  /* Metallic silver. Light enough to carry `on-primary` dark text on a filled
+     button (~11:1) and to read as a link against the canvas. */
+  --md-sys-color-primary: #c8cfda;
+  --md-sys-color-on-primary: #161920;
+  --md-sys-color-primary-container: #3a414c;
+  --md-sys-color-on-primary-container: #e3e8f1;
+  /* Darker brushed steel: the same family one step down, for anything that must
+     sit beside silver without competing with it. */
+  --md-sys-color-secondary: #b3bbc7;
+  --md-sys-color-on-secondary: #222831;
+  --md-sys-color-secondary-container: #323a45;
+  --md-sys-color-on-secondary-container: #d8dfe9;
+  /* Soft tech blue — the accent. Desaturated on purpose: a pure cyan or a
+     saturated brand blue would fight the silver instead of punctuating it. */
+  --md-sys-color-tertiary: #8fbeee;
+  --md-sys-color-on-tertiary: #08243c;
+  --md-sys-color-tertiary-container: #234e71;
+  --md-sys-color-on-tertiary-container: #cfe4fa;
   --md-sys-color-error: #ffb4ab;
   --md-sys-color-on-error: #690005;
   --md-sys-color-error-container: #93000a;
   --md-sys-color-on-error-container: #ffdad6;
-  --md-sys-color-background: #12100e;
-  --md-sys-color-on-background: #ece1d4;
-  --md-sys-color-surface: #12100e;
-  --md-sys-color-on-surface: #ece1d4;
-  --md-sys-color-surface-variant: #4f4539;
-  --md-sys-color-on-surface-variant: #d3c4b4;
-  --md-sys-color-outline: #9c8f80;
-  --md-sys-color-outline-variant: #4f4539;
+  --md-sys-color-background: #08090b;
+  --md-sys-color-on-background: #e6e9ee;
+  --md-sys-color-surface: #08090b;
+  --md-sys-color-on-surface: #e6e9ee;
+  --md-sys-color-surface-variant: #3c424b;
+  --md-sys-color-on-surface-variant: #bfc6d0;
+  --md-sys-color-outline: #878e98;
+  /* Every hairline and the phone column's frame. Deliberately low-contrast: on a
+     black canvas a divider only has to be perceptible, not visible. */
+  --md-sys-color-outline-variant: #2c323a;
   --md-sys-color-shadow: #000000;
   --md-sys-color-scrim: #000000;
-  --md-sys-color-inverse-surface: #ece1d4;
-  --md-sys-color-inverse-on-surface: #352f27;
-  --md-sys-color-inverse-primary: #8a5100;
-  --md-sys-color-surface-dim: #12100e;
-  --md-sys-color-surface-bright: #393228;
-  --md-sys-color-surface-container-lowest: #0c0a08;
-  --md-sys-color-surface-container-low: #1b1815;
-  --md-sys-color-surface-container: #201d19;
-  --md-sys-color-surface-container-high: #2b2723;
-  --md-sys-color-surface-container-highest: #363128;
+  --md-sys-color-inverse-surface: #e6e9ee;
+  --md-sys-color-inverse-on-surface: #2b3038;
+  --md-sys-color-inverse-primary: #545b66;
+  --md-sys-color-surface-dim: #08090b;
+  --md-sys-color-surface-bright: #2c313a;
+  --md-sys-color-surface-container-lowest: #030405;
+  --md-sys-color-surface-container-low: #0f1114;
+  --md-sys-color-surface-container: #14171b;
+  --md-sys-color-surface-container-high: #1d2126;
+  --md-sys-color-surface-container-highest: #262b32;
 
   /* Typefaces: applied to every system and component token.
      Noto Sans Thai follows Roboto because Roboto ships no Thai subset. The
@@ -69,13 +95,40 @@
  * app and they exist for exactly that reason.
  */
 :root {
-  --zx-media-scrim: #06050400;
-  --zx-media-scrim-strong: #060504;
+  /* Cool black, matching the canvas above. These were warm (#060504) to sit under
+     the amber scheme; left warm they would read as a brown haze over the video and
+     against the silver chrome laid on top of it.
+
+     `--zx-media-black-rgb` is the same color as a bare channel triplet, because the
+     scrims and text shadows in landing.css need it at several alphas and
+     `rgb(var(--...) / 0.85)` is the only way to reach one source of truth from
+     inside a gradient or a `drop-shadow()`. Keep the two in step. */
+  --zx-media-black-rgb: 4 6 9;
+  --zx-media-scrim: rgb(var(--zx-media-black-rgb) / 0);
+  --zx-media-scrim-strong: rgb(var(--zx-media-black-rgb) / 1);
   --zx-on-media: #ffffff;
-  --zx-on-media-variant: #cfc7bd;
+  --zx-on-media-variant: #c6ccd5;
   --zx-media-control: rgba(255, 255, 255, 0.14);
   --zx-media-control-hover: rgba(255, 255, 255, 0.24);
   --zx-media-outline: rgba(255, 255, 255, 0.22);
+
+  /* --- top bar geometry + surface -----------------------------------------
+     The top bar is the ONE part of the page excluded from the black canvas, and
+     its light band runs the full viewport width — wider than the 420px phone
+     column it sits in. Both `.zx-topbar` (inside the column) and `body::before`
+     (the left/right extension) read these, so the band and the bar can never
+     disagree about color or height.
+
+     `--zx-topbar-h` is a contract, not a measurement: the bar's tallest child is
+     the 32px install button, so if a taller control is ever added to it, bump
+     `--zx-topbar-content-h` to match or the extension will sit short of the bar. */
+  --zx-topbar-surface: #f3f5f8;
+  --zx-topbar-pad: 10px;
+  --zx-topbar-content-h: 32px;
+  --zx-topbar-h: calc(
+    max(var(--zx-topbar-pad), env(safe-area-inset-top)) + var(--zx-topbar-content-h) +
+      var(--zx-topbar-pad)
+  );
 }
 
 * {
@@ -100,13 +153,39 @@ html {
 
 body {
   /* The layout is a fixed-width phone column (see .zx-page), and the area
-     around it uses the SAME surface as the column itself — the page has exactly
-     one background color. The column is marked out by a hairline border, not by
-     a darker backdrop. */
+     around it uses the SAME premium black as the column itself, so the film is
+     the only bright thing on screen. The column is marked out by a hairline
+     border, not by a darker backdrop.
+
+     `position: relative` is here solely to anchor the top band below. */
+  position: relative;
   background: var(--md-sys-color-surface);
   color: var(--md-sys-color-on-background);
   font-family: var(--md-ref-typeface-plain);
   -webkit-font-smoothing: antialiased;
+}
+
+/* The top bar's LEFT/RIGHT EXTENSION: the light band either side of the phone
+   column, which together with `.zx-topbar` itself makes one uninterrupted header
+   across the viewport while everything below stays black.
+
+   It has to be painted from `body` rather than by the bar. The obvious approach —
+   a `100vw` pseudo-element on `.zx-topbar` — cannot work here, because the bar is
+   nested inside `.zx-hero` (`overflow: hidden`) inside `.zx-page`
+   (`overflow-x: clip`); either one crops the bleed back to the 420px column.
+   `body` is the nearest ancestor outside both clips.
+
+   `z-index: 0` against `.zx-page`'s `z-index: 1` is what keeps this strictly
+   BEHIND the column: an absolutely positioned box would otherwise paint over the
+   in-flow column and cover the real bar's contents. */
+body::before {
+  content: '';
+  position: absolute;
+  z-index: 0;
+  inset-block-start: 0;
+  inset-inline: 0;
+  height: var(--zx-topbar-h);
+  background: var(--zx-topbar-surface);
 }
 
 /* Material Symbols icon font for <md-icon> */

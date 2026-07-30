@@ -8,9 +8,11 @@
  *
  * ONE BACKGROUND. Every section — info, Top 10, About Zenorix, FAQ,
  * final CTA, footer — paints nothing and inherits `--md-sys-color-surface` from
- * .zx-page, and the area around the column (body) uses that same color. There
- * are exactly two exceptions, both deliberate: the top bar, which is a light
- * island (see .zx-topbar), and the video frame itself. No section tints, no
+ * .zx-page, and the area around the column (body) uses that same premium black.
+ * There are exactly two exceptions, both deliberate: the video frame itself, and
+ * the top bar, which is a light island (see .zx-topbar) whose band runs the full
+ * viewport width — so the only horizontal seam on the page is the header's lower
+ * edge, and everything below it is uninterrupted black. No section tints, no
  * background gradients, no backdrop images behind copy. Sections are separated
  * by spacing and hairlines only.
  *
@@ -97,6 +99,11 @@
   flex-direction: column;
   /* The Top 10 rail scrolls inside itself and must never widen the document. */
   overflow-x: clip;
+  /* Lifts the column above the header band painted by `body::before`, which is
+     absolutely positioned and would otherwise paint over this in-flow element and
+     hide the real top bar's contents. See that rule in globals.css. */
+  position: relative;
+  z-index: 1;
   /* Frames the phone column against the page backdrop on wide screens. */
   border-inline: 1px solid var(--md-sys-color-outline-variant);
   background: var(--md-sys-color-surface);
@@ -172,20 +179,28 @@
    was true only while a light scheme still existed there; globals.css is now
    dark-only, so following that instruction would repaint this bar dark and make its
    own contents invisible. This is the app's only light surface — if the brand's
-   light palette ever changes, edit it here. */
+   light palette ever changes, edit it here.
+
+   The palette is the page's own, inverted rather than swapped: the light end of the
+   METALLIC SILVER ramp for the surface, and the SOFT TECH BLUE darkened to #1d5b92
+   for `primary`. Blue does the accent's job here specifically because silver cannot:
+   on a near-white bar the brand silver has almost no contrast, so the install button
+   would dissolve into its own background. Darkening the accent instead of inventing a
+   third hue keeps the header recognisably part of the same three-color system, and
+   white-on-#1d5b92 clears AA at the button's 13px label. */
 .zx-topbar {
   color-scheme: light;
 
-  --md-sys-color-primary: #8a5100;
+  --md-sys-color-primary: #1d5b92;
   --md-sys-color-on-primary: #ffffff;
-  --md-sys-color-surface: #fff8f3;
-  --md-sys-color-on-surface: #201b13;
-  --md-sys-color-on-surface-variant: #4f4539;
-  --md-sys-color-outline: #817567;
-  --md-sys-color-outline-variant: #d3c4b4;
-  --md-sys-color-surface-container: #fcebdd;
-  --md-sys-color-surface-container-high: #f6e6d7;
-  --md-sys-color-surface-container-highest: #f0e0d1;
+  --md-sys-color-surface: var(--zx-topbar-surface);
+  --md-sys-color-on-surface: #161920;
+  --md-sys-color-on-surface-variant: #4b525c;
+  --md-sys-color-outline: #79818c;
+  --md-sys-color-outline-variant: #cbd1da;
+  --md-sys-color-surface-container: #e7ebf0;
+  --md-sys-color-surface-container-high: #dee3ea;
+  --md-sys-color-surface-container-highest: #d5dbe3;
 
   position: relative;
   z-index: 4;
@@ -193,8 +208,12 @@
   align-items: center;
   justify-content: space-between;
   gap: var(--zx-space-3);
-  padding: 10px var(--zx-gutter);
-  padding-block-start: max(10px, env(safe-area-inset-top));
+  /* Padding and height both come from the shared top-bar tokens, because the
+     full-width extension behind this bar (`body::before`) is sized from the same
+     ones — a local literal here would make the band and the bar disagree. */
+  padding: var(--zx-topbar-pad) var(--zx-gutter);
+  padding-block-start: max(var(--zx-topbar-pad), env(safe-area-inset-top));
+  min-height: var(--zx-topbar-h);
   background: var(--md-sys-color-surface);
   color: var(--md-sys-color-on-surface);
 }
@@ -281,7 +300,9 @@
 .zx-hero {
   position: relative;
   isolation: isolate;
-  background: #060504;
+  /* The letterbox behind the 16/9 frame. Uses the media black token rather than a
+     literal so it stays identical to the scrims painted over the video above it. */
+  background: var(--zx-media-scrim-strong);
   overflow: hidden;
 }
 
@@ -326,8 +347,8 @@
   pointer-events: none;
   background: linear-gradient(
     to top,
-    rgba(6, 5, 4, 0.72) 0%,
-    rgba(6, 5, 4, 0.32) 22%,
+    rgb(var(--zx-media-black-rgb) / 0.72) 0%,
+    rgb(var(--zx-media-black-rgb) / 0.32) 22%,
     var(--zx-media-scrim) 45%
   );
 }
@@ -436,7 +457,7 @@
   font-size: 20px;
   width: 20px;
   height: 20px;
-  filter: drop-shadow(0 1px 3px rgba(6, 5, 4, 0.85));
+  filter: drop-shadow(0 1px 3px rgb(var(--zx-media-black-rgb) / 0.85));
 }
 
 .zx-mute:hover {
@@ -458,7 +479,7 @@
   font-weight: var(--zx-weight-semibold);
   font-variant-numeric: tabular-nums;
   color: var(--zx-on-media);
-  text-shadow: 0 1px 3px rgba(6, 5, 4, 0.85);
+  text-shadow: 0 1px 3px rgb(var(--zx-media-black-rgb) / 0.85);
 }
 
 .zx-player-time-total {
@@ -488,9 +509,14 @@
 .zx-scrub-input::-webkit-slider-runnable-track {
   height: 3px;
   border-radius: 999px;
+  /* The one place the SOFT TECH BLUE accent is spent, and the reason it exists as a
+     separate hue: this is the only element on the page showing live machine state,
+     so it is the only one that benefits from a color no static copy uses. Silver
+     here would have been indistinguishable from the white-alpha remainder track
+     beside it — the accent is doing real work, not decorating. */
   background: linear-gradient(
     to right,
-    var(--md-sys-color-primary) var(--zx-progress, 0%),
+    var(--md-sys-color-tertiary) var(--zx-progress, 0%),
     rgba(255, 255, 255, 0.28) var(--zx-progress, 0%)
   );
 }
@@ -498,9 +524,14 @@
 .zx-scrub-input::-moz-range-track {
   height: 3px;
   border-radius: 999px;
+  /* The one place the SOFT TECH BLUE accent is spent, and the reason it exists as a
+     separate hue: this is the only element on the page showing live machine state,
+     so it is the only one that benefits from a color no static copy uses. Silver
+     here would have been indistinguishable from the white-alpha remainder track
+     beside it — the accent is doing real work, not decorating. */
   background: linear-gradient(
     to right,
-    var(--md-sys-color-primary) var(--zx-progress, 0%),
+    var(--md-sys-color-tertiary) var(--zx-progress, 0%),
     rgba(255, 255, 255, 0.28) var(--zx-progress, 0%)
   );
 }
@@ -513,7 +544,8 @@
   margin-block-start: -3px;
   border: 0;
   border-radius: 50%;
-  background: var(--md-sys-color-primary);
+  /* Matches the played portion of the track it sits at the end of. */
+  background: var(--md-sys-color-tertiary);
 }
 
 .zx-scrub-input::-moz-range-thumb {
@@ -521,7 +553,7 @@
   height: 9px;
   border: 0;
   border-radius: 50%;
-  background: var(--md-sys-color-primary);
+  background: var(--md-sys-color-tertiary);
 }
 
 .zx-scrub-input:focus-visible {
@@ -582,7 +614,7 @@
   width: 78px;
   height: 78px;
   border-radius: 50%;
-  background: rgba(6, 5, 4, 0.5);
+  background: rgb(var(--zx-media-black-rgb) / 0.5);
   color: var(--zx-on-media);
 }
 
@@ -891,7 +923,7 @@
   overflow: hidden;
   box-shadow:
     0 0 0 1px rgba(255, 255, 255, 0.35),
-    0 1px 4px rgba(6, 5, 4, 0.4);
+    0 1px 4px rgb(var(--zx-media-black-rgb) / 0.4);
 }
 
 .zx-chart-badge img {
@@ -912,7 +944,7 @@
   min-width: 22px;
   padding: 1px 6px;
   border-radius: 6px;
-  background: rgba(6, 5, 4, 0.82);
+  background: rgb(var(--zx-media-black-rgb) / 0.82);
   color: var(--zx-on-media);
   font-size: var(--zx-text-lg);
   font-weight: var(--zx-weight-bold);
