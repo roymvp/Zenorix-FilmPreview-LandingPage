@@ -1243,24 +1243,25 @@
 
 /* --- price anchor -----------------------------------------------------------
    A two-row bar chart: one key line, then a bar per plan with that plan's monthly cost
-   in a column beside it. Every element claims full width itself, because the card sets
+   inside it. Every element claims full width itself, because the card sets
    `align-items: flex-start` and would otherwise shrink-wrap each one — see the note on
    `.zx-compare-key`, where exactly that silently broke the unit's alignment.
 
    The two figures are identically sized, weighted and coloured: they are the same kind of
    fact, so ranking one visually would undercut the comparison the card exists to make.
-   The unit is stated once on the key line rather than on each figure, which is what
-   allowed the bars to stop being sized around their own labels.
+   The unit is stated once on the key line rather than on each figure, which is what let
+   the bars stop being sized around four extra characters apiece.
 
    Two failures worth not repeating:
    - The grid must live on the element the markup actually uses. It was once split onto a
      `.zx-compare-rows` wrapper; when the wrapper was deleted the class went with it while
      the rules stayed behind, so the chart silently fell back to `display: block` and the
      bars stacked as plain blocks with every grid rule dead.
-   - The value column must not be capped. A 6.5rem cap meant to hand more width to the
-     track backfired: the long Thai and Portuguese prices wrapped to two lines inside it
-     and made the card TALLER than the problem the cap was meant to solve. It is
-     `max-content` for that reason. */
+   - Do not give the prices their own column to buy a shorter bar. Tried twice: capping that
+     column at 6.5rem made the long Thai and Portuguese prices wrap to two lines and left
+     the card TALLER than before, and letting it size to content detached each number from
+     the bar tip it belongs to. The price belongs inside its bar; the bar's minimum length
+     is the price it holds. */
 /* The merged key line: `▪ Zenorix  vs  ▪▪▪ Disney + HBO + Netflix        per month`.
    
    It replaces two separate label rows, so it does four jobs at once — names both
@@ -1310,12 +1311,12 @@
 
 /* Miniature bars — same fill, same radius and the same flat proportion as the real ones,
    so the key is recognisably the same object as the chart rather than a generic dot. 5px
-   tall against the bars' 20px keeps them clearly subordinate.
+   tall against the bars' 34px keeps them clearly subordinate.
 
-   Both are now the SAME WIDTH, and the color does the keying. The previous pair was 8px
-   vs 20px, mirroring short bar vs long bar, which was the only mechanism available while
-   the two bars shared one hue. Equal widths are what make the color the signal: if the
-   chips differed in both width and color, width would still be the first thing compared.
+   Both are the SAME WIDTH, and the FILL does the keying. The previous pair was 8px vs
+   20px, mirroring short bar vs long bar, which was the only mechanism available while both
+   bars shared one fill. Equal widths are what make the color the signal: if the chips
+   differed in both width and color, width would still be compared first.
    `flex-shrink: 0` stops them collapsing if the line ever has to compress. */
 .zx-compare-key-swatch {
   flex-shrink: 0;
@@ -1324,16 +1325,13 @@
   border-radius: 2px;
 }
 
-/* Ours: the accent blue, the page's one chromatic color. As the only chroma in the
-   section it reads unmistakably as "this row is us" — a job neither weight nor brightness
-   did as well, since the whole section is otherwise silver-on-black. */
+/* Each swatch MUST stay identical to the fill of the bar it keys — a swatch that does not
+   match its bar keys nothing, so each of these pairs with its `.zx-compare-bar--*` rule and
+   the two move together or not at all. */
 .zx-compare-key-swatch--ours {
-  background: var(--md-sys-color-tertiary);
+  background: var(--md-sys-color-secondary);
 }
 
-/* Theirs: the dim neutral. MUST stay identical to `.zx-compare-bar--rival`'s fill — a key
-   whose swatch does not match its bar keys nothing, so these two declarations move
-   together or not at all. */
 .zx-compare-key-swatch--rival {
   background: var(--md-sys-color-outline);
 }
@@ -1347,150 +1345,131 @@
   color: var(--md-sys-color-outline);
 }
 
-/* TWO columns: the measured track, then a value column for the prices.
-   `1fr max-content` is what makes the short bar possible. The prices moved out of the
-   bars, and they had to land in a column that is sized ONCE for both rows — a
-   `max-content` grid column resolves to the wider of the two figures and both rows then
-   share it. If instead each row sized its own value column, the two tracks would differ
-   in width by the difference between "$1.25" and "~ $40", and the ratio between the bars
-   would silently be measured against two different 100%s.
+/* ONE column, two rows — one bar per row, each holding its own price. There is no separate
+   value column: the prices live inside the bars, so the only track this grid needs is the
+   full width the bars are measured against.
 
    The `dt`s are `.zx-visually-hidden`, which is `position: absolute` — so they are out of
    flow and never consume a grid cell. That is why auto-placement here sees exactly two
    rows and needs no explicit row pinning.
 
-   8px row-gap: close enough to read as one chart, far enough that the two lengths stay
-   distinct. 10px column-gap separates each bar's tip from its own figure. */
+   8px gap: close enough to read as one chart, far enough that the two lengths stay
+   distinct. */
 .zx-compare {
   width: 100%;
   margin: 0;
   display: grid;
-  grid-template-columns: 1fr max-content;
-  gap: var(--zx-space-2) var(--zx-space-25);
+  gap: var(--zx-space-2);
 }
 
-/* Each row spans both of the parent's columns and adopts them via `subgrid`, so the bar
-   and the price sit in the SAME two tracks for both rows. This is what keeps the row a
-   real `dd` box — the alternative, `display: contents`, would also share the columns but
-   is known to drop `dt`/`dd` semantics in some assistive tech, which would cost the
-   term/definition pairing this markup exists for.
+/* Each bar is a flex container because it holds its own price, and the `dd` for the plan
+   named above it.
 
-   If `subgrid` is ever unavailable, the declaration is dropped and the row degrades to a
-   single-column grid: bar above its price, chart still readable, ratio unaffected. */
-.zx-compare-row {
-  grid-column: 1 / -1;
-  margin: 0;
-  display: grid;
-  grid-template-columns: subgrid;
-  align-items: center;
-}
-
-/* Bars are now empty boxes — pure geometry, with their prices in the column beside them.
-   The flex centring and horizontal padding they carried as text containers are therefore
-   gone; padding in particular had to go, because it was charged at both ends and set the
-   floor on how short the bar could be.
-
-   They differ in LENGTH and in HUE. Length carries the quantity; hue carries only series
-   identity, keyed by the swatches above. An earlier version held hue constant precisely
-   so length would be the sole variable — the cost of that was a key which could only
-   distinguish the two by chip length, a weaker signal, and one that breaks down entirely
-   at an 8% bar. Two encodings for identity plus one for quantity is the standard
-   two-series convention and is legible; the risk to avoid is letting hue imply a
-   magnitude, which is why the swatch colors are the same size and carry no length.
-
-   34px -> 12px, and the second half of that reduction is load-bearing rather than
-   cosmetic. With no text inside, height is free to express what the bar IS — a measurement
-   rule — but height also decides whether the SHORT bar still reads as a bar at all: at
-   20px tall, our 22px-wide bar was very nearly a square, which is exactly the "reads as a
-   dot" failure that sets the floor on `ourShare`. Flattening to 12px makes it ~2:1 and
-   unmistakably a bar, which is what lets the length stay honest at 8% instead of being
-   inflated until it looks right. The flatter pair also reads more as a chart and less as
-   two buttons.
+   The two bars differ in LENGTH and in FILL. Length carries the quantity; fill carries only
+   series identity, keyed by the swatches on the line above. An earlier version held the
+   fill identical so that length would be the sole variable — the cost was a key that could
+   only tell the two apart by chip length, which is a far weaker signal than color at
+   caption size. Two encodings for identity plus one for quantity is the standard
+   two-series convention; the risk to avoid is letting the fill imply a magnitude, which is
+   why the swatches are equal in size and carry no length of their own.
 
    No background track behind either bar: an unfilled track behind a short bar reads as a
    STACKED bar, as if the remainder were another segment of the same total, which is the
    opposite of "ours is a fraction of theirs". With no track, length alone carries the
    quantity. */
 .zx-compare-bar {
+  /* REQUIRED, not tidiness. A `dd` carries a UA default `margin-inline-start: 40px`, and
+     the BAR is the `dd` — without this reset both bars are pushed 40px right of the names
+     labelling them and lose 40px of measurable length. The ratio still looks correct
+     because both are displaced equally, which is exactly why a ratio check alone cannot
+     catch it. */
+  margin: 0;
+  display: flex;
+  align-items: center;
+  /* LEFT-aligned figures, so both prices start at the same x and their digits sit in one
+     column — "$1.25" against "~ $40" reads as a column of numbers. Right-aligning pinned
+     each price to the tip of its own bar, tying the number's position to the bar's length,
+     and at 24% it also sat hard against the bar's rounded end. */
+  justify-content: flex-start;
   /* Both bars, explicitly. A fixed height guarantees the pair stays geometrically
      identical in every dimension except the one being compared. */
-  height: 12px;
-  /* 3px, well under the 12px `radius-sm`. The radius has to stay small relative to BOTH
-     of the bar's dimensions, or its rounded ends eat into the length being compared —
-     which matters far more now that our bar is only ~22px wide. Scaled down with the
-     height so the two bars keep the same corner character. */
-  border-radius: 3px;
+  height: 34px;
+  /* 8px. Charged TWICE on our bar — once at each end — and it comes straight out of the
+     width available to the price, so it is part of what sets the bar's minimum length. */
+  padding-inline: var(--zx-space-2);
+  /* 4px, well under the 12px `radius-sm`. The radius has to stay small relative to the
+     bar's own height, or the bar turns into a lozenge whose rounded ends eat into the
+     length being compared. */
+  border-radius: 4px;
 }
 
-/* Ours: the accent blue — the one chromatic element in an otherwise silver-on-black
-   section, which is what makes "this is us" instant. It is also the BRIGHTER of the two
-   fills (1.71:1 — see the rival's note for why it is not more), so hue and brightness
-   point the same way rather than fighting each other. */
+/* Ours: `secondary` — the bright silver, restored after a pass in the accent blue. It is
+   the BRIGHTER of the two fills (1.81:1 apart), so emphasis and identity point the same
+   way, and it keeps the chart in the same silver-on-black palette as the other three About
+   cards instead of introducing the section's only chromatic element. */
 .zx-compare-bar--ours {
-  /* A plain percentage of the track, with `border-box` so the share describes the
-     bar's whole painted width. That box model is the fix for a real miscount: with
-     the default `content-box`, the horizontal padding was added AFTER the percentage
-     resolved, so a nominal 30% painted as 51% — and a `clamp` ceiling of 45% painted
-     as 78%. The bar has no padding now, so the two models agree, but it is kept because
-     the share must never depend on padding again.
+  /* A plain percentage of the track, with `border-box` so the share describes the bar's
+     whole PAINTED width. That box model is the fix for a real miscount: under the default
+     `content-box` the horizontal padding is added AFTER the percentage resolves, so a
+     nominal 30% painted as 51% — and a `clamp` ceiling of 45% painted as 78%. The bar has
+     padding again, so this is load-bearing, not precautionary.
 
-     No `min-width: max-content` guard here. It was protecting the text that used to sit
-     inside from being clipped, but it outranks any ceiling and in Thai at 390px inflated
-     the bar to more than half the rival's — overturning the very comparison the chart
-     exists to make. Nothing needs guarding now that the bar is empty, and the floor lives
-     in the component (see `ourShare`) applied to the RATIO itself. */
+     No `min-width: max-content` guard. It was meant to stop the text inside from being
+     clipped, but it outranks any ceiling and in Thai at 390px inflated the bar past half
+     the rival's — overturning the very comparison the chart exists to make. The floor
+     lives in the component (see `ourShare`) where it applies to the RATIO and so cannot
+     silently exceed 100%; fitting the text is handled by type size and padding, which
+     cannot distort the quantity. */
   box-sizing: border-box;
-  width: var(--zx-bar-share, 8%);
-  background: var(--md-sys-color-tertiary);
+  width: var(--zx-bar-share, 24%);
+  background: var(--md-sys-color-secondary);
 }
 
 /* Theirs: full width by definition — it is the 100% the bar above is measured against.
    Same `border-box` as its partner so both are measured on one basis.
 
-   `outline`, and this fill is a measured compromise between two failure modes that pull
-   in opposite directions on a dark card:
-     - Too BRIGHT and it stops differing from ours. The original `secondary` silver
-       (#d3dae4) sat at 1.06:1 against the accent — two hues at near-identical brightness,
-       a hue-only key, which fails outright for color-deficient readers.
+   `outline` (#9aa3af) — deliberately paler and duller than our silver, so the comparison
+   target recedes while ours stays the bright one. It is a measured compromise between two
+   failure modes that pull in opposite directions on this dark card:
+     - Too BRIGHT and it stops differing from ours. `secondary` on both bars left them
+       identical, which is what made a color key impossible in the first place.
      - Too DARK and it stops being visible at all. `surface-container-highest` (#262b32)
-       separated from ours at 9.55:1 but fell to 1.47:1 against the card, and on screen the
-       rival bar and its key swatch nearly vanished — fatal for the bar that defines 100%.
-   #9aa3af is the step that clears both: 8.23:1 against the card so it is unmistakably
-   present, 1.71:1 against ours so brightness still reinforces hue. Dimmer than the accent
-   either way, which is the correct emphasis — ours is the one being sold. */
+       separated from ours at 10:1 but fell to 1.14:1 against the card, and on screen the
+       rival bar and its key swatch nearly vanished — fatal for the bar that DEFINES 100%.
+   #9aa3af clears both: 6.34:1 against the card so it is unmistakably present, 1.81:1
+   against ours so the two are still told apart at a glance. It also has to stay light
+   enough to carry the dark price sitting inside it, which it does at 6.35:1 (AA). */
 .zx-compare-bar--rival {
   box-sizing: border-box;
   width: 100%;
   background: var(--md-sys-color-outline);
 }
 
-/* The figure now sits in its own grid column, to the RIGHT of the bar it labels, so it is
-   light-on-black again rather than dark ink on a silver fill. Both figures share the
-   column, so they also share a left reading edge and their digits line up — which is what
-   makes "$1.25" against "~ $40" read as a column of numbers rather than two figures at
-   different depths.
+/* The figure sits INSIDE its bar, so it is dark ink on a light fill rather than
+   light-on-black, and it occupies no column of its own.
 
-   Back up to 16px (`--zx-text-lg`) after stepping 20px -> 15px -> 14px. Every one of
-   those reductions was forced by the figure living inside the bar, where its width set
-   the floor on how short the bar could be. Outside the bar that pressure is gone, and the
-   only remaining cost of larger type is the width of the value column, so the price can
-   be a headline number again.
+   14px (`--zx-text-body`), stepped down from 20px -> 15px. Both reductions are driven by
+   the same constraint: the figure lives inside a bar whose LENGTH is the chart's message,
+   so type size directly sets how short that bar is allowed to be. Together with hoisting
+   the unit onto the key line, this is what makes the 24% bar possible. Still bold and
+   still the largest text in the chart, so it reads as the headline number regardless.
 
-   Tabular figures keep both prices on a shared digit grid — genuinely load-bearing now
-   that the two sit in one left-aligned column. */
+   Tabular figures keep both prices on a shared digit grid, which pairs with the bars'
+   `flex-start` to give the two numbers one reading edge. */
 .zx-compare-amount {
-  font-size: var(--zx-text-lg);
+  font-size: var(--zx-text-body);
   font-weight: var(--zx-weight-bold);
   line-height: 1;
   letter-spacing: -0.02em;
   font-variant-numeric: tabular-nums;
   /* One line always. These are short figures meant to be compared at a glance, and a
-     wrapped price would desynchronise the two rows' heights. */
+     wrapped price would break the bar's fixed 34px height. */
   white-space: nowrap;
-  /* Full-strength white, shared by both figures. The bars now differ in hue, so tinting
-     the numbers to match would encode identity a third time and start to suggest that one
-     price is less real than the other. */
-  color: var(--md-sys-color-on-surface);
+  /* One dark ink for BOTH figures, on purpose. The bars now differ in fill, but the prices
+     are the same kind of fact, so tinting each to match its bar would encode identity a
+     third time and start to suggest one price is less real than the other. It reads on
+     either fill: 11.5:1 on our silver, 6.35:1 on the dimmer rival (both AA). */
+  color: var(--md-sys-color-on-secondary);
 }
 
 /* The `vs` between the two names on the key line — the thing that tells a skimming
