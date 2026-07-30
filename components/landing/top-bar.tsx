@@ -23,11 +23,9 @@ export function TopBar({
 }) {
   return (
     <header className="zx-topbar">
-      {/* TO REPLACE WITH THE REAL LOGO: swap the <span> below for an <img>
-          (or inline SVG) and keep the `zx-brand-mark` class — it already owns
-          the 30x30 box and the rounded corners, so no CSS change is needed:
-
-            <img className="zx-brand-mark" src="/brands/zenorix.svg" alt="" /> */}
+      {/* Logo handoff: replace the placeholder span below with an img or inline SVG
+          carrying the same `zx-brand-mark` class, which already owns the 30x30 box
+          and its radius — no CSS change needed. */}
       <a className="zx-brand" href={homeHref} aria-label={homeLabel}>
         <span className="zx-brand-mark" data-placeholder="logo" aria-hidden="true">
           <md-icon>image</md-icon>

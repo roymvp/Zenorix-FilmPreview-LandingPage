@@ -250,8 +250,21 @@ export function ConversionDialogs({
           <span className="zx-dialog-art">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             {/* Decorative: the heading below already carries the whole message,
-                so alt text here would add nothing for screen readers. */}
-            <img src={previewFrame} alt="" />
+                so alt text here would add nothing for screen readers.
+
+                Lazy + async: this dialog is closed on load, so the frame is
+                off-screen and must never compete with the hero LCP image for
+                early bandwidth. Intrinsic dimensions are declared so the sheet
+                reserves the right box the first time it opens instead of
+                reflowing its own headline. */}
+            <img
+              src={previewFrame}
+              alt=""
+              width={1600}
+              height={900}
+              loading="lazy"
+              decoding="async"
+            />
           </span>
           {/* One heading, two lines, one <strong> per line so both inherit the
               exact same typescale — see the note on `headingLines`. */}

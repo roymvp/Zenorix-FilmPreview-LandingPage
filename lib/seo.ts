@@ -119,23 +119,74 @@ export function buildStructuredData({
         '@type': 'SoftwareApplication',
         name: SITE.name,
         applicationCategory: 'MultimediaApplication',
-        operatingSystem: `Android ${SITE.minAndroid}+`,
+        /* Bare "Android" — this is the value crawlers match against, so the
+           minimum version moves to `softwareRequirements` rather than being
+           baked into the string as "Android 8.0+", which matches nothing. */
+        operatingSystem: 'Android',
+        softwareRequirements: `Android ${SITE.minAndroid} or later`,
+        /* The APK's real MIME type. schema.org defines `fileFormat` as a MIME
+           type, so this is the machine-readable form of "it's an APK" — the
+           bare string "APK" is not a registered format and parses as free text. */
+        fileFormat: 'application/vnd.android.package-archive',
         softwareVersion: SITE.apkVersion,
         fileSize: SITE.apkSize,
         installUrl: `${SITE.url}${SITE.apkUrl}`,
-        offers: [
-          {
-            '@type': 'Offer',
-            price: '0',
-            priceCurrency: dict.market.currency,
-            description: dict.faq.items[0].q,
-          },
-          {
-            '@type': 'Offer',
-            price: String(dict.market.annualPerMonthValue),
-            priceCurrency: dict.market.currency,
-          },
-        ],
+        /* AggregateOffer rather than a bare Offer list: this app has THREE price
+           points per market (free trial, monthly, annual) and an aggregate is the
+           only shape that states the range explicitly. `lowPrice: 0` is what lets
+           an AI answer engine say "there is a free tier" without inferring it, and
+           every figure carries the market's own currency so the US, BR and TH
+           graphs never report each other's numbers.
+           All values come from `dict.market.*Value` — the same numbers the visible
+           pricing UI renders — so the schema cannot drift from the page copy. */
+        offers: {
+          '@type': 'AggregateOffer',
+          priceCurrency: dict.market.currency,
+          lowPrice: '0',
+          highPrice: String(dict.market.annualTotalValue),
+          offerCount: 3,
+          offers: [
+            {
+              '@type': 'Offer',
+              /* `trial.value` is the literal offer ("30 DAYS FREE"); `trial.label`
+                 beside it is a marketing eyebrow ("Easy Try") and would be wrong
+                 here. The paid tiers below carry no `name` for the same reason —
+                 their only labels in the dictionary are marketing copy, and a
+                 billing period states what they are more precisely anyway. */
+              name: dict.about.trial.value,
+              price: '0',
+              priceCurrency: dict.market.currency,
+              description: dict.faq.items[0].q,
+            },
+            {
+              '@type': 'Offer',
+              price: String(dict.market.monthlyValue),
+              priceCurrency: dict.market.currency,
+              /* Explicit unit so "2" is never read as a one-off charge. */
+              priceSpecification: {
+                '@type': 'UnitPriceSpecification',
+                price: String(dict.market.monthlyValue),
+                priceCurrency: dict.market.currency,
+                billingDuration: 1,
+                billingIncrement: 1,
+                unitCode: 'MON',
+              },
+            },
+            {
+              '@type': 'Offer',
+              price: String(dict.market.annualTotalValue),
+              priceCurrency: dict.market.currency,
+              priceSpecification: {
+                '@type': 'UnitPriceSpecification',
+                price: String(dict.market.annualTotalValue),
+                priceCurrency: dict.market.currency,
+                billingDuration: 12,
+                billingIncrement: 1,
+                unitCode: 'MON',
+              },
+            },
+          ],
+        },
       },
       {
         '@type': 'FAQPage',

@@ -11,7 +11,7 @@ import { TopChart } from '@/components/landing/top-chart'
 import { SITE } from '@/lib/config/site'
 import { getChart, type Movie } from '@/lib/content/movies'
 import { fill, type Dictionary } from '@/lib/i18n/dictionaries'
-import type { Locale } from '@/lib/i18n/config'
+import { locales, type Locale } from '@/lib/i18n/config'
 import { buildStructuredData, marketValues } from '@/lib/seo'
 
 /**
@@ -63,6 +63,37 @@ export function FilmLanding({
         type="application/ld+json"
         // Emitted server-side; the object is built from typed content, not input.
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
+
+      {/* Prerenders the OTHER two markets of this same page. The language switcher
+          is the only in-page navigation that leaves the document, and switching
+          market is a deliberate act — so by the time a pointer reaches the control,
+          the destination can already be fully rendered.
+
+          `eagerness: "moderate"` is the hover/pointerdown trigger rather than
+          `"eager"`: prerendering all locales on load would run two extra full page
+          renders for every visitor, when most never switch. It is scoped to an
+          explicit `urls` list, NOT a `where` selector, so it can never speculate
+          the APK download link or an external href.
+
+          Emitted as a plain script tag because speculation rules must be in the raw
+          HTML payload to be parsed — a browser that does not support them ignores
+          the type and the switcher just navigates normally. */}
+      <script
+        type="speculationrules"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            prerender: [
+              {
+                source: 'list',
+                urls: locales
+                  .filter((other) => other !== locale)
+                  .map((other) => path(other)),
+                eagerness: 'moderate',
+              },
+            ],
+          }),
+        }}
       />
 
       <a className="zx-visually-hidden" href="#zx-details">

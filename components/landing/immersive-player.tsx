@@ -307,8 +307,32 @@ export function ImmersivePlayer({
 
   return (
     <div className="zx-stage" data-playing={started ? 'true' : 'false'}>
+      {/* This is the page's LCP element — the first full-width frame above the fold.
+          A plain <img> with a literal `src` is deliberate: it sits in the raw HTML
+          payload, so the browser's preload scanner can start the fetch before React
+          hydrates. `next/image` would add a srcset and a wrapper without changing
+          what is fetched here (the frame is a single fixed-size asset), and any
+          JS-driven `data-src` would hide it from the scanner entirely.
+
+          `fetchPriority="high"` moves it ahead of the video's `preload="metadata"`
+          request and the Material Symbols stylesheet, which otherwise compete for
+          the same early bandwidth.
+
+          `width`/`height` are the asset's intrinsic 16:9 dimensions. The CSS
+          absolutely positions this to fill `.zx-stage` so they set no layout size,
+          but they give the browser the aspect ratio before the bytes arrive — and
+          `.zx-stage` already reserves the box via `aspect-ratio`, so the pair means
+          this image contributes no layout shift. */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img className="zx-stage-poster" src={poster} alt={posterAlt} />
+      <img
+        className="zx-stage-poster"
+        src={poster}
+        alt={posterAlt}
+        width={1600}
+        height={900}
+        fetchPriority="high"
+        decoding="async"
+      />
 
       <video
         ref={videoRef}

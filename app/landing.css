@@ -148,6 +148,83 @@
   padding-block: var(--zx-section-y) 0;
 }
 
+/* Skips rendering work for the two HEAVY below-the-fold sections until they are
+   scrolled near. Applied only to these two, on measured evidence rather than to
+   every section: About is the tallest block on the page (~906px) and is the only one
+   running a 34s infinite marquee (`zx-logo-drift`) plus eleven logo images, and FAQ
+   is second (~676px) with a details element per question. The Top 10 strip is
+   deliberately EXCLUDED — it sits near the fold on a phone, so skipping it would
+   risk deferring work the user sees immediately.
+
+   `contain-intrinsic-size: auto <height>` matters more than the literal number: the
+   `auto` keyword tells the browser to remember each section's REAL size once it has
+   been rendered, so the placeholder estimate is used only for the very first
+   scrollbar calculation. The lengths are the measured desktop heights; being off on
+   a narrow viewport costs a scrollbar adjustment, not a layout shift of visible
+   content, because a skipped section is by definition outside the viewport.
+
+   This is also why the marquee is worth containing: off-screen, an infinite
+   animation otherwise keeps generating style and paint work for a strip nobody is
+   looking at. */
+.zx-section--about {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 906px;
+}
+
+/* The FAQ section carries no modifier class of its own, so it is addressed through
+   the heading it labels — a stable hook already required for the `aria-labelledby`
+   relationship, which avoids adding a class purely for styling. */
+.zx-section[aria-labelledby='zx-faq-heading'] {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 676px;
+}
+
+/* --- 48px minimum touch targets -------------------------------------------
+   Four controls are drawn smaller than the 48x48 minimum because the design needs
+   them visually compact: the language trigger (40x32), the player's mute toggle
+   (32x32), the synopsis expander (50x26) and the brand link (88x30, height only).
+
+   Rather than inflate them — which would break the topbar's proportions and push
+   chrome over the film — each gets a transparent, centred overlay that grows the
+   HIT AREA to 48x48 while leaving the painted size untouched. `position: absolute`
+   means the overlay never affects layout, so no spacing changes anywhere.
+
+   `max(100%, 48px)` per axis, so an element already larger on one axis keeps its
+   own size there and only the deficient axis grows — the brand link stays 88px wide
+   and gains height only, instead of being squeezed to a 48px square.
+
+   Not applied to the footer links: those are inline text inside a sentence-like row,
+   which WCAG exempts, and an expanded box on each would overlap its neighbours.
+   The scrub slider is also left alone — its target is the native range thumb, and
+   growing that is a visual change to the progress bar, not a hit-area tweak. */
+.zx-brand,
+.zx-lang-trigger,
+.zx-synopsis-toggle {
+  /* The overlay's containing block. `.zx-mute` is already `position: absolute`, so
+     it is deliberately absent here — restating it would risk overriding that. */
+  position: relative;
+}
+
+.zx-brand::after,
+.zx-lang-trigger::after,
+.zx-mute::after,
+.zx-synopsis-toggle::after {
+  content: '';
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline-start: 50%;
+  translate: -50% -50%;
+  width: max(100%, 48px);
+  height: max(100%, 48px);
+  /* Deliberately NO `z-index: -1`. Sending it behind would drop it beneath the
+     ancestor backgrounds the topbar and player paint (the button sets no stacking
+     context of its own), and an overlay covered by an opaque background stops being
+     hit-tested — silently undoing the whole point. Left in normal paint order it
+     covers its own control instead, which is harmless: a pseudo-element is part of
+     the element for event targeting, so the tap still lands on the button, and there
+     is no nested interactive child for it to intercept. */
+}
+
 /* One heading treatment for every section: no eyebrows, no sub-decks.
    Shares the h2 tier with both dialog titles — see `.zx-dialog-title`, which must
    stay in lockstep with this rule so a sheet never outranks a page section. */
@@ -338,6 +415,10 @@
   object-fit: cover;
 }
 
+/* Merged from a second, adjacent `.zx-stage-poster` block that declared only these
+   two lines — same selector, same specificity, no intervening rule, so it was pure
+   duplication. `width`/`height` above also override the intrinsic 1600x900 attributes
+   now set on the element, which exist for the aspect ratio hint, not for layout. */
 .zx-stage-poster {
   z-index: 0;
   transition: opacity 600ms ease;
