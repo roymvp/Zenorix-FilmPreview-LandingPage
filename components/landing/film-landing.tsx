@@ -130,6 +130,7 @@ export function FilmLanding({
               rivalLabel: dict.about.price.rivalLabel,
               rivalValue: dict.about.price.rivalValue,
               vs: dict.about.price.vs,
+              perMonth: dict.about.price.perMonth,
               // Bar widths come from the numeric market values, not from the
               // formatted strings, so currency symbols and separators (R$, บาท,
               // "~ ") never have to be parsed back out.

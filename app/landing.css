@@ -1268,34 +1268,91 @@
    `display: block`, every grid rule became dead CSS, and the bars stacked as plain
    blocks. Keeping the grid on the element the markup actually uses is what prevents
    that class of failure. */
-/* ONE full-width column, four rows: name, bar, name, bar.
+/* The merged key line: `▪ Zenorix  vs  ▪▪▪ Disney + HBO + Netflix        per month`.
    
-   This replaced a 2-column grid (price | bar) with every cell pinned to an explicit
-   row and column. That pinning existed to work around a conflict that no longer
-   exists: a `dl` requires `dt` before `dd`, but the price had to PAINT left of its
-   bar, so paint order had to be decoupled from DOM order. Now that the price sits
-   INSIDE the bar, DOM order and visual order finally agree — name then bar, twice —
-   so plain auto-placement expresses the layout correctly and the explicit
-   `grid-template-columns` / `grid-template-rows` / per-cell `grid-row` pins are all
-   deleted rather than carried forward as dead complexity.
+   It replaces two separate label rows, so it does four jobs at once — names both
+   series, marks them as a comparison, keys each to its bar by swatch length, and
+   declares the shared unit. That is a net saving of one text row AND it is what let the
+   unit come out of the figures, which is what shortened our bar.
 
-   Dropping the price column also hands the bars the card's FULL width, which is what
-   buys back the room the figures need now that they sit inside. */
+   `wrap` with a 6px row-gap: at 390px in Thai this line is close to the card's width,
+   and wrapping is the graceful failure — the unit drops to a second line still
+   right-aligned (its `auto` margin survives the wrap) rather than overflowing the
+   card. */
+.zx-compare-key {
+  /* REQUIRED for the unit's `auto` margin to mean anything. The card is a flex column
+     with `align-items: flex-start`, so this `<p>` shrink-wraps to its own content (292px
+     against the bar track's 328px) and the unit right-aligns to the END OF THE TEXT
+     rather than to the chart. That reads as "per month" being attached to the rival's
+     name — the exact ambiguity the auto margin exists to prevent. Matching the track
+     width puts the unit over the bars' right edge, where it reads as their shared axis
+     label. */
+  width: 100%;
+  margin: 0 0 var(--zx-space-25);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--zx-space-15) var(--zx-space-2);
+  font-size: var(--zx-text-caption);
+  line-height: 1.35;
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+/* Each swatch+name pair travels as one unit, so a wrap can never separate a chip from
+   the name it belongs to. */
+.zx-compare-key-item {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--zx-space-15);
+  white-space: nowrap;
+}
+
+/* Ours, distinguished by WEIGHT and brightness only — no hue. Colouring it would make
+   this the one accent-coloured string across all four About cards, which read as an
+   inconsistency rather than as emphasis when it was tried. */
+.zx-compare-key-item--ours {
+  font-weight: var(--zx-weight-semibold);
+  color: var(--md-sys-color-on-surface);
+}
+
+/* Miniature bars, same fill and proportionally the same shape as the real ones, so the
+   key is recognisably the same object as the chart rather than a generic dot. 5px tall
+   against the bars' 34px keeps them clearly subordinate.
+   `flex-shrink: 0` stops them collapsing if the line ever has to compress. */
+.zx-compare-key-swatch {
+  flex-shrink: 0;
+  height: 5px;
+  border-radius: 2px;
+  background: var(--md-sys-color-secondary);
+}
+
+/* The keying mechanism: 8px vs 20px, mirroring short bar vs long bar. Both are the same
+   colour because the bars are — with hue held constant so length is the only variable,
+   only length can key them. */
+.zx-compare-key-swatch--ours {
+  width: 8px;
+}
+
+.zx-compare-key-swatch--rival {
+  width: 20px;
+}
+
+/* The axis unit. `auto` margin pushes it to the line's far end, away from the two names
+   so it reads as applying to the whole chart rather than attaching to the nearer of the
+   two. `outline` is the quietest text token: it has to be available without competing
+   with either name. */
+.zx-compare-unit {
+  margin-inline-start: auto;
+  color: var(--md-sys-color-outline);
+}
+
+/* Two bars, nothing else — the labels moved to the key line above. 8px between them:
+   close enough to read as one chart, far enough that the two lengths stay distinct. */
 .zx-compare {
   width: 100%;
   margin: 0;
   display: grid;
-  /* Name sits tight to the bar it labels (4px); the 12px `row-gap` below then
-     separates one name+bar pair from the next. Without the asymmetry both gaps are
-     equal and the four rows read as four unrelated items instead of two pairs. */
-  gap: var(--zx-space-1);
-}
-
-/* The pair separation. Applied to the SECOND name so it only ever opens a gap
-   between groups, never above the first row — a `row-gap` alone cannot distinguish
-   the two, and margin on the bar would detach each bar from its own label. */
-.zx-compare-name + .zx-compare-bar + .zx-compare-name {
-  margin-block-start: var(--zx-space-2);
+  gap: var(--zx-space-2);
 }
 
 /* IDENTICAL in every respect except WIDTH — same fill, same height, same radius,
@@ -1336,10 +1393,9 @@
   /* Both bars, explicitly. `min-height` alone would let the two diverge if one ever
      wrapped; a fixed height guarantees the pair stays geometrically identical. */
   height: 34px;
-  /* 8px, down from 10px. Padding inside our bar is charged twice — once at each end —
-     and comes straight out of the width available to the price, which is what sets the
-     bar's minimum length. Trimming 2px a side is part of what let the floor drop from
-     38% to 33%. */
+  /* 8px. Padding inside our bar is charged twice — once at each end — and comes straight
+     out of the width available to the price, which is what sets the bar's minimum
+     length. */
   padding-inline: var(--zx-space-2);
   /* 4px, well under the 12px `radius-sm`. The radius has to stay small relative to
      the bar's own height or the bar turns into a lozenge whose rounded ends eat
@@ -1350,7 +1406,7 @@
   background: var(--md-sys-color-secondary);
 }
 
-/* Our bar's share of the rival's, set as a variable by the component (33% floor; see
+/* Our bar's share of the rival's, set as a variable by the component (24% floor; see
    `ourShare`). The share is the one number here that must not drift, so it is expressed
    as a plain percentage with nothing allowed to override it — two earlier attempts to
    also guarantee the text inside fits (`max(30%, max-content)`, then
@@ -1372,7 +1428,7 @@
      to make. The floor lives in the component (see `ourShare`) where it is applied to
      the RATIO itself and so cannot silently exceed 100%. */
   box-sizing: border-box;
-  width: var(--zx-bar-share, 33%);
+  width: var(--zx-bar-share, 24%);
 }
 
 /* Full width by definition — it is the 100% the bar above is measured against. Same
@@ -1384,52 +1440,16 @@
   width: 100%;
 }
 
-/* The name now sits ABOVE its bar rather than inside it, which resolves the problem
-   that shaped every earlier version of this rule: a label inside a one-third-width bar
-   had to compete with the bar's padding for room, and in Thai "Disney + HBO + Netflix"
-   ellipsized away. Out here it has the card's full width, so the `min-width: 0` /
-   `overflow` / `text-overflow` ellipsis machinery is no longer needed and is gone.
-
-   `nowrap` is kept deliberately. These are identities, not prose, and the pair's
-   4px/8px rhythm assumes a single-line name — a wrapped label would push its bar down
-   and make the two groups visibly uneven. At full card width nothing currently
-   approaches wrapping in any of the three locales. */
-.zx-compare-name {
-  margin: 0;
-  font-size: var(--zx-text-meta);
-  line-height: 1.35;
-  color: var(--md-sys-color-on-surface-variant);
-  white-space: nowrap;
-}
-
-/* Our row's name, distinguished by WEIGHT only — same size, same color as the rival's.
-   Weight is the last remaining signal that this row is ours: the bars are now
-   deliberately identical, and the figures inside them share one color, so if this were
-   also neutral the two rows would be indistinguishable apart from bar length.
-
-   Not colored. It was brand orange once, which made it the ONLY accent-colored text
-   across all four About cards and read as an inconsistency rather than as emphasis.
-
-   Semibold, was a one-off `650`. That value is not a real step in most variable UI
-   stacks, so it silently snapped to 600 or 700 depending on the font actually
-   loaded — an unpredictable weight for the card's most important label. */
-.zx-compare-name--ours {
-  font-weight: var(--zx-weight-semibold);
-  /* Full-strength body color against the rival's dimmer secondary grey, so the eye
-     lands on our row first without introducing another hue. */
-  color: var(--md-sys-color-on-surface);
-}
-
 /* The figure now sits INSIDE its bar, so it is dark-on-silver rather than
    light-on-black, and it no longer occupies a grid column of its own — the old
    `grid-column: 1` and the `dd` margin reset it needed are both gone with that column.
 
    14px (`--zx-text-body`), stepped down from 20px -> 15px -> here. Each step was driven
    by the same constraint: the figure lives inside a bar whose length is the chart's
-   message, so the type size directly sets how short that bar is allowed to be. At 15px
-   the widest localized price needed 34.4% of the track; at 14px it needs ~31%, which is
-   what makes the 33% bar possible. Still bold and still the largest text in the chart,
-   so it reads as the headline number despite the reduction.
+   message, so the type size directly sets how short that bar is allowed to be. Combined
+   with hoisting the unit onto the key line, this is what makes the 24% bar possible.
+   Still bold and still the largest text in the chart, so it reads as the headline
+   number despite the reduction.
 
    Tabular figures keep both prices on a shared digit grid — now genuinely useful, since
    the two figures are left-aligned and their digits sit in one column. */
@@ -1447,20 +1467,18 @@
   color: var(--md-sys-color-on-secondary);
 }
 
-/* The `vs` marker prefixed to the rival's name — the thing that tells a skimming reader
-   these two rows are a comparison rather than two separate offers.
+/* The `vs` between the two names on the key line — the thing that tells a skimming
+   reader these are a comparison rather than two separate offers.
 
-   Dimmer and lighter than the name it precedes: it is a connective, not a label, so it
-   has to be legible without pulling weight away from "Disney + HBO + Netflix". The 6px
-   gap is the page's existing "marker to its own text" step, tight enough that the two
-   read as one phrase.
+   Dimmer than both names it sits between: it is a connective, not a label, so it has to
+   be legible without pulling weight away from either brand. It inherits the key line's
+   own size and spacing, so the explicit `font-size` and `margin` it carried as a prefix
+   are gone.
 
-   `uppercase` is deliberately NOT used here. The page's own convention reserves caps for
-   eyebrow labels, and shouting a two-letter connective would give it more emphasis than
-   the brand names on either side of it. */
+   `uppercase` is deliberately NOT used. The page's convention reserves caps for eyebrow
+   labels, and shouting a two-letter connective would give it more emphasis than the
+   names on either side of it. */
 .zx-compare-vs {
-  margin-inline-end: var(--zx-space-15);
-  font-size: var(--zx-text-caption);
   font-weight: var(--zx-weight-semibold);
   color: var(--md-sys-color-outline);
 }

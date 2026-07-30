@@ -50,9 +50,10 @@
       "label": "Preço imbatível",
       "ourLabel": "Zenorix",
       "vs": "vs",
-      "value": "{annualPerMonth}/mês",
+      "value": "{annualPerMonth}",
       "rivalLabel": "Disney + HBO + Netflix",
-      "rivalValue": "~ R$ 150/mês",
+      "rivalValue": "~ R$ 150",
+      "perMonth": "por mês",
       "rivalAmount": 150
     },
     "viewing": {

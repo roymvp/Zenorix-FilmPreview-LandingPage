@@ -68,14 +68,20 @@ export function AboutZenorix({
   /** Card 2: the price, anchored against the stack of apps it replaces. */
   price: {
     label: string
-    /** Row 1: who we are, and our formatted monthly price. */
+    /** Row 1: who we are, and our monthly price — formatted WITHOUT a unit. */
     ourLabel: string
     value: string
-    /** Row 2: the rival stack, and its formatted combined monthly cost. */
+    /** Row 2: the rival stack, and its combined cost, also unit-less. */
     rivalLabel: string
     rivalValue: string
-    /** Comparison marker prefixed to the rival's name. Visual-only; see its note. */
+    /** Comparison marker between the two names on the key line. */
     vs: string
+    /**
+     * The unit both figures share ("per month"). Shown once on the key line instead
+     * of being repeated inside each bar, which is what lets our bar get shorter, and
+     * re-attached to each price for screen readers only.
+     */
+    perMonth: string
     /** Same two costs as plain numbers, used only to size the bars. */
     ourAmount: number
     rivalAmount: number
@@ -97,18 +103,18 @@ export function AboutZenorix({
   // what makes the figure fit inside the bar: at the real US ratio
   // (1.25 / 80 = 1.6%) the bar is a few pixels wide and could not hold any text.
   //
-  // 33%, down from 38%. This floor is TEXT-BOUND, not data-bound: with the price
-  // sitting inside the bar, the bar can never be narrower than that price plus its
-  // padding. Measured at the 390px breakpoint, the widest localized figure
-  // ("R$ 6,20/mês", 83px at 15px type) needed 34.4% of the track — which is what set
-  // 38%. Dropping the figure to 14px and the bar's padding to 8px cut that requirement
-  // to ~31%, and 33% is that measurement plus a safety margin for font-metric variance
-  // between locales.
+  // 24%, down from 33% -> 38%. This floor is TEXT-BOUND, not data-bound: the price sits
+  // inside the bar, so the bar can never be narrower than that price plus its padding.
   //
-  // So 33% is the shortest this bar can go while the price remains inside it. Going
-  // materially shorter is not a matter of tuning this number — it requires moving the
-  // figure back outside the bar, which is the trade to make if the bar's length matters
-  // more than the price being read at the point the length stops.
+  // The unit is what moved. Each figure used to carry its own ("R$ 6,20/mês"), and at
+  // the 390px breakpoint that needed 34.4% of the track. Hoisting the unit onto the key
+  // line leaves the bar holding only "R$ 6,20" — 55px, or ~22% including padding — so
+  // 24% is that measurement plus a margin for font-metric variance between locales.
+  //
+  // 24% is now the shortest this bar can go while the price remains inside it. Going
+  // materially shorter would mean moving the figure back outside the bar, which is the
+  // trade to make if bar length ever matters more than the price being read at the point
+  // the length stops.
   //
   // Worth staying clear-eyed about the distortion either way: this draws a ~1/64 price
   // as ~1/3 of the bar, so the bars read as "much cheaper" rather than as a measurable
@@ -116,7 +122,7 @@ export function AboutZenorix({
   // are stated in full and at the same size. It stays a floor rather than a multiplier,
   // so a market where the true ratio is larger is drawn at its own honest value
   // instead of being scaled up to meet it.
-  const ourShare = Math.max(33, (price.ourAmount / price.rivalAmount) * 100)
+  const ourShare = Math.max(24, (price.ourAmount / price.rivalAmount) * 100)
 
   return (
     // Tighter than the shared section rhythm: four cards plus a CTA is the
@@ -184,30 +190,57 @@ export function AboutZenorix({
           <li className="zx-about-card">
             <p className="zx-about-label">{price.label}</p>
             {/* A price alone is just a number; against the stack it replaces it
-                becomes a saving. Each row is now "name, then a bar with its own
-                price inside it", stacked so both bars share a start edge and the
-                length difference carries the gap pre-attentively.
+                becomes a saving.
 
-                The name is the `dt` and the bar is the `dd`: the term is the plan,
-                and its definition is what that plan costs — drawn as the bar, with
-                the figure sitting inside the bar it belongs to. Putting the price
-                INSIDE removes the separate price column entirely, so the full card
-                width now goes to the bars themselves and the two figures can no
-                longer drift away from the quantities they label.
+                ONE key line, then two bare bars. The two per-bar labels used to sit
+                above their own bars, which cost two lines of height and — more to the
+                point — never stated the relationship between them. Merged into a single
+                line they become a real legend: it names both series, marks them as a
+                comparison with "vs", keys each one to its bar by SWATCH LENGTH, and
+                declares the shared unit once at the end.
 
-                Keeping `dt`/`dd` as direct children of one `dl` is what lets a
-                single grid own both rows, so the two bars are measured against the
-                same track rather than each against its own container.
-
-                Each figure carries its own "/mo" rather than deferring to a caption
-                under the chart. The caption was accurate but cost 34px of card
-                height for one line of text, which made this card visibly taller
-                than its three neighbours — and the unit is only four characters, so
-                repeating it is cheaper than explaining it. */}
-            <dl className="zx-compare">
-              <dt className="zx-compare-name zx-compare-name--ours">
+                That last part is what shortens the bars. The unit used to be baked into
+                both figures ("$1.25/mo"), and since each figure sits inside its own bar,
+                those four characters set the floor on how short our bar could be. Stated
+                once on the key line instead, it stops constraining the geometry — the
+                bar now only has to hold "$1.25". */}
+            <p className="zx-compare-key" aria-hidden="true">
+              {/* Swatch widths MIRROR the bars they key (short for ours, long for
+                  theirs). This is the mechanism that survives the bars being identical
+                  in color: with hue and height held constant so that length is the only
+                  variable, a color swatch would key nothing, whereas a short chip and a
+                  long chip map onto the short and long bars unambiguously — and teach
+                  "length = cost" in the process, which is what the deleted legend line
+                  used to spell out in words. */}
+              <span className="zx-compare-key-item zx-compare-key-item--ours">
+                <span className="zx-compare-key-swatch zx-compare-key-swatch--ours" />
                 {price.ourLabel}
-              </dt>
+              </span>
+              {/* States the relationship the chart depends on. Without it the card shows
+                  two named plans with two prices, and a reader skimming has to infer
+                  that the second is the alternative being replaced rather than, say, a
+                  second Zenorix tier or an add-on. */}
+              <span className="zx-compare-vs">{price.vs}</span>
+              <span className="zx-compare-key-item">
+                <span className="zx-compare-key-swatch zx-compare-key-swatch--rival" />
+                {price.rivalLabel}
+              </span>
+              {/* The axis unit, stated once for both bars. */}
+              <span className="zx-compare-unit">{price.perMonth}</span>
+            </p>
+
+            {/* The whole key line above is `aria-hidden`: it is a VISUAL key, and its
+                swatch-length convention means nothing read aloud. The real semantics
+                live here instead — each name is a `dt` and its bar the `dd`, so a screen
+                reader gets "Zenorix, $1.25 per month" as a proper term/definition pair.
+                The names are visually hidden rather than absent so nothing is announced
+                twice, and each price re-attaches the unit for the same reason.
+
+                Keeping `dt`/`dd` as direct children of one `dl` is what lets a single
+                grid own both rows, so the two bars are measured against the same track
+                rather than each against its own container. */}
+            <dl className="zx-compare">
+              <dt className="zx-visually-hidden">{price.ourLabel}</dt>
               {/* The share sizes the bar via a variable rather than a plain width,
                   so the CSS keeps the ratio in one place and the bar can still be
                   floored wide enough to hold the price now sitting inside it. */}
@@ -218,32 +251,15 @@ export function AboutZenorix({
                 <span className="zx-compare-amount zx-compare-amount--ours">
                   {price.value}
                 </span>
+                <span className="zx-visually-hidden"> {price.perMonth}</span>
               </dd>
 
-              {/* The `vs` marker states the relationship the chart depends on. Without
-                  it the card shows two named plans with two prices, and a reader
-                  skimming has to infer that the second is the alternative being
-                  replaced rather than, say, a second Zenorix tier or an add-on.
-
-                  Deliberately a PREFIX on this label rather than a badge floating
-                  between the bars: a floating element would need vertical room of its
-                  own, and the legend was just removed to reclaim exactly that space.
-                  Here it costs zero extra height and reads as one phrase —
-                  "vs Disney + HBO + Netflix".
-
-                  `aria-hidden`, because the `dl` already encodes the comparison
-                  structurally (two terms, each with its own price) and a screen reader
-                  announcing a bare "vs" mid-list would only interrupt that. */}
-              <dt className="zx-compare-name">
-                <span className="zx-compare-vs" aria-hidden="true">
-                  {price.vs}
-                </span>
-                {price.rivalLabel}
-              </dt>
+              <dt className="zx-visually-hidden">{price.rivalLabel}</dt>
               <dd className="zx-compare-bar zx-compare-bar--rival">
                 <span className="zx-compare-amount zx-compare-amount--rival">
                   {price.rivalValue}
                 </span>
+                <span className="zx-visually-hidden"> {price.perMonth}</span>
               </dd>
             </dl>
           </li>
