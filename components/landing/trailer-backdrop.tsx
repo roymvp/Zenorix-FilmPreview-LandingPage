@@ -63,25 +63,34 @@ export function TrailerBackdrop() {
   return (
     <div className="zx-reel" aria-hidden="true" role="presentation">
       {TRAILERS.map((trailer, index) => (
-        <video
+        /* The poster is painted as the SLOT's background rather than the video's
+           `poster` attribute, because Chrome letterboxes a poster inside the
+           video box and ignores `object-fit: cover` on it — which left black
+           bands above and below the frame on any viewport that did not match the
+           poster's aspect ratio. As a background it is covered by
+           `background-size: cover` in CSS, so it fills the hero at every size and
+           matches how the video itself is fitted. */
+        <div
           key={trailer.src}
-          ref={(node) => {
-            videosRef.current[index] = node
-          }}
-          className="zx-reel-clip"
+          className="zx-reel-slot"
           data-active={index === active}
-          /* The poster keeps the slot filled before its video can render — and
-             is the whole picture for a slot whose file is not encoded yet. */
-          poster={trailer.poster}
-          src={armed.has(index) ? trailer.src : undefined}
-          muted
-          playsInline
-          /* Single-clip loops are handled by advancing the reel, so `loop` is
-             deliberately absent: it would suppress the `ended` event. */
-          preload={index === 0 ? 'auto' : 'none'}
-          tabIndex={-1}
-          onEnded={() => setActive((i) => (i + 1) % TRAILERS.length)}
-        />
+          style={{ backgroundImage: `url(${trailer.poster})` }}
+        >
+          <video
+            ref={(node) => {
+              videosRef.current[index] = node
+            }}
+            className="zx-reel-clip"
+            src={armed.has(index) ? trailer.src : undefined}
+            muted
+            playsInline
+            /* Single-clip loops are handled by advancing the reel, so `loop` is
+               deliberately absent: it would suppress the `ended` event. */
+            preload={index === 0 ? 'auto' : 'none'}
+            tabIndex={-1}
+            onEnded={() => setActive((i) => (i + 1) % TRAILERS.length)}
+          />
+        </div>
       ))}
 
       {/* Sole purpose: hold the brand copy legible over moving footage. */}

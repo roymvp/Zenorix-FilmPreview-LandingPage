@@ -1,162 +1,82 @@
-/* Material Web typescale utility classes (.md-typescale-*) */
-@import '@material/web/typography/md-typescale-styles.css';
-
 /*
  * Zenorix — Material 3 dark scheme built on a premium-black canvas.
  *
  * THREE COLORS, and only three. Every value below is one of:
  *   1. PREMIUM BLACK — the immersive canvas. A near-neutral black carrying a
  *      faint COOL cast (blue channel always >= red), so it sits under silver and
- *      blue without the muddy edge a warm black gives them. Was a warm brown-black
- *      (#12100e) tuned for amber; every surface step is re-derived here.
- *   2. METALLIC SILVER — the brand, and the workhorse: install CTAs, links,
+ *      blue without the muddy edge a warm black gives them.
+ *   2. METALLIC SILVER — the brand, and the workhorse: download CTAs, links,
  *      focus rings, the brand mark. Silver on black is the whole identity, so it
  *      is `primary` rather than an accent used occasionally.
  *   3. SOFT TECH BLUE — the accent, deliberately rationed. It is `tertiary` and
- *      earns its saturation by marking live/technical state (see the scrubber in
- *      landing.css) rather than decorating static copy.
+ *      is the light top bar's `primary`, where silver has too little contrast.
  *
- * Silver as `primary` is the load-bearing decision: M3 paints filled buttons
- * `primary` with `on-primary` labels, so the CTAs become light-on-dark plates and
- * the accent stays free for the few places that need it. Anything that wants to
- * "stand out more" should earn contrast through weight or size — NOT by reaching
- * for the blue, which stops meaning anything once it is everywhere.
+ * Silver as `primary` is the load-bearing decision: the CTA plates are
+ * light-on-dark, and the accent stays free for the few places that need it.
+ * Anything that wants to "stand out more" should earn contrast through weight or
+ * size — NOT by reaching for the blue, which stops meaning anything once it is
+ * everywhere.
  *
  * DARK ONLY, by design. This is a cinema product whose hero is film footage, so
- * there is no light scheme and no theme toggle: one scheme means one set of
- * tokens to reason about, and every surface can be tuned against the video
- * rather than compromised to work on white too. The single exception is the top
+ * there is no light scheme and no theme toggle. The single exception is the top
  * bar, a self-contained light island — see `.zx-topbar` in landing.css.
  *
- * `color-scheme: dark` is what tells the browser to render form controls,
- * scrollbars and the <video> letterbox dark, so it must stay even though there
- * is nothing left to switch between.
+ * `color-scheme: dark` is what tells the browser to render scrollbars and the
+ * <video> letterbox dark, so it must stay even though there is nothing left to
+ * switch between.
  */
 :root {
   color-scheme: dark;
 
-  /* POLISHED metallic silver, near-white. The previous value (#c8cfda) passed
+  /* POLISHED metallic silver, near-white. A duller pewter (#c8cfda) passed
      contrast easily — 12.7:1 as a button plate — and was still wrong: at ~82%
-     lightness it read as dull pewter, so the install CTAs looked like disabled grey
-     plates rather than the brightest, most clickable thing on the page.
+     lightness the download CTAs looked like disabled grey plates rather than the
+     brightest, most clickable thing on the page.
 
-     That is the lesson worth keeping: a WCAG ratio measures legibility, not presence.
-     On a near-black canvas almost any light grey clears 12:1, so the ratio stops
-     discriminating and cannot tell you whether a control looks live. Silver has to be
-     pushed to the top of its ramp to read as metal rather than as grey. */
+     That is the lesson worth keeping: a WCAG ratio measures legibility, not
+     presence. On a near-black canvas almost any light grey clears 12:1, so the
+     ratio stops discriminating and cannot tell you whether a control looks live.
+     Silver has to be pushed to the top of its ramp to read as metal, not grey. */
   --md-sys-color-primary: #fbfcfe;
-  /* Near-black label on the silver plate. Deepened with the plate so the CTA's
-     label keeps the darkest possible ink against the brightest possible metal. */
+  /* Near-black label on the silver plate — the darkest possible ink against the
+     brightest possible metal. */
   --md-sys-color-on-primary: #05070a;
-  /* Brightened with it, so the tonal step below silver stays a step and does not
-     collapse into the surface containers. */
-  --md-sys-color-primary-container: #4a5462;
-  --md-sys-color-on-primary-container: #f1f4fa;
-  /* Brushed steel: the same family one step down, for anything that must sit beside
-     silver without competing with it. */
-  --md-sys-color-secondary: #d3dae4;
-  --md-sys-color-on-secondary: #1b2129;
-  --md-sys-color-secondary-container: #3d4653;
-  --md-sys-color-on-secondary-container: #e8edf4;
-  /* Soft tech blue — the accent, luminous rather than subdued. It has been lifted
-     twice now, from #8fbeee to #79c9ff to this: as the only chromatic color on a black
-     page it has to glow to register at all, and each earlier value was dark enough to
-     read as dimmed grey instead of blue. Raised in lightness while KEEPING the high
-     saturation, which is what separates "bright blue" from "washed-out pale blue".
-     Still soft rather than neon — it is an accent, not a warning. */
-  --md-sys-color-tertiary: #9bdcff;
-  --md-sys-color-on-tertiary: #002138;
-  --md-sys-color-tertiary-container: #2b6f9e;
-  --md-sys-color-on-tertiary-container: #dcefff;
-  --md-sys-color-error: #ffb4ab;
-  --md-sys-color-on-error: #690005;
-  --md-sys-color-error-container: #93000a;
-  --md-sys-color-on-error-container: #ffdad6;
   --md-sys-color-background: #08090b;
   --md-sys-color-on-background: #ffffff;
   --md-sys-color-surface: #08090b;
-  /* PURE white. Titles, prices and the sentences that carry the pitch all resolve to
-     this, so it takes the very top of the ramp — on a near-black canvas there is no
-     reason to spend the brightest value on anything other than the most important
-     words, and #f4f7fb was leaving a little of that range unused. */
+  /* PURE white, for the words that carry the pitch. On a near-black canvas there
+     is no reason to spend the brightest value on anything less. */
   --md-sys-color-on-surface: #ffffff;
-  --md-sys-color-surface-variant: #454c57;
-  /* SECONDARY text: captions under CTAs, spec labels, FAQ answers, footer.
-     Deliberately pulled DOWN to #a4aebc (L* 71) from #d2d9e4 (L* 87). The previous
-     value was legible but nearly as bright as the body copy, so the page had two
-     ranks of text competing at the same volume and no clear reading order. Dropping
-     it widens the gap against the now-white `on-surface` above, which is what makes a
-     title feel like a title rather than just bigger text.
-
-     Still 8.9:1 on the canvas — far above AA even at the 12px caption size. This is a
-     hierarchy adjustment, NOT a legibility trade: do not push it lower to get more
-     separation, brighten nothing to compensate, and if a specific label ever needs to
-     recede further, use `--md-sys-color-outline` which exists for exactly that. */
+  /* SECONDARY text: footer links and copyright. Deliberately well below
+     `on-surface` (L* 71 vs 100) so a heading reads as a heading rather than just
+     bigger text. Still 8.9:1 on the canvas — far above AA even at 12px. This is
+     a hierarchy adjustment, NOT a legibility trade: do not push it lower. */
   --md-sys-color-on-surface-variant: #a4aebc;
-  --md-sys-color-outline: #9aa3af;
-  /* Every hairline and the phone column's frame. Deliberately low-contrast: on a
-     black canvas a divider only has to be perceptible, not visible. */
+  /* Every hairline. Deliberately low-contrast: on a black canvas a divider only
+     has to be perceptible, not visible. */
   --md-sys-color-outline-variant: #2c323a;
-  --md-sys-color-shadow: #000000;
-  --md-sys-color-scrim: #000000;
-  --md-sys-color-inverse-surface: #f4f7fb;
-  --md-sys-color-inverse-on-surface: #2b3038;
-  /* Silver's counterpart for use ON a light surface — kept dark for that reason.
-     It must NOT follow `primary` upward or it becomes near-white on near-white. */
-  --md-sys-color-inverse-primary: #495260;
-  --md-sys-color-surface-dim: #08090b;
-  --md-sys-color-surface-bright: #2c313a;
-  --md-sys-color-surface-container-lowest: #030405;
-  --md-sys-color-surface-container-low: #0f1114;
-  --md-sys-color-surface-container: #14171b;
-  --md-sys-color-surface-container-high: #1d2126;
-  --md-sys-color-surface-container-highest: #262b32;
 
-  /* Typefaces: applied to every system and component token.
-     Noto Sans Thai follows Roboto because Roboto ships no Thai subset. The
-     browser resolves font-family per glyph, so Latin/Portuguese stay in Roboto
-     and only Thai codepoints fall through to the Thai face. */
-  --md-ref-typeface-brand: var(--font-roboto), Roboto, var(--font-noto-thai), system-ui, sans-serif;
+  /* Typefaces. Noto Sans Thai follows Roboto because Roboto ships no Thai
+     subset. The browser resolves font-family per glyph, so Latin/Portuguese stay
+     in Roboto and only Thai codepoints fall through to the Thai face. */
   --md-ref-typeface-plain: var(--font-roboto), Roboto, var(--font-noto-thai), system-ui, sans-serif;
-}
 
-/*
- * Media-surface tokens.
- * Content layered over film footage is always light-on-dark because the
- * underlying pixels are the video. These are the only fixed color values in the
- * app and they exist for exactly that reason.
- */
-:root {
-  /* Cool black, matching the canvas above. These were warm (#060504) to sit under
-     the amber scheme; left warm they would read as a brown haze over the video and
-     against the silver chrome laid on top of it.
-
-     `--zx-media-black-rgb` is the same color as a bare channel triplet, because the
-     scrims and text shadows in landing.css need it at several alphas and
-     `rgb(var(--...) / 0.85)` is the only way to reach one source of truth from
-     inside a gradient or a `drop-shadow()`. Keep the two in step. */
+  /* Cool media black, matching the canvas. Exposed as a bare channel triplet
+     because the hero scrim needs it at several alphas, and `rgb(var(--…) / 0.85)`
+     is the only way to reach one source of truth from inside a gradient. */
   --zx-media-black-rgb: 4 6 9;
-  --zx-media-scrim: rgb(var(--zx-media-black-rgb) / 0);
   --zx-media-scrim-strong: rgb(var(--zx-media-black-rgb) / 1);
-  --zx-on-media: #ffffff;
-  /* Secondary text laid over the video. Lifted from #c6ccd5: this is the hardest
-     place on the page to read anything — moving footage underneath, so the
-     background luminance is not even constant — and it was the dimmest text token. */
-  --zx-on-media-variant: #dde2ea;
-  --zx-media-control: rgba(255, 255, 255, 0.14);
-  --zx-media-control-hover: rgba(255, 255, 255, 0.24);
-  --zx-media-outline: rgba(255, 255, 255, 0.22);
 
   /* --- top bar geometry + surface -----------------------------------------
      The top bar is the ONE part of the page excluded from the black canvas, and
-     its light band runs the full viewport width — wider than the 420px phone
-     column it sits in. Both `.zx-topbar` (inside the column) and `body::before`
-     (the left/right extension) read these, so the band and the bar can never
-     disagree about color or height.
+     its light band runs the full viewport width — wider than the phone column it
+     sits in. Both `.zx-topbar` (inside the column) and `body::before` (the
+     left/right extension) read these, so the band and the bar can never disagree
+     about color or height.
 
-     `--zx-topbar-h` is a contract, not a measurement: the bar's tallest child is
-     the 32px install button, so if a taller control is ever added to it, bump
-     `--zx-topbar-content-h` to match or the extension will sit short of the bar. */
+     `--zx-topbar-h` is a contract, not a measurement: if a control taller than
+     `--zx-topbar-content-h` is ever added to the bar, bump that token to match or
+     the extension will sit short of the bar. */
   --zx-topbar-surface: #f3f5f8;
   --zx-topbar-pad: 10px;
   --zx-topbar-content-h: 32px;
@@ -187,10 +107,8 @@ html {
 }
 
 body {
-  /* The layout is a fixed-width phone column (see .zx-page), and the area
-     around it uses the SAME premium black as the column itself, so the film is
-     the only bright thing on screen. The column is marked out by a hairline
-     border, not by a darker backdrop.
+  /* The area around the capped column uses the SAME premium black as the column
+     itself, so the film is the only bright thing on screen.
 
      `position: relative` is here solely to anchor the top band below. */
   position: relative;
@@ -200,15 +118,14 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* The top bar's LEFT/RIGHT EXTENSION: the light band either side of the phone
+/* The top bar's LEFT/RIGHT EXTENSION: the light band either side of the capped
    column, which together with `.zx-topbar` itself makes one uninterrupted header
    across the viewport while everything below stays black.
 
    It has to be painted from `body` rather than by the bar. The obvious approach —
-   a `100vw` pseudo-element on `.zx-topbar` — cannot work here, because the bar is
-   nested inside `.zx-hero` (`overflow: hidden`) inside `.zx-page`
-   (`overflow-x: clip`); either one crops the bleed back to the 420px column.
-   `body` is the nearest ancestor outside both clips.
+   a `100vw` pseudo-element on `.zx-topbar` — cannot work, because the bar is
+   nested inside `.zx-page` (`overflow-x: clip`), which crops the bleed back to
+   the column. `body` is the nearest ancestor outside that clip.
 
    `z-index: 0` against `.zx-page`'s `z-index: 1` is what keeps this strictly
    BEHIND the column: an absolutely positioned box would otherwise paint over the
@@ -221,69 +138,6 @@ body::before {
   inset-inline: 0;
   height: var(--zx-topbar-h);
   background: var(--zx-topbar-surface);
-}
-
-/* Material Symbols icon font for <md-icon> */
-md-icon {
-  font-family: 'Material Symbols Outlined';
-}
-
-/* ---------------------------------------------------------------------------
-   UNUPGRADED CUSTOM ELEMENT GUARD — do not remove.
-
-   Every `md-*` tag is server-rendered as an UNKNOWN element: the definitions are
-   registered on the client by MaterialWebLoader, so between first paint and that
-   registration the browser treats each one as a plain inline box that simply
-   shows its own children. Without the rules below that window renders as a badly
-   broken page: both `md-dialog`s dump their full contents inline at the bottom of
-   the document, `md-filled-button` loses all button chrome and survives as bare
-   text, and the language `md-menu` prints every locale at once. If a definition
-   chunk ever fails to load, the page stays stuck in exactly that state.
-
-   `:defined` matches only once an element has been upgraded, so `:not(:defined)`
-   targets precisely that pre-registration window and nothing else — these rules
-   stop applying by themselves the moment the definitions land. No JS, no class
-   toggling, and no hydration involvement.
-   --------------------------------------------------------------------------- */
-
-/* Overlays must NEVER occupy layout while unupgraded. `display: none`, not
-   `visibility: hidden`: a dialog's contents are full-page-height, so merely
-   making them invisible would still reserve a huge empty gap at the end of the
-   page and leave its links in the tab order. */
-md-dialog:not(:defined),
-md-menu:not(:defined) {
-  display: none;
-}
-
-/* Non-overlay elements only need their unstyled intermediate state hidden. They
-   keep `display` so the surrounding layout does not reflow when they upgrade;
-   `visibility: hidden` also removes them from the accessibility tree and from
-   hit-testing, so nothing can be clicked before it works. */
-md-filled-button:not(:defined),
-md-outlined-button:not(:defined),
-md-text-button:not(:defined),
-md-icon-button:not(:defined),
-md-icon:not(:defined),
-md-list:not(:defined),
-md-list-item:not(:defined),
-md-menu-item:not(:defined),
-md-elevated-card:not(:defined),
-md-outlined-card:not(:defined),
-md-filled-card:not(:defined),
-md-badge:not(:defined),
-md-linear-progress:not(:defined),
-md-circular-progress:not(:defined),
-md-slider:not(:defined),
-md-switch:not(:defined),
-md-checkbox:not(:defined),
-md-radio:not(:defined),
-md-chip-set:not(:defined),
-md-assist-chip:not(:defined),
-md-filter-chip:not(:defined),
-md-divider:not(:defined),
-md-ripple:not(:defined),
-md-focus-ring:not(:defined) {
-  visibility: hidden;
 }
 
 /* Thai needs a slightly taller line box than the Latin type scale allows. */
@@ -301,4 +155,25 @@ html[lang='th-TH'] body {
   clip-path: inset(50%);
   white-space: nowrap;
   border: 0;
+}
+
+/* The skip link is visually hidden until focused, then lands as a normal
+   control over the header. Same element, so nothing shifts for other users. */
+.zx-visually-hidden:focus-visible {
+  position: fixed;
+  z-index: 9;
+  inset-block-start: var(--zx-topbar-pad);
+  inset-inline-start: var(--zx-topbar-pad);
+  width: auto;
+  height: auto;
+  margin: 0;
+  padding: 8px 14px;
+  overflow: visible;
+  clip-path: none;
+  border-radius: 8px;
+  background: var(--md-sys-color-primary);
+  color: var(--md-sys-color-on-primary);
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
 }

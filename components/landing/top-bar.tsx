@@ -18,16 +18,20 @@ export function TopBar({
 }) {
   return (
     <header className="zx-topbar">
-      <a className="zx-brand" href={homePath(locale)} aria-label={homeLabel}>
-        <img className="zx-brand-mark" src={SITE.logo} alt="" width={30} height={30} />
-        {/* aria-hidden: the link already announces itself via homeLabel, so
-            reading the wordmark too would just duplicate it. */}
-        <span className="zx-brand-name" aria-hidden="true">
-          {SITE.name}
-        </span>
-      </a>
+      {/* The light band spans the viewport while its CONTENT stays in the shared
+          page column, so the brand mark lines up with the hero lockup below. */}
+      <div className="zx-shell zx-topbar-inner">
+        <a className="zx-brand" href={homePath(locale)} aria-label={homeLabel}>
+          <img className="zx-brand-mark" src={SITE.logo} alt="" width={30} height={30} />
+          {/* aria-hidden: the link already announces itself via homeLabel, so
+              reading the wordmark too would just duplicate it. */}
+          <span className="zx-brand-name" aria-hidden="true">
+            {SITE.name}
+          </span>
+        </a>
 
-      <LanguageSwitcher current={locale} menuLabel={languageMenuLabel} />
+        <LanguageSwitcher current={locale} menuLabel={languageMenuLabel} />
+      </div>
     </header>
   )
 }

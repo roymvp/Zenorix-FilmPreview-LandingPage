@@ -2,6 +2,10 @@ import type { MetadataRoute } from 'next'
 import { SITE } from '@/lib/config/site'
 import { homePath, locales, localeMeta } from '@/lib/i18n/config'
 
+/* Required by `output: 'export'`: metadata routes default to dynamic, and the
+   build fails rather than writing a file unless they are pinned to static. */
+export const dynamic = 'force-static'
+
 /**
  * The three market homes — the only indexable URLs on the site. Each carries
  * reciprocal hreflang alternates so search engines cluster them correctly.

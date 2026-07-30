@@ -1,0 +1,5 @@
+User-Agent: *
+Allow: /
+
+Host: https://zenorix.app
+Sitemap: https://zenorix.app/sitemap.xml
