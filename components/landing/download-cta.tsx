@@ -1,27 +1,21 @@
 import { SITE } from '@/lib/config/site'
 
 /**
- * Minimal linear platform glyphs, inline so they cost no request and inherit
- * `currentColor` from the button label. Stroked only — they sit beside a text
- * label at 18px and a filled mark would out-weigh it.
+ * Standard filled brand marks (Simple Icons path data), inline so they cost no
+ * request and inherit `currentColor` from the button label. Filled rather than
+ * hand-stroked: these are recognizable logos, and approximating them with
+ * freehand strokes only ever reads as a broken icon.
  */
 function AndroidGlyph() {
   return (
     <svg
       className="zx-cta-glyph"
       viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.7"
-      strokeLinecap="round"
-      strokeLinejoin="round"
+      fill="currentColor"
       aria-hidden="true"
       focusable="false"
     >
-      <path d="M6 10.5a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v6a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2z" />
-      <path d="M9 9.5 7.4 6.6M15 9.5l1.6-2.9" />
-      <path d="M3.5 11.5v4M20.5 11.5v4" />
-      <path d="M9.5 18.5v2M14.5 18.5v2" />
+      <path d="M17.523 15.341a1.001 1.001 0 1 1 0-2.002 1.001 1.001 0 0 1 0 2.002m-11.046 0a1.001 1.001 0 1 1 0-2.002 1.001 1.001 0 0 1 0 2.002m11.405-6.02 1.997-3.46a.416.416 0 0 0-.152-.567.416.416 0 0 0-.568.152l-2.022 3.503A12.293 12.293 0 0 0 12 7.332c-1.807 0-3.51.404-5.037 1.117L4.94 4.946a.416.416 0 0 0-.568-.152.416.416 0 0 0-.152.567L6.218 8.82C2.79 10.68.45 14.147 0 18.242h24c-.45-4.095-2.79-7.561-6.218-9.421" />
     </svg>
   )
 }
@@ -31,17 +25,11 @@ function AppleGlyph() {
     <svg
       className="zx-cta-glyph"
       viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.7"
-      strokeLinecap="round"
-      strokeLinejoin="round"
+      fill="currentColor"
       aria-hidden="true"
       focusable="false"
     >
-      <path d="M12 8.2c-1-.6-2-.7-3.1-.2-1.7.8-2.6 2.7-2.2 5 .4 2.4 1.9 5 3.3 6 .8.6 1.5.3 2-.1.5-.4 1.1-.4 1.6 0 .6.4 1.3.6 2 0 1.3-1 2.7-3.5 3.2-5.8" />
-      <path d="M15.4 7.7c1 .1 2 .7 2.6 1.6" />
-      <path d="M12.4 7.3c-.2-1.5.8-3 2.3-3.3" />
+      <path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.51 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z" />
     </svg>
   )
 }
