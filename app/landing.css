@@ -1313,6 +1313,14 @@
    A flex container because each bar now holds its own price. The bar is the `dd` for
    that reason: it is the definition — what the plan named above it costs. */
 .zx-compare-bar {
+  /* REQUIRED, not tidiness. A `dd` carries a UA default `margin-inline-start: 40px`.
+     The old markup reset it on the price (which was then the `dd`); now the BAR is the
+     `dd`, so without this both bars were pushed 40px right of the names labelling them
+     and lost 40px of measurable length. The ratio still looked correct because both
+     bars were displaced equally — which is exactly why a ratio check alone could not
+     catch it, and why the bars' left edge is asserted against the list's in the
+     verification below. */
+  margin: 0;
   display: flex;
   align-items: center;
   /* Right-aligned figure: it sits at the bar's END, so both prices land at the tip of
