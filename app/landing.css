@@ -1341,15 +1341,10 @@
   background: var(--md-sys-color-secondary);
 }
 
-/* Mirrors the rival bar exactly: dark fill plus the same `outline` border. The border is
-   even more necessary at 14x5px than on the bar — an unbordered #3d4653 chip this small on
-   the near-black page would read as an empty gap and key nothing at all. `border-box` keeps
-   it the same 14px as its partner, so the two swatches stay equal in size and the FILL
-   remains the only difference between them. */
+/* Mirrors the rival bar: dark fill without the border. The swatch and bar are now purely
+   distinguished by the darkness of the fill, which separates from ours at 6.78:1. */
 .zx-compare-key-swatch--rival {
-  box-sizing: border-box;
   background: var(--md-sys-color-secondary-container);
-  border: 1px solid var(--md-sys-color-outline);
 }
 
 /* The axis unit. `auto` margin pushes it to the line's far end, away from the two names
@@ -1467,12 +1462,6 @@
   box-sizing: border-box;
   width: 100%;
   background: var(--md-sys-color-secondary-container);
-  /* Load-bearing, not decoration: at 2.09:1 the fill alone would leave the reference bar
-     barely distinguishable from the page. `outline` sits at 7.81:1 against that background,
-     so the bar's full length — the chart's 100% — is unambiguous no matter how dark the fill
-     goes. `border-box` above means this costs no measurable width, so the ratio is
-     untouched. Only theirs needs it; ours is bright enough to define its own edge. */
-  border: 1px solid var(--md-sys-color-outline);
   /* Light ink here, because this fill is dark — the paired `on-*` token again, so the
      contrast holds automatically if either value is ever retuned. */
   color: var(--md-sys-color-on-secondary-container);
