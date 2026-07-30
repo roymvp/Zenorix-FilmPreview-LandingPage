@@ -1,7 +1,6 @@
 import type { ReactNode } from 'react'
 import type { Metadata, Viewport } from 'next'
 import { Roboto, Noto_Sans_Thai } from 'next/font/google'
-import { MaterialWebLoader } from '@/components/material-web-loader'
 import { SITE } from '@/lib/config/site'
 import './globals.css'
 import './landing.css'
@@ -13,7 +12,7 @@ import './landing.css'
  */
 const roboto = Roboto({
   subsets: ['latin', 'latin-ext'],
-  weight: ['400', '500', '700'],
+  weight: ['400', '600', '700'],
   variable: '--font-roboto',
   display: 'swap',
 })
@@ -22,13 +21,13 @@ const roboto = Roboto({
  * Noto Sans Thai supplies the Thai glyphs Roboto lacks. It is appended to the
  * global font stack rather than swapped in per locale: browsers resolve
  * font-family per glyph, so Latin still renders in Roboto and only Thai
- * codepoints fall through to this face. Never drop it — the sandbox (and many
- * devices) have no Thai system font, so Thai copy renders as blank boxes
- * without a webfont that actually contains the script.
+ * codepoints fall through to this face. Never drop it — many devices have no
+ * Thai system font, so Thai copy renders as blank boxes without a webfont that
+ * actually contains the script.
  */
 const notoSansThai = Noto_Sans_Thai({
   subsets: ['thai'],
-  weight: ['400', '500', '700'],
+  weight: ['400', '600', '700'],
   variable: '--font-noto-thai',
   display: 'swap',
 })
@@ -36,8 +35,8 @@ const notoSansThai = Noto_Sans_Thai({
 export const metadata: Metadata = {
   metadataBase: new URL(SITE.url),
   title: SITE.name,
-  description: `Watch officially licensed movies, series and live TV in 4K on ${SITE.name}.`,
   applicationName: SITE.name,
+  icons: { icon: SITE.logo, apple: SITE.logo },
   formatDetection: { telephone: false },
 }
 
@@ -47,43 +46,22 @@ export const viewport: Viewport = {
   /* Pinch-zoom stays enabled: disabling it is an accessibility failure. */
   maximumScale: 5,
   userScalable: true,
-  /* Matches `--zx-topbar-surface`, NOT the black canvas. This paints the mobile
-     browser's own chrome, which sits directly above the page's light header band —
-     so the old warm near-black (#060504) drew a dark stripe between the browser UI
-     and a light bar. Keep this in step with that token; it is the one place the
-     value has to be a literal, because Next serialises it into a <meta> tag before
-     any CSS is available. */
+  /* Matches `--zx-topbar-surface`, NOT the black canvas: this paints the mobile
+     browser's own chrome, which sits directly above the page's light header
+     band. Keep it in step with that token — it has to be a literal here because
+     Next serialises it into a <meta> tag before any CSS is available. */
   themeColor: '#f3f5f8',
   colorScheme: 'dark',
 }
 
 /**
- * The <html lang> attribute is set per market by app/[lang]/layout.tsx, which
- * rewrites it on the client before paint via a tiny inline script — Next only
- * allows one <html> element, and it lives here. `suppressHydrationWarning`
- * exists for exactly that rewrite; it is not theme-related.
- *
- * No `dark` class: the app is dark-only and the scheme now lives on :root, so
- * there is no class to apply and no pre-paint script needed to avoid a flash.
+ * The <html lang> attribute is corrected per market by app/[lang]/layout.tsx —
+ * Next allows only one <html> element and it lives here.
  */
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html
-      lang="en-US"
-      className={`${roboto.variable} ${notoSansThai.variable}`}
-      suppressHydrationWarning
-    >
-      <head>
-        {/* Material Symbols for <md-icon>. */}
-        <link
-          rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
-        />
-      </head>
-      <body>
-        <MaterialWebLoader />
-        {children}
-      </body>
+    <html lang="en-US" className={`${roboto.variable} ${notoSansThai.variable}`}>
+      <body>{children}</body>
     </html>
   )
 }

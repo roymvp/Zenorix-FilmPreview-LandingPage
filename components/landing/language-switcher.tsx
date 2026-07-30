@@ -1,72 +1,41 @@
-'use client'
-
-import { useId, useRef, useState } from 'react'
-import { trackEvent } from '@/lib/analytics'
-import { locales, localeMeta, type Locale } from '@/lib/i18n/config'
+import { homePath, locales, localeMeta, type Locale } from '@/lib/i18n/config'
 
 /**
- * Language selection is NAVIGATION, not client-side string swapping: each item
- * is a real anchor to that market's own URL, so every language keeps its own
+ * Language selection is NAVIGATION, not client-side string swapping: each
+ * market is a plain anchor to its own URL, so every language keeps an
  * indexable page and its own link equity.
+ *
+ * Three flat anchors rather than a dropdown — with only three markets a menu
+ * costs interactive JavaScript to hide two links, and this ships none.
  */
 export function LanguageSwitcher({
   current,
   menuLabel,
-  /** Same film, localized path, one per market. */
-  hrefs,
 }: {
   current: Locale
   menuLabel: string
-  hrefs: Record<Locale, string>
 }) {
-  const [open, setOpen] = useState(false)
-  const anchorId = useId().replace(/:/g, '')
-  const wrapRef = useRef<HTMLDivElement>(null)
-
   return (
-    <div className="zx-lang" ref={wrapRef}>
-      {/* A plain button, not an outlined MD button: in the top bar this is a
-          tertiary control next to the install CTA, and button chrome made the
-          two read as competing actions. Just the locale code and a caret. */}
-      <button
-        type="button"
-        id={anchorId}
-        className="zx-lang-trigger"
-        aria-haspopup="menu"
-        aria-expanded={open}
-        aria-label={menuLabel}
-        onClick={() => setOpen((value) => !value)}
-      >
-        {localeMeta[current].short}
-        <md-icon aria-hidden="true">expand_more</md-icon>
-      </button>
+    <nav className="zx-lang" aria-label={menuLabel}>
+      {locales.map((locale) => {
+        const { short, name, htmlLang } = localeMeta[locale]
+        const isCurrent = locale === current
 
-      <md-menu
-        anchor={anchorId}
-        open={open}
-        positioning="popover"
-        onclosed={() => setOpen(false)}
-      >
-        {locales.map((locale) => (
-          <md-menu-item
+        return (
+          <a
             key={locale}
-            href={hrefs[locale]}
-            selected={locale === current}
-            onClick={() => {
-              trackEvent('language_switch', { from: current, to: locale })
-            }}
+            className="zx-lang-link"
+            href={homePath(locale)}
+            hrefLang={htmlLang}
+            /* The short code is the visible label; the endonym is the
+               accessible name, so "PT" is announced as "Português". */
+            aria-label={name}
+            aria-current={isCurrent ? 'page' : undefined}
           >
-            <span slot="headline" lang={localeMeta[locale].htmlLang}>
-              {localeMeta[locale].name}
-            </span>
-            {locale === current ? (
-              <md-icon slot="end" aria-hidden="true">
-                check
-              </md-icon>
-            ) : null}
-          </md-menu-item>
-        ))}
-      </md-menu>
-    </div>
+            {short}
+          </a>
+        )
+      })}
+    </nav>
   )
 }

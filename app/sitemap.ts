@@ -1,38 +1,21 @@
 import type { MetadataRoute } from 'next'
 import { SITE } from '@/lib/config/site'
-import { movies } from '@/lib/content/movies'
-import { locales, localeMeta, moviePath, type Locale } from '@/lib/i18n/config'
+import { homePath, locales, localeMeta } from '@/lib/i18n/config'
 
 /**
- * Lists every market page with reciprocal hreflang alternates, so each
- * localized URL is discovered and correctly clustered by search engines.
+ * The three market homes — the only indexable URLs on the site. Each carries
+ * reciprocal hreflang alternates so search engines cluster them correctly.
  */
 export default function sitemap(): MetadataRoute.Sitemap {
-  const alternates = (path: (locale: Locale) => string) => {
-    const languages: Record<string, string> = {}
-    for (const locale of locales) {
-      languages[localeMeta[locale].hreflang] = `${SITE.url}${path(locale)}`
-    }
-    return { languages }
+  const languages: Record<string, string> = {}
+  for (const locale of locales) {
+    languages[localeMeta[locale].hreflang] = `${SITE.url}${homePath(locale)}`
   }
 
-  const homes = locales.map((locale) => ({
-    url: `${SITE.url}/${locale}`,
-    lastModified: new Date(),
-    changeFrequency: 'daily' as const,
+  return locales.map((locale) => ({
+    url: `${SITE.url}${homePath(locale)}`,
+    changeFrequency: 'monthly',
     priority: 1,
-    alternates: alternates((target) => `/${target}`),
+    alternates: { languages },
   }))
-
-  const films = locales.flatMap((locale) =>
-    movies.map((movie) => ({
-      url: `${SITE.url}${moviePath(locale, movie.slug)}`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly' as const,
-      priority: 0.8,
-      alternates: alternates((target) => moviePath(target, movie.slug)),
-    })),
-  )
-
-  return [...homes, ...films]
 }
