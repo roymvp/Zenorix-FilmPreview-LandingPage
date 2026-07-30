@@ -104,8 +104,17 @@
      hide the real top bar's contents. See that rule in globals.css. */
   position: relative;
   z-index: 1;
-  /* Frames the phone column against the page backdrop on wide screens. */
-  border-inline: 1px solid var(--md-sys-color-outline-variant);
+  /* No side borders, and deliberately no substitute for them. A 1px `outline-variant` rule
+     used to frame this column on each edge, which on a desktop viewport read as two
+     vertical lines running the full height of the page.
+
+     Nothing replaces it because there is nothing to separate: this column and the `body`
+     around it are the SAME color (both `surface`, #08090b — measured at 1:1), which is the
+     "ONE BACKGROUND" rule in the file header. The border was the only thing drawing the
+     column's edge, so removing it makes the content read as centered on an uninterrupted
+     black page — and it is what finally makes the header's claim true that the topbar's
+     lower edge is the page's only seam. Do not "restore the frame" with a border, shadow or
+     tinted column; that reintroduces the lines and contradicts that rule. */
   background: var(--md-sys-color-surface);
 }
 
