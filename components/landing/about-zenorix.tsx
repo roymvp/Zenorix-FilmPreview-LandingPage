@@ -99,30 +99,28 @@ export function AboutZenorix({
   /** APK facts rendered directly beneath that button. */
   ctaMeta: string
 }) {
-  // The rival bar is always full, so our bar is our share of its cost. The floor is
-  // what makes the figure fit inside the bar: at the real US ratio
-  // (1.25 / 80 = 1.6%) the bar is a few pixels wide and could not hold any text.
+  // The rival bar is always full, so our bar is our share of its cost.
   //
-  // 24%, down from 33% -> 38%. This floor is TEXT-BOUND, not data-bound: the price sits
-  // inside the bar, so the bar can never be narrower than that price plus its padding.
+  // 8%, down from 24% -> 33% -> 38%. Every earlier floor was TEXT-BOUND rather than
+  // data-bound: the price used to sit inside the bar, so the bar could never be narrower
+  // than that price plus its padding, and 24% was simply the width of "R$ 6,20" at the
+  // 390px breakpoint. The figure has now moved OUT of the bar into its own column, which
+  // removes that constraint entirely — the bar no longer has to hold anything, so it is
+  // free to be as short as the data.
   //
-  // The unit is what moved. Each figure used to carry its own ("R$ 6,20/mês"), and at
-  // the 390px breakpoint that needed 34.4% of the track. Hoisting the unit onto the key
-  // line leaves the bar holding only "R$ 6,20" — 55px, or ~22% including padding — so
-  // 24% is that measurement plus a margin for font-metric variance between locales.
+  // What remains is a PERCEPTUAL floor, and it is much smaller: below roughly 8% of the
+  // track the bar is under 20px and its 4px end radii start consuming the length being
+  // compared, so it reads as a dot rather than as a short bar.
   //
-  // 24% is now the shortest this bar can go while the price remains inside it. Going
-  // materially shorter would mean moving the figure back outside the bar, which is the
-  // trade to make if bar length ever matters more than the price being read at the point
-  // the length stops.
+  // The gain in honesty is the point. The real ratios are 3.1% (US), 4.3% (TH) and 4.1%
+  // (BR), so 8% now overstates our cost by about 2x, where 24% overstated it by 6-8x.
+  // It stays a floor rather than a multiplier, so any market whose true ratio exceeds 8%
+  // is drawn at its own honest value instead of being scaled up to meet it.
   //
-  // Worth staying clear-eyed about the distortion either way: this draws a ~1/64 price
-  // as ~1/3 of the bar, so the bars read as "much cheaper" rather than as a measurable
-  // ratio. The exact figures inside them carry the real magnitude, which is why both
-  // are stated in full and at the same size. It stays a floor rather than a multiplier,
-  // so a market where the true ratio is larger is drawn at its own honest value
-  // instead of being scaled up to meet it.
-  const ourShare = Math.max(24, (price.ourAmount / price.rivalAmount) * 100)
+  // The residual distortion is still worth being clear-eyed about: the bars say "much
+  // cheaper", not "exactly this many times cheaper". The exact figures beside them carry
+  // the real magnitude, which is why both are stated in full and at the same size.
+  const ourShare = Math.max(8, (price.ourAmount / price.rivalAmount) * 100)
 
   return (
     // Tighter than the shared section rhythm: four cards plus a CTA is the
@@ -192,26 +190,24 @@ export function AboutZenorix({
             {/* A price alone is just a number; against the stack it replaces it
                 becomes a saving.
 
-                ONE key line, then two bare bars. The two per-bar labels used to sit
-                above their own bars, which cost two lines of height and — more to the
-                point — never stated the relationship between them. Merged into a single
-                line they become a real legend: it names both series, marks them as a
-                comparison with "vs", keys each one to its bar by SWATCH LENGTH, and
-                declares the shared unit once at the end.
-
-                That last part is what shortens the bars. The unit used to be baked into
-                both figures ("$1.25/mo"), and since each figure sits inside its own bar,
-                those four characters set the floor on how short our bar could be. Stated
-                once on the key line instead, it stops constraining the geometry — the
-                bar now only has to hold "$1.25". */}
+                ONE key line, then two bare bars. The key names both series, marks them as
+                a comparison with "vs", keys each one to its bar by COLOR, and declares the
+                shared unit once at the end. Stating the unit here rather than inside each
+                figure is what stopped it constraining the bar geometry. */}
             <p className="zx-compare-key" aria-hidden="true">
-              {/* Swatch widths MIRROR the bars they key (short for ours, long for
-                  theirs). This is the mechanism that survives the bars being identical
-                  in color: with hue and height held constant so that length is the only
-                  variable, a color swatch would key nothing, whereas a short chip and a
-                  long chip map onto the short and long bars unambiguously — and teach
-                  "length = cost" in the process, which is what the deleted legend line
-                  used to spell out in words. */}
+              {/* Swatches key by COLOR at a shared size, replacing a short-chip/long-chip
+                  pair that keyed by length. Length-keying only existed because the two
+                  bars were identical in hue, which left length as the sole available
+                  signal — and it was the weaker mechanism: the reader had to compare two
+                  chips against each other, and at 8px vs 20px inside a caption line that
+                  is a subtle judgement. Color is matched at a glance and, unlike length,
+                  stays unambiguous now that our bar is only 8% of the track — a
+                  proportional mini-bar for it would be a 3px speck.
+
+                  The tradeoff accepted in exchange: the bars now differ in two ways at
+                  once (length and hue), so hue carries no quantity of its own. It reads as
+                  series identity, which is the standard convention for a two-series
+                  chart. */}
               <span className="zx-compare-key-item zx-compare-key-item--ours">
                 <span className="zx-compare-key-swatch zx-compare-key-swatch--ours" />
                 {price.ourLabel}
@@ -241,24 +237,28 @@ export function AboutZenorix({
                 rather than each against its own container. */}
             <dl className="zx-compare">
               <dt className="zx-visually-hidden">{price.ourLabel}</dt>
-              {/* The share sizes the bar via a variable rather than a plain width,
-                  so the CSS keeps the ratio in one place and the bar can still be
-                  floored wide enough to hold the price now sitting inside it. */}
-              <dd
-                className="zx-compare-bar zx-compare-bar--ours"
-                style={{ '--zx-bar-share': `${ourShare}%` } as CSSProperties}
-              >
-                <span className="zx-compare-amount zx-compare-amount--ours">
-                  {price.value}
-                </span>
+              {/* Bar and price are now SIBLINGS in two columns, where the price used to
+                  sit inside the bar. That is what frees the bar to shrink: its length no
+                  longer has to accommodate any text (see `ourShare`).
+
+                  The `dd` is the row, so the price stays inside the definition it belongs
+                  to. The bar is an empty `span` — a pure visual encoding of the number
+                  next to it, with nothing for a screen reader to read. */}
+              <dd className="zx-compare-row">
+                {/* The share sizes the bar via a variable rather than a plain width, so
+                    the CSS keeps the ratio in one place. */}
+                <span
+                  className="zx-compare-bar zx-compare-bar--ours"
+                  style={{ '--zx-bar-share': `${ourShare}%` } as CSSProperties}
+                />
+                <span className="zx-compare-amount">{price.value}</span>
                 <span className="zx-visually-hidden"> {price.perMonth}</span>
               </dd>
 
               <dt className="zx-visually-hidden">{price.rivalLabel}</dt>
-              <dd className="zx-compare-bar zx-compare-bar--rival">
-                <span className="zx-compare-amount zx-compare-amount--rival">
-                  {price.rivalValue}
-                </span>
+              <dd className="zx-compare-row">
+                <span className="zx-compare-bar zx-compare-bar--rival" />
+                <span className="zx-compare-amount">{price.rivalValue}</span>
                 <span className="zx-visually-hidden"> {price.perMonth}</span>
               </dd>
             </dl>

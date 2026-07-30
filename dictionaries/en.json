@@ -52,9 +52,9 @@
       "vs": "vs",
       "value": "{annualPerMonth}",
       "rivalLabel": "Disney + HBO + Netflix",
-      "rivalValue": "~ $80",
+      "rivalValue": "~ $40",
       "perMonth": "per month",
-      "rivalAmount": 80
+      "rivalAmount": 40
     },
     "viewing": {
       "label": "Cinematic Viewing",
