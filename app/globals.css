@@ -37,24 +37,24 @@
      presence. On a near-black canvas almost any light grey clears 12:1, so the
      ratio stops discriminating and cannot tell you whether a control looks live.
      Silver has to be pushed to the top of its ramp to read as metal, not grey. */
-  --md-sys-color-primary: #fbfcfe;
+  --zx-color-primary: #fbfcfe;
   /* Near-black label on the silver plate — the darkest possible ink against the
      brightest possible metal. */
-  --md-sys-color-on-primary: #05070a;
-  --md-sys-color-background: #08090b;
-  --md-sys-color-on-background: #ffffff;
-  --md-sys-color-surface: #08090b;
+  --zx-color-on-primary: #05070a;
+  --zx-color-background: #08090b;
+  --zx-color-on-background: #ffffff;
+  --zx-color-surface: #08090b;
   /* PURE white, for the words that carry the pitch. On a near-black canvas there
      is no reason to spend the brightest value on anything less. */
-  --md-sys-color-on-surface: #ffffff;
+  --zx-color-on-surface: #ffffff;
   /* SECONDARY text: footer links and copyright. Deliberately well below
      `on-surface` (L* 71 vs 100) so a heading reads as a heading rather than just
      bigger text. Still 8.9:1 on the canvas — far above AA even at 12px. This is
      a hierarchy adjustment, NOT a legibility trade: do not push it lower. */
-  --md-sys-color-on-surface-variant: #a4aebc;
+  --zx-color-on-surface-variant: #a4aebc;
   /* Every hairline. Deliberately low-contrast: on a black canvas a divider only
      has to be perceptible, not visible. */
-  --md-sys-color-outline-variant: #2c323a;
+  --zx-color-outline-variant: #2c323a;
 
   /* Typefaces. Noto Sans Thai follows Roboto because Roboto ships no Thai
      subset. The browser resolves font-family per glyph, so Latin/Portuguese stay
@@ -112,8 +112,8 @@ body {
 
      `position: relative` is here solely to anchor the top band below. */
   position: relative;
-  background: var(--md-sys-color-surface);
-  color: var(--md-sys-color-on-background);
+  background: var(--zx-color-surface);
+  color: var(--zx-color-on-background);
   font-family: var(--md-ref-typeface-plain);
   -webkit-font-smoothing: antialiased;
 }
@@ -171,8 +171,8 @@ html[lang='th-TH'] body {
   overflow: visible;
   clip-path: none;
   border-radius: 8px;
-  background: var(--md-sys-color-primary);
-  color: var(--md-sys-color-on-primary);
+  background: var(--zx-color-primary);
+  color: var(--zx-color-on-primary);
   font-size: 13px;
   font-weight: 600;
   text-decoration: none;

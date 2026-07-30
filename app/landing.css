@@ -6,7 +6,7 @@
  * THREE SECTIONS, and only three: top bar, hero, footer. If a rule here does not
  * serve one of those, it does not belong in this file.
  *
- * ONE BACKGROUND. The page paints `--md-sys-color-surface` and nothing else
+ * ONE BACKGROUND. The page paints `--zx-color-surface` and nothing else
  * paints over it, with exactly two deliberate exceptions: the hero's trailer reel,
  * and the top bar, which is a light island (see .zx-topbar) whose band runs the
  * full viewport width. So the only horizontal seam on the page is the header's
@@ -104,17 +104,17 @@
 .zx-topbar {
   color-scheme: light;
 
-  --md-sys-color-primary: #1668cf;
-  --md-sys-color-surface: var(--zx-topbar-surface);
-  --md-sys-color-on-surface: #161920;
-  --md-sys-color-on-surface-variant: #4b525c;
-  --md-sys-color-surface-container-highest: #d5dbe3;
+  --zx-color-primary: #1668cf;
+  --zx-color-surface: var(--zx-topbar-surface);
+  --zx-color-on-surface: #161920;
+  --zx-color-on-surface-variant: #4b525c;
+  --zx-color-surface-container-highest: #d5dbe3;
 
   position: relative;
   z-index: 4;
   min-height: var(--zx-topbar-h);
-  background: var(--md-sys-color-surface);
-  color: var(--md-sys-color-on-surface);
+  background: var(--zx-color-surface);
+  color: var(--zx-color-on-surface);
 }
 
 /* Padding comes from the shared top-bar tokens, because the full-width extension
@@ -137,7 +137,7 @@
   align-items: center;
   gap: var(--zx-space-2);
   text-decoration: none;
-  color: var(--md-sys-color-on-surface);
+  color: var(--zx-color-on-surface);
 }
 
 /* --- 48px minimum touch targets -------------------------------------------
@@ -175,7 +175,7 @@
   height: 30px;
   border-radius: 6px;
   object-fit: cover;
-  background: var(--md-sys-color-surface-container-highest);
+  background: var(--zx-color-surface-container-highest);
 }
 
 .zx-brand-name {
@@ -202,7 +202,7 @@
   height: 32px;
   padding-inline: var(--zx-space-2);
   border-radius: 8px;
-  color: var(--md-sys-color-on-surface-variant);
+  color: var(--zx-color-on-surface-variant);
   font-size: var(--zx-text-caption);
   font-weight: var(--zx-weight-semibold);
   letter-spacing: 0.02em;
@@ -211,20 +211,20 @@
 }
 
 .zx-lang-link:hover {
-  color: var(--md-sys-color-on-surface);
+  color: var(--zx-color-on-surface);
 }
 
 /* The active market is stated, not merely highlighted: `aria-current` carries it
    for assistive tech and this styles the same attribute, so the visual and the
    announced state can never drift apart. */
 .zx-lang-link[aria-current='page'] {
-  color: var(--md-sys-color-on-surface);
-  background: var(--md-sys-color-surface-container-highest);
+  color: var(--zx-color-on-surface);
+  background: var(--zx-color-surface-container-highest);
 }
 
 .zx-lang-link:focus-visible,
 .zx-brand:focus-visible {
-  outline: 2px solid var(--md-sys-color-primary);
+  outline: 2px solid var(--zx-color-primary);
   outline-offset: 2px;
   border-radius: 8px;
 }
@@ -349,7 +349,7 @@
   line-height: var(--zx-lh-tight);
   font-weight: var(--zx-weight-bold);
   letter-spacing: -0.01em;
-  color: var(--md-sys-color-on-surface);
+  color: var(--zx-color-on-surface);
 }
 
 /* 32px, the largest step on the scale: this is the gap between the identity and
@@ -388,7 +388,7 @@
   min-height: 46px;
   padding-inline: var(--zx-space-6);
   border-radius: var(--zx-cta-shape);
-  color: var(--md-sys-color-on-primary);
+  color: var(--zx-color-on-primary);
   font-size: var(--zx-text-body);
   font-weight: var(--zx-weight-semibold);
   line-height: var(--zx-lh-snug);
@@ -401,7 +401,7 @@
   background-image: linear-gradient(
     180deg,
     #ffffff 0%,
-    var(--md-sys-color-primary) 52%,
+    var(--zx-color-primary) 52%,
     #dbe3ee 100%
   );
   /* Three layers doing three jobs: a 1px inner highlight for the lit top bevel, a
@@ -439,7 +439,7 @@
 }
 
 .zx-cta-button:focus-visible {
-  outline: 2px solid var(--md-sys-color-primary);
+  outline: 2px solid var(--zx-color-primary);
   outline-offset: 3px;
 }
 
@@ -465,7 +465,7 @@
 /* ------------------------------------------------------------------ footer */
 
 .zx-footer {
-  border-block-start: 1px solid var(--md-sys-color-outline-variant);
+  border-block-start: 1px solid var(--zx-color-outline-variant);
   /* The `max()` keeps the bottom inset at least 24px while still yielding to a
      larger home-indicator safe area. */
   padding-block: var(--zx-space-6) max(var(--zx-space-6), env(safe-area-inset-bottom));
@@ -493,7 +493,7 @@
 }
 
 .zx-footer-links a {
-  color: var(--md-sys-color-on-surface-variant);
+  color: var(--zx-color-on-surface-variant);
   font-size: var(--zx-text-meta);
   line-height: 1.4;
   text-decoration: none;
@@ -501,18 +501,18 @@
 }
 
 .zx-footer-links a:hover {
-  color: var(--md-sys-color-on-surface);
+  color: var(--zx-color-on-surface);
 }
 
 .zx-footer-links a:focus-visible {
-  outline: 2px solid var(--md-sys-color-primary);
+  outline: 2px solid var(--zx-color-primary);
   outline-offset: 3px;
   border-radius: 3px;
 }
 
 .zx-footer-copy {
   margin: 0;
-  color: var(--md-sys-color-on-surface-variant);
+  color: var(--zx-color-on-surface-variant);
   font-size: var(--zx-text-caption);
   line-height: 1.5;
 }
