@@ -16,7 +16,9 @@ export const SITE = {
   IOS_DOWNLOAD_URL: process.env.NEXT_PUBLIC_IOS_DOWNLOAD_URL ?? '#ios-download',
 
   logo: '/assets/images/logo.png',
-  ogImage: '/assets/images/og.png',
+  /* JPEG, not WebP: this is the one asset third-party crawlers fetch, and some
+     chat clients still fail to render a WebP share card. */
+  ogImage: '/assets/images/og.jpg',
 } as const
 
 /**
@@ -29,9 +31,13 @@ export const SITE = {
  * Drop the encoded trailers into `public/assets/trailers/` under these names to
  * activate them. Until then each slot falls back to its own first frame, so the
  * reel still crossfades.
+ *
+ * Posters are 1920x1080 WebP. Keep replacements at a TRUE 16:9 ratio with no
+ * baked-in letterbox bars: the reel scales them with `background-size: cover`,
+ * so any bars in the file are scaled up and read as a broken layer.
  */
 export const TRAILERS = [
-  { src: '/assets/trailers/trailer-1.mp4', poster: '/assets/trailers/trailer-1.png' },
-  { src: '/assets/trailers/trailer-2.mp4', poster: '/assets/trailers/trailer-2.png' },
-  { src: '/assets/trailers/trailer-3.mp4', poster: '/assets/trailers/trailer-3.png' },
+  { src: '/assets/trailers/trailer-1.mp4', poster: '/assets/trailers/trailer-1.webp' },
+  { src: '/assets/trailers/trailer-2.mp4', poster: '/assets/trailers/trailer-2.webp' },
+  { src: '/assets/trailers/trailer-3.mp4', poster: '/assets/trailers/trailer-3.webp' },
 ] as const

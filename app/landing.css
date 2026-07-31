@@ -519,19 +519,19 @@
 
 /* ------------------------------------------------------------- breakpoints */
 
-/* Two buttons on one row as soon as two labels fit. Below this they stay
-   stacked, which is the reference mobile layout. */
-@media (min-width: 480px) {
-  .zx-cta {
-    grid-template-columns: 1fr 1fr;
-  }
-}
+/* From here up the ONLY thing that changes is the column cap, the brand lockup's
+   size, and the CTA going side by side. A 420px column centered on a tablet or
+   desktop display reads as a narrow island in a very wide light bar, so the cap
+   is raised in two steps — everything inside keeps its own sizing and simply has
+   more room.
 
-/* From here up the ONLY thing that changes is the column cap and the brand
-   lockup's size. A 420px column centered on a tablet or desktop display reads as
-   a narrow island in a very wide light bar, so the cap is raised in two steps —
-   everything inside keeps its own sizing and simply has more room. */
-@media (min-width: 768px) {
+   640px, NOT 480px, is where the pair may go side by side. The switch is tied to
+   the width that actually fits two labels, not to the first width where two
+   boxes physically sit in a row: while the column cap is still 420px each button
+   gets ~205px, which is under the widest label and wrapped the Android button to
+   two lines against a single-line iOS one. Below this they stay stacked and full
+   width, which is the reference mobile layout and never wraps. */
+@media (min-width: 640px) {
   .zx-page {
     --zx-page-max: 720px;
     --zx-gutter: 32px;

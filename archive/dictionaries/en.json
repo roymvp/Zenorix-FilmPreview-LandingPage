@@ -1,0 +1,159 @@
+{
+  "market": {
+    "country": "the United States",
+    "countryShort": "the US",
+    "currency": "USD",
+    "zero": "$0",
+    "monthly": "$2",
+    "annualPerMonth": "$1.25",
+    "annualTotal": "$15",
+    "monthlyValue": 2,
+    "annualPerMonthValue": 1.25,
+    "annualTotalValue": 15
+  },
+  "meta": {
+    "title": "{title} ({year}) — Watch Free in 4K | Zenorix",
+    "description": "Stream {title} free in 4K on Zenorix — plus 28,000+ movies, 8,000+ series and 900+ live channels from every major platform. First month free, then $2/month.",
+    "ogTitle": "{title} — free in 4K on Zenorix",
+    "keywords": "watch {title} free, {title} full movie, {title} 4K stream, free streaming app Android, Zenorix APK",
+    "imageAlt": "Key art from the film {title}, streaming free in 4K on Zenorix"
+  },
+  "nav": {
+    "home": "Zenorix home",
+    "languageMenu": "Choose your language",
+    "install": "Install"
+  },
+  "player": {
+    "play": "Play",
+    "pause": "Pause",
+    "mute": "Mute",
+    "unmute": "Unmute",
+    "seek": "Seek within the free preview"
+  },
+  "info": {
+    "synopsisExpand": "More",
+    "synopsisCollapse": "Less"
+  },
+  "chart": {
+    "heading": "Top 10 in {country} This Week",
+    "rank": "Number {rank}",
+    "seeAllShort": "See all",
+    "more": "Install Zenorix App for More Hits",
+    "moreHint": "28,000+ movies, 8,000+ shows & live TV channels"
+  },
+  "about": {
+    "heading": "About Zenorix",
+    "apps": {
+      "label": "20+ Premium Networks in One"
+    },
+    "price": {
+      "label": "Unbeatable Price",
+      "ourLabel": "Zenorix",
+      "vs": "vs",
+      "value": "{annualPerMonth}",
+      "rivalLabel": "Disney + HBO + Netflix",
+      "rivalValue": "~ $40",
+      "perMonth": "per month",
+      "rivalAmount": 40
+    },
+    "viewing": {
+      "label": "Cinematic Viewing",
+      "specs": {
+        "resolution": "4K Ultra HD",
+        "audio": "Dolby Atmos",
+        "playback": "Lag-Free"
+      }
+    },
+    "trial": {
+      "label": "Easy Try",
+      "value": "30 DAYS FREE",
+      "note": "No card needed to start."
+    },
+    "cta": "Like it? Get the Zenorix App",
+    "ctaMeta": "Android APK · {size} · {downloads}"
+  },
+  "faq": {
+    "heading": "FAQ",
+    "items": [
+      {
+        "q": "Do I get full access to everything during the 30 free days?",
+        "a": "100% full, unrestricted access. Zero locked titles, zero paywalled features, zero hidden tiers. Every movie, every show, every live channel, full 4K quality — all unlocked the second you install the app. No fine print, no limitations."
+      },
+      {
+        "q": "How much does it cost after the 30 free days?",
+        "a": "Two straightforward plans. The monthly plan is {monthly} after your free trial. The annual plan works out to just {annualPerMonth} per month — the cheapest streaming price on the market, way lower than Netflix, Disney+ or any other major service."
+      },
+      {
+        "q": "Do I need to add a card to start the 30-day free trial?",
+        "a": "No card, and no payment details of any kind. Your 30 free days start the moment you install the app. You only pick a plan and add a payment method after those 30 days are up — so there is no auto-charge to worry about, because we never hold your card during the trial, and nothing to cancel if you decide not to continue."
+      },
+      {
+        "q": "How do I install the APK on my Android phone?",
+        "a": "Takes 10 seconds flat. Tap download, open the file, and allow installs from unknown sources when prompted. No rooting, no complicated setup — just install and start watching instantly."
+      },
+      {
+        "q": "How much content is actually available?",
+        "a": "The biggest streaming library anywhere. 28,000+ blockbuster movies, 8,000+ binge-worthy TV series, plus 900+ live global TV channels. You'll never run out of things to watch."
+      },
+      {
+        "q": "How quickly are new shows and movies added?",
+        "a": "Same-day — often same-minute — premieres. Every new episode, every theatrical release goes live the exact same time it drops on the original platforms. No waiting, no spoilers."
+      },
+      {
+        "q": "What video quality do I get?",
+        "a": "True 4K Ultra HD on every single title. No fuzzy compressed streams, no extra charge for premium quality. Crisp, cinema-grade picture on every screen."
+      },
+      {
+        "q": "Can I watch on my Android TV or tablet too?",
+        "a": "Absolutely. Works on every Android device — phones, tablets, Android TV boxes, Fire sticks. One account works on all your screens. Install once, watch anywhere."
+      },
+      {
+        "q": "Can I cancel my subscription whenever I want?",
+        "a": "Yes. Cancel in one tap, no hoops to jump through, no cancellation fees. You're never locked into a contract. Stay only as long as you love the service."
+      }
+    ]
+  },
+  "finalCta": {
+    "srHeading": "Get Zenorix",
+    "cta": "Download & Install Zenorix App",
+    "meta": "Android APK · {size} · {downloads}"
+  },
+  "modals": {
+    "content": {
+      "heading": "Get the app to watch this movie FREE.",
+      "body": "Beyond this movie on the app:",
+      "bullets": [
+        "20+ Premium Movie Networks",
+        "28,000+ Movies & Series",
+        "4K Ultra HD & Dolby Atmos",
+        "30 Days Free - Then {annualPerMonth}/mo"
+      ],
+      "cta": "Get the Zenorix App",
+      "ctaMeta": "Android APK · {size} · {downloads}"
+    },
+    "preview": {
+      "headingLines": [
+        "Web viewing limited to the first {previewMinutes} mins.",
+        "Get the app to watch the FULL movie FREE."
+      ],
+      "body": "More features in app:",
+      "bullets": [
+        "Unlock 28,000+ movies & series",
+        "4K Ultra HD & Dolby Atmos",
+        "30 Days Free - No card needed to start"
+      ],
+      "cta": "Get the Zenorix App",
+      "ctaMeta": "Android APK · {size} · {downloads}"
+    }
+  },
+  "footer": {
+    "privacy": "Privacy",
+    "terms": "Terms",
+    "dmca": "DMCA",
+    "copyright": "© {year} Zenorix"
+  },
+  "a11y": {
+    "skipToContent": "Skip to film details",
+    "posterAlt": "Poster for {title}"
+  }
+}
