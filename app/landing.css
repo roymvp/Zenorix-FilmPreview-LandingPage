@@ -563,6 +563,12 @@
      correct in English. */
   .zx-cta {
     width: min(100%, 560px);
+    /* Side by side ONLY from here up, and only inside the 560px wrapper above —
+       the two rules belong together. That yields ~275px per button, which clears
+       the widest label; the old 480px switch fired while the column cap was still
+       420px, giving ~205px per button and wrapping Android to two lines against a
+       single-line iOS one. Below 640px they stay stacked at full width. */
+    grid-template-columns: 1fr 1fr;
   }
 }
 
