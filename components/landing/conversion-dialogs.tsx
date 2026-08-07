@@ -10,8 +10,8 @@ import { DownloadCta } from '@/components/landing/download-cta'
  * `<md-dialog onclosed={fn}>` does NOT work and was silently dead: React sets
  * unknown props on custom elements as PROPERTIES, and assigning `.onclosed`
  * only registers a listener for standardised `on*` handlers — which `closed`,
- * being Material's own event, is not. So dismissals never reached the provider,
- * state stayed non-null and the preview gate latched shut after one open.
+ * being Material's own event, is not. So dismissals never reached the provider
+ * and state stayed non-null, latching the sheet shut after one open.
  * Custom-element events have to be wired with a real `addEventListener`.
  */
 function useClosedEvent(
@@ -127,179 +127,81 @@ function useSheetAnimation(ref: React.RefObject<HTMLElement | null>) {
 }
 
 export type DialogCopy = {
-  content: {
-    heading: string
-    body: string
-    bullets: string[]
-    cta: string
-    ctaMeta: string
-  }
-  preview: {
-    /**
-     * Two lines rendered at IDENTICAL weight and size — they are one heading
-     * split for line control, not a heading plus a subheading. Kept as an array
-     * rather than one string with a `\n` so the break is structural (two
-     * elements) instead of depending on `white-space` styling.
-     */
-    headingLines: string[]
-    body: string
-    bullets: string[]
-    cta: string
-    ctaMeta: string
-  }
+  heading: string
+  body: string
+  bullets: string[]
+  cta: string
+  ctaMeta: string
 }
 
-/* NOTE: `CornerClose` lived here — a top-right dismiss disc. Both sheets now rely
+/* NOTE: `CornerClose` lived here — a top-right dismiss disc. The sheet now relies
    on md-dialog's own light dismiss instead: `handleDialogClick` fires `cancel` and
    closes whenever the click did not originate inside `.container`, so tapping the
    scrim (and Escape, which stays for keyboard users) already routed through the
    same `closed` event the provider listens to. The button was a second, redundant
    path to a behaviour the component gave us for free, and removing it hands the
-   corner back to the title. */
+   corner back to the title.
+
+   NOTE: a second sheet lived here too — the preview gate, opened when the hero
+   player hit its 10-minute wall. The hero has no player any more, so that sheet
+   could never be opened and went with it, along with its `modals.preview` copy. */
 
 /**
- * Both upsell dialogs. They share one mount point so the page has exactly one
- * modal layer, and each is driven purely by conversion context state.
+ * The locked-title upsell sheet, fired from the Top 10 rail.
+ *
+ * Mounted once at page level rather than per card so the page has exactly one
+ * modal layer, and driven purely by conversion context state.
  */
-export function ConversionDialogs({
-  copy,
-  previewFrame,
-}: {
-  copy: DialogCopy
-  /**
-   * The film's opening frame (`Movie.previewFrame`) — the same asset the player
-   * uses as its poster, reused here as the sheet's header art so the upsell
-   * reads as a continuation of the frame rather than a new screen. Landscape;
-   * it is cropped with `object-fit: cover`.
-   */
-  previewFrame: string
-}) {
-  const {
-    contentTitle,
-    closeContent,
-    previewReason,
-    closePreview,
-  } = useConversion()
+export function ConversionDialogs({ copy }: { copy: DialogCopy }) {
+  const { contentTitle, closeContent } = useConversion()
 
   const contentRef = useRef<HTMLElement | null>(null)
-  const previewRef = useRef<HTMLElement | null>(null)
 
-  // The ONLY dismissal route now, and it covers both: md-dialog fires `closed`
-  // after an outside/scrim click and after Escape, so this single listener resets
-  // the provider state for either gesture.
+  // The ONLY dismissal route, and it covers both gestures: md-dialog fires
+  // `closed` after an outside/scrim click and after Escape, so this single
+  // listener resets the provider state either way.
   useClosedEvent(contentRef, closeContent)
-  useClosedEvent(previewRef, closePreview)
-
   useSheetAnimation(contentRef)
-  useSheetAnimation(previewRef)
 
   return (
-    <>
-      {/* Locked-title dialog — fired from the Top 10 rail. */}
-      <md-dialog
-        ref={contentRef}
-        className="zx-dialog"
-        open={contentTitle !== null}
-        aria-label={copy.content.heading}
-      >
-        <div slot="headline" className="zx-dialog-headline">
-          <strong className="zx-dialog-title">{copy.content.heading}</strong>
-        </div>
+    <md-dialog
+      ref={contentRef}
+      className="zx-dialog"
+      open={contentTitle !== null}
+      aria-label={copy.heading}
+    >
+      <div slot="headline" className="zx-dialog-headline">
+        <strong className="zx-dialog-title">{copy.heading}</strong>
+      </div>
 
-        {/* A plain div, not a `<form method="dialog">`. The form only existed so
-            a Close button could submit it via `form="…"`, but React assigns that
-            prop as a PROPERTY on the custom element and Material's buttons
-            expose `form` as getter-only — it threw "Cannot set property form of
-            #<Button> which has only a getter" and the association never
-            happened. An explicit onClick is both simpler and actually works. */}
-        <div slot="content">
-          <div className="zx-dialog-body">
-            <p className="zx-dialog-lead">{copy.content.body}</p>
-            <ul className="zx-dialog-bullets">
-              {copy.content.bullets.map((bullet) => (
-                <li key={bullet}>
-                  <md-icon aria-hidden="true">check</md-icon>
-                  {bullet}
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-
-        <div slot="actions" className="zx-dialog-actions">
-          <DownloadCta
-            label={copy.content.cta}
-            sub={copy.content.ctaMeta}
-            source={`content_lock:${contentTitle ?? 'unknown'}`}
-            autoFocus
-          />
-        </div>
-      </md-dialog>
-
-      {/* Preview-exhausted dialog — fired by the player at the 10-minute wall. */}
-      <md-dialog
-        ref={previewRef}
-        className="zx-dialog"
-        open={previewReason !== null}
-        /* Both heading lines, joined: the accessible name has to carry the whole
-           message, and the visual break between them is not meaningful to a
-           screen reader. */
-        aria-label={copy.preview.headingLines.join(' ')}
-      >
-        <div slot="headline" className="zx-dialog-headline">
-          <span className="zx-dialog-art">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            {/* Decorative: the heading below already carries the whole message,
-                so alt text here would add nothing for screen readers.
-
-                Lazy + async: this dialog is closed on load, so the frame is
-                off-screen and must never compete with the hero LCP image for
-                early bandwidth. Intrinsic dimensions are declared so the sheet
-                reserves the right box the first time it opens instead of
-                reflowing its own headline. */}
-            <img
-              src={previewFrame}
-              alt=""
-              width={1600}
-              height={900}
-              loading="lazy"
-              decoding="async"
-            />
-          </span>
-          {/* One heading, two lines, one <strong> per line so both inherit the
-              exact same typescale — see the note on `headingLines`. */}
-          <span className="zx-dialog-heading-stack">
-            {copy.preview.headingLines.map((line) => (
-              <strong key={line} className="zx-dialog-title">
-                {line}
-              </strong>
+      {/* A plain div, not a `<form method="dialog">`. The form only existed so
+          a Close button could submit it via `form="…"`, but React assigns that
+          prop as a PROPERTY on the custom element and Material's buttons
+          expose `form` as getter-only — it threw "Cannot set property form of
+          #<Button> which has only a getter" and the association never
+          happened. An explicit onClick is both simpler and actually works. */}
+      <div slot="content">
+        <div className="zx-dialog-body">
+          <p className="zx-dialog-lead">{copy.body}</p>
+          <ul className="zx-dialog-bullets">
+            {copy.bullets.map((bullet) => (
+              <li key={bullet}>
+                <md-icon aria-hidden="true">check</md-icon>
+                {bullet}
+              </li>
             ))}
-          </span>
+          </ul>
         </div>
+      </div>
 
-        <div slot="content">
-          <div className="zx-dialog-body">
-            <p className="zx-dialog-lead">{copy.preview.body}</p>
-            <ul className="zx-dialog-bullets">
-              {copy.preview.bullets.map((bullet) => (
-                <li key={bullet}>
-                  <md-icon aria-hidden="true">check</md-icon>
-                  {bullet}
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-
-        <div slot="actions" className="zx-dialog-actions">
-          <DownloadCta
-            label={copy.preview.cta}
-            sub={copy.preview.ctaMeta}
-            source={`preview_gate:${previewReason ?? 'limit'}`}
-            autoFocus
-          />
-        </div>
-      </md-dialog>
-    </>
+      <div slot="actions" className="zx-dialog-actions">
+        <DownloadCta
+          label={copy.cta}
+          sub={copy.ctaMeta}
+          source={`content_lock:${contentTitle ?? 'unknown'}`}
+          autoFocus
+        />
+      </div>
+    </md-dialog>
   )
 }

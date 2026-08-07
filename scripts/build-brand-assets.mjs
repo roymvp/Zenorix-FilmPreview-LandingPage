@@ -95,15 +95,18 @@ async function crop(top, bottom, out, resizeWidth) {
   const transparent = await toTransparent(cropped)
   // `trim` runs last so it works on the alpha channel and removes the plate's
   // own margin rather than a black border it can no longer see.
-  await sharp(transparent)
+  const resized = sharp(transparent)
     .trim({ threshold: 4 })
     .resize({ width: resizeWidth, withoutEnlargement: true })
-    .png({ compressionLevel: 9 })
-    .toFile(out)
-  console.log('[v0] wrote', out)
+
+  /* WebP, not PNG: these are smooth gradient artwork with an alpha channel, and
+     the equivalent PNG of the lockup is ~390KB against ~35KB here. The hero
+     lockup is painted in the first viewport, so that difference is LCP budget. */
+  const info = await resized.webp({ quality: 90, effort: 6 }).toFile(out)
+  console.log('[v0] wrote', out, `${Math.round(info.size / 1024)}KB`, info.width, info.height)
 }
 
 // The mark alone: top of the artwork down to the gap.
-await crop(firstInk, splitY, 'public/brand/zenorix-mark.png', 256)
+await crop(firstInk, splitY, 'public/brand/zenorix-mark.webp', 256)
 // The full lockup: mark + wordmark, for the hero.
-await crop(firstInk, lastInk + 1, 'public/brand/zenorix-lockup.png', 640)
+await crop(firstInk, lastInk + 1, 'public/brand/zenorix-lockup.webp', 640)

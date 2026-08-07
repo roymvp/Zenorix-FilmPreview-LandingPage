@@ -388,447 +388,203 @@
 
 /* ------------------------------------------------------------------- hero */
 
+/* NOTE: everything from `.zx-stage` to `.zx-genre` lived here — the 16/9 video
+   frame, its scrim and tap layer, the mute button, the scrub bar with its locked
+   tail, the big play disc, and the film info block (title, meta row, A/V tags,
+   genre chips, clamped synopsis with its expander). All of it belonged to the
+   in-page preview player and the film block under it, both of which the brand
+   billboard replaced. ~440 lines, and none of the classes have any remaining
+   markup: the hero is now a poster wall, a scrim and a pitch. */
+
 .zx-hero {
   position: relative;
   isolation: isolate;
-  /* The letterbox behind the 16/9 frame. Uses the media black token rather than a
-     literal so it stays identical to the scrims painted over the video above it. */
+  /* The canvas the wall's scrim fades into at the bottom edge. Uses the media
+     black token rather than a literal so the fade lands on exactly the value the
+     scrim's last stop resolves to. */
   background: var(--zx-media-scrim-strong);
   overflow: hidden;
 }
 
-/* The stage is now just the video frame: the title, specs and synopsis moved
-   out from over the film into .zx-info below, so it no longer needs to reserve
-   near-viewport height for an overlaid copy block. */
-.zx-stage {
+/* Full-bleed brand billboard: tilted poster wall, scrim, pitch.
+   `min(78svh, 640px)` rather than a media query, because this file has none by
+   design (see the header): `svh` responds to the real phone viewport — and it is
+   the SMALL viewport unit on purpose, so a mobile browser's collapsing URL bar
+   cannot make the hero taller than the space it measured — while the 640px cap
+   stops a tall desktop window stretching the same 420px column into a 1300px
+   billboard. */
+.zx-hero-billboard {
   position: relative;
-  width: 100%;
-  aspect-ratio: 16 / 9;
+  min-height: min(78svh, 640px);
+  display: flex;
+  flex-direction: column;
+  /* Copy sits at the BOTTOM: the wall reads as depth above it, and the CTA lands
+     as close to the fold as the layout allows. */
+  justify-content: flex-end;
 }
 
-.zx-stage-media,
-.zx-stage-poster {
+.zx-hero-wall {
   position: absolute;
   inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-/* Merged from a second, adjacent `.zx-stage-poster` block that declared only these
-   two lines — same selector, same specificity, no intervening rule, so it was pure
-   duplication. `width`/`height` above also override the intrinsic 1600x900 attributes
-   now set on the element, which exist for the aspect ratio hint, not for layout. */
-.zx-stage-poster {
   z-index: 0;
-  transition: opacity 600ms ease;
+  overflow: hidden;
 }
 
-.zx-stage-media {
-  z-index: 1;
-}
+/* One arrangement of the wall. All three layers are stacked in the same box and
+   crossfade; only their opacity is ever animated (never a transform or a layout
+   property), so the whole effect stays on the compositor.
 
-.zx-stage[data-playing='true'] .zx-stage-poster {
+   Inset NEGATIVELY on all sides: the layer is rotated, and a rotated rectangle
+   no longer covers the corners of its own box. The overhang is what keeps the
+   wall bleeding past every edge instead of showing triangles of black canvas. */
+.zx-hero-wall-layer {
+  position: absolute;
+  inset: -20% -14%;
+  display: flex;
+  gap: 8px;
+  rotate: -9deg;
   opacity: 0;
+  animation: zx-wall-cycle 18s var(--zx-wall-delay, 0s) linear infinite;
 }
 
-/* One job only: keep the timecode and scrub bar legible over a bright frame.
-   The former full-frame vignette and warm ember light leak are gone — they
-   tinted the film and added two more gradients to the page. */
-.zx-stage-scrim {
+.zx-hero-wall-column {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+}
+
+/* Vertical offsets so the three columns don't line up into visible horizontal
+   bands — the tiles are all one aspect ratio, so without this the wall reads as
+   a grid rather than as a stack of shelves. */
+.zx-hero-wall-column:nth-child(2) {
+  translate: 0 -7%;
+}
+
+.zx-hero-wall-column:nth-child(3) {
+  translate: 0 5%;
+}
+
+/* `flex: 0 0 auto` so tiles keep their 2:3 ratio and overflow the column instead
+   of being squashed to fit it — the overflow is the point, `.zx-hero-wall` clips
+   it and the wall reads as continuing past the frame. */
+.zx-hero-tile {
+  flex: 0 0 auto;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 2 / 3;
+  object-fit: cover;
+  border-radius: 10px;
+}
+
+/* Each layer is visible for a third of the cycle with a short crossfade. The
+   stops are deliberately asymmetric: the fade-IN is packed into the last 6% so a
+   layer is already at full opacity when its own 0% comes round, which is what
+   makes three layers on one shared 18s cycle hand over cleanly. */
+@keyframes zx-wall-cycle {
+  0%,
+  27% {
+    opacity: 1;
+  }
+  33%,
+  94% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+/* A wall that silently stops moving, rather than one that keeps cycling at a
+   slower speed: for anyone who has asked for less motion the crossfade has no
+   informational value at all, so the first arrangement simply stays put. */
+@media (prefers-reduced-motion: reduce) {
+  .zx-hero-wall-layer {
+    animation: none;
+  }
+
+  .zx-hero-wall-layer:first-child {
+    opacity: 1;
+  }
+}
+
+/* Two jobs: (1) hold white text to AA over ANY tile the cycle happens to land
+   on — the top stop also darkens the art under the translucent top bar — and
+   (2) land on solid black at the bottom so the hero has no seam against the
+   page. The bottom stop MUST stay fully opaque for that reason. */
+.zx-hero-scrim {
   position: absolute;
   inset: 0;
-  z-index: 2;
+  z-index: 1;
   pointer-events: none;
   background: linear-gradient(
     to top,
-    rgb(var(--zx-media-black-rgb) / 0.72) 0%,
-    rgb(var(--zx-media-black-rgb) / 0.32) 22%,
-    var(--zx-media-scrim) 45%
+    rgb(var(--zx-media-black-rgb) / 1) 0%,
+    rgb(var(--zx-media-black-rgb) / 0.92) 26%,
+    rgb(var(--zx-media-black-rgb) / 0.6) 62%,
+    rgb(var(--zx-media-black-rgb) / 0.5) 100%
   );
 }
 
-.zx-stage-tap {
-  position: absolute;
-  inset: 0;
-  z-index: 3;
-  border: 0;
-  padding: 0;
-  background: transparent;
-  cursor: pointer;
-  appearance: none;
-}
-
-.zx-stage-tap:focus-visible {
-  outline: 3px solid var(--md-sys-color-primary);
-  outline-offset: -6px;
-}
-
-/* Playback control strip, pinned to the bottom of the video frame. Formerly
-   also held the title and metadata, which now live in .zx-info below.
-
-   Visible while paused, faded out 2s into playback — `data-visible` is driven by
-   `controlsVisible` in ImmersivePlayer. Hidden controls also drop out of the hit
-   test so a tap on the frame reaches the play/pause layer instead of the bar. */
-.zx-player-bar {
-  position: absolute;
-  z-index: 4;
-  inset-inline: 0;
-  inset-block-end: 0;
-  padding: 0 var(--zx-gutter) 10px;
-  pointer-events: none;
-  transition:
-    opacity 260ms ease,
-    transform 260ms ease;
-}
-
-.zx-player-bar[data-visible='false'] {
-  opacity: 0;
-  transform: translateY(6px);
-}
-
-.zx-player-bar[data-visible='true'] > * {
-  pointer-events: auto;
-}
-
-/* A/V spec chips (4K, HDR, Atmos). These sit on the page surface now that the
-   metadata line moved out of the player overlay, so they use on-surface colors
-   rather than the --zx-on-media pair. */
-.zx-tag {
-  /* 8px inline, matching `.zx-genre`. These two chip types sit side by side in the
-     same metadata row, so they were 7px vs 9px against each other — a difference with
-     no meaning that just made the row look unevenly set. They stay distinguishable by
-     SHAPE and fill (outlined 5px rect vs filled pill), not by padding. */
-  padding: var(--zx-space-05) var(--zx-space-2);
-  border-radius: 5px;
-  border: 1px solid var(--md-sys-color-outline-variant);
-  color: var(--md-sys-color-on-surface-variant);
-  font-size: var(--zx-text-micro);
-  font-weight: var(--zx-weight-bold);
-  letter-spacing: 0.05em;
-}
-
-/* Separator between year and runtime. */
-.zx-dot {
-  width: 3px;
-  height: 3px;
-  border-radius: 50%;
-  background: currentColor;
-  opacity: 0.5;
-}
-
-/* Player controls: mute (top-right) and the scrub bar (bottom). Play/pause has
-   no button of its own — it is the full-frame tap target. */
-
-/* Sits above .zx-stage-tap so the tap layer cannot swallow the mute click.
-   Just the glyph — no pill, no blur, no state layer; a text shadow does the
-   legibility work that the translucent container used to. */
-.zx-mute {
-  position: absolute;
-  z-index: 5;
-  inset-block-start: 6px;
-  inset-inline-end: 8px;
-  display: grid;
-  place-items: center;
-  width: 32px;
-  height: 32px;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  color: var(--zx-on-media);
-  cursor: pointer;
-  appearance: none;
-  transition: opacity 260ms ease;
-}
-
-/* Fades with the rest of the controls during playback, and stops taking taps
-   while hidden so the frame tap underneath keeps working. */
-.zx-mute[data-visible='false'] {
-  opacity: 0;
-  pointer-events: none;
-}
-
-.zx-mute md-icon {
-  font-size: 20px;
-  width: 20px;
-  height: 20px;
-  filter: drop-shadow(0 1px 3px rgb(var(--zx-media-black-rgb) / 0.85));
-}
-
-.zx-mute:hover {
-  color: var(--md-sys-color-primary);
-}
-
-.zx-mute:focus-visible {
-  outline: 2px solid var(--md-sys-color-primary);
-  outline-offset: 2px;
-  border-radius: 999px;
-}
-
-/* Elapsed / total, directly above the track. */
-.zx-player-time {
-  display: flex;
-  justify-content: space-between;
-  margin: 0 0 var(--zx-space-1);
-  font-size: var(--zx-text-label);
-  font-weight: var(--zx-weight-semibold);
-  font-variant-numeric: tabular-nums;
-  color: var(--zx-on-media);
-  text-shadow: 0 1px 3px rgb(var(--zx-media-black-rgb) / 0.85);
-}
-
-.zx-player-time-total {
-  color: var(--zx-on-media-variant);
-}
-
-/* A thin native range input replaces <md-slider>: same behaviour, far less
-   chrome. The played portion is painted with a gradient driven by the
-   --zx-progress custom property the component sets inline. */
-.zx-scrub {
+.zx-hero-copy {
   position: relative;
+  z-index: 2;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  height: 12px;
+  gap: var(--zx-space-5);
+  /* Clears the absolutely positioned top bar overhead, so a tall headline can
+     never slide under it. */
+  padding: calc(var(--zx-topbar-h) + var(--zx-space-8)) var(--zx-gutter)
+    var(--zx-space-8);
+  text-align: center;
 }
 
-.zx-scrub-input {
-  flex: 1;
-  min-width: 0;
-  height: 12px;
+/* The signature element, and the only place the logo is shown at size. Width in
+   px rather than a percentage: it is a raster lockup, so it should never be
+   scaled above the 640px asset or shrunk to where the wordmark stops resolving. */
+.zx-hero-lockup {
+  width: 172px;
+  height: auto;
+}
+
+.zx-hero-headline {
   margin: 0;
-  background: transparent;
-  appearance: none;
-  cursor: pointer;
-}
-
-.zx-scrub-input::-webkit-slider-runnable-track {
-  height: 3px;
-  border-radius: 999px;
-  /* The one place the SOFT TECH BLUE accent is spent, and the reason it exists as a
-     separate hue: this is the only element on the page showing live machine state,
-     so it is the only one that benefits from a color no static copy uses. Silver
-     here would have been indistinguishable from the white-alpha remainder track
-     beside it — the accent is doing real work, not decorating. */
-  background: linear-gradient(
-    to right,
-    var(--md-sys-color-tertiary) var(--zx-progress, 0%),
-    rgba(255, 255, 255, 0.28) var(--zx-progress, 0%)
-  );
-}
-
-.zx-scrub-input::-moz-range-track {
-  height: 3px;
-  border-radius: 999px;
-  /* The one place the SOFT TECH BLUE accent is spent, and the reason it exists as a
-     separate hue: this is the only element on the page showing live machine state,
-     so it is the only one that benefits from a color no static copy uses. Silver
-     here would have been indistinguishable from the white-alpha remainder track
-     beside it — the accent is doing real work, not decorating. */
-  background: linear-gradient(
-    to right,
-    var(--md-sys-color-tertiary) var(--zx-progress, 0%),
-    rgba(255, 255, 255, 0.28) var(--zx-progress, 0%)
-  );
-}
-
-/* A small dot, not a grabbable MD handle: this scrubber only spans a preview. */
-.zx-scrub-input::-webkit-slider-thumb {
-  appearance: none;
-  width: 9px;
-  height: 9px;
-  margin-block-start: -3px;
-  border: 0;
-  border-radius: 50%;
-  /* Matches the played portion of the track it sits at the end of. */
-  background: var(--md-sys-color-tertiary);
-}
-
-.zx-scrub-input::-moz-range-thumb {
-  width: 9px;
-  height: 9px;
-  border: 0;
-  border-radius: 50%;
-  background: var(--md-sys-color-tertiary);
-}
-
-.zx-scrub-input:focus-visible {
-  outline: 2px solid var(--md-sys-color-primary);
-  outline-offset: 3px;
-  border-radius: 999px;
-}
-
-/* The locked tail visualizes "the rest of the film is behind the app". Sits on
-   the track, above the input's own background but not blocking its pointer. */
-.zx-scrub-lock {
-  position: absolute;
-  inset-block-start: 50%;
-  transform: translateY(-50%);
-  inset-inline-end: 0;
-  height: 3px;
-  border-radius: 999px;
-  background: repeating-linear-gradient(
-    115deg,
-    rgba(255, 255, 255, 0.3) 0 5px,
-    rgba(255, 255, 255, 0.06) 5px 10px
-  );
-  pointer-events: none;
-}
-
-/* Big center play/pause affordance */
-
-/* Centered in the frame above the scrub bar, not across the whole frame, so it
-   never sits on top of the slider on a short 16/9 phone-width video. Fades with
-   the rest of the controls 2s into playback (see .zx-player-bar). */
-.zx-bigplay {
-  position: absolute;
-  z-index: 4;
-  inset: 0 0 34px;
-  display: grid;
-  place-items: center;
-  pointer-events: none;
-  transition:
-    opacity 260ms ease,
-    transform 260ms ease;
-}
-
-.zx-bigplay[data-visible='false'] {
-  opacity: 0;
-  /* Shrinks rather than just fading, so it reads as receding into the film. */
-  transform: scale(0.86);
-}
-
-/* ONE shape: a single translucent circle. No FAB container, no outline ring on
-   top of it — the previous version stacked an <md-fab>'s rounded-square surface
-   under a circular box-shadow and read as two shapes at once.
-   Sized well above the MD "large" default: this is the hero control on a 16/9
-   phone frame and has to be an obvious, thumb-sized target from across the
-   room, not a small chip floating in the middle of the video. */
-.zx-bigplay-disc {
-  display: grid;
-  place-items: center;
-  width: 78px;
-  height: 78px;
-  border-radius: 50%;
-  background: rgb(var(--zx-media-black-rgb) / 0.5);
-  color: var(--zx-on-media);
-}
-
-.zx-bigplay-disc md-icon {
-  font-size: 42px;
-  width: 42px;
-  height: 42px;
-}
-
-/* --------------------------------------------------------------- film info */
-
-/* No gradient blend out of the player: the page has ONE background color and
-   the video frame's own edge is the transition. */
-.zx-info {
-  /* The one deliberate exception to the 40px step: 20px below the player. The video
-     frame has its own hard edge that already reads as a separator, so a full step
-     here just detaches the title from the film it belongs to.
-     Bottom is 0 — the following section owns that gap. */
-  padding-block: var(--zx-space-5) 0;
-}
-
-/* The film title now lives here rather than over the video, so it is the page's
-   real <h1> and is set on the surface instead of on media. */
-.zx-film-title {
-  margin: 0;
-  /* 26px on the scale, was an off-scale 27px. Still a clear step above the 21px
-     section titles, which is what marks this as the page's single h1. */
   font-size: var(--zx-text-h1);
   line-height: var(--zx-lh-tight);
   font-weight: var(--zx-weight-bold);
   letter-spacing: -0.02em;
   text-wrap: balance;
-  color: var(--md-sys-color-on-surface);
+  color: var(--zx-on-media);
 }
 
-/* Year · runtime · A/V specs, all on one wrapping line. */
-.zx-film-meta {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  /* 8px, was an off-scale 7px. These are peer items on one line. */
-  gap: var(--zx-space-2);
-  margin: var(--zx-space-2) 0 0;
-  font-size: var(--zx-text-meta);
-  color: var(--md-sys-color-on-surface-variant);
-}
-
-.zx-synopsis-wrap {
-  /* Bottom margin is 0, not 20px. As the section's LAST child, any bottom margin here
-     is invisible on its own and simply adds to the following section's step — it was
-     20px of the old 100px gap. Trailing space belongs to the section rhythm, not to
-     the last element inside a section. */
-  margin: var(--zx-space-4) 0 0;
-}
-
-/* Clamped to 2 lines and expanded in place by the toggle below: the synopsis is
-   supporting copy, and a long one pushed the download CTA below the fold. The
-   full text always stays in the DOM (and in the JSON-LD description), so the
-   clamp is purely visual and nothing is lost to crawlers.
-
-   `--md-sys-color-outline` rather than on-surface-variant: this is the lowest
-   emphasis body copy on the page and should sit clearly behind the title, the
-   metadata row and the CTA in the reading hierarchy. */
-.zx-synopsis {
+/* The hero's one number. Sits a tier below the headline on purpose: the pitch is
+   the promise, the price is the proof of it. */
+.zx-hero-price {
   margin: 0;
-  color: var(--md-sys-color-outline);
-  text-wrap: pretty;
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
-  line-clamp: 2;
-  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: var(--zx-space-1);
+  font-size: var(--zx-text-amount);
+  line-height: var(--zx-lh-tight);
+  font-weight: var(--zx-weight-bold);
+  letter-spacing: 0.01em;
+  font-variant-numeric: tabular-nums;
+  color: var(--zx-on-media);
 }
 
-/* Expanded: drop the clamp so the paragraph grows to its natural height. */
-.zx-synopsis[data-expanded='true'] {
-  -webkit-line-clamp: unset;
-  line-clamp: unset;
-  overflow: visible;
-}
-
-/* Text + caret, deliberately quieter than the CTA below it. */
-.zx-synopsis-toggle {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--zx-space-05);
-  margin-block-start: var(--zx-space-1);
-  padding: var(--zx-space-1) 0;
-  border: 0;
-  background: transparent;
-  color: var(--md-sys-color-primary);
-  font: inherit;
+.zx-hero-price-note {
   font-size: var(--zx-text-meta);
-  font-weight: var(--zx-weight-semibold);
-  cursor: pointer;
+  font-weight: var(--zx-weight-regular);
+  letter-spacing: normal;
+  color: var(--zx-on-media-variant);
 }
 
-.zx-synopsis-toggle md-icon {
-  font-size: 18px;
-  width: 18px;
-  height: 18px;
-}
-
-.zx-synopsis-toggle:focus-visible {
-  outline: 2px solid var(--md-sys-color-primary);
-  outline-offset: 2px;
-  border-radius: 6px;
-}
-
-/* Genre chips. These now sit inline in .zx-film-meta (after the runtime), so
-   they are sized to that 13px line rather than as standalone pills. */
-.zx-genre {
-  /* 8px inline, matching `.zx-tag` — see the note there. */
-  padding: var(--zx-space-05) var(--zx-space-2);
-  border-radius: 999px;
-  background: var(--md-sys-color-surface-container-high);
-  color: var(--md-sys-color-on-surface-variant);
-  font-size: var(--zx-text-label);
-  font-weight: var(--zx-weight-semibold);
+/* The hero CTA is the widest element in the stack, so it sets the copy block's
+   measure. `100%` inside the padded column, not a fixed width. */
+.zx-hero-copy .zx-cta {
+  width: 100%;
 }
 
 /* Primary CTA cluster (repeated at several scroll depths) */

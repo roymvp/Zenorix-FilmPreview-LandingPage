@@ -3,7 +3,14 @@ import { LanguageSwitcher } from '@/components/landing/language-switcher'
 import { SITE } from '@/lib/config/site'
 import type { Locale } from '@/lib/i18n/config'
 
-/** Transparent bar layered over the film — chrome must never steal from the art. */
+/**
+ * Frosted-glass bar layered over the hero's poster wall.
+ *
+ * It is translucent rather than solid so the art keeps running underneath, and
+ * blurred rather than merely transparent because the wall behind it is
+ * high-contrast key art — plain transparency would leave the wordmark and the
+ * install button fighting whatever poster happens to be under them.
+ */
 export function TopBar({
   locale,
   homeHref,
@@ -23,13 +30,20 @@ export function TopBar({
 }) {
   return (
     <header className="zx-topbar">
-      {/* Logo handoff: replace the placeholder span below with an img or inline SVG
-          carrying the same `zx-brand-mark` class, which already owns the 30x30 box
-          and its radius — no CSS change needed. */}
       <a className="zx-brand" href={homeHref} aria-label={homeLabel}>
-        <span className="zx-brand-mark" data-placeholder="logo" aria-hidden="true">
-          <md-icon>image</md-icon>
-        </span>
+        {/* The mark alone, not the full lockup: the wordmark is set in live text
+            beside it, so shipping the lockup here would print "ZENORIX" twice.
+            alt="" + aria-hidden because the link is already named by homeLabel.
+            eslint-disable — a 256px transparent WebP needs no image loader. */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          className="zx-brand-mark"
+          src="/brand/zenorix-mark.webp"
+          alt=""
+          aria-hidden="true"
+          width={256}
+          height={196}
+        />
         {/* aria-hidden: the link already announces itself via homeLabel, so
             reading the wordmark too would just duplicate it. */}
         <span className="zx-brand-name" aria-hidden="true">

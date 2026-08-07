@@ -2,9 +2,8 @@ import { AboutZenorix } from '@/components/landing/about-zenorix'
 import { ConversionDialogs } from '@/components/landing/conversion-dialogs'
 import { ConversionProvider } from '@/components/landing/conversion-provider'
 import { FaqSection } from '@/components/landing/faq-section'
-import { FilmInfo } from '@/components/landing/film-info'
 import { FinalCta } from '@/components/landing/final-cta'
-import { ImmersivePlayer } from '@/components/landing/immersive-player'
+import { HeroBillboard } from '@/components/landing/hero-billboard'
 import { SiteFooter } from '@/components/landing/site-footer'
 import { TopBar } from '@/components/landing/top-bar'
 import { TopChart } from '@/components/landing/top-chart'
@@ -18,8 +17,14 @@ import { buildStructuredData, marketValues } from '@/lib/seo'
  * The landing page itself, shared by the market home route and the localized
  * /movie/[slug] routes.
  *
- * Section order is the funnel: cinematic hook -> what it is -> social proof ->
+ * Section order is the funnel: brand billboard -> what people are watching ->
  * what Zenorix is -> objections -> close, all wired to one download handler.
+ *
+ * `movie` no longer drives anything VISIBLE. The hero used to open with that
+ * film's preview player and an info block; the page now opens on the brand and
+ * the catalogue, so the film survives only in the head — its title in the
+ * metadata and its `Movie` node in the JSON-LD graph — which is what keeps each
+ * /movie/[slug] route a distinct, indexable entry point.
  *
  * The layout is mobile-only by design: `.zx-page` caps itself at a phone width
  * and centers, so the page never stretches into a desktop composition.
@@ -36,24 +41,13 @@ export function FilmLanding({
   /** Resolves this same page's URL in any market, for hreflang + the selector. */
   path: (locale: Locale) => string
 }) {
-  const copy = movie.copy[locale]
-  const values = {
-    ...marketValues(dict),
-    title: copy.title,
-    year: movie.releaseYear,
-    /* The web preview length, in whole minutes, for the gate dialog's headline.
-       Rounded because the copy reads "the first N mins" — a fractional limit
-       would otherwise print as "9.5". */
-    previewMinutes: Math.round(movie.previewLimitSeconds / 60),
-  }
+  const values = marketValues(dict)
 
   const localeHrefs = {
     en: path('en'),
     'pt-br': path('pt-br'),
     th: path('th'),
   } as const
-
-  const runtimeSeconds = movie.runtimeMinutes * 60
 
   const structuredData = buildStructuredData({ movie, locale, dict, path })
 
@@ -96,50 +90,34 @@ export function FilmLanding({
         }}
       />
 
-      <a className="zx-visually-hidden" href="#zx-details">
+      <a className="zx-visually-hidden" href="#zx-main">
         {dict.a11y.skipToContent}
       </a>
 
       <div className="zx-page">
-        <section className="zx-hero">
+        {/* The hero is a <section> outside <main> and holds the top bar, because
+            the bar is layered over the poster wall rather than sitting above it. */}
+        <section className="zx-hero" aria-labelledby="zx-hero-headline">
           <TopBar
             locale={locale}
             homeHref={`/${locale}`}
             homeLabel={dict.nav.home}
-          languageMenuLabel={dict.nav.languageMenu}
+            languageMenuLabel={dict.nav.languageMenu}
             installLabel={dict.nav.install}
             localeHrefs={localeHrefs}
           />
 
-          <ImmersivePlayer
-            src={movie.videoSrc}
-            type={movie.videoType}
-            poster={movie.previewFrame}
-            posterAlt={fill(dict.meta.imageAlt, values)}
-            runtimeSeconds={runtimeSeconds}
-            limitSeconds={movie.previewLimitSeconds}
-            copy={{
-              play: dict.player.play,
-              pause: dict.player.pause,
-              mute: dict.player.mute,
-              unmute: dict.player.unmute,
-              seek: dict.player.seek,
-            }}
+          <HeroBillboard
+            headline={dict.hero.headline}
+            price={fill(dict.hero.price, values)}
+            priceNote={dict.hero.priceNote}
+            cta={dict.hero.cta}
+            ctaMeta={fill(dict.hero.ctaMeta, values)}
+            brandAlt={dict.hero.brandAlt}
           />
         </section>
 
-        <main>
-          <FilmInfo
-            title={copy.title}
-            releaseYear={movie.releaseYear}
-            runtimeMinutes={movie.runtimeMinutes}
-            qualityTags={movie.qualityTags}
-            synopsis={copy.synopsis}
-            genres={copy.genres}
-            expandLabel={dict.info.synopsisExpand}
-            collapseLabel={dict.info.synopsisCollapse}
-          />
-
+        <main id="zx-main">
           <TopChart
             entries={getChart(locale)}
             heading={fill(dict.chart.heading, values)}
@@ -183,7 +161,7 @@ export function FilmLanding({
           />
 
           <FinalCta
-            srHeading={fill(dict.finalCta.srHeading, values)}
+            srHeading={dict.finalCta.srHeading}
             cta={dict.finalCta.cta}
             meta={fill(dict.finalCta.meta, values)}
           />
@@ -198,31 +176,13 @@ export function FilmLanding({
           copyright={fill(dict.footer.copyright, { year: 2026 })}
         />
 
-        {/* previewFrame is the same asset the player shows as its poster, so the
-            upsell sheet reads as a continuation of the frame the viewer was
-            just watching. */}
         <ConversionDialogs
-          previewFrame={movie.previewFrame}
           copy={{
-            content: {
-              heading: dict.modals.content.heading,
-              body: dict.modals.content.body,
-              bullets: dict.modals.content.bullets.map((b) => fill(b, values)),
-              cta: dict.modals.content.cta,
-              ctaMeta: fill(dict.modals.content.ctaMeta, values),
-            },
-            preview: {
-              // `previewMinutes` is derived from the film's own gate rather than
-              // hardcoded as "10" in copy, so a movie with a different
-              // previewLimitSeconds can never contradict its own dialog.
-              headingLines: dict.modals.preview.headingLines.map((line) =>
-                fill(line, values),
-              ),
-              body: dict.modals.preview.body,
-              bullets: dict.modals.preview.bullets.map((b) => fill(b, values)),
-              cta: dict.modals.preview.cta,
-              ctaMeta: fill(dict.modals.preview.ctaMeta, values),
-            },
+            heading: dict.modals.content.heading,
+            body: dict.modals.content.body,
+            bullets: dict.modals.content.bullets.map((b) => fill(b, values)),
+            cta: dict.modals.content.cta,
+            ctaMeta: fill(dict.modals.content.ctaMeta, values),
           }}
         />
       </div>

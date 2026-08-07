@@ -90,16 +90,20 @@ export function HeroBillboard({
       <div className="zx-hero-scrim" aria-hidden="true" />
 
       <div className="zx-hero-copy">
-        <h1 className="zx-hero-headline">{headline}</h1>
+        {/* id: the hero <section> names itself from this heading via
+            aria-labelledby, so the landmark announces the pitch. */}
+        <h1 id="zx-hero-headline" className="zx-hero-headline">
+          {headline}
+        </h1>
 
         {/* The lockup, not a text wordmark: the brand mark is the hero's
             signature element and the one place the logo is shown at size.
             eslint-disable — next/image would add a client-side loader for a
-            fixed-size, already-optimized PNG. */}
+            fixed-size, already-optimized WebP. */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           className="zx-hero-lockup"
-          src="/brand/zenorix-lockup.png"
+          src="/brand/zenorix-lockup.webp"
           alt={brandAlt}
           width={640}
           height={596}
