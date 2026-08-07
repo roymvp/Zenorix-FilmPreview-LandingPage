@@ -6,17 +6,29 @@
  * no component change.
  *
  * Every entry is a normalized 2:3 WebP produced by
- * `scripts/build-poster-wall.mjs` — do NOT reference a raw source poster here.
+ * `scripts/build-poster-tiles.mjs` — do NOT reference a raw source poster here.
  * The wall lays twelve tiles side by side, so mismatched aspect ratios show up
  * immediately as black gutters inside individual tiles.
+ *
+ * This pool intentionally stays at six even though the tile directory now holds
+ * fourteen: the other eight exist for the Top 10 rail. The wall is background
+ * texture behind a scrim at ~130px wide, so more variety buys nothing visible
+ * while every added tile is another image on the LCP path. Six is also what makes
+ * the stride in `buildWall` work.
+ *
+ * These six are also the ONLY place the licensed platform posters may appear
+ * (`72-hours`, `walter-boys` and `the-last-house` carry a burned-in service logo
+ * and title lettering). At this size, behind the scrim, that reads as a real
+ * catalogue; on a rail card it would contradict the card's own platform badge.
+ * See the note in `scripts/build-poster-tiles.mjs`.
  */
 const TILES = [
-  '/media/wall/nocturne-protocol.webp',
-  '/media/wall/72-hours.webp',
-  '/media/wall/the-last-signal.webp',
-  '/media/wall/walter-boys.webp',
-  '/media/wall/crimson-harbor.webp',
-  '/media/wall/the-last-house.webp',
+  '/media/tiles/nocturne-protocol.webp',
+  '/media/tiles/72-hours.webp',
+  '/media/tiles/the-last-signal.webp',
+  '/media/tiles/walter-boys.webp',
+  '/media/tiles/crimson-harbor.webp',
+  '/media/tiles/the-last-house.webp',
 ] as const
 
 /** Tiles per column, and columns per wall. 3x4 fills a phone-width hero. */

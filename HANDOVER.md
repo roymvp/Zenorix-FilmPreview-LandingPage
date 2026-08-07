@@ -346,21 +346,34 @@ Verify after switching: the gate reads `video.currentTime` against `cap`, which
 works identically for HLS — but confirm `timeupdate` still fires at your segment
 cadence, and that seeking past the wall is still intercepted.
 
-### Top 10 posters (item 11)
+### Top 10 posters (item 11) — DONE
 
-Three steps, all sign-posted in code:
+`ChartEntry.poster` is wired and every `chartPool` entry has its own tile; the
+placeholder tile and its `.zx-chart-ph` CSS are gone. To swap in licensed art,
+replace the file and keep the two rules below.
 
-1. `lib/content/movies.ts` — add `poster: string` to `ChartEntry`.
-2. Set it on every `chartPool` entry.
-3. `top-chart.tsx` — replace the placeholder `<span className="zx-chart-ph">`
-   with:
-   ```tsx
-   <img className="zx-chart-img" src={entry.poster} alt="" loading="lazy" decoding="async" />
-   ```
+**Tiles are built, not referenced raw.** `scripts/build-poster-tiles.mjs` trims
+each source in `public/media/poster-*.png` and covers it into a 420x630 WebP in
+`public/media/tiles/`. Add a source there, re-run the script, then point
+`chartPool` (rail) or `lib/content/poster-wall.ts` (hero) at the output. Never
+reference a `poster-*.png` from a component — the sources are three different
+aspect ratios, and the letterboxed ones show black gutters inside the tile.
 
-`.zx-chart-art` **already owns** the 2:3 aspect ratio, radius and clipping — no
-CSS change needed. Keep `alt=""`: the card's accessible name already carries rank
-+ title, and the rail intentionally shows no visible titles.
+Two constraints that are easy to break:
+
+1. **Rail art must be untitled and unbranded.** Each card overlays its own
+   platform badge and takes its title from data, so a poster with a service logo
+   or the film's name burned in contradicts the card around it. The three
+   licensed platform posters (`72-hours`, `walter-boys`, `the-last-house`) are
+   therefore **hero-wall only** — there they are small, scrimmed background
+   texture. The script tags each source `branded: true/false`.
+2. **One tile per rail entry.** Ten cards are visible at once, so a reused tile
+   reads immediately as filler. The hero wall is the opposite case and reuses six
+   tiles across twelve slots on purpose (see `buildWall`).
+
+Keep `alt=""`: the card's accessible name already carries rank + title, and the
+rail intentionally shows no visible titles. The first two cards load eagerly
+(above the fold on a phone), the rest lazily.
 
 ---
 

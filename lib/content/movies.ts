@@ -144,11 +144,6 @@ export type ChartPlatform = PlatformId
 
 /**
  * One entry of the regional weekly chart.
- *
- * RESERVED: there is deliberately no `poster` field. The rail renders a neutral
- * placeholder tile for every entry until real artwork is licensed. To wire
- * artwork up, add `poster: string` here, set it on each pool entry below, and
- * render it inside `.zx-chart-art` in `TopChart` (see the note there).
  */
 export type ChartEntry = {
   id: string
@@ -156,20 +151,35 @@ export type ChartEntry = {
   /** Localized "Movie" / "Series" style label key. */
   kind: 'movie' | 'series'
   platform: ChartPlatform
+  /**
+   * 2:3 tile from `public/media/tiles/`, built by
+   * `scripts/build-poster-tiles.mjs`.
+   *
+   * Must be UNTITLED, UNBRANDED key art. Every rail card overlays its own
+   * platform badge and takes its title from `title` above, so a poster with a
+   * service logo or the film's name printed into it contradicts the card it sits
+   * in. That rules out the three licensed platform posters in the tile directory
+   * — those are hero-wall-only. See `scripts/build-poster-tiles.mjs`.
+   *
+   * One tile per entry, never shared: the rail shows ten cards at once, so a
+   * repeat is immediately visible and makes the chart read as filler.
+   */
+  poster: string
 }
 
+/* prettier-ignore */
 const chartPool: Record<string, ChartEntry> = {
-  nocturne: { id: 'nocturne', title: 'Nocturne Protocol', kind: 'movie', platform: 'netflix' },
-  crimson: { id: 'crimson', title: 'Crimson Harbor', kind: 'movie', platform: 'hbo-max' },
-  signal: { id: 'signal', title: 'The Last Signal', kind: 'movie', platform: 'apple-tv' },
-  neon: { id: 'neon', title: 'Neon Requiem', kind: 'series', platform: 'prime-video' },
-  orbit: { id: 'orbit', title: 'Silent Orbit', kind: 'movie', platform: 'disney-plus' },
-  ember: { id: 'ember', title: 'Ash & Ember', kind: 'movie', platform: 'amc-plus' },
-  cartel: { id: 'cartel', title: 'Midnight Cartel', kind: 'series', platform: 'paramount-plus' },
-  glass: { id: 'glass', title: 'Glass Kingdom', kind: 'series', platform: 'hulu' },
-  tigers: { id: 'tigers', title: 'Paper Tigers', kind: 'movie', platform: 'peacock' },
-  solstice: { id: 'solstice', title: 'Solstice', kind: 'movie', platform: 'fox-one' },
-  crown: { id: 'crown', title: 'Hollow Crown', kind: 'series', platform: 'nbc' },
+  nocturne: { id: 'nocturne', title: 'Nocturne Protocol', kind: 'movie',  platform: 'netflix',        poster: '/media/tiles/nocturne-protocol.webp' },
+  crimson:  { id: 'crimson',  title: 'Crimson Harbor',   kind: 'movie',  platform: 'hbo-max',        poster: '/media/tiles/crimson-harbor.webp' },
+  signal:   { id: 'signal',   title: 'The Last Signal',  kind: 'movie',  platform: 'apple-tv',       poster: '/media/tiles/the-last-signal.webp' },
+  neon:     { id: 'neon',     title: 'Neon Requiem',     kind: 'series', platform: 'prime-video',    poster: '/media/tiles/neon.webp' },
+  orbit:    { id: 'orbit',    title: 'Silent Orbit',     kind: 'movie',  platform: 'disney-plus',    poster: '/media/tiles/orbit.webp' },
+  ember:    { id: 'ember',    title: 'Ash & Ember',      kind: 'movie',  platform: 'amc-plus',       poster: '/media/tiles/ember.webp' },
+  cartel:   { id: 'cartel',   title: 'Midnight Cartel',  kind: 'series', platform: 'paramount-plus', poster: '/media/tiles/cartel.webp' },
+  glass:    { id: 'glass',    title: 'Glass Kingdom',    kind: 'series', platform: 'hulu',           poster: '/media/tiles/glass.webp' },
+  tigers:   { id: 'tigers',   title: 'Paper Tigers',     kind: 'movie',  platform: 'peacock',        poster: '/media/tiles/tigers.webp' },
+  solstice: { id: 'solstice', title: 'Solstice',         kind: 'movie',  platform: 'fox-one',        poster: '/media/tiles/solstice.webp' },
+  crown:    { id: 'crown',    title: 'Hollow Crown',     kind: 'series', platform: 'nbc',            poster: '/media/tiles/crown.webp' },
 }
 
 const order: Record<Locale, string[]> = {
