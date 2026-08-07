@@ -23,16 +23,13 @@
     "languageMenu": "Choose your language",
     "install": "Install"
   },
-  "player": {
-    "play": "Play",
-    "pause": "Pause",
-    "mute": "Mute",
-    "unmute": "Unmute",
-    "seek": "Seek within the free preview"
-  },
-  "info": {
-    "synopsisExpand": "More",
-    "synopsisCollapse": "Less"
+  "hero": {
+    "headline": "Every movie, series & live channel.",
+    "price": "{annualPerMonth}/MONTH",
+    "priceNote": "30 days free · no card needed",
+    "cta": "Get Zenorix",
+    "ctaMeta": "Android APK · {size} · {downloads}",
+    "brandAlt": "Zenorix"
   },
   "chart": {
     "heading": "Top 10 in {country} This Week",
@@ -130,20 +127,6 @@
       ],
       "cta": "Get the Zenorix App",
       "ctaMeta": "Android APK · {size} · {downloads}"
-    },
-    "preview": {
-      "headingLines": [
-        "Web viewing limited to the first {previewMinutes} mins.",
-        "Get the app to watch the FULL movie FREE."
-      ],
-      "body": "More features in app:",
-      "bullets": [
-        "Unlock 28,000+ movies & series",
-        "4K Ultra HD & Dolby Atmos",
-        "30 Days Free - No card needed to start"
-      ],
-      "cta": "Get the Zenorix App",
-      "ctaMeta": "Android APK · {size} · {downloads}"
     }
   },
   "footer": {
@@ -153,7 +136,7 @@
     "copyright": "© {year} Zenorix"
   },
   "a11y": {
-    "skipToContent": "Skip to film details",
+    "skipToContent": "Skip to main content",
     "posterAlt": "Poster for {title}"
   }
 }

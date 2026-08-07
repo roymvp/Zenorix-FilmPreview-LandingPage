@@ -23,16 +23,13 @@
     "languageMenu": "Escolha seu idioma",
     "install": "Instalar"
   },
-  "player": {
-    "play": "Reproduzir",
-    "pause": "Pausar",
-    "mute": "Desativar som",
-    "unmute": "Ativar som",
-    "seek": "Avançar dentro da prévia gratuita"
-  },
-  "info": {
-    "synopsisExpand": "Mais",
-    "synopsisCollapse": "Menos"
+  "hero": {
+    "headline": "Todo filme, série e canal ao vivo.",
+    "price": "{annualPerMonth}/MÊS",
+    "priceNote": "30 dias grátis · sem cartão",
+    "cta": "Baixar a Zenorix",
+    "ctaMeta": "APK Android · {size} · {downloads}",
+    "brandAlt": "Zenorix"
   },
   "chart": {
     "heading": "Top 10 {country} nesta semana",
@@ -130,20 +127,6 @@
       ],
       "cta": "Baixar o app Zenorix",
       "ctaMeta": "APK Android · {size} · {downloads}"
-    },
-    "preview": {
-      "headingLines": [
-        "Na web, só os {previewMinutes} primeiros minutos.",
-        "Baixe o app e assista ao filme COMPLETO DE GRAÇA."
-      ],
-      "body": "Mais recursos no app:",
-      "bullets": [
-        "Mais de 28.000 filmes e séries liberados",
-        "4K Ultra HD e Dolby Atmos",
-        "30 dias grátis - sem cartão para começar"
-      ],
-      "cta": "Baixar o app Zenorix",
-      "ctaMeta": "APK Android · {size} · {downloads}"
     }
   },
   "footer": {
@@ -153,7 +136,7 @@
     "copyright": "© {year} Zenorix"
   },
   "a11y": {
-    "skipToContent": "Ir para os detalhes do filme",
+    "skipToContent": "Ir para o conteúdo principal",
     "posterAlt": "Pôster de {title}"
   }
 }

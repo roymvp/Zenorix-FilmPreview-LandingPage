@@ -1,0 +1,59 @@
+/**
+ * Artwork for the hero's poster wall.
+ *
+ * RESERVED INTEGRATION POINT (artwork): this is the only place the wall's tiles
+ * are named. Point it at a CMS/catalogue response and the hero re-composes with
+ * no component change.
+ *
+ * Every entry is a normalized 2:3 WebP produced by
+ * `scripts/build-poster-wall.mjs` — do NOT reference a raw source poster here.
+ * The wall lays twelve tiles side by side, so mismatched aspect ratios show up
+ * immediately as black gutters inside individual tiles.
+ */
+const TILES = [
+  '/media/wall/nocturne-protocol.webp',
+  '/media/wall/72-hours.webp',
+  '/media/wall/the-last-signal.webp',
+  '/media/wall/walter-boys.webp',
+  '/media/wall/crimson-harbor.webp',
+  '/media/wall/the-last-house.webp',
+] as const
+
+/** Tiles per column, and columns per wall. 3x4 fills a phone-width hero. */
+const ROWS = 4
+const COLUMNS = 3
+
+/**
+ * Builds one wall as an array of columns.
+ *
+ * `offset` rotates the source list so each layer of the carousel is a DIFFERENT
+ * arrangement of the same six posters. That is the whole reason the wall reads as
+ * a deep catalogue rather than as six images: with a 6-tile pool and 12 slots
+ * every layer must repeat, but a co-prime stride (7 against a pool of 6) means no
+ * tile ever lands next to, above or below a copy of itself.
+ *
+ * Pure function of its argument — no randomness — so the server and client render
+ * byte-identical markup.
+ */
+function buildWall(offset: number): string[][] {
+  return Array.from({ length: COLUMNS }, (_, column) =>
+    Array.from(
+      { length: ROWS },
+      (_, row) => TILES[(offset * 7 + column * ROWS + row) % TILES.length],
+    ),
+  )
+}
+
+/**
+ * The carousel's layers. Three is deliberate: enough that the wall visibly
+ * changes, few enough that the hero's image payload stays at the six files every
+ * layer shares (the browser fetches each tile once and reuses it).
+ */
+export const posterWalls: string[][][] = [0, 1, 2].map(buildWall)
+
+/**
+ * The tiles the hero preloads, i.e. the first layer's, flattened and deduped.
+ * These are the hero's LCP candidates — everything else in the wall fades in
+ * later and must not compete for the first bytes.
+ */
+export const firstWallTiles: string[] = [...new Set(posterWalls[0].flat())]
