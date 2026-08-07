@@ -1,5 +1,5 @@
 import { DownloadCta } from '@/components/landing/download-cta'
-import { firstWallTiles, posterWalls } from '@/lib/content/poster-wall'
+import { posterWalls } from '@/lib/content/poster-wall'
 
 /**
  * Brand hero: a tilted wall of key art, a scrim, and the pitch on top.
@@ -68,13 +68,12 @@ export function HeroBillboard({
                     width={420}
                     height={630}
                     /* Only the first layer is on screen at first paint, so only
-                       it is eager. The other two are fetched lazily and are
-                       already cached by then anyway — every layer draws from the
-                       same six files. */
+                       it is eager and only it competes for early bandwidth. The
+                       other two are lazy and cost nothing extra anyway — all
+                       three layers draw from the same six files, so by the time
+                       one fades in the bytes are already cached. */
                     loading={layer === 0 ? 'eager' : 'lazy'}
-                    fetchPriority={
-                      layer === 0 && firstWallTiles.includes(src) ? 'high' : 'low'
-                    }
+                    fetchPriority={layer === 0 ? 'high' : 'low'}
                     decoding="async"
                   />
                 ))}

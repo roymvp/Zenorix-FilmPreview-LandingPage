@@ -99,9 +99,10 @@
   flex-direction: column;
   /* The Top 10 rail scrolls inside itself and must never widen the document. */
   overflow-x: clip;
-  /* Lifts the column above the header band painted by `body::before`, which is
-     absolutely positioned and would otherwise paint over this in-flow element and
-     hide the real top bar's contents. See that rule in globals.css. */
+  /* Stays as the positioned ancestor for the absolutely positioned things inside
+     the column. `z-index` previously also had to lift this above a `body::before`
+     header band, which no longer exists — see the note where it was, in
+     globals.css. */
   position: relative;
   z-index: 1;
   /* No side borders, and deliberately no substitute for them. A 1px `outline-variant` rule
@@ -180,35 +181,33 @@
 }
 
 /* --- 48px minimum touch targets -------------------------------------------
-   Four controls are drawn smaller than the 48x48 minimum because the design needs
-   them visually compact: the language trigger (40x32), the player's mute toggle
-   (32x32), the synopsis expander (50x26) and the brand link (88x30, height only).
+   Two controls are drawn smaller than the 48x48 minimum because the design needs
+   them visually compact: the language trigger (40x32) and the brand link
+   (~110x26, height only).
 
-   Rather than inflate them — which would break the topbar's proportions and push
-   chrome over the film — each gets a transparent, centred overlay that grows the
-   HIT AREA to 48x48 while leaving the painted size untouched. `position: absolute`
-   means the overlay never affects layout, so no spacing changes anywhere.
+   Rather than inflate them — which would break the top bar's proportions — each
+   gets a transparent, centred overlay that grows the HIT AREA to 48x48 while
+   leaving the painted size untouched. `position: absolute` means the overlay never
+   affects layout, so no spacing changes anywhere.
 
    `max(100%, 48px)` per axis, so an element already larger on one axis keeps its
-   own size there and only the deficient axis grows — the brand link stays 88px wide
+   own size there and only the deficient axis grows — the brand link keeps its width
    and gains height only, instead of being squeezed to a 48px square.
 
    Not applied to the footer links: those are inline text inside a sentence-like row,
    which WCAG exempts, and an expanded box on each would overlap its neighbours.
-   The scrub slider is also left alone — its target is the native range thumb, and
-   growing that is a visual change to the progress bar, not a hit-area tweak. */
+
+   NOTE: `.zx-mute` (the player's 32x32 toggle) and `.zx-synopsis-toggle` (the
+   50x26 expander) were also in these selector lists. Both controls went with the
+   preview player and the film info block. */
 .zx-brand,
-.zx-lang-trigger,
-.zx-synopsis-toggle {
-  /* The overlay's containing block. `.zx-mute` is already `position: absolute`, so
-     it is deliberately absent here — restating it would risk overriding that. */
+.zx-lang-trigger {
+  /* The overlay's containing block. */
   position: relative;
 }
 
 .zx-brand::after,
-.zx-lang-trigger::after,
-.zx-mute::after,
-.zx-synopsis-toggle::after {
+.zx-lang-trigger::after {
   content: '';
   position: absolute;
   inset-block-start: 50%;
@@ -217,8 +216,8 @@
   width: max(100%, 48px);
   height: max(100%, 48px);
   /* Deliberately NO `z-index: -1`. Sending it behind would drop it beneath the
-     ancestor backgrounds the topbar and player paint (the button sets no stacking
-     context of its own), and an overlay covered by an opaque background stops being
+     background the top bar paints (the button sets no stacking context of its
+     own), and an overlay covered by an opaque background stops being
      hit-tested — silently undoing the whole point. Left in normal paint order it
      covers its own control instead, which is harmless: a pseudo-element is part of
      the element for event targeting, so the tap still lands on the button, and there
@@ -246,67 +245,66 @@
 
 /* ---------------------------------------------------------------- top bar */
 
-/* In normal flow above the player, not overlaid on it: the frame is now a
-   16/9 video rather than a full-height hero, so floating chrome over it would
-   collide with the playback controls.
+/* Frosted glass layered OVER the hero's poster wall, not a row above it.
+   `position: absolute` is what makes the wall start at the very top of the page
+   and run behind the chrome — the hero's copy block pays for that by padding
+   itself by `--zx-topbar-h` so a tall headline can never slide underneath.
 
-   Because it is a real bar rather than an overlay it is a LIGHT surface, even
-   though the rest of the landing page is dark-first cinema.
+   NOTE: this was an opaque LIGHT island. It re-declared the entire light Material
+   scheme locally (`color-scheme: light`, a near-white surface, #1668cf primary,
+   plus five container/outline steps) because it was the one part of the page
+   excluded from the black canvas, and its Material children would otherwise have
+   painted dark-scheme on-dark colors onto it and gone invisible.
 
-   The app runs the dark scheme, so a light bar cannot simply set a background:
-   its children (brand text, language trigger + menu, icon buttons, install
-   button) would keep painting dark-scheme on-dark colors and go invisible.
-   Instead this re-declares the LIGHT scheme tokens on the bar itself, making it a
-   self-contained light island — every Material child inside resolves correct
-   on-light colors automatically, with no per-component overrides.
+   None of that survives, and the reason is the reason for the whole page: with a
+   film playing in a 16/9 frame, chrome floating over it would have collided with
+   the playback controls, so the bar had to be a real row — and a real row on a
+   dark page reads better light. There is no player now. The hero is a full-bleed
+   billboard, so the bar's job flipped from "be a header" to "stay out of the
+   art's way", which means translucent, dark, and on top.
 
-   These values are DELIBERATELY local and have no counterpart to track. An earlier
-   note here said to keep them in sync with the `:root` block in globals.css, which
-   was true only while a light scheme still existed there; globals.css is now
-   dark-only, so following that instruction would repaint this bar dark and make its
-   own contents invisible. This is the app's only light surface — if the brand's
-   light palette ever changes, edit it here.
-
-   The palette is the page's own, inverted rather than swapped: the light end of the
-   METALLIC SILVER ramp for the surface, and the SOFT TECH BLUE for `primary`. Blue
-   does the accent's job here specifically because silver cannot: on a near-white bar
-   the brand silver has almost no contrast, so the install button would dissolve into
-   its own background. Reusing the accent instead of inventing a third hue keeps the
-   header recognisably part of the same three-color system.
-
-   The blue is only as dark as white-on-it needs (AA at the button's 13px label) and
-   no darker. It was #1d5b92 — a heavy navy that made the page's single most important
-   action look sombre; #1668cf is the same hue with the saturation and lightness the
-   accent carries everywhere else, so the header now matches the scrubber's blue
-   instead of reading as a duller relative of it. */
+   Being dark again also means it inherits the page's dark scheme, so the local
+   override block is not just unnecessary, it would be actively wrong. */
 .zx-topbar {
-  color-scheme: light;
-
-  --md-sys-color-primary: #1668cf;
-  --md-sys-color-on-primary: #ffffff;
-  --md-sys-color-surface: var(--zx-topbar-surface);
-  --md-sys-color-on-surface: #161920;
-  --md-sys-color-on-surface-variant: #4b525c;
-  --md-sys-color-outline: #79818c;
-  --md-sys-color-outline-variant: #cbd1da;
-  --md-sys-color-surface-container: #e7ebf0;
-  --md-sys-color-surface-container-high: #dee3ea;
-  --md-sys-color-surface-container-highest: #d5dbe3;
-
-  position: relative;
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline: 0;
   z-index: 4;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: var(--zx-space-3);
-  /* Padding and height both come from the shared top-bar tokens, because the
-     full-width extension behind this bar (`body::before`) is sized from the same
-     ones — a local literal here would make the band and the bar disagree. */
   padding: var(--zx-topbar-pad) var(--zx-gutter);
   padding-block-start: max(var(--zx-topbar-pad), env(safe-area-inset-top));
   min-height: var(--zx-topbar-h);
-  background: var(--md-sys-color-surface);
-  color: var(--md-sys-color-on-surface);
+
+  /* The glass itself. Three parts, all load-bearing:
+     - a translucent WHITE tint, not a black one: the hero scrim below is already
+       darkening the wall, and stacking dark-on-dark would read as a smudge rather
+       than as a pane;
+     - the blur, which is what separates the bar's own text from the key art
+       moving behind it. Without it this is just a see-through strip and the
+       wordmark competes with whatever poster the cycle lands on;
+     - `saturate` before the blur, because averaging colours over a wide radius
+       washes them out — this puts back the poster colour the blur removes, so the
+       pane still reads as tinted glass and not as grey plastic. */
+  background: rgb(255 255 255 / 0.06);
+  backdrop-filter: saturate(140%) blur(18px);
+  -webkit-backdrop-filter: saturate(140%) blur(18px);
+  /* Bottom edge only: the pane's near edge, and the one line that keeps it from
+     dissolving into the scrim where the two tints happen to match. */
+  border-block-end: 1px solid rgb(255 255 255 / 0.1);
+  color: var(--zx-on-media);
+}
+
+/* Fallback for browsers without `backdrop-filter` (and for the blur being
+   disabled by a privacy/perf setting). A 6% white tint alone would leave the
+   wordmark sitting directly on key art, so a supportless browser gets an opaque
+   dark bar instead — less pretty, still legible. */
+@supports not (backdrop-filter: blur(1px)) {
+  .zx-topbar {
+    background: rgb(var(--zx-media-black-rgb) / 0.82);
+  }
 }
 
 .zx-brand {
@@ -314,56 +312,49 @@
   align-items: center;
   gap: var(--zx-space-2);
   text-decoration: none;
-  color: var(--md-sys-color-on-surface);
+  /* `--zx-on-media`, not `--md-sys-color-on-surface`: the two resolve to the same
+     white today, but this text sits on moving key art seen through glass, not on
+     the page surface, and the media tokens are the ones that exist to guarantee
+     contrast there. */
+  color: var(--zx-on-media);
 }
 
-/* The box and its corner radius live here, so the real logo can drop in as an
-   <img class="zx-brand-mark"> and need no further styling. */
+/* The real brand mark. Sized by HEIGHT with `width: auto`, not fitted into a
+   square box: the artwork is wider than it is tall (the Z, its play triangle and
+   the signal arcs), so a 30px square would have had to crop or letterbox it.
+   Height is what needs to agree with the wordmark beside it.
+
+   NOTE: this was a 30x30 rounded tile with a `--md-sys-color-primary` fill and a
+   centered glyph, plus a `[data-placeholder]` variant — a dashed outline holding a
+   Material `image` icon — that deliberately read as an empty asset slot. Both are
+   gone now that the actual logo exists, and the footer that shared the
+   placeholder no longer renders a brand block at all. */
 .zx-brand-mark {
-  display: grid;
-  place-items: center;
-  width: 30px;
-  height: 30px;
-  border-radius: 6px;
-  object-fit: cover;
-  background: var(--md-sys-color-primary);
-  color: var(--md-sys-color-on-primary);
-  font-weight: var(--zx-weight-bold);
-  /* 16px, off the scale's `lg` step rather than the old one-off 17px. This is a
-     single glyph in a 30px box, so the exact size is not load-bearing. */
-  font-size: var(--zx-text-lg);
-  line-height: 1;
+  height: 26px;
+  width: auto;
 }
 
-/* Neutral stand-in until the brand asset exists. Deliberately reads as an empty
-   slot rather than a finished logo. Both places it appears — the top bar and the
-   footer — are page surfaces, so it uses on-surface colors. */
-.zx-brand-mark[data-placeholder] {
-  background: var(--md-sys-color-surface-container-highest);
-  border: 1px dashed var(--md-sys-color-outline-variant);
-  color: var(--md-sys-color-on-surface-variant);
-}
-
-.zx-brand-mark[data-placeholder] md-icon {
-  font-size: 16px;
-  width: 16px;
-  height: 16px;
-}
-
-/* Wordmark, paired with the mark in both the top bar and the footer. */
+/* Wordmark, set in live text beside the mark. Letter-spaced OPEN rather than
+   tight, mirroring the lockup's own wordmark — this is the only place the two are
+   seen at the same size, so they should not disagree about proportion. */
 .zx-brand-name {
   font-size: var(--zx-text-lg);
   font-weight: var(--zx-weight-bold);
-  letter-spacing: -0.01em;
+  letter-spacing: 0.04em;
+  color: var(--zx-on-media);
 }
 
+/* Icons take the MEDIA tokens rather than the surface ones (was
+   `on-surface-variant` #a4aebc / `primary`): a mid grey is legible on flat black
+   but not against key art showing through glass, and `--zx-on-media-variant` is
+   the lifted value that exists for exactly that problem. */
 .zx-topbar-actions {
   display: flex;
   align-items: center;
   gap: var(--zx-space-1);
-  --md-icon-button-icon-color: var(--md-sys-color-on-surface-variant);
-  --md-icon-button-hover-icon-color: var(--md-sys-color-primary);
-  --md-icon-button-pressed-icon-color: var(--md-sys-color-primary);
+  --md-icon-button-icon-color: var(--zx-on-media-variant);
+  --md-icon-button-hover-icon-color: var(--zx-on-media);
+  --md-icon-button-pressed-icon-color: var(--zx-on-media);
 }
 
 /* Compact install button, sized to the bar. It carries only the short
@@ -371,8 +362,13 @@
    beside the brand and language control.
 
    Unlike the in-page CTAs it is a small-radius rectangle, not a pill: at 32px
-   tall a pill reads as a chip, and the squarer corner makes it read as the
-   bar's primary action and echoes the 6px brand mark beside it. */
+   tall a pill reads as a chip, and the squarer corner makes it read as the bar's
+   primary action.
+
+   It needs no color of its own. The dark scheme's `primary` is a near-white
+   (#fbfcfe) on a near-black `on-primary`, so a plain filled button lands as the
+   white pill this bar wants — the one fully opaque element on the glass, which is
+   what makes it the obvious thing to press. */
 .zx-topbar-cta {
   --md-filled-button-container-height: 32px;
   /* `meta` + semibold, not the old 13px/700. Every button label on the page now
@@ -399,10 +395,13 @@
 .zx-hero {
   position: relative;
   isolation: isolate;
-  /* The canvas the wall's scrim fades into at the bottom edge. Uses the media
-     black token rather than a literal so the fade lands on exactly the value the
-     scrim's last stop resolves to. */
-  background: var(--zx-media-scrim-strong);
+  /* `--md-sys-color-surface`, i.e. the PAGE's black — NOT the media black the
+     scrim above it is built from. The two are deliberately different values
+     (#08090b vs #040609), so ending the hero on the media black left a measurable
+     4-value step exactly where the hero meets the section below it: a faint but
+     visible horizontal line across the full column. The hero's last pixel has to
+     be the first pixel of the page. */
+  background: var(--md-sys-color-surface);
   overflow: hidden;
 }
 
@@ -520,7 +519,10 @@
   pointer-events: none;
   background: linear-gradient(
     to top,
-    rgb(var(--zx-media-black-rgb) / 1) 0%,
+    /* First stop is the PAGE surface, not the media black used by every stop
+       above it — this is the pixel that has to match the section below the hero.
+       See the note on `.zx-hero`'s own background. */ var(--md-sys-color-surface)
+      0%,
     rgb(var(--zx-media-black-rgb) / 0.92) 26%,
     rgb(var(--zx-media-black-rgb) / 0.6) 62%,
     rgb(var(--zx-media-black-rgb) / 0.5) 100%

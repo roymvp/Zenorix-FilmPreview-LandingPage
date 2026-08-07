@@ -50,10 +50,3 @@ function buildWall(offset: number): string[][] {
  * layer shares (the browser fetches each tile once and reuses it).
  */
 export const posterWalls: string[][][] = [0, 1, 2].map(buildWall)
-
-/**
- * The tiles the hero preloads, i.e. the first layer's, flattened and deduped.
- * These are the hero's LCP candidates — everything else in the wall fades in
- * later and must not compete for the first bytes.
- */
-export const firstWallTiles: string[] = [...new Set(posterWalls[0].flat())]

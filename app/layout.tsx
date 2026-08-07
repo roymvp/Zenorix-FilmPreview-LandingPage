@@ -47,13 +47,16 @@ export const viewport: Viewport = {
   /* Pinch-zoom stays enabled: disabling it is an accessibility failure. */
   maximumScale: 5,
   userScalable: true,
-  /* Matches `--zx-topbar-surface`, NOT the black canvas. This paints the mobile
-     browser's own chrome, which sits directly above the page's light header band —
-     so the old warm near-black (#060504) drew a dark stripe between the browser UI
-     and a light bar. Keep this in step with that token; it is the one place the
-     value has to be a literal, because Next serialises it into a <meta> tag before
-     any CSS is available. */
-  themeColor: '#f3f5f8',
+  /* Paints the mobile browser's own chrome, which sits directly above the top of
+     the page — so this has to match whatever the page's first pixels are, or the
+     browser UI draws a visible stripe against them.
+
+     That is now the hero's poster wall under a dark frosted bar, so it is the
+     canvas black (`--md-sys-color-surface`). It was #f3f5f8 for as long as the bar
+     was an opaque near-white island; before that it was a warm near-black. It has
+     to be a literal — Next serialises it into a <meta> tag before any CSS
+     exists. */
+  themeColor: '#08090b',
   colorScheme: 'dark',
 }
 

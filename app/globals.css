@@ -147,17 +147,21 @@
   --zx-media-control-hover: rgba(255, 255, 255, 0.24);
   --zx-media-outline: rgba(255, 255, 255, 0.22);
 
-  /* --- top bar geometry + surface -----------------------------------------
-     The top bar is the ONE part of the page excluded from the black canvas, and
-     its light band runs the full viewport width — wider than the 420px phone
-     column it sits in. Both `.zx-topbar` (inside the column) and `body::before`
-     (the left/right extension) read these, so the band and the bar can never
-     disagree about color or height.
-
+  /* --- top bar geometry ----------------------------------------------------
      `--zx-topbar-h` is a contract, not a measurement: the bar's tallest child is
      the 32px install button, so if a taller control is ever added to it, bump
-     `--zx-topbar-content-h` to match or the extension will sit short of the bar. */
-  --zx-topbar-surface: #f3f5f8;
+     `--zx-topbar-content-h` to match.
+
+     The height matters beyond the bar itself because the bar is a TRANSLUCENT
+     OVERLAY on the hero rather than a row above it: it is out of flow, so the
+     hero's copy block pads itself by this value to clear it.
+
+     NOTE: `--zx-topbar-surface` (an opaque near-white, #f3f5f8) lived here. The
+     bar was a light island — the one part of the page excluded from the black
+     canvas — and both the bar and a full-width `body::before` band read this
+     token so they could not disagree. Frosted glass over the poster wall replaced
+     both: the bar's own tint is now a translucent white in `.zx-topbar`, and
+     there is no band left to keep in sync with it. */
   --zx-topbar-pad: 10px;
   --zx-topbar-content-h: 32px;
   --zx-topbar-h: calc(
@@ -192,36 +196,23 @@ body {
      the only bright thing on screen. The column is marked out by a hairline
      border, not by a darker backdrop.
 
-     `position: relative` is here solely to anchor the top band below. */
-  position: relative;
+     NOTE: this used to also carry `position: relative` to anchor a `body::before`
+     top band (see below). */
   background: var(--md-sys-color-surface);
   color: var(--md-sys-color-on-background);
   font-family: var(--md-ref-typeface-plain);
   -webkit-font-smoothing: antialiased;
 }
 
-/* The top bar's LEFT/RIGHT EXTENSION: the light band either side of the phone
-   column, which together with `.zx-topbar` itself makes one uninterrupted header
-   across the viewport while everything below stays black.
+/* NOTE: a `body::before` rule lived here. It painted the top bar's LEFT/RIGHT
+   EXTENSION — the light band either side of the 420px phone column that made the
+   old opaque bar read as one uninterrupted header across the viewport. It had to
+   be painted from `body` because a `100vw` pseudo-element on the bar itself would
+   have been cropped by `.zx-hero`'s `overflow: hidden`.
 
-   It has to be painted from `body` rather than by the bar. The obvious approach —
-   a `100vw` pseudo-element on `.zx-topbar` — cannot work here, because the bar is
-   nested inside `.zx-hero` (`overflow: hidden`) inside `.zx-page`
-   (`overflow-x: clip`); either one crops the bleed back to the 420px column.
-   `body` is the nearest ancestor outside both clips.
-
-   `z-index: 0` against `.zx-page`'s `z-index: 1` is what keeps this strictly
-   BEHIND the column: an absolutely positioned box would otherwise paint over the
-   in-flow column and cover the real bar's contents. */
-body::before {
-  content: '';
-  position: absolute;
-  z-index: 0;
-  inset-block-start: 0;
-  inset-inline: 0;
-  height: var(--zx-topbar-h);
-  background: var(--zx-topbar-surface);
-}
+   The bar is frosted glass over the hero's poster wall now, so there is nothing
+   to extend: outside the column there is no wall to see through the glass, and a
+   band of tinted black either side of the phone would just be the canvas. */
 
 /* Material Symbols icon font for <md-icon> */
 md-icon {
