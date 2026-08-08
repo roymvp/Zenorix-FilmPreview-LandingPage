@@ -103,7 +103,6 @@ export function FilmLanding({
             homeHref={`/${locale}`}
             homeLabel={dict.nav.home}
             languageMenuLabel={dict.nav.languageMenu}
-            installLabel={dict.nav.install}
             localeHrefs={localeHrefs}
           />
 
@@ -113,7 +112,6 @@ export function FilmLanding({
             priceNote={dict.hero.priceNote}
             cta={dict.hero.cta}
             ctaMeta={fill(dict.hero.ctaMeta, values)}
-            brandAlt={dict.hero.brandAlt}
           />
         </section>
 

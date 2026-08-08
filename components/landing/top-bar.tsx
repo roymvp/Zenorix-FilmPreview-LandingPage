@@ -1,4 +1,3 @@
-import { DownloadCta } from '@/components/landing/download-cta'
 import { LanguageSwitcher } from '@/components/landing/language-switcher'
 import { SITE } from '@/lib/config/site'
 import type { Locale } from '@/lib/i18n/config'
@@ -8,24 +7,23 @@ import type { Locale } from '@/lib/i18n/config'
  *
  * It is translucent rather than solid so the art keeps running underneath, and
  * blurred rather than merely transparent because the wall behind it is
- * high-contrast key art — plain transparency would leave the wordmark and the
- * install button fighting whatever poster happens to be under them.
+ * high-contrast key art — plain transparency would leave the wordmark fighting
+ * whatever poster happens to be under it.
+ *
+ * Since the hero dropped its lockup, this bar is the ONLY place the brand is
+ * stated: the mark plus a wordmark set in the display face (see `.zx-brand-name`).
  */
 export function TopBar({
   locale,
   homeHref,
   homeLabel,
   languageMenuLabel,
-  installLabel,
   localeHrefs,
 }: {
   locale: Locale
   homeHref: string
   homeLabel: string
   languageMenuLabel: string
-  /** Short label for the compact install button (the long sentence is used
-      by the in-page CTAs, which have a full row to themselves). */
-  installLabel: string
   localeHrefs: Record<Locale, string>
 }) {
   return (
@@ -51,17 +49,18 @@ export function TopBar({
         </span>
       </a>
 
+      {/* NOTE: a compact filled "Install" button sat beside the language
+          switcher (source="topbar", `.zx-topbar-cta`). Removed deliberately —
+          the page keeps three full-width install CTAs (hero, about, final), and
+          the white pill was the only fully opaque element on the glass, so it
+          pulled the eye away from the hero's own CTA sitting right below it.
+          If a persistent install affordance is wanted back, prefer a sticky
+          bottom bar over restoring this one: it would not compete with the hero. */}
       <div className="zx-topbar-actions">
         <LanguageSwitcher
           current={locale}
           menuLabel={languageMenuLabel}
           hrefs={localeHrefs}
-        />
-        <DownloadCta
-          label={installLabel}
-          source="topbar"
-          className="zx-topbar-cta"
-          bare
         />
       </div>
     </header>

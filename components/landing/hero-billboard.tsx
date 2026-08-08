@@ -5,7 +5,7 @@ import { posterWalls } from '@/lib/content/poster-wall'
  * Brand hero: a tilted wall of key art, a scrim, and the pitch on top.
  *
  * This replaced an embedded preview player. The site is a brand site now, so the
- * hero states what Zenorix IS — the catalogue, the logo, the price, one install
+ * hero states what Zenorix IS — the catalogue, the price, one install
  * action — instead of playing one specific film. Nothing here is film-specific:
  * no title, no synopsis, no runtime.
  *
@@ -23,9 +23,8 @@ export function HeroBillboard({
   priceNote,
   cta,
   ctaMeta,
-  brandAlt,
 }: {
-  /** The page's single <h1>. Two or three words per line reads best. */
+  /** The page's single <h1>. */
   headline: string
   /** Headline price, e.g. "$1.25/MONTH" — the hero's one number. */
   price: string
@@ -33,8 +32,6 @@ export function HeroBillboard({
   priceNote: string
   cta: string
   ctaMeta: string
-  /** Accessible name for the logo lockup. */
-  brandAlt: string
 }) {
   return (
     <div className="zx-hero-billboard">
@@ -95,19 +92,12 @@ export function HeroBillboard({
           {headline}
         </h1>
 
-        {/* The lockup, not a text wordmark: the brand mark is the hero's
-            signature element and the one place the logo is shown at size.
-            eslint-disable — next/image would add a client-side loader for a
-            fixed-size, already-optimized WebP. */}
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          className="zx-hero-lockup"
-          src="/brand/zenorix-lockup.webp"
-          alt={brandAlt}
-          width={640}
-          height={596}
-        />
-
+        {/* NOTE: the 172px brand lockup sat between the headline and the price.
+            Removed deliberately: the headline now names the networks it sells,
+            which is the actual pitch, and a logo repeated 60px under the top
+            bar's own mark spent the hero's most valuable vertical space saying
+            the brand name a second time. The bar carries brand identity; the
+            hero carries the offer. */}
         <p className="zx-hero-price">
           {price}
           <span className="zx-hero-price-note">{priceNote}</span>

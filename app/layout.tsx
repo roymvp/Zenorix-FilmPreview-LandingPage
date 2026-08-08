@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import type { Metadata, Viewport } from 'next'
-import { Roboto, Noto_Sans_Thai } from 'next/font/google'
+import { Roboto, Noto_Sans_Thai, Orbitron } from 'next/font/google'
 import { MaterialWebLoader } from '@/components/material-web-loader'
 import { SITE } from '@/lib/config/site'
 import './globals.css'
@@ -30,6 +30,29 @@ const notoSansThai = Noto_Sans_Thai({
   subsets: ['thai'],
   weight: ['400', '500', '700'],
   variable: '--font-noto-thai',
+  display: 'swap',
+})
+
+/**
+ * DISPLAY FACE, wordmark only — the eight letters of `.zx-brand-name` in the top
+ * bar, and nothing else. It is not in the body stack and must not be: this is a
+ * wide squared techno face, unreadable in a paragraph.
+ *
+ * Why a third webfont at all: the hero no longer renders the raster lockup, so
+ * the top bar's live-text wordmark is the only place the brand is stated. In
+ * Roboto Bold it read as a generic app header rather than as the logo it sits
+ * next to. Orbitron is the closest match on Google Fonts to the lockup's
+ * lettering (wide, geometric, squared counters, very heavy).
+ *
+ * ONE weight (900), latin only — that keeps it to a single small woff2, and it
+ * roughly offsets the 172px lockup image the hero just stopped requesting.
+ * `display: 'swap'` so the wordmark paints in Roboto immediately rather than
+ * leaving a hole in the bar on a slow connection.
+ */
+const orbitron = Orbitron({
+  subsets: ['latin'],
+  weight: ['900'],
+  variable: '--font-orbitron',
   display: 'swap',
 })
 
@@ -73,7 +96,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html
       lang="en-US"
-      className={`${roboto.variable} ${notoSansThai.variable}`}
+      className={`${roboto.variable} ${notoSansThai.variable} ${orbitron.variable}`}
       suppressHydrationWarning
     >
       <head>

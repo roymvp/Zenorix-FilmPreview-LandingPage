@@ -20,16 +20,14 @@
   },
   "nav": {
     "home": "หน้าแรก Zenorix",
-    "languageMenu": "เลือกภาษาของคุณ",
-    "install": "ติดตั้ง"
+    "languageMenu": "เลือกภาษาของคุณ"
   },
   "hero": {
-    "headline": "ครบทุกหนัง ซีรีส์ และช่องทีวีสด",
+    "headline": "ดู Netflix, Disney+, HBO Max และช่องพรีเมียมกว่า 20 ช่อง ดูหนังและซีรีส์ที่คุณอยากดูได้ทุกเรื่อง",
     "price": "{annualPerMonth}/เดือน",
     "priceNote": "ฟรี 30 วัน · ไม่ต้องใช้บัตร",
     "cta": "ดาวน์โหลด Zenorix",
-    "ctaMeta": "APK Android · {size} · {downloads}",
-    "brandAlt": "Zenorix"
+    "ctaMeta": "APK Android · {size} · {downloads}"
   },
   "chart": {
     "heading": "10 อันดับยอดนิยม{country}สัปดาห์นี้",

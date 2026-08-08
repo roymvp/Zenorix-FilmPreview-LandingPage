@@ -20,16 +20,14 @@
   },
   "nav": {
     "home": "Zenorix home",
-    "languageMenu": "Choose your language",
-    "install": "Install"
+    "languageMenu": "Choose your language"
   },
   "hero": {
-    "headline": "Every movie, series & live channel.",
+    "headline": "Get Netflix, Disney+, HBO Max & 20+ premium networks. Watch any movie & series you want to watch.",
     "price": "{annualPerMonth}/MONTH",
     "priceNote": "30 days free · no card needed",
     "cta": "Get Zenorix",
-    "ctaMeta": "Android APK · {size} · {downloads}",
-    "brandAlt": "Zenorix"
+    "ctaMeta": "Android APK · {size} · {downloads}"
   },
   "chart": {
     "heading": "Top 10 in {country} This Week",

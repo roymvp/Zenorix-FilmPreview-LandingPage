@@ -334,13 +334,32 @@
   width: auto;
 }
 
-/* Wordmark, set in live text beside the mark. Letter-spaced OPEN rather than
-   tight, mirroring the lockup's own wordmark — this is the only place the two are
-   seen at the same size, so they should not disagree about proportion. */
+/* Wordmark, set in live text beside the mark — and since the hero dropped its
+   lockup, the only place the brand name appears on the page.
+   
+   Set in the DISPLAY face (Orbitron 900, loaded in app/layout.tsx) to match the
+   logo's lettering: wide, squared, very heavy, all caps. In Roboto Bold this read
+   as a generic app header sitting next to an unrelated logo.
+
+   Four properties do the matching, and all four are load-bearing:
+   - `--font-orbitron` FIRST, then the body stack as the swap/failure fallback;
+   - `uppercase`, because the lockup is all caps and `SITE.name` is title case.
+     Transformed rather than re-cased in config, so the config value stays the
+     human-readable brand name used in <title> and prose;
+   - 900, the one weight loaded — do not ask for a weight that is not in the
+     layout's `weight` array or the browser synthesises it;
+   - open tracking, mirroring the lockup, which is generously letter-spaced.
+
+   Stays on the `lg` tier it always used: Orbitron's caps run wider and taller than
+   Roboto's at the same `font-size`, but 15px still measures shorter than the 26px
+   mark beside it, so the lockup reads as mark-plus-wordmark rather than as two
+   competing elements. */
 .zx-brand-name {
+  font-family: var(--font-orbitron), var(--md-ref-typeface-brand);
   font-size: var(--zx-text-lg);
-  font-weight: var(--zx-weight-bold);
-  letter-spacing: 0.04em;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
   color: var(--zx-on-media);
 }
 
@@ -357,30 +376,10 @@
   --md-icon-button-pressed-icon-color: var(--zx-on-media);
 }
 
-/* Compact install button, sized to the bar. It carries only the short
-   `nav.install` label — the full CTA sentence would not fit a 420px header
-   beside the brand and language control.
-
-   Unlike the in-page CTAs it is a small-radius rectangle, not a pill: at 32px
-   tall a pill reads as a chip, and the squarer corner makes it read as the bar's
-   primary action.
-
-   It needs no color of its own. The dark scheme's `primary` is a near-white
-   (#fbfcfe) on a near-black `on-primary`, so a plain filled button lands as the
-   white pill this bar wants — the one fully opaque element on the glass, which is
-   what makes it the obvious thing to press. */
-.zx-topbar-cta {
-  --md-filled-button-container-height: 32px;
-  /* `meta` + semibold, not the old 13px/700. Every button label on the page now
-     uses semibold; only its SIZE varies with the button's rank (this compact bar
-     button at 13px, the full-width install CTAs at 14px). Weight was previously
-     doing that job inconsistently — 700 here vs 500 on the primary CTA. */
-  --md-filled-button-label-text-size: var(--zx-text-meta);
-  --md-filled-button-label-text-weight: var(--zx-weight-semibold);
-  --md-filled-button-container-shape: 8px;
-  --md-filled-button-leading-space: 14px;
-  --md-filled-button-trailing-space: 14px;
-}
+/* NOTE: `.zx-topbar-cta` sat here — a 32px filled install button, sized and
+   shaped (8px radius, not a pill) to read as the bar's primary action. The bar no
+   longer renders it; see the note in top-bar.tsx for why, and restore from git
+   rather than rewriting if a header CTA is ever wanted back. */
 
 /* ------------------------------------------------------------------- hero */
 
@@ -543,13 +542,9 @@
   text-align: center;
 }
 
-/* The signature element, and the only place the logo is shown at size. Width in
-   px rather than a percentage: it is a raster lockup, so it should never be
-   scaled above the 640px asset or shrunk to where the wordmark stops resolving. */
-.zx-hero-lockup {
-  width: 172px;
-  height: auto;
-}
+/* NOTE: `.zx-hero-lockup` (the 172px raster brand lockup) sat here, between the
+   headline and the price. The hero no longer renders it — the brand now lives
+   only in the top bar's mark + wordmark. See the note in hero-billboard.tsx. */
 
 .zx-hero-headline {
   margin: 0;

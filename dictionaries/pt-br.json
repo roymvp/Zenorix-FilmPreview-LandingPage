@@ -20,16 +20,14 @@
   },
   "nav": {
     "home": "Página inicial da Zenorix",
-    "languageMenu": "Escolha seu idioma",
-    "install": "Instalar"
+    "languageMenu": "Escolha seu idioma"
   },
   "hero": {
-    "headline": "Todo filme, série e canal ao vivo.",
+    "headline": "Tenha Netflix, Disney+, HBO Max e mais de 20 canais premium. Assista a qualquer filme e série que você quiser.",
     "price": "{annualPerMonth}/MÊS",
     "priceNote": "30 dias grátis · sem cartão",
     "cta": "Baixar a Zenorix",
-    "ctaMeta": "APK Android · {size} · {downloads}",
-    "brandAlt": "Zenorix"
+    "ctaMeta": "APK Android · {size} · {downloads}"
   },
   "chart": {
     "heading": "Top 10 {country} nesta semana",
