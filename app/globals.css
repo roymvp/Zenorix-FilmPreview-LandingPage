@@ -147,17 +147,21 @@
   --zx-media-control-hover: rgba(255, 255, 255, 0.24);
   --zx-media-outline: rgba(255, 255, 255, 0.22);
 
-  /* --- top bar geometry + surface -----------------------------------------
-     The top bar is the ONE part of the page excluded from the black canvas, and
-     its light band runs the full viewport width — wider than the 420px phone
-     column it sits in. Both `.zx-topbar` (inside the column) and `body::before`
-     (the left/right extension) read these, so the band and the bar can never
-     disagree about color or height.
-
+  /* --- top bar geometry ----------------------------------------------------
      `--zx-topbar-h` is a contract, not a measurement: the bar's tallest child is
      the 32px install button, so if a taller control is ever added to it, bump
-     `--zx-topbar-content-h` to match or the extension will sit short of the bar. */
-  --zx-topbar-surface: #f3f5f8;
+     `--zx-topbar-content-h` to match.
+
+     The height matters beyond the bar itself because the bar is a TRANSLUCENT
+     OVERLAY on the hero rather than a row above it: it is out of flow, so the
+     hero's copy block pads itself by this value to clear it.
+
+     NOTE: `--zx-topbar-surface` (an opaque near-white, #f3f5f8) lived here. The
+     bar was a light island — the one part of the page excluded from the black
+     canvas — and both the bar and a full-width `body::before` band read this
+     token so they could not disagree. Frosted glass over the poster wall replaced
+     both: the bar's own tint is now a translucent white in `.zx-topbar`, and
+     there is no band left to keep in sync with it. */
   --zx-topbar-pad: 10px;
   --zx-topbar-content-h: 32px;
   --zx-topbar-h: calc(
@@ -170,6 +174,47 @@
   box-sizing: border-box;
 }
 
+/* ---------------------------------------------------------------------------
+   TAP RESPONSIVENESS — the 0ms feedback layer. Do not remove.
+
+   `touch-action: manipulation` opts these elements out of the browser's
+   DOUBLE-TAP-TO-ZOOM gesture. That gesture is why a mobile tap feels dead for
+   ~300ms: the browser cannot know a first tap is not the start of a double-tap,
+   so it WITHHOLDS the click while it waits to see. Declaring that this element
+   has no double-tap behaviour lets the click dispatch immediately.
+
+   That delay has NOTHING to do with connection speed, which is what makes it
+   worth calling out: it is indistinguishable from "slow network" when reported
+   ("the button feels laggy"), so it gets chased in the wrong place. These markets
+   are mobile-first and the whole page exists to earn one tap on the install
+   button, so 300ms of manufactured lag is spent on the only interaction that
+   matters. Single-tap zoom (accessibility) and pinch-zoom are untouched —
+   `manipulation` disables double-tap zoom only, and the viewport in layout.tsx
+   deliberately keeps `userScalable`.
+
+   `md-filled-button` is listed explicitly because it is a custom element: it
+   matches none of the native selectors, and it IS the install CTA.
+
+   The tap highlight is cleared because every control here already has its own
+   `:active` and Material ripple feedback; the platform's grey flash lands on top
+   of those, a beat later, and reads as a rendering artifact rather than as
+   acknowledgement. Removing it is only safe BECAUSE of that existing feedback —
+   if a control is ever added without a pressed state, give it one rather than
+   re-enabling this globally. */
+a,
+button,
+label,
+select,
+summary,
+textarea,
+input,
+md-filled-button,
+md-menu-item,
+[role='button'] {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
 html,
 body {
   margin: 0;
@@ -178,6 +223,15 @@ body {
 
 html {
   scroll-behavior: smooth;
+  /* Guards the hero's desktop full-bleed. That bleed is sized in `vw`, which
+     INCLUDES the vertical scrollbar's width, so on a scrollbar-reserving platform
+     (Windows/Linux Chrome) the hero is a few px wider than the visible viewport —
+     enough to raise a horizontal scrollbar across the whole document.
+
+     `clip` not `hidden`: `hidden` on the root turns the document into a scroll
+     container and kills the `scroll-behavior: smooth` above it, along with
+     `position: sticky` further down the tree. */
+  overflow-x: clip;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -192,36 +246,23 @@ body {
      the only bright thing on screen. The column is marked out by a hairline
      border, not by a darker backdrop.
 
-     `position: relative` is here solely to anchor the top band below. */
-  position: relative;
+     NOTE: this used to also carry `position: relative` to anchor a `body::before`
+     top band (see below). */
   background: var(--md-sys-color-surface);
   color: var(--md-sys-color-on-background);
   font-family: var(--md-ref-typeface-plain);
   -webkit-font-smoothing: antialiased;
 }
 
-/* The top bar's LEFT/RIGHT EXTENSION: the light band either side of the phone
-   column, which together with `.zx-topbar` itself makes one uninterrupted header
-   across the viewport while everything below stays black.
+/* NOTE: a `body::before` rule lived here. It painted the top bar's LEFT/RIGHT
+   EXTENSION — the light band either side of the 420px phone column that made the
+   old opaque bar read as one uninterrupted header across the viewport. It had to
+   be painted from `body` because a `100vw` pseudo-element on the bar itself would
+   have been cropped by `.zx-hero`'s `overflow: hidden`.
 
-   It has to be painted from `body` rather than by the bar. The obvious approach —
-   a `100vw` pseudo-element on `.zx-topbar` — cannot work here, because the bar is
-   nested inside `.zx-hero` (`overflow: hidden`) inside `.zx-page`
-   (`overflow-x: clip`); either one crops the bleed back to the 420px column.
-   `body` is the nearest ancestor outside both clips.
-
-   `z-index: 0` against `.zx-page`'s `z-index: 1` is what keeps this strictly
-   BEHIND the column: an absolutely positioned box would otherwise paint over the
-   in-flow column and cover the real bar's contents. */
-body::before {
-  content: '';
-  position: absolute;
-  z-index: 0;
-  inset-block-start: 0;
-  inset-inline: 0;
-  height: var(--zx-topbar-h);
-  background: var(--zx-topbar-surface);
-}
+   The bar is frosted glass over the hero's poster wall now, so there is nothing
+   to extend: outside the column there is no wall to see through the glass, and a
+   band of tinted black either side of the phone would just be the canvas. */
 
 /* Material Symbols icon font for <md-icon> */
 md-icon {
@@ -244,6 +285,11 @@ md-icon {
    targets precisely that pre-registration window and nothing else — these rules
    stop applying by themselves the moment the definitions land. No JS, no class
    toggling, and no hydration involvement.
+
+   Only the five elements this page renders are listed. The selector list used to
+   name 25, most for components the app does not use; keep it matched to
+   MaterialWebLoader's REGISTRATIONS. `md-ripple`/`md-focus-ring` are NOT needed
+   here — Material renders those inside its own shadow DOM, never in our markup.
    --------------------------------------------------------------------------- */
 
 /* Overlays must NEVER occupy layout while unupgraded. `display: none`, not
@@ -260,29 +306,8 @@ md-menu:not(:defined) {
    `visibility: hidden` also removes them from the accessibility tree and from
    hit-testing, so nothing can be clicked before it works. */
 md-filled-button:not(:defined),
-md-outlined-button:not(:defined),
-md-text-button:not(:defined),
-md-icon-button:not(:defined),
 md-icon:not(:defined),
-md-list:not(:defined),
-md-list-item:not(:defined),
-md-menu-item:not(:defined),
-md-elevated-card:not(:defined),
-md-outlined-card:not(:defined),
-md-filled-card:not(:defined),
-md-badge:not(:defined),
-md-linear-progress:not(:defined),
-md-circular-progress:not(:defined),
-md-slider:not(:defined),
-md-switch:not(:defined),
-md-checkbox:not(:defined),
-md-radio:not(:defined),
-md-chip-set:not(:defined),
-md-assist-chip:not(:defined),
-md-filter-chip:not(:defined),
-md-divider:not(:defined),
-md-ripple:not(:defined),
-md-focus-ring:not(:defined) {
+md-menu-item:not(:defined) {
   visibility: hidden;
 }
 
@@ -301,4 +326,24 @@ html[lang='th-TH'] body {
   clip-path: inset(50%);
   white-space: nowrap;
   border: 0;
+}
+
+/* The skip link's landing target. `<main>` carries `tabIndex={-1}` so that
+   following `#zx-main` actually MOVES FOCUS and not just the scroll position
+   (without it, focus stayed on <body> and the next Tab went back to the top bar —
+   the skip link skipped nothing).
+
+   Making a full-page container focusable has one side effect that must be undone
+   here: Chrome treats programmatic focus from a fragment as `:focus-visible` and
+   draws its default ring around the ENTIRE element, which is the whole page
+   column — verified as a white outline down the left, top and right of the
+   viewport. So the ring is removed on this container only.
+
+   This suppresses NOTHING real: `<main>` is not a control, it cannot be tabbed to
+   (-1), and the user's next Tab lands on the first card, which draws its own
+   `:focus-visible` ring. Do NOT generalise this rule to other elements — every
+   actual control on this page depends on its focus ring. */
+main[tabindex='-1']:focus,
+main[tabindex='-1']:focus-visible {
+  outline: none;
 }

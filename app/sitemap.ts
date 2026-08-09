@@ -1,38 +1,31 @@
 import type { MetadataRoute } from 'next'
 import { SITE } from '@/lib/config/site'
-import { movies } from '@/lib/content/movies'
-import { locales, localeMeta, moviePath, type Locale } from '@/lib/i18n/config'
+import { locales } from '@/lib/i18n/config'
+import { buildLocaleAlternates } from '@/lib/seo'
 
 /**
- * Lists every market page with reciprocal hreflang alternates, so each
- * localized URL is discovered and correctly clustered by search engines.
+ * Three URLs — one per market — each with reciprocal hreflang alternates.
+ *
+ * It used to list twelve: these three plus nine `/movie/[slug]` URLs that all
+ * rendered the same landing page with only a different <title>. Submitting near
+ * duplicates competes with itself and is what Google classifies as doorway pages,
+ * so the sitemap now lists only pages that are genuinely distinct.
  */
 export default function sitemap(): MetadataRoute.Sitemap {
-  const alternates = (path: (locale: Locale) => string) => {
-    const languages: Record<string, string> = {}
-    for (const locale of locales) {
-      languages[localeMeta[locale].hreflang] = `${SITE.url}${path(locale)}`
-    }
-    return { languages }
-  }
-
-  const homes = locales.map((locale) => ({
+  return locales.map((locale) => ({
     url: `${SITE.url}/${locale}`,
     lastModified: new Date(),
     changeFrequency: 'daily' as const,
     priority: 1,
-    alternates: alternates((target) => `/${target}`),
+    /* Shared with the `<head>` alternates via `buildLocaleAlternates`, and
+       deliberately not a second local copy of that logic. This file used to build
+       its own `languages` map, and the two had already drifted: the helper adds
+       `x-default` (the page Google serves to visitors whose language matches none
+       of the three markets) and this one did not. Google reads hreflang from both
+       the head and the sitemap, so the two were making different claims about the
+       same URLs. Import it so that can no longer happen. */
+    alternates: buildLocaleAlternates((target) => `/${target}`) as {
+      languages: Record<string, string>
+    },
   }))
-
-  const films = locales.flatMap((locale) =>
-    movies.map((movie) => ({
-      url: `${SITE.url}${moviePath(locale, movie.slug)}`,
-      lastModified: new Date(),
-      changeFrequency: 'weekly' as const,
-      priority: 0.8,
-      alternates: alternates((target) => moviePath(target, movie.slug)),
-    })),
-  )
-
-  return [...homes, ...films]
 }

@@ -12,32 +12,34 @@
     "annualTotalValue": 15
   },
   "meta": {
-    "title": "{title} ({year}) — Watch Free in 4K | Zenorix",
-    "description": "Stream {title} free in 4K on Zenorix — plus 28,000+ movies, 8,000+ series and 900+ live channels from every major platform. First month free, then $2/month.",
-    "ogTitle": "{title} — free in 4K on Zenorix",
-    "keywords": "watch {title} free, {title} full movie, {title} 4K stream, free streaming app Android, Zenorix APK",
-    "imageAlt": "Key art from the film {title}, streaming free in 4K on Zenorix"
+    "title": "Zenorix — Every Movie, Series & Live TV in 4K",
+    "description": "One Android app for 28,000+ movies, 8,000+ series and 900+ live channels from Netflix, Disney+, HBO Max and 20+ more networks, all in 4K. 30 days free, then $2/month.",
+    "ogTitle": "Zenorix — every platform, one app, $2/month",
+    "keywords": "free streaming app Android, watch movies free 4K, live TV app, all streaming platforms one app, Zenorix APK",
+    "imageAlt": "Zenorix — one Android app for movies, series and live TV in 4K"
   },
   "nav": {
     "home": "Zenorix home",
-    "languageMenu": "Choose your language",
-    "install": "Install"
+    "languageMenu": "Choose your language"
   },
-  "player": {
-    "play": "Play",
-    "pause": "Pause",
-    "mute": "Mute",
-    "unmute": "Unmute",
-    "seek": "Seek within the free preview"
-  },
-  "info": {
-    "synopsisExpand": "More",
-    "synopsisCollapse": "Less"
+  "hero": {
+    "headline": "Netflix, Disney+, HBO Max & 20+ networks. Every movie and series, one app.",
+    "price": "{annualPerMonth}/MONTH",
+    "priceNote": "30 days free · no card needed",
+    "cta": "Get Zenorix",
+    "ctaMeta": "Android APK · {size} · {downloads}",
+    "stores": {
+      "iosEyebrow": "Coming soon to the",
+      "ios": "App Store",
+      "googlePlayEyebrow": "Coming soon to",
+      "googlePlay": "Google Play",
+      "unavailable": "{store} — coming soon"
+    }
   },
   "chart": {
-    "heading": "Top 10 in {country} This Week",
+    "headingMovies": "Trending Movies",
+    "headingSeries": "Trending Shows",
     "rank": "Number {rank}",
-    "seeAllShort": "See all",
     "more": "Install Zenorix App for More Hits",
     "moreHint": "28,000+ movies, 8,000+ shows & live TV channels"
   },
@@ -60,6 +62,7 @@
       "label": "Cinematic Viewing",
       "specs": {
         "resolution": "4K Ultra HD",
+        "lossless": "Lossless Quality",
         "audio": "Dolby Atmos",
         "playback": "Lag-Free"
       }
@@ -130,21 +133,12 @@
       ],
       "cta": "Get the Zenorix App",
       "ctaMeta": "Android APK · {size} · {downloads}"
-    },
-    "preview": {
-      "headingLines": [
-        "Web viewing limited to the first {previewMinutes} mins.",
-        "Get the app to watch the FULL movie FREE."
-      ],
-      "body": "More features in app:",
-      "bullets": [
-        "Unlock 28,000+ movies & series",
-        "4K Ultra HD & Dolby Atmos",
-        "30 Days Free - No card needed to start"
-      ],
-      "cta": "Get the Zenorix App",
-      "ctaMeta": "Android APK · {size} · {downloads}"
     }
+  },
+  "contact": {
+    "label": "Contact us",
+    "prompt": "Questions before you install?",
+    "aria": "Contact us on Telegram"
   },
   "footer": {
     "privacy": "Privacy",
@@ -153,7 +147,7 @@
     "copyright": "© {year} Zenorix"
   },
   "a11y": {
-    "skipToContent": "Skip to film details",
+    "skipToContent": "Skip to main content",
     "posterAlt": "Poster for {title}"
   }
 }

@@ -1,5 +1,6 @@
 import type { CSSProperties } from 'react'
 
+import { ContactLink } from '@/components/landing/contact-link'
 import { DownloadCta } from '@/components/landing/download-cta'
 import { PLATFORMS, PLATFORM_ORDER } from '@/lib/content/platforms'
 
@@ -10,9 +11,19 @@ import { PLATFORMS, PLATFORM_ORDER } from '@/lib/content/platforms'
  * are keyed rather than index-matched so reordering or retranslating a label can
  * never silently pair "Dolby Atmos" with the 4K plate.
  */
+/**
+ * Order is not arbitrary — these are read as a 2x2 grid that fills row-wise, so
+ * the pairs are what the rows say: row 1 is PICTURE (resolution, then the
+ * compression behind it), row 2 is SOUND and SMOOTHNESS. Reordering this array
+ * regroups the card.
+ */
 const VIEWING_SPECS = [
   // The literal 4K plate broadcasters and disc cases use.
   { id: 'resolution', icon: '4k' },
+  // The "HQ" plate. Sits beside 4K deliberately: 4K is how many pixels arrive,
+  // lossless is whether they survive compression — the second is the claim that
+  // stops "4K" from meaning a heavily-compressed 4K stream.
+  { id: 'lossless', icon: 'high_quality' },
   // Speaker throwing concentric arcs — the standard surround/spatial mark.
   { id: 'audio', icon: 'surround_sound' },
   // Smooth playback has no industry plate, so this borrows the universal
@@ -61,6 +72,7 @@ export function AboutZenorix({
   trial,
   cta,
   ctaMeta,
+  contact,
 }: {
   heading: string
   /** Card 1 label. Its "content" is the platform icon matrix itself. */
@@ -98,6 +110,8 @@ export function AboutZenorix({
   cta: string
   /** APK facts rendered directly beneath that button. */
   ctaMeta: string
+  /** Support escape hatch under the button, for readers who are not ready yet. */
+  contact: { label: string; prompt: string; aria: string }
 }) {
   // The rival bar is always full, so our bar is our share of its cost.
   //
@@ -167,7 +181,7 @@ export function AboutZenorix({
                         <li key={platform.id}>
                           {/* eslint-disable-next-line @next/next/no-img-element */}
                           <img
-                            src={platform.icon || '/placeholder.svg'}
+                            src={platform.icon}
                             alt={copy === 0 ? platform.name : ''}
                             width={44}
                             height={44}
@@ -258,12 +272,18 @@ export function AboutZenorix({
 
           <li className="zx-about-card">
             <p className="zx-about-label">{viewing.label}</p>
-            {/* Three equal tiles side by side, each with its badge over its label
-                and both left-aligned to the tile's own edge. Icons are the
-                industry's own marks (a 4K plate, a surround-sound speaker), so the
-                claim is recognized before it is read. Decorative by design: each
-                label already states its spec, so announcing the glyph too would
-                only double up for screen readers. */}
+            {/* Four equal tiles on a 2x2 grid, each badge BESIDE its label rather
+                than above it. The row layout is what let a fourth spec in without
+                growing the card: stacked, four tiles meant either a 4-across row
+                (labels down to ~80px, so "4K Ultra HD" broke onto three lines) or
+                two stacked rows of two, which added a whole second icon+label
+                column height. Side by side, the icon shares the label's line box,
+                so the 2x2 grid costs one text row instead of one tile.
+
+                Icons are the industry's own marks (a 4K plate, an HQ plate, a
+                surround-sound speaker), so the claim is recognized before it is
+                read. Decorative by design: each label already states its spec, so
+                announcing the glyph too would only double up for screen readers. */}
             <ul className="zx-about-specs">
               {VIEWING_SPECS.map((spec) => (
                 <li key={spec.id} className="zx-spec">
@@ -301,6 +321,22 @@ export function AboutZenorix({
             the exact moment the reader is deciding. */}
         <div className="zx-about-cta">
           <DownloadCta label={cta} sub={ctaMeta} source="about" />
+          {/* The section's four cards answer "is this worth it?", but a reader
+              still holding a question has had nowhere to put it — the only exit
+              was to install anyway or leave. This is that exit.
+
+              It sits BELOW the APK meta line, not beside the button: the prompt
+              is a question, so putting it above or alongside would have it argue
+              with the CTA at the moment of the decision. Reached only after the
+              primary action has been offered and declined. */}
+          <p className="zx-about-contact">
+            {contact.prompt}{' '}
+            <ContactLink
+              label={contact.label}
+              ariaLabel={contact.aria}
+              source="about"
+            />
+          </p>
         </div>
       </div>
     </section>

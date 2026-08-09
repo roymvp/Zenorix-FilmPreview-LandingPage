@@ -2,9 +2,12 @@
  * Zenorix landing layout.
  * Plain CSS (flexbox / grid) over M3 tokens — no utility framework.
  *
- * MOBILE-ONLY BY DESIGN. There is exactly one layout: the phone one. The page
- * caps itself at --zx-page-max and centers on wider screens rather than
- * reflowing into a desktop composition.
+ * MOBILE-FIRST, WITH ONE DESKTOP TIER. The phone layout is the base and is still
+ * what every unconditional rule in this file describes. Wider screens are handled
+ * by exactly one breakpoint at the very bottom of the file (see "DESKTOP TIER"),
+ * which widens --zx-page-max and reflows four blocks. Do not scatter new
+ * `min-width` queries through the file — add to that single block instead, so the
+ * desktop composition stays readable in one place.
  *
  * ONE BACKGROUND. Every section — info, Top 10, About Zenorix, FAQ,
  * final CTA, footer — paints nothing and inherits `--md-sys-color-surface` from
@@ -16,10 +19,12 @@
  * background gradients, no backdrop images behind copy. Sections are separated
  * by spacing and hairlines only.
  *
- * Consequence, and the reason this file has no `min-width` media queries:
- * media queries match the VIEWPORT, not this capped container, so any
- * `min-width` rule would fire on a desktop viewport and restyle a 420px-wide
- * column with desktop values. Keep all sizing unconditional.
+ * THE ONE RULE THAT MAKES THE BREAKPOINT SAFE: a media query matches the
+ * VIEWPORT, not this capped container, so a `min-width` rule is only ever correct
+ * here if the column itself also widens at that width. That is exactly why the
+ * desktop tier's FIRST declaration is `--zx-page-max`. Never add a `min-width`
+ * rule that restyles content without moving the cap with it — that is what would
+ * put desktop values on a phone-width column.
  */
 
 .zx-page {
@@ -92,16 +97,30 @@
   /* Section rhythm, now a scale step rather than a standalone 44px. */
   --zx-section-y: var(--zx-space-10);
 
+  /* THE control height, shared by the primary install button, the secondary
+     "see all" pill and the sticky bar's button. It was the literal `46px`
+     repeated in three rules, which is exactly how the outlined secondary once
+     ended up 6px TALLER than the primary filled button it sits beside. As a token
+     the desktop tier can raise all three in one line and they cannot drift. */
+  --zx-control-h: 46px;
+
   width: 100%;
   max-width: var(--zx-page-max);
   margin-inline: auto;
   display: flex;
   flex-direction: column;
-  /* The Top 10 rail scrolls inside itself and must never widen the document. */
-  overflow-x: clip;
-  /* Lifts the column above the header band painted by `body::before`, which is
-     absolutely positioned and would otherwise paint over this in-flow element and
-     hide the real top bar's contents. See that rule in globals.css. */
+  /* NOT clipped, deliberately. `overflow-x: clip` lived here to stop the rails
+     widening the document, but a clip applies to every descendant however it is
+     positioned — including the hero, which on desktop has to escape this column to
+     bleed the poster wall to the viewport edge. The rail guard moved DOWN to
+     `#zx-main`, which is where the rails actually are.
+
+     Do not re-add a clip here: it would silently cap the desktop hero back to
+     `--zx-page-max` with nothing to indicate why. */
+  /* Stays as the positioned ancestor for the absolutely positioned things inside
+     the column. `z-index` previously also had to lift this above a `body::before`
+     header band, which no longer exists — see the note where it was, in
+     globals.css. */
   position: relative;
   z-index: 1;
   /* No side borders, and deliberately no substitute for them. A 1px `outline-variant` rule
@@ -131,6 +150,15 @@
   padding-inline: var(--zx-gutter);
 }
 
+/* The rail-overflow guard, moved here from `.zx-page` (see the note there). Every
+   rail is inside <main>, so this clips exactly what needs clipping while leaving
+   the hero — the one section outside <main> — free to bleed on desktop.
+   `clip` rather than `hidden` on purpose: `hidden` would make this a scroll
+   container, which silently breaks `position: sticky` for anything inside it. */
+#zx-main {
+  overflow-x: clip;
+}
+
 /* SECTION RHYTHM — single-owner model.
    Each section owns ONLY the space above itself, and never below. That is the whole
    reason this is `var(--zx-section-y) 0` and not a symmetric `var(--zx-section-y)`.
@@ -148,24 +176,17 @@
   padding-block: var(--zx-section-y) 0;
 }
 
-/* Skips rendering work for the two HEAVY below-the-fold sections until they are
-   scrolled near. Applied only to these two, on measured evidence rather than to
-   every section: About is the tallest block on the page (~906px) and is the only one
-   running a 34s infinite marquee (`zx-logo-drift`) plus eleven logo images, and FAQ
-   is second (~676px) with a details element per question. The Top 10 strip is
-   deliberately EXCLUDED — it sits near the fold on a phone, so skipping it would
-   risk deferring work the user sees immediately.
+/* Skips rendering work for the two HEAVY below-the-fold sections until scrolled
+   near. Only these two, on measured evidence: About is the tallest block (~906px)
+   and the only one running a 34s infinite marquee plus eleven logo images, FAQ is
+   second (~676px). Top 10 is deliberately EXCLUDED — it sits near the fold on a
+   phone, so skipping it would defer work the user sees immediately.
 
-   `contain-intrinsic-size: auto <height>` matters more than the literal number: the
-   `auto` keyword tells the browser to remember each section's REAL size once it has
-   been rendered, so the placeholder estimate is used only for the very first
-   scrollbar calculation. The lengths are the measured desktop heights; being off on
-   a narrow viewport costs a scrollbar adjustment, not a layout shift of visible
-   content, because a skipped section is by definition outside the viewport.
-
-   This is also why the marquee is worth containing: off-screen, an infinite
-   animation otherwise keeps generating style and paint work for a strip nobody is
-   looking at. */
+   In `contain-intrinsic-size: auto <height>` the `auto` keyword matters more than
+   the number: the browser remembers each section's real size after first render, so
+   the estimate only ever affects the initial scrollbar. Being off on a narrow
+   viewport costs a scrollbar adjustment, not a visible shift — a skipped section is
+   by definition off-screen. */
 .zx-section--about {
   content-visibility: auto;
   contain-intrinsic-size: auto 906px;
@@ -180,35 +201,32 @@
 }
 
 /* --- 48px minimum touch targets -------------------------------------------
-   Four controls are drawn smaller than the 48x48 minimum because the design needs
-   them visually compact: the language trigger (40x32), the player's mute toggle
-   (32x32), the synopsis expander (50x26) and the brand link (88x30, height only).
+   The language trigger (40x32) and brand link (~110x26) are drawn compact on
+   purpose. Instead of inflating them and breaking the bar's proportions, each gets
+   a transparent centred overlay that grows the HIT AREA to 48x48; `absolute` keeps
+   it out of layout so no spacing shifts.
 
-   Rather than inflate them — which would break the topbar's proportions and push
-   chrome over the film — each gets a transparent, centred overlay that grows the
-   HIT AREA to 48x48 while leaving the painted size untouched. `position: absolute`
-   means the overlay never affects layout, so no spacing changes anywhere.
+   `max(100%, 48px)` per axis grows ONLY the deficient axis — the brand link keeps
+   its width and gains height, rather than collapsing to a 48px square.
 
-   `max(100%, 48px)` per axis, so an element already larger on one axis keeps its
-   own size there and only the deficient axis grows — the brand link stays 88px wide
-   and gains height only, instead of being squeezed to a 48px square.
+   The top-bar contact link is included for the same reason: it is a standalone
+   control in the bar, not running text. Being icon-only it is ~18px square, so
+   BOTH axes grow to 48 — see `.zx-contact--bar` for the margin that keeps that
+   square from overlapping the language trigger's own overlay.
 
-   Not applied to the footer links: those are inline text inside a sentence-like row,
-   which WCAG exempts, and an expanded box on each would overlap its neighbours.
-   The scrub slider is also left alone — its target is the native range thumb, and
-   growing that is a visual change to the progress bar, not a hit-area tweak. */
+   Not applied to footer links, nor to the contact link inside the About sentence:
+   inline text in a sentence-like row is WCAG-exempt, and an expanded box on each
+   would overlap its neighbours. */
 .zx-brand,
 .zx-lang-trigger,
-.zx-synopsis-toggle {
-  /* The overlay's containing block. `.zx-mute` is already `position: absolute`, so
-     it is deliberately absent here — restating it would risk overriding that. */
+.zx-contact--bar {
+  /* The overlay's containing block. */
   position: relative;
 }
 
 .zx-brand::after,
 .zx-lang-trigger::after,
-.zx-mute::after,
-.zx-synopsis-toggle::after {
+.zx-contact--bar::after {
   content: '';
   position: absolute;
   inset-block-start: 50%;
@@ -217,8 +235,8 @@
   width: max(100%, 48px);
   height: max(100%, 48px);
   /* Deliberately NO `z-index: -1`. Sending it behind would drop it beneath the
-     ancestor backgrounds the topbar and player paint (the button sets no stacking
-     context of its own), and an overlay covered by an opaque background stops being
+     background the top bar paints (the button sets no stacking context of its
+     own), and an overlay covered by an opaque background stops being
      hit-tested — silently undoing the whole point. Left in normal paint order it
      covers its own control instead, which is harmless: a pseudo-element is part of
      the element for event targeting, so the tap still lands on the button, and there
@@ -240,73 +258,57 @@
   color: var(--md-sys-color-on-surface);
 }
 
-/* NOTE: `.zx-eyebrow` lived here. Its only user was the locked-title dialog's
-   "Available in the app" kicker, which was removed when that sheet's copy was
-   reduced to a heading + bullet list, so the rule went with it. */
-
 /* ---------------------------------------------------------------- top bar */
 
-/* In normal flow above the player, not overlaid on it: the frame is now a
-   16/9 video rather than a full-height hero, so floating chrome over it would
-   collide with the playback controls.
+/* Frosted glass layered OVER the hero's poster wall, not a row above it.
+   `position: absolute` is what makes the wall start at the very top of the page
+   and run behind the chrome — the hero's copy block pays for that by padding
+   itself by `--zx-topbar-h` so a tall headline can never slide underneath.
 
-   Because it is a real bar rather than an overlay it is a LIGHT surface, even
-   though the rest of the landing page is dark-first cinema.
-
-   The app runs the dark scheme, so a light bar cannot simply set a background:
-   its children (brand text, language trigger + menu, icon buttons, install
-   button) would keep painting dark-scheme on-dark colors and go invisible.
-   Instead this re-declares the LIGHT scheme tokens on the bar itself, making it a
-   self-contained light island — every Material child inside resolves correct
-   on-light colors automatically, with no per-component overrides.
-
-   These values are DELIBERATELY local and have no counterpart to track. An earlier
-   note here said to keep them in sync with the `:root` block in globals.css, which
-   was true only while a light scheme still existed there; globals.css is now
-   dark-only, so following that instruction would repaint this bar dark and make its
-   own contents invisible. This is the app's only light surface — if the brand's
-   light palette ever changes, edit it here.
-
-   The palette is the page's own, inverted rather than swapped: the light end of the
-   METALLIC SILVER ramp for the surface, and the SOFT TECH BLUE for `primary`. Blue
-   does the accent's job here specifically because silver cannot: on a near-white bar
-   the brand silver has almost no contrast, so the install button would dissolve into
-   its own background. Reusing the accent instead of inventing a third hue keeps the
-   header recognisably part of the same three-color system.
-
-   The blue is only as dark as white-on-it needs (AA at the button's 13px label) and
-   no darker. It was #1d5b92 — a heavy navy that made the page's single most important
-   action look sombre; #1668cf is the same hue with the saturation and lightness the
-   accent carries everywhere else, so the header now matches the scrubber's blue
-   instead of reading as a duller relative of it. */
+   Do NOT re-declare a local Material scheme here. The bar is dark and inherits
+   the page's dark scheme, so a `color-scheme: light` island (which this once was,
+   back when the bar was an opaque row) would now fight the tokens rather than
+   help them. */
 .zx-topbar {
-  color-scheme: light;
-
-  --md-sys-color-primary: #1668cf;
-  --md-sys-color-on-primary: #ffffff;
-  --md-sys-color-surface: var(--zx-topbar-surface);
-  --md-sys-color-on-surface: #161920;
-  --md-sys-color-on-surface-variant: #4b525c;
-  --md-sys-color-outline: #79818c;
-  --md-sys-color-outline-variant: #cbd1da;
-  --md-sys-color-surface-container: #e7ebf0;
-  --md-sys-color-surface-container-high: #dee3ea;
-  --md-sys-color-surface-container-highest: #d5dbe3;
-
-  position: relative;
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline: 0;
   z-index: 4;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: var(--zx-space-3);
-  /* Padding and height both come from the shared top-bar tokens, because the
-     full-width extension behind this bar (`body::before`) is sized from the same
-     ones — a local literal here would make the band and the bar disagree. */
   padding: var(--zx-topbar-pad) var(--zx-gutter);
   padding-block-start: max(var(--zx-topbar-pad), env(safe-area-inset-top));
   min-height: var(--zx-topbar-h);
-  background: var(--md-sys-color-surface);
-  color: var(--md-sys-color-on-surface);
+
+  /* The glass itself. Three parts, all load-bearing:
+     - a translucent WHITE tint, not a black one: the hero scrim below is already
+       darkening the wall, and stacking dark-on-dark would read as a smudge rather
+       than as a pane;
+     - the blur, which is what separates the bar's own text from the key art
+       moving behind it. Without it this is just a see-through strip and the
+       wordmark competes with whatever poster the cycle lands on;
+     - `saturate` before the blur, because averaging colours over a wide radius
+       washes them out — this puts back the poster colour the blur removes, so the
+       pane still reads as tinted glass and not as grey plastic. */
+  background: rgb(255 255 255 / 0.06);
+  backdrop-filter: saturate(140%) blur(18px);
+  -webkit-backdrop-filter: saturate(140%) blur(18px);
+  /* Bottom edge only: the pane's near edge, and the one line that keeps it from
+     dissolving into the scrim where the two tints happen to match. */
+  border-block-end: 1px solid rgb(255 255 255 / 0.1);
+  color: var(--zx-on-media);
+}
+
+/* Fallback for browsers without `backdrop-filter` (and for the blur being
+   disabled by a privacy/perf setting). A 6% white tint alone would leave the
+   wordmark sitting directly on key art, so a supportless browser gets an opaque
+   dark bar instead — less pretty, still legible. */
+@supports not (backdrop-filter: blur(1px)) {
+  .zx-topbar {
+    background: rgb(var(--zx-media-black-rgb) / 0.82);
+  }
 }
 
 .zx-brand {
@@ -314,521 +316,524 @@
   align-items: center;
   gap: var(--zx-space-2);
   text-decoration: none;
-  color: var(--md-sys-color-on-surface);
+  /* `--zx-on-media`, not `--md-sys-color-on-surface`: the two resolve to the same
+     white today, but this text sits on moving key art seen through glass, not on
+     the page surface, and the media tokens are the ones that exist to guarantee
+     contrast there. */
+  color: var(--zx-on-media);
 }
 
-/* The box and its corner radius live here, so the real logo can drop in as an
-   <img class="zx-brand-mark"> and need no further styling. */
+/* The real brand mark. Sized by HEIGHT with `width: auto`, not fitted into a
+   square box: the artwork is wider than it is tall (the Z, its play triangle and
+   the signal arcs), so a 30px square would have had to crop or letterbox it.
+   Height is what needs to agree with the wordmark beside it. */
 .zx-brand-mark {
-  display: grid;
-  place-items: center;
-  width: 30px;
-  height: 30px;
-  border-radius: 6px;
-  object-fit: cover;
-  background: var(--md-sys-color-primary);
-  color: var(--md-sys-color-on-primary);
-  font-weight: var(--zx-weight-bold);
-  /* 16px, off the scale's `lg` step rather than the old one-off 17px. This is a
-     single glyph in a 30px box, so the exact size is not load-bearing. */
-  font-size: var(--zx-text-lg);
-  line-height: 1;
+  height: 26px;
+  width: auto;
 }
 
-/* Neutral stand-in until the brand asset exists. Deliberately reads as an empty
-   slot rather than a finished logo. Both places it appears — the top bar and the
-   footer — are page surfaces, so it uses on-surface colors. */
-.zx-brand-mark[data-placeholder] {
-  background: var(--md-sys-color-surface-container-highest);
-  border: 1px dashed var(--md-sys-color-outline-variant);
-  color: var(--md-sys-color-on-surface-variant);
-}
+/* Wordmark, in live text beside the mark — the only place the brand name appears.
 
-.zx-brand-mark[data-placeholder] md-icon {
-  font-size: 16px;
-  width: 16px;
-  height: 16px;
-}
+   Set in the display face (Orbitron 900, loaded in app/layout.tsx) to match the
+   logo's lettering. All four properties below are load-bearing:
+   - `--font-orbitron` FIRST, body stack after as the swap/failure fallback;
+   - `uppercase`, because the lockup is caps but `SITE.name` is title case — cased
+     here so config keeps the readable name used in <title> and prose;
+   - 900, the ONLY weight loaded; any other value gets synthesised by the browser;
+   - open tracking, mirroring the lockup's own letter-spacing.
 
-/* Wordmark, paired with the mark in both the top bar and the footer. */
+   Keep it on `lg`: at 15px it still measures shorter than the 26px mark, so the
+   pair reads as mark-plus-wordmark rather than two competing elements. */
 .zx-brand-name {
+  font-family: var(--font-orbitron), var(--md-ref-typeface-brand);
   font-size: var(--zx-text-lg);
-  font-weight: var(--zx-weight-bold);
-  letter-spacing: -0.01em;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--zx-on-media);
 }
 
+/* Icons take the MEDIA tokens rather than the surface ones (was
+   `on-surface-variant` #a4aebc / `primary`): a mid grey is legible on flat black
+   but not against key art showing through glass, and `--zx-on-media-variant` is
+   the lifted value that exists for exactly that problem. */
 .zx-topbar-actions {
   display: flex;
   align-items: center;
   gap: var(--zx-space-1);
-  --md-icon-button-icon-color: var(--md-sys-color-on-surface-variant);
-  --md-icon-button-hover-icon-color: var(--md-sys-color-primary);
-  --md-icon-button-pressed-icon-color: var(--md-sys-color-primary);
-}
-
-/* Compact install button, sized to the bar. It carries only the short
-   `nav.install` label — the full CTA sentence would not fit a 420px header
-   beside the brand and language control.
-
-   Unlike the in-page CTAs it is a small-radius rectangle, not a pill: at 32px
-   tall a pill reads as a chip, and the squarer corner makes it read as the
-   bar's primary action and echoes the 6px brand mark beside it. */
-.zx-topbar-cta {
-  --md-filled-button-container-height: 32px;
-  /* `meta` + semibold, not the old 13px/700. Every button label on the page now
-     uses semibold; only its SIZE varies with the button's rank (this compact bar
-     button at 13px, the full-width install CTAs at 14px). Weight was previously
-     doing that job inconsistently — 700 here vs 500 on the primary CTA. */
-  --md-filled-button-label-text-size: var(--zx-text-meta);
-  --md-filled-button-label-text-weight: var(--zx-weight-semibold);
-  --md-filled-button-container-shape: 8px;
-  --md-filled-button-leading-space: 14px;
-  --md-filled-button-trailing-space: 14px;
+  --md-icon-button-icon-color: var(--zx-on-media-variant);
+  --md-icon-button-hover-icon-color: var(--zx-on-media);
+  --md-icon-button-pressed-icon-color: var(--zx-on-media);
 }
 
 /* ------------------------------------------------------------------- hero */
 
+/* The hero is a poster wall, a scrim and a pitch — no player, no film block. */
+
 .zx-hero {
   position: relative;
   isolation: isolate;
-  /* The letterbox behind the 16/9 frame. Uses the media black token rather than a
-     literal so it stays identical to the scrims painted over the video above it. */
-  background: var(--zx-media-scrim-strong);
+  /* `--md-sys-color-surface`, i.e. the PAGE's black — NOT the media black the
+     scrim above it is built from. The two are deliberately different values
+     (#08090b vs #040609), so ending the hero on the media black left a measurable
+     4-value step exactly where the hero meets the section below it: a faint but
+     visible horizontal line across the full column. The hero's last pixel has to
+     be the first pixel of the page. */
+  background: var(--md-sys-color-surface);
   overflow: hidden;
 }
 
-/* The stage is now just the video frame: the title, specs and synopsis moved
-   out from over the film into .zx-info below, so it no longer needs to reserve
-   near-viewport height for an overlaid copy block. */
-.zx-stage {
+/* Full-bleed brand billboard: tilted poster wall, scrim, pitch.
+   `min(78svh, 640px)` rather than a media query, because this file has none by
+   design (see the header): `svh` responds to the real phone viewport — and it is
+   the SMALL viewport unit on purpose, so a mobile browser's collapsing URL bar
+   cannot make the hero taller than the space it measured — while the 640px cap
+   stops a tall desktop window stretching the same 420px column into a 1300px
+   billboard. */
+.zx-hero-billboard {
   position: relative;
-  width: 100%;
-  aspect-ratio: 16 / 9;
+  min-height: min(78svh, 640px);
+  display: flex;
+  flex-direction: column;
+  /* Copy sits at the BOTTOM: the wall reads as depth above it, and the CTA lands
+     as close to the fold as the layout allows. */
+  justify-content: flex-end;
 }
 
-.zx-stage-media,
-.zx-stage-poster {
+.zx-hero-wall {
   position: absolute;
   inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-/* Merged from a second, adjacent `.zx-stage-poster` block that declared only these
-   two lines — same selector, same specificity, no intervening rule, so it was pure
-   duplication. `width`/`height` above also override the intrinsic 1600x900 attributes
-   now set on the element, which exist for the aspect ratio hint, not for layout. */
-.zx-stage-poster {
   z-index: 0;
-  transition: opacity 600ms ease;
+  overflow: hidden;
 }
 
-.zx-stage-media {
-  z-index: 1;
-}
+/* The rotated track that holds every column.
 
-.zx-stage[data-playing='true'] .zx-stage-poster {
-  opacity: 0;
-}
-
-/* One job only: keep the timecode and scrub bar legible over a bright frame.
-   The former full-frame vignette and warm ember light leak are gone — they
-   tinted the film and added two more gradients to the page. */
-.zx-stage-scrim {
+   Inset NEGATIVELY on all sides because it is rotated, and a rotated rectangle no
+   longer covers the corners of its own box. The overhang is what keeps the wall
+   bleeding past every edge instead of showing triangles of black canvas. The
+   vertical -20% also hides the top and bottom of the drifting columns, so a tile
+   is always entering and leaving out of sight. */
+.zx-hero-wall-track {
   position: absolute;
-  inset: 0;
-  z-index: 2;
-  pointer-events: none;
-  background: linear-gradient(
-    to top,
-    rgb(var(--zx-media-black-rgb) / 0.72) 0%,
-    rgb(var(--zx-media-black-rgb) / 0.32) 22%,
-    var(--zx-media-scrim) 45%
-  );
-}
-
-.zx-stage-tap {
-  position: absolute;
-  inset: 0;
-  z-index: 3;
-  border: 0;
-  padding: 0;
-  background: transparent;
-  cursor: pointer;
-  appearance: none;
-}
-
-.zx-stage-tap:focus-visible {
-  outline: 3px solid var(--md-sys-color-primary);
-  outline-offset: -6px;
-}
-
-/* Playback control strip, pinned to the bottom of the video frame. Formerly
-   also held the title and metadata, which now live in .zx-info below.
-
-   Visible while paused, faded out 2s into playback — `data-visible` is driven by
-   `controlsVisible` in ImmersivePlayer. Hidden controls also drop out of the hit
-   test so a tap on the frame reaches the play/pause layer instead of the bar. */
-.zx-player-bar {
-  position: absolute;
-  z-index: 4;
-  inset-inline: 0;
-  inset-block-end: 0;
-  padding: 0 var(--zx-gutter) 10px;
-  pointer-events: none;
-  transition:
-    opacity 260ms ease,
-    transform 260ms ease;
-}
-
-.zx-player-bar[data-visible='false'] {
-  opacity: 0;
-  transform: translateY(6px);
-}
-
-.zx-player-bar[data-visible='true'] > * {
-  pointer-events: auto;
-}
-
-/* A/V spec chips (4K, HDR, Atmos). These sit on the page surface now that the
-   metadata line moved out of the player overlay, so they use on-surface colors
-   rather than the --zx-on-media pair. */
-.zx-tag {
-  /* 8px inline, matching `.zx-genre`. These two chip types sit side by side in the
-     same metadata row, so they were 7px vs 9px against each other — a difference with
-     no meaning that just made the row look unevenly set. They stay distinguishable by
-     SHAPE and fill (outlined 5px rect vs filled pill), not by padding. */
-  padding: var(--zx-space-05) var(--zx-space-2);
-  border-radius: 5px;
-  border: 1px solid var(--md-sys-color-outline-variant);
-  color: var(--md-sys-color-on-surface-variant);
-  font-size: var(--zx-text-micro);
-  font-weight: var(--zx-weight-bold);
-  letter-spacing: 0.05em;
-}
-
-/* Separator between year and runtime. */
-.zx-dot {
-  width: 3px;
-  height: 3px;
-  border-radius: 50%;
-  background: currentColor;
-  opacity: 0.5;
-}
-
-/* Player controls: mute (top-right) and the scrub bar (bottom). Play/pause has
-   no button of its own — it is the full-frame tap target. */
-
-/* Sits above .zx-stage-tap so the tap layer cannot swallow the mute click.
-   Just the glyph — no pill, no blur, no state layer; a text shadow does the
-   legibility work that the translucent container used to. */
-.zx-mute {
-  position: absolute;
-  z-index: 5;
-  inset-block-start: 6px;
-  inset-inline-end: 8px;
-  display: grid;
-  place-items: center;
-  width: 32px;
-  height: 32px;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  color: var(--zx-on-media);
-  cursor: pointer;
-  appearance: none;
-  transition: opacity 260ms ease;
-}
-
-/* Fades with the rest of the controls during playback, and stops taking taps
-   while hidden so the frame tap underneath keeps working. */
-.zx-mute[data-visible='false'] {
-  opacity: 0;
-  pointer-events: none;
-}
-
-.zx-mute md-icon {
-  font-size: 20px;
-  width: 20px;
-  height: 20px;
-  filter: drop-shadow(0 1px 3px rgb(var(--zx-media-black-rgb) / 0.85));
-}
-
-.zx-mute:hover {
-  color: var(--md-sys-color-primary);
-}
-
-.zx-mute:focus-visible {
-  outline: 2px solid var(--md-sys-color-primary);
-  outline-offset: 2px;
-  border-radius: 999px;
-}
-
-/* Elapsed / total, directly above the track. */
-.zx-player-time {
+  inset: -20% -14%;
   display: flex;
-  justify-content: space-between;
-  margin: 0 0 var(--zx-space-1);
-  font-size: var(--zx-text-label);
-  font-weight: var(--zx-weight-semibold);
-  font-variant-numeric: tabular-nums;
-  color: var(--zx-on-media);
-  text-shadow: 0 1px 3px rgb(var(--zx-media-black-rgb) / 0.85);
+  gap: 8px;
+  rotate: -9deg;
 }
 
-.zx-player-time-total {
-  color: var(--zx-on-media-variant);
+/* FIXED width, not `flex: 1`, and that is what makes one wall serve every
+   viewport. Sharing the layer's width between however many columns exist ties
+   tile size to the container: the same 8 columns that read correctly at 184px on
+   desktop would be 60px slivers on a phone, and the 3 columns a phone wants would
+   be 400px slabs in a 1200px hero — one poster per screen, not a wall.
+
+   Sized by the tile instead, the tile is constant and the COLUMN COUNT is what
+   varies: a phone lays out ~4 of the 8 and `.zx-hero-wall` clips the rest, the
+   desktop hero shows all 8. So the wall needs no breakpoint — only
+   `--zx-wall-col` moves, and it moves for art-direction (bigger key art on a
+   bigger screen), not to repair the layout. */
+/* COLUMN BUDGET. The pool holds 12 (see COLUMNS in poster-wall.ts) because the
+   full-bleed desktop hero needs all of them; a phone needs four. The surplus is
+   `display: none` rather than laid out and clipped, since `overflow: hidden` still
+   paints and measures what it crops — and eight extra columns is 32 <img> elements
+   on the viewport least able to afford them. Costs no requests either way: all 12
+   draw from the same six files.
+
+   The count is then raised at each tier, because the rotated layer is 128% of the
+   hero and each tier makes the hero wider. Measured layer width vs. wall content:
+     - base   538px needed; 5 cols = 682 ✓
+     - 720    870px needed; 8 cols = 1096 ✓ (5 would be 682 ✗)
+     - 1024   full-bleed  -> see `--zx-wall-col`; 12 cols, ~424px spare at 2128 ✓
+   Fall short and the rotated wall exposes black canvas at the corners, so a new
+   width tier has to re-check this.
+
+   Five at base rather than the four that strictly fit: four covers 544 against the
+   538 needed, a 6px margin that any subpixel rounding or user font scaling could
+   eat. The fifth column costs 12 <img> elements and removes the whole class of
+   problem. Verify in LAYOUT coordinates if you re-measure — `getBoundingClientRect`
+   returns the ROTATED bounding box, which is ~25% wider and makes a failing wall
+   look like it passes. */
+.zx-hero-wall-column:nth-child(n + 6) {
+  display: none;
 }
 
-/* A thin native range input replaces <md-slider>: same behaviour, far less
-   chrome. The played portion is painted with a gradient driven by the
-   --zx-progress custom property the component sets inline. */
-.zx-scrub {
-  position: relative;
+.zx-hero-wall-column {
   display: flex;
-  align-items: center;
-  height: 12px;
-}
-
-.zx-scrub-input {
-  flex: 1;
+  flex-direction: column;
+  gap: 8px;
+  flex: 0 0 var(--zx-wall-col, 130px);
   min-width: 0;
-  height: 12px;
-  margin: 0;
-  background: transparent;
-  appearance: none;
-  cursor: pointer;
+  /* THE DRIFT. Each column holds its five tiles twice (see `buildColumn` in
+     poster-wall.ts), so translating by half the strip plus half a gutter lands the
+     second copy exactly where the first began — no seam, no snap, no reset. See
+     `@keyframes zx-wall-drift` for why the gutter term is there.
+     `linear` for the same reason: any easing would make the wall visibly slow
+     down and speed up once per cycle, which is precisely the tell that gives away
+     a loop.
+
+     Only `transform` is animated, so this stays on the compositor and never
+     triggers layout — that matters when it is twelve columns of ten images each,
+     running for as long as the page is open. Speeds and directions are assigned
+     per column below. */
+  animation: zx-wall-drift var(--zx-wall-drift, 150s) linear infinite;
 }
 
-.zx-scrub-input::-webkit-slider-runnable-track {
-  height: 3px;
-  border-radius: 999px;
-  /* The one place the SOFT TECH BLUE accent is spent, and the reason it exists as a
-     separate hue: this is the only element on the page showing live machine state,
-     so it is the only one that benefits from a color no static copy uses. Silver
-     here would have been indistinguishable from the white-alpha remainder track
-     beside it — the accent is doing real work, not decorating. */
-  background: linear-gradient(
-    to right,
-    var(--md-sys-color-tertiary) var(--zx-progress, 0%),
-    rgba(255, 255, 255, 0.28) var(--zx-progress, 0%)
-  );
+/* Four speeds and two directions, cycled across the twelve columns.
+
+   The point is DESYNC, not variety for its own sake. Columns that share a period
+   stay locked in formation and the wall reads as one sliding sheet; at four
+   co-prime-ish periods with alternate columns reversed, no two neighbours ever
+   travel together for long and the surface keeps reorganising itself.
+
+   All four are slow on purpose — 150s means a tile takes roughly 40 seconds to
+   cross the hero. This is background texture behind a scrim, sitting under a
+   headline someone is trying to read; anything faster competes with the copy and
+   turns into a distraction rather than a sense of depth.
+
+   `reverse` rather than a negative duration (invalid) or reversed keyframes (a
+   second @keyframes block to keep in sync). */
+.zx-hero-wall-column:nth-child(4n + 1) {
+  --zx-wall-drift: 150s;
 }
 
-.zx-scrub-input::-moz-range-track {
-  height: 3px;
-  border-radius: 999px;
-  /* The one place the SOFT TECH BLUE accent is spent, and the reason it exists as a
-     separate hue: this is the only element on the page showing live machine state,
-     so it is the only one that benefits from a color no static copy uses. Silver
-     here would have been indistinguishable from the white-alpha remainder track
-     beside it — the accent is doing real work, not decorating. */
-  background: linear-gradient(
-    to right,
-    var(--md-sys-color-tertiary) var(--zx-progress, 0%),
-    rgba(255, 255, 255, 0.28) var(--zx-progress, 0%)
-  );
+.zx-hero-wall-column:nth-child(4n + 2) {
+  --zx-wall-drift: 190s;
+  animation-direction: reverse;
 }
 
-/* A small dot, not a grabbable MD handle: this scrubber only spans a preview. */
-.zx-scrub-input::-webkit-slider-thumb {
-  appearance: none;
-  width: 9px;
-  height: 9px;
-  margin-block-start: -3px;
-  border: 0;
-  border-radius: 50%;
-  /* Matches the played portion of the track it sits at the end of. */
-  background: var(--md-sys-color-tertiary);
+.zx-hero-wall-column:nth-child(4n + 3) {
+  --zx-wall-drift: 170s;
 }
 
-.zx-scrub-input::-moz-range-thumb {
-  width: 9px;
-  height: 9px;
-  border: 0;
-  border-radius: 50%;
-  background: var(--md-sys-color-tertiary);
+.zx-hero-wall-column:nth-child(4n + 4) {
+  --zx-wall-drift: 210s;
+  animation-direction: reverse;
 }
 
-.zx-scrub-input:focus-visible {
-  outline: 2px solid var(--md-sys-color-primary);
-  outline-offset: 3px;
-  border-radius: 999px;
+/* Static stagger, so the columns are already offset from each other at first
+   paint instead of starting as one flat row and only separating as the drift
+   diverges.
+
+   Fixed px, NOT the percentage this once used: percentages resolve against the
+   column's own height, and the column is twice as tall as it looks (five tiles
+   duplicated). A -7% offset would eat 7% of the doubled strip — enough to pull the
+   bottom edge into view at the narrowest tile. 40px is an optical amount that
+   holds at every tile size, and the loop's margin is measured against it (see
+   ROWS in poster-wall.ts). */
+.zx-hero-wall-column:nth-child(3n + 2) {
+  translate: 0 -40px;
 }
 
-/* The locked tail visualizes "the rest of the film is behind the app". Sits on
-   the track, above the input's own background but not blocking its pointer. */
-.zx-scrub-lock {
+.zx-hero-wall-column:nth-child(3n + 3) {
+  translate: 0 24px;
+}
+
+/* `flex: 0 0 auto` so tiles keep their 2:3 ratio and overflow the column instead
+   of being squashed to fit it — the overflow is the point, `.zx-hero-wall` clips
+   it and the wall reads as continuing past the frame. */
+.zx-hero-tile {
+  flex: 0 0 auto;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 2 / 3;
+  object-fit: cover;
+  border-radius: 10px;
+}
+
+/* The seamless loop.
+
+   NOT a flat -50%. The column is five tiles rendered twice with an 8px `gap`
+   between all ten, so its height is `10h + 9g` — half of that is `5h + 4.5g`,
+   which lands the second copy 4px SHORT of where the first began and the wall
+   jumps by half a gutter once per cycle. `calc(-50% - 4px)` is the exact
+   `5h + 5g` the loop needs. Re-derive it if the gap changes: the offset is
+   always `50% + gap / 2`.
+
+   `translate3d` rather than `translateY` to keep the column on its own
+   compositor layer for the whole animation — twelve columns of ten images each
+   are running for as long as the page is open, and this never touches layout. */
+@keyframes zx-wall-drift {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(0, calc(-50% - 4px), 0);
+  }
+}
+
+/* A wall that silently stops moving. For anyone who has asked for less motion the
+   drift carries no information at all, so the columns simply hold their staggered
+   first-paint arrangement — which is still a full, mismatched wall, because the
+   stagger is a static `translate` and not part of the animation. */
+@media (prefers-reduced-motion: reduce) {
+  .zx-hero-wall-column {
+    animation: none;
+  }
+}
+
+/* Two jobs: (1) hold white text to AA over ANY tile the drift happens to bring
+   past — the top stop also darkens the art under the translucent top bar — and
+   (2) land on solid black at the bottom so the hero has no seam against the
+   page. The bottom stop MUST stay fully opaque for that reason. */
+.zx-hero-scrim {
   position: absolute;
-  inset-block-start: 50%;
-  transform: translateY(-50%);
-  inset-inline-end: 0;
-  height: 3px;
-  border-radius: 999px;
-  background: repeating-linear-gradient(
-    115deg,
-    rgba(255, 255, 255, 0.3) 0 5px,
-    rgba(255, 255, 255, 0.06) 5px 10px
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  /* Held in a variable so the desktop tier can stack a horizontal scrim ON TOP of
+     this exact ramp without restating its four stops — one definition, two
+     compositions. */
+  --zx-hero-scrim-vertical: linear-gradient(
+    to top,
+    /* First stop is the PAGE surface, not the media black used by every stop
+       above it — this is the pixel that has to match the section below the hero.
+       See the note on `.zx-hero`'s own background. */ var(--md-sys-color-surface)
+      0%,
+    rgb(var(--zx-media-black-rgb) / 0.92) 26%,
+    rgb(var(--zx-media-black-rgb) / 0.6) 62%,
+    rgb(var(--zx-media-black-rgb) / 0.5) 100%
   );
-  pointer-events: none;
+  background: var(--zx-hero-scrim-vertical);
 }
 
-/* Big center play/pause affordance */
-
-/* Centered in the frame above the scrub bar, not across the whole frame, so it
-   never sits on top of the slider on a short 16/9 phone-width video. Fades with
-   the rest of the controls 2s into playback (see .zx-player-bar). */
-.zx-bigplay {
-  position: absolute;
-  z-index: 4;
-  inset: 0 0 34px;
-  display: grid;
-  place-items: center;
-  pointer-events: none;
-  transition:
-    opacity 260ms ease,
-    transform 260ms ease;
+.zx-hero-copy {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--zx-space-5);
+  /* Clears the absolutely positioned top bar overhead, so a tall headline can
+     never slide under it. */
+  padding: calc(var(--zx-topbar-h) + var(--zx-space-8)) var(--zx-gutter)
+    var(--zx-space-8);
+  text-align: center;
 }
 
-.zx-bigplay[data-visible='false'] {
-  opacity: 0;
-  /* Shrinks rather than just fading, so it reads as receding into the film. */
-  transform: scale(0.86);
-}
-
-/* ONE shape: a single translucent circle. No FAB container, no outline ring on
-   top of it — the previous version stacked an <md-fab>'s rounded-square surface
-   under a circular box-shadow and read as two shapes at once.
-   Sized well above the MD "large" default: this is the hero control on a 16/9
-   phone frame and has to be an obvious, thumb-sized target from across the
-   room, not a small chip floating in the middle of the video. */
-.zx-bigplay-disc {
-  display: grid;
-  place-items: center;
-  width: 78px;
-  height: 78px;
-  border-radius: 50%;
-  background: rgb(var(--zx-media-black-rgb) / 0.5);
-  color: var(--zx-on-media);
-}
-
-.zx-bigplay-disc md-icon {
-  font-size: 42px;
-  width: 42px;
-  height: 42px;
-}
-
-/* --------------------------------------------------------------- film info */
-
-/* No gradient blend out of the player: the page has ONE background color and
-   the video frame's own edge is the transition. */
-.zx-info {
-  /* The one deliberate exception to the 40px step: 20px below the player. The video
-     frame has its own hard edge that already reads as a separator, so a full step
-     here just detaches the title from the film it belongs to.
-     Bottom is 0 — the following section owns that gap. */
-  padding-block: var(--zx-space-5) 0;
-}
-
-/* The film title now lives here rather than over the video, so it is the page's
-   real <h1> and is set on the surface instead of on media. */
-.zx-film-title {
+.zx-hero-headline {
   margin: 0;
-  /* 26px on the scale, was an off-scale 27px. Still a clear step above the 21px
-     section titles, which is what marks this as the page's single h1. */
   font-size: var(--zx-text-h1);
   line-height: var(--zx-lh-tight);
   font-weight: var(--zx-weight-bold);
   letter-spacing: -0.02em;
   text-wrap: balance;
-  color: var(--md-sys-color-on-surface);
+  color: var(--zx-on-media);
 }
 
-/* Year · runtime · A/V specs, all on one wrapping line. */
-.zx-film-meta {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  /* 8px, was an off-scale 7px. These are peer items on one line. */
-  gap: var(--zx-space-2);
-  margin: var(--zx-space-2) 0 0;
-  font-size: var(--zx-text-meta);
-  color: var(--md-sys-color-on-surface-variant);
-}
+/* The hero's one number. Sits a tier below the headline on purpose: the pitch is
+   the promise, the price is the proof of it. */
+/* THE PRICE, and the only coloured text in the hero.
 
-.zx-synopsis-wrap {
-  /* Bottom margin is 0, not 20px. As the section's LAST child, any bottom margin here
-     is invisible on its own and simply adds to the following section's step — it was
-     20px of the old 100px gap. Trailing space belongs to the section rhythm, not to
-     the last element inside a section. */
-  margin: var(--zx-space-4) 0 0;
-}
+   It was `--zx-on-media` white — the same value as the headline above it and the
+   CTA label below it — so the single most persuasive fact on the page (the whole
+   pitch is "$1.25 instead of $60+") carried no more weight than the sentence
+   introducing it. Colour buys it rank without growing the type, which would have
+   started competing with the h1 two lines up.
 
-/* Clamped to 2 lines and expanded in place by the toggle below: the synopsis is
-   supporting copy, and a long one pushed the download CTA below the fold. The
-   full text always stays in the DOM (and in the JSON-LD description), so the
-   clamp is purely visual and nothing is lost to crawlers.
-
-   `--md-sys-color-outline` rather than on-surface-variant: this is the lowest
-   emphasis body copy on the page and should sit clearly behind the title, the
-   metadata row and the CTA in the reading hierarchy. */
-.zx-synopsis {
+   `--md-sys-color-tertiary` (#9bdcff) and NOT a new value: it is the scheme's
+   existing accent, so this adds no fourth hue to a page that is otherwise
+   black / white / silver. It is also the only candidate that works — `primary` is
+   a near-white indistinguishable from the body copy, and `error` red would read as
+   a warning attached to a price. Sky blue on the near-black scrim clears AA by a
+   wide margin at this size. */
+.zx-hero-price {
   margin: 0;
-  color: var(--md-sys-color-outline);
-  text-wrap: pretty;
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
-  line-clamp: 2;
-  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: var(--zx-space-1);
+  font-size: var(--zx-text-amount);
+  line-height: var(--zx-lh-tight);
+  font-weight: var(--zx-weight-bold);
+  letter-spacing: 0.01em;
+  font-variant-numeric: tabular-nums;
+  color: var(--md-sys-color-tertiary);
 }
 
-/* Expanded: drop the clamp so the paragraph grows to its natural height. */
-.zx-synopsis[data-expanded='true'] {
-  -webkit-line-clamp: unset;
-  line-clamp: unset;
-  overflow: visible;
-}
-
-/* Text + caret, deliberately quieter than the CTA below it. */
-.zx-synopsis-toggle {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--zx-space-05);
-  margin-block-start: var(--zx-space-1);
-  padding: var(--zx-space-1) 0;
-  border: 0;
-  background: transparent;
-  color: var(--md-sys-color-primary);
-  font: inherit;
+/* Stays NEUTRAL, and that is what makes the colour above work. This is a child of
+   `.zx-hero-price`, so it would otherwise inherit the accent and both lines would be
+   blue — at which point the colour marks "this block" rather than "this number", and
+   the emphasis is spent. The re-declaration is load-bearing, not redundant. */
+.zx-hero-price-note {
   font-size: var(--zx-text-meta);
-  font-weight: var(--zx-weight-semibold);
-  cursor: pointer;
+  font-weight: var(--zx-weight-regular);
+  letter-spacing: normal;
+  color: var(--zx-on-media-variant);
 }
 
-.zx-synopsis-toggle md-icon {
-  font-size: 18px;
+/* The hero CTA is the widest element in the stack, so it sets the copy block's
+   measure. `100%` inside the padded column, not a fixed width. */
+.zx-hero-copy .zx-cta {
+  width: 100%;
+}
+
+/* The two upcoming store builds, under the hero's APK button.
+   
+   Two equal columns rather than a centered flex row: the pair then shares one
+   axis with the full-width CTA above, and neither item shifts when its label
+   length changes between locales (the wordmarks are fixed, but the Thai and
+   Portuguese "coming soon" eyebrows are not).
+
+   Pulled up against the CTA with a negative margin that cancels the hero copy's
+   own 20px block gap down to 12px. These belong to the install cluster, not to
+   the hero as a third peer block — at the full 20px they floated between the
+   button and the section edge, reading as unrelated. */
+.zx-store-row {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--zx-space-2);
+  margin: calc(var(--zx-space-3) - var(--zx-space-5)) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* The official App Store / Google Play badge silhouette: rounded rect, solid dark
+   fill, hairline border, fixed height. This replaces an earlier dashed-outline
+   "placeholder slot" treatment. The dash did communicate unavailability, but it
+   cost the pair its recognisability — a visitor scanning the hero saw two empty
+   dashed boxes and had to READ them to learn iOS and Play were coming. The store
+   lockup is recognised pre-reading, so it now carries that message at a glance
+   and the copy inside states the truth.
+
+   The fill is black at 55% rather than opaque: these sit on the poster wall, and
+   the hero's own scrim already darkens what is behind them, so a solid black
+   plate would punch two dead rectangles into the artwork.
+
+   Still not a control: `cursor: default` (the default `text` cursor over a label
+   invites a selection drag), and no hover or active state at all. Deliberately one
+   step quieter than the silver CTA 12px above it — outline plus translucent fill
+   against that button's solid plate — so the badge shape never competes with the
+   one action that works today. */
+.zx-store {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* 48px, the real badges' proportion at this width. Not `min-height`: both
+     badges must be exactly the same height even when one locale's eyebrow wraps
+     differently, which is what a fixed height guarantees and a minimum does not. */
+  height: 48px;
+  padding: 0 var(--zx-space-25);
+  background: rgba(0, 0, 0, 0.55);
+  /* Literal rgba, not a token: there is no `--zx-on-media-rgb` channel triplet to
+     compose with, and `--zx-on-media` is a hex so it cannot take an alpha here.
+     This is white at 28% — the same on-media hairline weight the glass top bar
+     uses for its own bottom edge. */
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: var(--zx-radius-sm);
+  cursor: default;
+}
+
+/* Mark on the left, two stacked lines of type on the right — the badge lockup.
+   Centered as a block inside the badge (rather than stretched to it) so both
+   badges are optically centered even though "App Store" and "Google Play" differ
+   in width. */
+.zx-store-face {
+  display: flex;
+  align-items: center;
+  gap: var(--zx-space-15);
+  min-width: 0;
+}
+
+/* Both marks are single-path monochrome SVGs authored in black, so they are
+   inverted to sit on the hero's dark scrim. `brightness(0) invert(1)` is used
+   rather than shipping white-filled copies: it guarantees both marks land on
+   exactly the same white as the text beside them, and it survives replacing
+   either file with a different variant. */
+.zx-store-icon {
+  /* Never shrinks: it is the recognisable half of the lockup, so a long Thai or
+     Portuguese eyebrow must compress the text column, not the glyph. */
+  flex: none;
+  width: 22px;
+  height: 22px;
+  filter: brightness(0) invert(1);
+}
+
+.zx-store-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+/* The eyebrow carries the availability ("Coming soon to the"), so it is sentence
+   case at small size — NOT the page's uppercase tracked eyebrow treatment, which
+   is reserved for status tags and would read as a label rather than as the first
+   half of a sentence that continues into the wordmark below. */
+.zx-store-eyebrow {
+  font-size: var(--zx-text-label);
+  font-weight: var(--zx-weight-regular);
+  line-height: 1.25;
+  color: var(--zx-on-media-variant);
+}
+
+/* The store wordmark: the badge's dominant line, set noticeably larger than the
+   eyebrow above it. That size step is most of what makes the lockup read as a
+   store badge rather than as two lines of caption. */
+.zx-store-name {
+  font-size: var(--zx-text-body);
+  font-weight: var(--zx-weight-semibold);
+  line-height: 1.2;
+  color: var(--zx-on-media);
+  white-space: nowrap;
+}
+
+/* Grid, not a wrapping flex row. Flex-wrap was tried first and produced the exact
+   defect this replaces: "iOS COMING SOON" fits one line while "Google Play COMING
+   SOON" does not, so one tile wrapped and the other didn't — two tiles of different
+   heights and different internal layouts, side by side.
+
+   So the badge ALWAYS gets its own line, in both tiles, regardless of whether it
+   would have fit. The mark and the store name share row 1; the badge sits under the
+   name in row 2, aligned to the name rather than to the tile, which is what keeps
+   the icon reading as a prefix to the whole block instead of to just one line. */
+.zx-store-face {
+  display: grid;
+  grid-template-columns: auto auto;
+  /* 6px column: the icon-to-its-own-label step. 2px row: the badge is a state
+     attached to the name directly above it, the tightest joint on the page. */
+  gap: var(--zx-space-05) var(--zx-space-15);
+  align-items: center;
+  /* Centers the two-column block inside the tile, so both tiles are optically
+     centered even though their names differ in width. */
+  justify-content: center;
+}
+
+/* Both marks are single-path monochrome SVGs authored in black, so they are
+   inverted to sit on the hero's dark scrim. `brightness(0) invert(1)` is used
+   rather than shipping white-filled copies: it guarantees both marks land on
+   exactly the same white as the text beside them, and it survives replacing
+   either file with a different variant. Opacity, not a grey fill, keeps them
+   one step quieter than the label. */
+.zx-store-icon {
+  /* Column 1, spanning BOTH rows, so the mark is centered against the name+badge
+     block as a whole rather than sitting beside only the name. */
+  grid-row: 1 / span 2;
   width: 18px;
   height: 18px;
+  filter: brightness(0) invert(1);
+  opacity: 0.8;
 }
 
-.zx-synopsis-toggle:focus-visible {
-  outline: 2px solid var(--md-sys-color-primary);
-  outline-offset: 2px;
-  border-radius: 6px;
+.zx-store-name {
+  font-size: var(--zx-text-meta);
+  font-weight: var(--zx-weight-semibold);
+  line-height: 1.2;
+  color: var(--zx-on-media);
 }
 
-/* Genre chips. These now sit inline in .zx-film-meta (after the runtime), so
-   they are sized to that 13px line rather than as standalone pills. */
-.zx-genre {
-  /* 8px inline, matching `.zx-tag` — see the note there. */
-  padding: var(--zx-space-05) var(--zx-space-2);
-  border-radius: 999px;
-  background: var(--md-sys-color-surface-container-high);
-  color: var(--md-sys-color-on-surface-variant);
+/* The "Coming soon" state, in the page's established eyebrow treatment
+   (uppercase, 11px, tracked) so it reads as a status tag and not as body copy.
+   `--zx-on-media-variant` puts it a step below the store name it qualifies. */
+.zx-store-badge {
+  /* Row 2 of column 2 — under the name, not under the icon. Start-aligned so it
+     shares a left edge with the name above it. */
+  justify-self: start;
   font-size: var(--zx-text-label);
   font-weight: var(--zx-weight-semibold);
+  letter-spacing: 0.08em;
+  line-height: 1.2;
+  text-transform: uppercase;
+  color: var(--zx-on-media-variant);
 }
 
 /* Primary CTA cluster (repeated at several scroll depths) */
@@ -849,12 +854,13 @@
    secondary action mattered more. Both are now `body`/semibold, and primacy is
    carried by fill-vs-outline where it belongs. */
 .zx-cta-button {
-  /* 46px, matching `.zx-chart-more` — the one height every install control on the page
-     shares, and the number the dialog rule below already documents as "the base".
-     Nothing set it here, so these buttons silently took Material's 40px default and
-     the SECONDARY outlined button ended up 6px taller than the primary filled ones:
-     a size hierarchy inversion, exactly the kind the label-weight note above fixed. */
-  --md-filled-button-container-height: 46px;
+  /* `--zx-control-h`, the same token `.zx-chart-more` reads — the one height every
+     install control on the page shares, and the number the dialog rule below
+     documents as "the base". Nothing set it here at all once, so these buttons
+     silently took Material's 40px default and the SECONDARY outlined button ended
+     up 6px taller than the primary filled ones: a size hierarchy inversion,
+     exactly the kind the label-weight note above fixed. */
+  --md-filled-button-container-height: var(--zx-control-h);
   --md-filled-button-label-text-size: var(--zx-text-body);
   --md-filled-button-label-text-weight: var(--zx-weight-semibold);
 
@@ -958,10 +964,6 @@
   color: var(--md-sys-color-primary);
 }
 
-/* NOTE: the standalone brand strip lived here. It was merged into the
-   "About Zenorix" section — see .zx-about, whose first row carries the same
-   platform icon wall at display size. */
-
 /* --------------------------------------------------------------- top chart */
 
 /* Intentionally has NO background of its own: every section shares the page
@@ -1021,7 +1023,11 @@
   aspect-ratio: 2 / 3;
   border-radius: var(--zx-radius-sm);
   overflow: hidden;
-  background: var(--md-sys-color-surface-container-highest);
+  /* What shows for the instant before the tile decodes. A near-black, NOT the
+     `surface-container-highest` grey it used to be: that grey was chosen to be the
+     placeholder's own fill, and against real art it flashed as a light block on
+     every lazy card scrolled into view. */
+  background: rgb(var(--zx-media-black-rgb) / 1);
   box-shadow: 0 8px 22px rgba(0, 0, 0, 0.24);
   transition:
     transform 220ms cubic-bezier(0.2, 0, 0, 1),
@@ -1043,32 +1049,14 @@
   outline-offset: 2px;
 }
 
-/* Applies to real artwork when it replaces the placeholder — see TopChart. */
+/* The key art. `object-fit: cover` is belt-and-braces — the tiles are already
+   built to exactly this 2:3 ratio by scripts/build-poster-tiles.mjs — but it means
+   a future off-ratio source crops instead of stretching the art. */
 .zx-chart-img {
+  display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
-}
-
-/* Poster placeholder. Deliberately reads as an empty slot: a flat tint, a dashed
-   frame and a centered image glyph, never as finished art. */
-.zx-chart-ph {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  border: 1px dashed var(--md-sys-color-outline-variant);
-  border-radius: inherit;
-  /* Flat tint, not a striped gradient: the only patterned fill on the page read
-     as a third background treatment. */
-  background: var(--md-sys-color-surface-container-high);
-  color: var(--md-sys-color-outline);
-}
-
-.zx-chart-ph md-icon {
-  font-size: 26px;
-  width: 26px;
-  height: 26px;
 }
 
 /* Source app icon, top-right. The real store icon, so the tile IS the artwork:
@@ -1097,9 +1085,10 @@
   object-fit: cover;
 }
 
-/* Rank badge, bottom-left. Previously an oversized outlined numeral bleeding off
-   the card; now a compact solid chip, because the placeholder tiles give it no
-   dark artwork to sit on and the numeral needs its own contrast. */
+/* Rank badge, bottom-left. A compact solid chip rather than an oversized outlined
+   numeral bleeding off the card: the numeral has to stay legible over whatever
+   the poster happens to put in that corner, and the chip carries its own contrast
+   instead of borrowing the art's. */
 .zx-rank {
   position: absolute;
   z-index: 2;
@@ -1134,7 +1123,9 @@
   justify-content: center;
   gap: var(--zx-space-15);
   width: 100%;
-  min-height: 46px;
+  /* Same token as the primary install button — see `--zx-control-h`. This pill
+     stands beside/below one, so any divergence reads as a hierarchy claim. */
+  min-height: var(--zx-control-h);
   padding: 0 var(--zx-space-5);
   /* Bright border, not the muted `outline` token. This pill is the rail's tail
      action and sits alone on the page surface, where a low-contrast hairline
@@ -1279,26 +1270,25 @@
    members standing off the card group, so they stand off it equally. */
 .zx-about-cta {
   margin-block-start: var(--zx-space-6);
+  /* Now a two-child stack (the CTA block, then the support line), so it owns a
+     joint. 16px, the same step `.zx-cta` uses to bind a button to its own
+     caption: the support line is a sibling of that whole CTA block, so it stands
+     one step off it rather than joining the button's own 8px caption pairing. */
+  display: flex;
+  flex-direction: column;
+  gap: var(--zx-space-4);
 }
 
-/* OUTLINED pill, transparent fill. `align-items: flex-start` on the card keeps it
-   hugging its own text instead of stretching the full card width.
+/* The page's eyebrow treatment: OUTLINED pill, transparent fill.
 
-   It was a filled pill using `primary-container`, and on a pure-black canvas that
-   mid-grey slab (L* 35) was the muddiest object on the page — a grey block sitting on
-   black, dragging the whole section's perceived brightness down while the label inside
-   it fought its own backing for contrast. A hairline stroke with the silver text
-   showing straight through to the canvas removes the slab entirely and lets the label
-   read at full silver.
+   Keep it unfilled. As a filled `primary-container` pill, that mid-grey slab (L* 35)
+   on pure black was the muddiest object on the page and the label fought its own
+   backing for contrast. A hairline stroke lets the label read at full silver.
 
-   This also brings it into line with `.zx-dialog-lead`, the same eyebrow rank, which
-   is already unfilled bright silver.
+   `align-self: flex-start` is load-bearing precisely BECAUSE there is no fill: the
+   element is still a block, so without it the invisible stroke spans the whole card.
 
-   `align-self: flex-start` matters now: with no fill there is no visible box, but the
-   element is still a block, so without it the invisible stroke would span the card. */
-/* The page's eyebrow treatment. `.zx-dialog-lead` is the same rank and MUST keep
-   the same size/weight/tracking — it was 11px/700 against this rule's 11px/600,
-   so the two eyebrows were subtly different weights for no reason. */
+   `.zx-dialog-lead` is the same rank and MUST keep the same size/weight/tracking. */
 .zx-about-label {
   margin: 0;
   align-self: flex-start;
@@ -1342,16 +1332,11 @@
    The unit is stated once on the key line rather than on each figure, which is what let
    the bars stop being sized around four extra characters apiece.
 
-   Two failures worth not repeating:
-   - The grid must live on the element the markup actually uses. It was once split onto a
-     `.zx-compare-rows` wrapper; when the wrapper was deleted the class went with it while
-     the rules stayed behind, so the chart silently fell back to `display: block` and the
-     bars stacked as plain blocks with every grid rule dead.
-   - Do not give the prices their own column to buy a shorter bar. Tried twice: capping that
-     column at 6.5rem made the long Thai and Portuguese prices wrap to two lines and left
-     the card TALLER than before, and letting it size to content detached each number from
-     the bar tip it belongs to. The price belongs inside its bar; the bar's minimum length
-     is the price it holds. */
+   Do NOT give the prices their own grid column to buy a shorter bar. Tried twice: capping
+   that column at 6.5rem wrapped the long Thai and Portuguese prices to two lines and left
+   the card TALLER than before, and letting it size to content detached each number from the
+   bar tip it belongs to. The price belongs inside its bar; the bar's minimum length is the
+   price it holds. */
 /* The merged key line: `▪ Zenorix  vs  ▪▪▪ Disney + HBO + Netflix        per month`.
    
    It replaces two separate label rows, so it does four jobs at once — names both
@@ -1457,18 +1442,13 @@
 /* Each bar is a flex container because it holds its own price, and the `dd` for the plan
    named above it.
 
-   The two bars differ in LENGTH and in FILL. Length carries the quantity; fill carries only
-   series identity, keyed by the swatches on the line above. An earlier version held the
-   fill identical so that length would be the sole variable — the cost was a key that could
-   only tell the two apart by chip length, which is a far weaker signal than color at
-   caption size. Two encodings for identity plus one for quantity is the standard
-   two-series convention; the risk to avoid is letting the fill imply a magnitude, which is
-   why the swatches are equal in size and carry no length of their own.
+   The two bars differ in LENGTH and in FILL: length carries the quantity, fill carries only
+   series identity (keyed by the swatches above). Keep the swatches equal in size so fill
+   never implies a magnitude of its own.
 
-   No background track behind either bar: an unfilled track behind a short bar reads as a
-   STACKED bar, as if the remainder were another segment of the same total, which is the
-   opposite of "ours is a fraction of theirs". With no track, length alone carries the
-   quantity. */
+   No background track behind either bar. An unfilled track behind a short bar reads as a
+   STACKED bar — as if the remainder were another segment of the same total — which is the
+   opposite of "ours is a fraction of theirs". */
 .zx-compare-bar {
   /* REQUIRED, not tidiness. A `dd` carries a UA default `margin-inline-start: 40px`, and
      the BAR is the `dd` — without this reset both bars are pushed 40px right of the names
@@ -1527,18 +1507,14 @@
    `secondary` fill, which is why the pair still reads as one chart rather than two unrelated
    colors. Fill separation is now 6.78:1, up from 1.81:1 when this was `outline`.
 
-   That number was previously stuck, and it is worth recording why. Fill alone cannot get
-   there on this near-black page: every token that separates well from our silver (>=5:1)
-   also falls to <=2.6:1 against the #08090b background, and at that point the bar DEFINING
-   100% is the one that fades out — measured twice, once at 1.47:1 and once at 1.14:1, and
-   both times the rival bar and its key swatch visibly disappeared. Brighter fills fix the
-   visibility and lose the distinction; darker fills do the reverse.
+   Fill ALONE cannot satisfy both constraints on this near-black page: any token that
+   separates well from our silver (>=5:1) drops to <=2.6:1 against the #08090b background,
+   and then the bar defining 100% is the one that fades out. The border below breaks the
+   deadlock — the fill goes dark for separation, the border keeps the extent legible.
 
-   The border below is what breaks that deadlock, so the two constraints stop fighting:
-   the FILL is free to go dark for maximum separation from ours, while the BORDER guarantees
-   the bar's extent stays legible. Note the card itself is transparent — an earlier round of
-   these numbers was computed against a #1d2126 card that does not exist, which made the
-   dark fills look ~1.8x safer than they are. */
+   Compute any new numbers against the PAGE background: the card is transparent, and an
+   earlier pass measured against a #1d2126 card that does not exist, which made dark fills
+   look ~1.8x safer than they are. */
 .zx-compare-bar--rival {
   box-sizing: border-box;
   width: 100%;
@@ -1594,15 +1570,22 @@
   color: var(--md-sys-color-outline);
 }
 
-/* Grid rather than flex: three EQUAL tracks are what keep the tiles the same
-   width. With flex each tile would size to its own label, so "Lag-Free" would be
-   visibly narrower than "4K Ultra HD" and three equal-rank specs would read as
-   three different-rank ones. */
+/* Grid rather than flex: EQUAL tracks are what keep the tiles the same width. With
+   flex each tile would size to its own label, so "Lag-Free" would be visibly
+   narrower than "Lossless Quality" and four equal-rank specs would read as four
+   different-rank ones.
+
+   TWO columns, was three — a fourth spec joined the card. Four across would squeeze
+   each label to ~80px and break "4K Ultra HD" over three lines, so the row wraps
+   into a 2x2 block instead. Both dimensions are explicit: `1fr` columns keep the
+   tiles equal in width, and the tiles' own `stretch` keeps each ROW equal in height,
+   so a label that wraps cannot make its neighbour shorter. */
 .zx-about-specs {
   width: 100%;
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  /* Sibling step, matching the compare card's row gap. */
+  grid-template-columns: repeat(2, 1fr);
+  /* Sibling step, matching the compare card's row gap. Applies on both axes here,
+     so the 2x2 block's vertical and horizontal joints agree. */
   gap: var(--zx-space-3);
   margin: 0;
   padding: 0;
@@ -1615,16 +1598,21 @@
    them instead, which is also why the 12px gap can equal the 12px padding here —
    the tile boundary is drawn, so it does not have to be implied by whitespace.
 
-   `align-items: stretch` from the grid keeps all three the same height even
-   though "Lag-Free" is one line where "4K Ultra HD" wraps to two, so the badges
-   still sit on one line across the row. */
+   `align-items: stretch` from the grid keeps tiles in the same row equal in height
+   even though "Lag-Free" is one line where "Lossless Quality" may wrap to two.
+
+   ROW, not column: the badge sits beside its label rather than above it. Centered
+   on the cross axis so a wrapping two-line label stays visually paired with its
+   glyph instead of leaving it hanging at the top. This is the change that paid for
+   the fourth spec — see the note on `.zx-about-specs`. */
 .zx-spec {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  /* 6px, was 8px. Icon and label are the tightest possible pair — a glyph and the
-     two words naming it — so this is where height comes out of this card first. */
-  gap: var(--zx-space-15);
+  flex-direction: row;
+  align-items: center;
+  /* 8px. One step up from the 6px the stacked layout used: side by side the glyph
+     and the text share a line box, and 6px horizontally read as the icon touching
+     its label. Still the tightest joint in the card. */
+  gap: var(--zx-space-2);
   /* 10px, was 12px. The tile keeps its own fill, so its edge is still drawn rather
      than implied; 10px is enough inset to read as a tile at this size. */
   padding: var(--zx-space-25);
@@ -1642,18 +1630,29 @@
      the glyphs crop. */
   width: 24px;
   height: 24px;
+  /* Now that the icon is a FLEX SIBLING of the label rather than stacked above it,
+     it is shrinkable — without this the glyph gets squeezed narrower than its own
+     box (and clips) in the narrowest column, e.g. the longer Thai and Portuguese
+     labels at 390px. */
+  flex-shrink: 0;
   color: var(--md-sys-color-on-surface);
 }
 
 /* Same weight and color as .zx-about-value so this card still belongs to the
-   set; only the size drops, because three labels have to share one row. */
+   set; only the size drops, because two labels have to share one row. */
 .zx-spec-label {
   font-size: var(--zx-text-meta);
   font-weight: var(--zx-weight-bold);
   line-height: 1.3;
   letter-spacing: -0.01em;
   color: var(--md-sys-color-on-surface);
+  /* `balance`, not `pretty`: these are 2-3 word labels, so when one wraps the goal
+     is two even lines rather than a long line plus an orphan. */
   text-wrap: balance;
+  /* The label is the flex item that must give way. Without it a long unbroken word
+     sets the tile's min-content width, and two such tiles overflow the 1fr track
+     instead of wrapping inside it. */
+  min-width: 0;
 }
 
 .zx-about-note {
@@ -1891,6 +1890,87 @@
   width: 100%;
 }
 
+/* ----------------------------------------------------------------- contact */
+
+/* One support link, three placements (top bar, about, footer). The base rule
+   owns everything shared — inline layout, the icon sizing, the hover and the
+   focus ring — so a placement modifier only ever restates its own colour or
+   spacing, never the mechanics. */
+.zx-contact {
+  /* inline-flex, not flex: in the about placement this sits INSIDE a sentence
+     ("Questions before you install? Contact us"), so it has to stay on the text
+     baseline. A block-level flex would break onto its own line. */
+  display: inline-flex;
+  align-items: center;
+  /* 6px, the scale's documented "icon <-> its own label" step — the same joint
+     `.zx-cta-sub` uses for its shield glyph. */
+  gap: var(--zx-space-15);
+  color: var(--md-sys-color-primary);
+  font-size: var(--zx-text-meta);
+  line-height: 1.4;
+  text-decoration: none;
+  transition: color 120ms ease;
+}
+
+.zx-contact md-icon {
+  /* Same treatment as `.zx-cta-sub md-icon`: pinned to the `lg` step and given
+     an explicit box so the glyph rides the label's line box instead of dictating
+     it. Without the width/height an md-icon defaults to 24px and pushes the row
+     taller than the 12px text beside it. */
+  font-size: var(--zx-text-lg);
+  width: 15px;
+  height: 15px;
+}
+
+.zx-contact:hover {
+  color: var(--md-sys-color-on-surface);
+}
+
+.zx-contact:focus-visible {
+  outline: 2px solid var(--md-sys-color-primary);
+  outline-offset: 3px;
+  border-radius: 3px;
+}
+
+/* Top bar. Takes the MEDIA tokens, not the surface ones, for the same reason the
+   comment above `.zx-topbar-actions` gives: this sits on glass with key art
+   running underneath, and `--md-sys-color-primary` is tuned for the flat page
+   surface, not for poster art showing through. */
+.zx-contact--bar {
+  color: var(--zx-on-media-variant);
+  /* Icon-only, so this is a 15px square whose 48px hit overlay overflows it by
+     16.5px per side; the language trigger's own overlay overflows its 40px box by
+     4px. With only the 4px flex gap between them the two overlays intersected by
+     5px (measured), and whichever painted later would swallow the other's taps.
+     16px restores a clear boundary: 16.5 - 4(gap) - 4(their overflow) rounded up.
+     Margin, not a wider `gap`: the gap is shared with any future sibling, while
+     the overflow being corrected belongs to this control alone. */
+  margin-inline-end: 16px;
+}
+
+.zx-contact--bar:hover {
+  color: var(--zx-on-media);
+}
+
+.zx-contact--bar:focus-visible {
+  outline-color: var(--zx-on-media);
+}
+
+/* The bar renders the GLYPH ALONE at every width — no visible label, and no
+   responsive variant that adds one. The label is simply not passed in the markup
+   (see top-bar.tsx), so there is no text node here to hide; the accessible name
+   comes from `aria-label` and the hover affordance from `title`. */
+
+/* About. Muted to match the APK caption it follows — this is the section's
+   THIRD-priority element, after the install button and its meta line. */
+.zx-about-contact {
+  margin: 0;
+  color: var(--md-sys-color-on-surface-variant);
+  font-size: var(--zx-text-caption);
+  line-height: var(--zx-lh-body);
+  text-align: center;
+}
+
 /* ------------------------------------------------------------------ footer */
 
 .zx-footer {
@@ -1909,6 +1989,13 @@
   flex-direction: column;
   align-items: center;
   gap: var(--zx-space-25);
+}
+
+/* Keeps the base `primary` colour rather than muting to the legal links' grey.
+   That difference is the point: it is the only actionable link in the footer, and
+   the row above the legal list is where a reader looking for help will scan. */
+.zx-contact--footer {
+  font-size: var(--zx-text-meta);
 }
 
 .zx-footer-links {
@@ -1995,14 +2082,6 @@
   --md-menu-item-label-text-weight: var(--zx-weight-regular);
 }
 
-/* NOTE: the top bar used to be cinema black and needed an --zx-on-media
-   override here. It is a light surface now, so the base on-surface color above
-   is correct in both the top bar and the footer. */
-
-/* NOTE: a fixed bottom download bar used to live here. It was removed — the
-   page now closes on the in-flow final CTA, so nothing permanently covers
-   content and the page needs no bottom spacer. */
-
 /* ----------------------------------------------------------------- dialogs */
 
 /* Bottom sheet, not a centered dialog.
@@ -2050,74 +2129,15 @@
     0 -18px 48px rgba(0, 0, 0, 0.55);
 }
 
-.zx-dialog-art {
-  position: relative;
-  /* 116px of FULLY VISIBLE art. It was 132px with a `-24px` TOP margin, which did
-     not bleed upward as intended: `.container` is `overflow: hidden`, so those 24px
-     were clipped away and only 108px ever reached the screen. The top padding it
-     was fighting is instead zeroed on the parent (see the `:has` rule below), which
-     both reveals the full height and sits the art flush against the sheet's edge.
-     Only the HORIZONTAL bleed below is still doing real work. */
-  height: 116px;
-  /* Bottom margin `space-4`. Combined with the headline's own 6px flex gap that puts
-     22px between the artwork and the title, up from a cramped 10px — the art is a
-     full-bleed 116px band, so the title needs real clearance to stop looking glued
-     to it. Horizontal `-24px` is the full-width bleed and must not change. */
-  margin: 0 -24px var(--zx-space-4);
-  overflow: hidden;
-}
-
-.zx-dialog-art img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-/* Blends the art's bottom edge into the sheet so it reads as one surface. Only
-   the lower ~55% is tinted: at `88%` the gradient covered nearly the entire strip
-   and the frame was reduced to a dark band, which wasted 132px of sheet height
-   on something the viewer could not actually see. */
-.zx-dialog-art::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    to top,
-    var(--md-sys-color-surface-container-high) 0%,
-    rgba(0, 0, 0, 0) 55%
-  );
-}
-
 .zx-dialog-headline {
   display: flex;
   flex-direction: column;
   gap: var(--zx-space-15);
   /* Neutralizes md-dialog's `slot[name=headline]::slotted(*){align-items:center}`.
-     That rule is written for a ROW of icon + text, but this slot is a COLUMN, so
-     the cross axis is horizontal and it was centering everything sideways — the
-     key art has no width of its own, so it collapsed to the image's intrinsic
-     size and rendered as a narrow strip floating in the middle of the sheet
-     instead of a full-bleed header. Stretch also left-aligns the eyebrow and
-     heading, matching the body copy below them. */
+     That rule assumes a ROW of icon + text; this slot is a COLUMN, so the cross
+     axis is horizontal and it centered the title and eyebrow sideways. Stretch
+     left-aligns them to match the body copy below. */
   align-items: stretch;
-}
-
-/* Flush-to-the-top key art.
-
-   md-dialog ships `slot[name=headline]::slotted(*){padding:24px 24px 0}`, so this
-   element inherits 24px of TOP padding from the component. On the poster sheet that
-   renders as a 24px band of container color above the artwork, which is what made
-   the image look detached from the sheet's top edge.
-
-   Zeroing the padding is the right fix, NOT pulling the art up with a negative
-   margin: `.container` is `overflow: hidden`, so a `-24px` margin does not reveal
-   those pixels, it pushes them outside the box and discards them — exactly the
-   earlier bug where a 132px poster only ever showed 108px on screen.
-
-   The 24px INLINE padding deliberately stays; that is what `.zx-dialog-art`'s
-   `0 -24px` side margins bleed back out against to reach full sheet width. */
-.zx-dialog-headline:has(> .zx-dialog-art) {
-  padding-block-start: 0;
 }
 
 /* The sheet title, deliberately identical to `.zx-section-title` ("About Zenorix",
@@ -2147,27 +2167,8 @@
   text-wrap: pretty;
 }
 
-/* The two-line heading on the poster sheet. Both lines carry `.zx-dialog-title`,
-   so this only owns the spacing between them — no font-size or weight here, which
-   is what keeps the lines truly equal rank.
-
-   The gap is 14px, not the 2px first tried: each line wraps to two visual lines
-   on a 420px sheet, and at 2px the four resulting lines read as one paragraph
-   with no visible break between the two statements. It needs to beat the text's
-   own ~26px line spacing to register as a break at all — 10px was still too close
-   to that to separate them cleanly. */
-.zx-dialog-heading-stack {
-  display: flex;
-  flex-direction: column;
-  gap: var(--zx-space-4);
-}
-
-/* NOTE: `.zx-dialog-close` and its md-icon/hover/focus rules lived here. The
-   corner dismiss disc is gone — md-dialog already light-dismisses on any click
-   outside `.container` (and on Escape), so the button duplicated behaviour the
-   component provides, while occupying the one corner the title wants. Dropping it
-   also retired the 56px inline clearance and the 9px block offsets that existed
-   purely to position and clear it. */
+/* The dismiss control is md-dialog's own: it light-dismisses on a click outside
+   `.container` and on Escape, so this sheet adds no close button. */
 
 /* The "More features in app:" / "Beyond this movie on the app:" line.
 
@@ -2186,6 +2187,28 @@
   line-height: var(--zx-lh-snug);
   text-transform: uppercase;
   color: var(--md-sys-color-primary);
+}
+
+/* The content slot's wrapper, which on a phone is NOT A BOX.
+
+   `display: contents` is load-bearing, not tidiness. This element only exists so
+   the desktop tier has something to lay the poster and the benefit panel out
+   side by side in; at phone width there is no poster, so a real box here would
+   insert md-dialog's `slot[name=content]::slotted(*){padding:24px}` as a second
+   inset OUTSIDE `.zx-dialog-body`'s own 20px — the panel would lose 24px on each
+   side and the sheet would read as inset twice. With `contents` the wrapper
+   generates no box at all and `.zx-dialog-body` sits in the slot exactly as it
+   did before this element existed. */
+.zx-dialog-content {
+  display: contents;
+}
+
+/* Hidden here, shown at the desktop tier. `display: none` and not a media-scoped
+   render, because at 420px the sheet has no horizontal room for a 2:3 poster and
+   stacking it would push the CTA a full poster-height below the fold — on the one
+   surface whose entire job is to get that CTA tapped. */
+.zx-dialog-art {
+  display: none;
 }
 
 /* The benefit block: TINTED FILL, NO BORDER.
@@ -2297,9 +2320,434 @@
   min-width: 0;
 }
 
-/* NOTE: this used to also set `font-size: 13.5px`, making the dialog's install
-   caption a different size from the identical in-page one. The size now comes
-   solely from `.zx-cta-sub`; only the centering is dialog-specific. */
+/* Centering only. Size stays with `.zx-cta-sub` so the dialog's install caption
+   and the identical in-page one cannot drift apart. */
 .zx-dialog-actions .zx-cta-sub {
   justify-content: center;
+}
+
+/* ========================================================================== */
+/* DESKTOP TIER — the file's only breakpoints, kept together on purpose.       */
+/*                                                                            */
+/* Everything above this line is the phone layout and stays unconditional. Two */
+/* tiers widen it, and BOTH open by moving `--zx-page-max`, because a media    */
+/* query matches the viewport while the content lives in a capped container —  */
+/* restyling without moving the cap is what would put desktop values on a      */
+/* phone-width column. See the note in the file header.                        */
+/*                                                                            */
+/* Every value below is a token override or a reflow of an existing block. No  */
+/* new component, no new colour, no desktop-only element: the page must stay   */
+/* ONE page, so a change to a card or a CTA above keeps applying at every      */
+/* width. That is also why the type scale is overridden as TOKENS rather than  */
+/* per-component — the tier ordering (h1 > h2 > amount > lg > body > meta) is  */
+/* preserved at every width, so nothing changes rank on a wider screen.        */
+/* ========================================================================== */
+
+/* TABLET — a wider column, deliberately NOT a desktop composition. At 420px a
+   tablet showed a phone column stranded in black margins; this gives the content
+   room without reflowing anything into multiple columns, so the single-column
+   reading order survives to the point where there is genuinely width for two. */
+@media (min-width: 720px) {
+  .zx-page {
+    --zx-page-max: 680px;
+    --zx-gutter: 32px;
+    /* The one rhythm value that scales with the viewport: at 680px wide the 40px
+       step reads tight, and section separation is what carries structure once the
+       column is too wide to take in at a glance. */
+    --zx-section-y: 56px;
+    --zx-text-h1: 34px;
+    --zx-text-h2: 24px;
+    --zx-text-amount: 23px;
+  }
+
+  /* Wider column, so more of the rail is visible at once — the cards grow with it
+     rather than leaving a 680px row showing the same 124px thumbnails. */
+  .zx-rail {
+    grid-auto-columns: 148px;
+  }
+
+  /* Four more wall columns. The hero is 680px wide here, so its rotated layer needs
+     ~870px of wall and the phone's four columns (552px) would leave black at the
+     corners. See the column-budget note on `.zx-hero-wall-column`. */
+  .zx-hero-wall-column:nth-child(n + 6):nth-child(-n + 8) {
+    display: flex;
+  }
+}
+
+/* DESKTOP — the reflow tier. Four blocks become multi-column here, and the hero
+   changes composition; everything else just inherits the wider column. */
+@media (min-width: 1024px) {
+  .zx-page {
+    /* The answer to "no infinite full-screen": the column stops at 1200px and
+       centres on the page's own black, at every viewport width above it. The hero
+       stops here too — it is inside this column, so the poster wall spans the full
+       content width rather than bleeding to the viewport edge. */
+    --zx-page-max: 1200px;
+    --zx-gutter: 40px;
+    --zx-section-y: 72px;
+    --zx-text-h1: 44px;
+    --zx-text-h2: 28px;
+    --zx-text-amount: 26px;
+    /* Body copy moves up one step too. 14px is right at arm's length on a phone
+       and small at desktop viewing distance; 16/15/14 keeps `lg > body > meta`
+       ordered exactly as the phone scale has it. */
+    --zx-text-lg: 17px;
+    --zx-text-body: 16px;
+    --zx-text-meta: 14px;
+    /* Controls grow with the type they contain. 46px was sized for a thumb on a
+       420px column; at desktop the label inside it is now 16px, so 46px leaves
+       only 15px of padding above and below and the pill reads as a compact
+       toolbar button rather than as the page's one action. 54px restores the
+       proportion, and because every install control reads this token the primary,
+       the secondary "see all" pill and the sticky bar all move together. */
+    --zx-control-h: 54px;
+  }
+
+  /* ------------------------------------------------------------------- hero */
+
+  /* FULL BLEED, and the one thing on the page that is allowed to leave the 1200px
+     column. The art spans the viewport; the COPY does not — see the padding below.
+     That split is the whole point: "no infinite full-screen" applies to content
+     (headline, price, CTA, every rail and card stay capped), while the poster wall
+     behind it is backdrop, and a backdrop stopping short of the window edge would
+     read as a framed picture rather than as a cinema screen.
+     
+     The `margin/padding` pair is what does it, on BOTH elements:
+     - the negative margin pulls each edge out to the viewport;
+     - the equal positive padding pushes the CONTENT box back to 1200px.
+     Percentages in both resolve against the same containing block, so the two
+     always cancel — the pair stays correct at any viewport width and needs no
+     second breakpoint.
+     
+     `.zx-hero` needs it too, not just the billboard: it owns `overflow: hidden`
+     (which crops the rotated wall) and the page-black background, so leaving it at
+     1200px would clip the bleed straight back off and leave a visible seam where
+     its background ended. Both also depend on `.zx-page` no longer clipping and on
+     `html { overflow-x: clip }` absorbing the `vw`-vs-scrollbar difference. */
+  .zx-hero,
+  .zx-hero-billboard {
+    margin-inline: calc(50% - 50vw);
+    padding-inline: calc(50vw - 50%);
+  }
+
+  /* A SECOND, horizontal scrim — and it only exists because of the bleed above.
+     The base scrim is purely vertical, which is exactly right on a phone where the
+     copy spans the full column: every pixel of text gets the same darkening.
+     Full-bleed breaks that assumption. The headline now ends at ~53% of a 2128px
+     viewport, so the vertical ramp is spending its darkness across 1000px of empty
+     right-hand art while the copy crosses whatever poster happens to land behind
+     it — measured, that includes the white gown of `devil-wears-prada-2`, i.e.
+     white type on white key art.
+
+     So this darkens the COPY SIDE and fades out before the right edge: the text
+     gets a guaranteed floor, and the art stays bright where nothing sits on it.
+     Listed FIRST because in a multi-value `background` the first layer paints on
+     top; the vertical ramp underneath still owns the bottom hand-off to the page
+     surface, which this layer cannot disturb since it is transparent by then. */
+  .zx-hero-scrim {
+    background:
+      linear-gradient(
+        to right,
+        rgb(var(--zx-media-black-rgb) / 0.7) 0%,
+        rgb(var(--zx-media-black-rgb) / 0.58) 34%,
+        transparent 68%
+      ),
+      var(--zx-hero-scrim-vertical);
+  }
+
+  /* The bar's BAND still runs the full viewport (that is the header's "only seam"
+     rule), but its CONTENTS now stop where the page column does. The bar is
+     `position: absolute; inset-inline: 0` against the hero, and the hero is
+     full-bleed from here down — so without this the wordmark sat hard against the
+     window edge, ~470px left of the headline it belongs with, reading as a stray
+     element rather than as the top of this page.
+
+     `100%` is the bar's own width, i.e. the viewport, so the first term is the
+     black margin beside the column; adding the gutter lands the wordmark on the
+     exact inline start as the hero copy and every card below it. `max()` keeps the
+     plain gutter on narrow screens, where the column already fills the width and
+     the first term would go negative. */
+  .zx-topbar {
+    padding-inline: max(
+      var(--zx-gutter),
+      calc((100% - var(--zx-page-max)) / 2 + var(--zx-gutter))
+    );
+  }
+
+  /* Bigger key art for a bigger screen — and a `vw` term, which is what lets ONE
+     column count cover every desktop width. The rotated layer is 128% of the hero
+     (`inset: -20% -14%`), so filling it needs `1.28 * 100vw` of columns: with a
+     FIXED tile that requirement grows without bound (a 2560px window would want 18
+     columns), but with a tile that is itself 12vw the ratio is constant at
+     1.28 / 0.12 ≈ 10.7 columns at EVERY width. Twelve columns therefore cover any
+     viewport, which is why `COLUMNS` in poster-wall.ts is 12 and does not need to
+     track the maximum monitor size.
+
+     `max()` keeps the floor: below ~1530px the 184px branch wins, so a 1024px
+     window still gets full-size key art rather than 123px slivers. */
+  /* The columns narrower tiers do not lay out. The full-bleed hero needs all 12. */
+  .zx-hero-wall-column:nth-child(n + 6) {
+    display: flex;
+  }
+
+  .zx-hero-billboard {
+    --zx-wall-col: max(184px, 12vw);
+    /* Taller, but still capped rather than tied to `svh` alone: a 1700px-tall
+       window would otherwise hand the hero 1300px and push every rail below the
+       fold. The cap is what keeps the catalogue reachable without scrolling far. */
+    min-height: min(86svh, 760px);
+  }
+
+  /* Copy goes LEFT, which is the one real composition change on the page. Centred
+     copy works at 420px because the column IS the measure; at 1120px it strands
+     each line's start in a different place and the eye has to re-find the left
+     edge on every line. Anchoring the block gives all four elements — headline,
+     price, CTA, store row — one shared start edge. */
+  .zx-hero-copy {
+    align-items: flex-start;
+    text-align: start;
+    padding-block-end: var(--zx-space-10);
+  }
+
+  /* The one place on the page with a FLUID size rather than a token step, and the
+     only one that earns it: the hero is the sole full-bleed block, so its
+     headline is the only text whose container grows with the window while every
+     other element stays inside the 1200px column. Held at the token's 44px on a
+     1024px laptop and reaching 64px on a 2128px display, which is where a
+     left-anchored pitch has to compete with 2000px of key art beside it.
+     
+     Capped at 64px, not left open: past that the three lines start eating the
+     vertical the price and the CTA need, and the wall stops being a backdrop and
+     becomes a margin around the type. */
+  .zx-hero-headline {
+    font-size: clamp(var(--zx-text-h1), 3.4vw, 64px);
+    /* MEASURE, in em — so it scales with the size above and the line length stays
+       constant instead of the wrap point moving as the type grows. 14em is ~620px
+       at the 44px floor, i.e. exactly the fixed px cap this replaced, and ~900px
+       at 64px: the same ~28-character line at both ends. */
+    max-width: 14em;
+    /* -0.02em is tuned for the phone's 26px. At 64px the same relative tracking
+       reads loose, and display type wants tighter as it grows. */
+    letter-spacing: -0.03em;
+  }
+
+  /* Price and its risk-reduction line go SIDE BY SIDE from here up, sharing one
+     baseline. Stacked, they cost two lines of the hero's vertical for eleven
+     words — and at desktop the pair reads as a single statement ("$1.25/month,
+     30 days free") which is how it is spoken. `baseline` rather than `center`
+     because the two sizes differ by 12px and centring them optically floats the
+     smaller one above the number's feet. */
+  .zx-hero-price {
+    flex-direction: row;
+    align-items: baseline;
+    gap: var(--zx-space-3);
+  }
+
+  /* The install cluster keeps ONE width for both members, so the CTA and the two
+     store tiles under it stay a single left-anchored block instead of a
+     full-width button with a full-width pair beneath it. */
+  .zx-hero-copy .zx-cta,
+  .zx-hero-copy .zx-store-row {
+    width: 100%;
+    max-width: 360px;
+  }
+
+  /* ----------------------------------------------------------------- top 10 */
+
+  .zx-rail {
+    grid-auto-columns: 172px;
+    gap: var(--zx-space-4);
+  }
+
+  /* Both tail actions stop being full-width. A 1120px pill reads as a banner
+     rather than a button, and its label ends up marooned in the middle of a very
+     wide empty stroke — so each is capped and centred in its own block. */
+  .zx-chart-more-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .zx-chart-more {
+    width: 100%;
+    max-width: 360px;
+  }
+
+  /* ------------------------------------------------------------------ about */
+
+  /* 2x2, the reflow with the most to gain: these four cards are peers making one
+     argument (catalogue, price, quality, trial), and stacked in a 1120px column
+     each one became a very wide short band with the reader scrolling between
+     claims that belong side by side. */
+  /* `minmax(0, 1fr)`, NOT `1fr`, and this is load-bearing rather than defensive.
+     `1fr` is shorthand for `minmax(auto, 1fr)`, so each track is floored at its
+     item's MIN-CONTENT width — and the networks card contains `.zx-logo-marquee`,
+     a horizontal scroller whose min-content is its entire un-scrolled logo track.
+     Measured with plain `1fr` the two tracks resolved to 1322px and 190px instead
+     of 548px each, which pushed the price and trial cards to x=1850, outside the
+     1200px column, where `.zx-page`'s `overflow-x: clip` silently ate them: two of
+     the four claims simply were not on the page.
+
+     Flooring at 0 lets the scroller stay a scroller — the same reason `.zx-rail`
+     sets `min-width: 0` and `.zx-spec-label` does too. Any future card holding an
+     overflowing child depends on this, so keep it. */
+  .zx-about {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    /* One step up from the phone's 20px. The cards are outlined with no fill, so
+       the gap is the only thing separating two ADJACENT columns as well as two
+       rows now, and it has to stay clearly wider than the 24px padding inside
+       each card or the pair reads as one box. */
+    gap: var(--zx-space-6);
+  }
+
+  .zx-about-cta {
+    align-items: center;
+  }
+
+  .zx-about-cta .zx-cta {
+    width: 100%;
+    max-width: 360px;
+  }
+
+  /* -------------------------------------------------------------------- faq */
+
+  /* Two columns, flowing row-major so the visual order still matches the DOM
+     order a screen reader and a keyboard follow. The hairlines have to be
+     re-owned: the list's single top border only spans the grid's first row, so the
+     border moves onto the two items IN that row and the list drops its own. Every
+     item keeps its bottom border, so an open answer stretches its grid row and
+     both rules stay aligned across the pair. */
+  .zx-faq-list {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    column-gap: var(--zx-space-10);
+    border-block-start: 0;
+  }
+
+  .zx-faq-item:nth-child(-n + 2) {
+    border-block-start: 1px solid var(--md-sys-color-outline-variant);
+  }
+
+  /* -------------------------------------------------------- final cta, footer */
+
+  .zx-final .zx-cta {
+    width: 100%;
+    max-width: 360px;
+  }
+
+  /* One row instead of a centred stack. With 1120px available, three short items
+     centred on three lines leaves two thirds of the band empty; spread apart they
+     read as what they are — support, legal, copyright. */
+  .zx-footer-inner {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: var(--zx-space-4);
+  }
+
+  /* ------------------------------------------------------------------ dialogs */
+
+  /* CENTRED DIALOG, not a bottom sheet.
+
+     A sheet pinned to the bottom edge is a phone convention — it is reachable by
+     a thumb and it keeps the page visible above it. On a 2128px display neither
+     applies: the sheet lands 1400px below the eye, off to the bottom of a mostly
+     empty scrim, and a 420px column of it looks like a phone screenshot pasted
+     onto the page. Centred, it sits where the cursor and the attention already
+     are.
+
+     This UNDOES the base rule's whole trick rather than tweaking it (see
+     `.zx-dialog`): `margin: auto` on all four sides restores the UA's own
+     centering inside the modal's `inset: 0`, and all four corners round because
+     no edge is flush with the viewport any more. The internal `<dialog>`
+     inherits margin/width/max-height/border-radius from the host, so setting
+     them here is what actually moves the box. */
+  .zx-dialog {
+    --md-dialog-container-shape-end-end: 28px;
+    --md-dialog-container-shape-end-start: 28px;
+
+    margin: auto;
+    /* 720px, not the 420px of the sheet: the poster panel joins the layout at
+       this tier, so the dialog carries two columns instead of one. Still far
+       short of the 1200px page column — a modal that approaches the width of the
+       page behind it stops reading as a layer over it. */
+    max-width: 720px;
+    /* Was `min(680px, 86svh)`. The 680px cap existed to stop the SHEET growing
+       past a comfortable phone height; here the two-column layout is what sets
+       the height, and the poster wants every pixel it can get. 80svh keeps a
+       clear band of scrim above and below so the dialog reads as floating. */
+    max-height: 80svh;
+    /* The base shadow is directional — `0 -1px` and `0 -18px` throw light
+       downward, correct for a box whose only visible edges face up. A centred
+       dialog has all four edges exposed, so the hairline goes all the way round
+       and the drop shadow straightens out. */
+    box-shadow:
+      0 0 0 1px var(--md-sys-color-outline-variant),
+      0 24px 64px rgba(0, 0, 0, 0.55);
+  }
+
+  /* The wrapper becomes a real box at this tier, which is the one place it earns
+     its existence — see `.zx-dialog-content`. `flex`, so the poster keeps its
+     intrinsic 2:3 ratio while the benefit panel takes the rest; `stretch` so the
+     art's height is driven by the copy beside it rather than the reverse. */
+  .zx-dialog-content {
+    display: flex;
+    align-items: stretch;
+    gap: var(--zx-space-5);
+    /* md-dialog's `::slotted(*){padding:24px}` now lands on a real box. Zeroed,
+       because the host already insets the slot and `.zx-dialog-body` carries its
+       own padding — left in place it would double-inset the pair. */
+    padding: 0;
+  }
+
+  .zx-dialog-art {
+    display: block;
+    /* A FIXED-WIDTH PANEL CROPPED TO THE COPY'S HEIGHT, and deliberately not a
+       whole 2:3 poster. Two earlier attempts are why:
+
+       1. `flex: 0 0 168px` + `aspect-ratio: 2/3` made the art 252px tall, taller
+          than the benefit panel, and `align-items: stretch` then grew the panel to
+          match — a band of bare tint under the last bullet.
+       2. Inverting it (`align-self: stretch` + `width: auto` + `aspect-ratio`) to
+          let the copy set the height does NOT work: the `width`/`height` attributes
+          give the item a definite flex basis of 420px, aspect-ratio derives 630px
+          of height from that, and stretch never gets to apply. The dialog rendered
+          a 420x630 poster with the copy crushed into 280px beside it.
+
+       So: width is fixed, height comes from `stretch`, and `object-fit: cover`
+       absorbs the difference. No `aspect-ratio` — that is exactly what fought
+       stretch — and no magic height that has to be kept in sync with a bullet
+       count. 176px reads as a poster at the ~250px the copy is tall, and the ~10%
+       vertical crop lands in the art's bleed, not on a face or a logo. */
+    flex: 0 0 176px;
+    align-self: stretch;
+    width: 176px;
+    height: auto;
+    object-fit: cover;
+    /* Matches `.zx-dialog-body`, so the two columns read as one pair of nested
+       panels rather than as a photo next to a card. */
+    border-radius: var(--zx-radius-sm);
+    /* The tiles are dark-cornered key art on a dark surface; without this the
+       poster's edge dissolves into the dialog exactly as the sheet's top edge
+       once did into the page. */
+    box-shadow: 0 0 0 1px var(--md-sys-color-outline-variant);
+    /* The panel beside it has `margin-block-start: 4px` to separate it from the
+       title; the art matches so their top edges align. */
+    margin-block-start: var(--zx-space-1);
+  }
+
+  /* Takes the remainder of the row. `min-width: 0` because a flex item's default
+     `auto` minimum is its content width — a long bullet would otherwise refuse to
+     wrap and push the poster out of the dialog instead. */
+  .zx-dialog-body {
+    flex: 1 1 auto;
+    min-width: 0;
+    /* The poster is the taller of the two columns, so `stretch` grows this panel
+       past its own content and leaves slack. Centring the label and bullets in it
+       splits that slack evenly above and below, where it reads as generous padding;
+       left at the default it all pooled under the last bullet and looked like a
+       list that had lost its final item. */
+    justify-content: center;
+  }
 }

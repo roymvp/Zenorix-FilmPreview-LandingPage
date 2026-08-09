@@ -22,22 +22,27 @@ export type PlatformId =
 export type Platform = {
   id: PlatformId
   name: string
-  /** Square app icon in /public/brands. */
+  /**
+   * Square app icon in `/public/brands`, GENERATED — do not hand-edit or point
+   * this at a source file. `scripts/build-brand-icons.mjs` downscales the
+   * originals in `assets/brands/` to 144px WebP (1040 KB -> 20 KB across the
+   * eleven); the originals are 512px store icons and are not deployed.
+   */
   icon: string
 }
 
 export const PLATFORMS: Record<PlatformId, Platform> = {
-  netflix: { id: 'netflix', name: 'Netflix', icon: '/brands/netflix.png' },
-  'disney-plus': { id: 'disney-plus', name: 'Disney+', icon: '/brands/disney-plus.png' },
-  'hbo-max': { id: 'hbo-max', name: 'HBO Max', icon: '/brands/hbo-max.png' },
-  'prime-video': { id: 'prime-video', name: 'Prime Video', icon: '/brands/prime-video.png' },
-  'apple-tv': { id: 'apple-tv', name: 'Apple TV', icon: '/brands/apple-tv.png' },
-  'paramount-plus': { id: 'paramount-plus', name: 'Paramount+', icon: '/brands/paramount-plus.png' },
-  hulu: { id: 'hulu', name: 'Hulu', icon: '/brands/hulu.png' },
-  peacock: { id: 'peacock', name: 'Peacock', icon: '/brands/peacock.png' },
-  'amc-plus': { id: 'amc-plus', name: 'AMC+', icon: '/brands/amc-plus.png' },
-  nbc: { id: 'nbc', name: 'NBC', icon: '/brands/nbc.png' },
-  'fox-one': { id: 'fox-one', name: 'FOX One', icon: '/brands/fox-one.png' },
+  netflix: { id: 'netflix', name: 'Netflix', icon: '/brands/netflix.webp' },
+  'disney-plus': { id: 'disney-plus', name: 'Disney+', icon: '/brands/disney-plus.webp' },
+  'hbo-max': { id: 'hbo-max', name: 'HBO Max', icon: '/brands/hbo-max.webp' },
+  'prime-video': { id: 'prime-video', name: 'Prime Video', icon: '/brands/prime-video.webp' },
+  'apple-tv': { id: 'apple-tv', name: 'Apple TV', icon: '/brands/apple-tv.webp' },
+  'paramount-plus': { id: 'paramount-plus', name: 'Paramount+', icon: '/brands/paramount-plus.webp' },
+  hulu: { id: 'hulu', name: 'Hulu', icon: '/brands/hulu.webp' },
+  peacock: { id: 'peacock', name: 'Peacock', icon: '/brands/peacock.webp' },
+  'amc-plus': { id: 'amc-plus', name: 'AMC+', icon: '/brands/amc-plus.webp' },
+  nbc: { id: 'nbc', name: 'NBC', icon: '/brands/nbc.webp' },
+  'fox-one': { id: 'fox-one', name: 'FOX One', icon: '/brands/fox-one.webp' },
 }
 
 /** Display order of the trust strip. */

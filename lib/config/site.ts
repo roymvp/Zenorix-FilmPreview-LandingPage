@@ -10,8 +10,16 @@ export const SITE = {
   name: 'Zenorix',
   /** Canonical origin. Set NEXT_PUBLIC_SITE_URL at build time in production. */
   url: process.env.NEXT_PUBLIC_SITE_URL ?? 'https://zenorix.app',
-  /** RESERVED: point at the signed APK on the CDN. */
-  apkUrl: process.env.NEXT_PUBLIC_APK_URL ?? '/download/zenorix.apk',
+  /**
+   * The APK endpoint. ABSOLUTE, and on its own host: it is an update channel
+   * that always resolves to the newest build, not a file under this site.
+   * Anything joining this to `SITE.url` is a bug — see `installUrl` in
+   * lib/seo.ts, which consumes it as-is for exactly that reason.
+   */
+  apkUrl:
+    process.env.NEXT_PUBLIC_APK_URL ?? 'https://update.vinextv.co/zenorix/latest',
+  /** Support channel behind every "contact us" entry point. */
+  contactUrl: 'https://t.me/roykay_mvp',
   apkVersion: '3.4.1',
   apkSize: '14MB',
   /** Install count shown under the download CTAs. RESERVED: feed from analytics. */

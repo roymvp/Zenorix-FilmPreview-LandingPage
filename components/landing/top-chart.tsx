@@ -1,45 +1,58 @@
 'use client'
 
 import { useConversion } from '@/components/landing/conversion-provider'
-import type { ChartEntry } from '@/lib/content/movies'
+import type { ChartEntry } from '@/lib/content/charts'
 import { PLATFORMS } from '@/lib/content/platforms'
 
 /**
- * Regional Top 10 — placeholder art, rank, source badge. Nothing else.
+ * One regional chart rail — key art, rank, source badge. Nothing else.
  *
  * Every card is a locked door: tapping any title opens the download upsell
  * instead of a detail page. Titles and type labels are deliberately omitted so
  * the rail reads as pure curiosity bait; the accessible name still carries the
  * rank and title for screen readers.
  *
- * TO REPLACE WITH REAL POSTERS: add `poster: string` back to `ChartEntry`
- * (see `lib/content/movies.ts`) and swap the placeholder <span> below for an
- * <img className="zx-chart-img" src={entry.poster} alt="" loading="lazy" />.
- * `.zx-chart-art` already owns the 2/3 aspect ratio, radius and clipping, so
- * no CSS needs to change.
+ * The page renders this twice — films, then shows — so `id` is required: two
+ * rails cannot share one heading id, or `aria-labelledby` on the second section
+ * would point at the first section's title.
+ *
+ * The tail CTA is OPTIONAL and belongs to the last rail only. Both rails sell the
+ * same install, so two identical buttons 500px apart were the same offer asked
+ * twice — the first one interrupted the browse before the shows rail had made its
+ * case. It lives inside this section rather than in its own block so the
+ * "each section owns only the space above itself" rhythm keeps holding.
+ *
+ * Rail length is whatever `entries` holds. No slicing, no padding: the copy in
+ * `chart.headingMovies` / `chart.headingSeries` carries no count, so a rail of
+ * eight and a rail of twelve are both honest, and the catalogue never has to
+ * invent an entry to fill a "Top 10" label.
  */
 export function TopChart({
+  id,
   entries,
   heading,
   rankLabel,
-  moreLabel,
-  moreHint,
+  more,
 }: {
+  /** Unique per rail; used for the section's heading id. */
+  id: string
   entries: ChartEntry[]
   heading: string
   /** "Number {rank}" template, used to build each poster's accessible name. */
   rankLabel: string
-  /** Outlined tail button that jumps straight to the download. */
-  moreLabel: string
-  /** Catalogue size line under the button — the payoff for tapping it. */
-  moreHint: string
+  /**
+   * Outlined tail button that jumps straight to the download, plus the catalogue
+   * size line under it. Omit on every rail but the last — the page carries one.
+   */
+  more?: { label: string; hint: string }
 }) {
   const { openContent, download } = useConversion()
+  const headingId = `zx-chart-heading-${id}`
 
   return (
-    <section className="zx-section zx-chart" aria-labelledby="zx-chart-heading">
+    <section className="zx-section zx-chart" aria-labelledby={headingId}>
       <div className="zx-shell">
-        <h2 id="zx-chart-heading" className="zx-section-title">
+        <h2 id={headingId} className="zx-section-title">
           {heading}
         </h2>
       </div>
@@ -55,15 +68,32 @@ export function TopChart({
               <button
                 type="button"
                 className="zx-chart-card"
-                onClick={() => openContent(entry.title)}
+                /* The poster travels with the title so the dialog can show the
+                   art the visitor just clicked — see `LockedContent`. */
+                onClick={() =>
+                  openContent({ title: entry.title, poster: entry.poster })
+                }
                 aria-label={`${rankLabel.replace('{rank}', String(index + 1))} · ${entry.title}`}
               >
                 <span className="zx-chart-art">
-                  {/* Neutral stand-in until artwork is licensed. Reads as an
-                      empty slot, never as finished art. */}
-                  <span className="zx-chart-ph" aria-hidden="true">
-                    <md-icon>image</md-icon>
-                  </span>
+                  {/* alt="": the button's aria-label already carries rank +
+                      title, so a described image would just repeat it.
+                      The first two cards are above the fold on a phone, so they
+                      load eagerly; the rest are off to the right of the scroll
+                      track and wait.
+                      eslint-disable — these are pre-sized 2:3 WebP tiles built by
+                      scripts/build-poster-tiles.mjs, so next/image would add a
+                      loader with nothing left to optimize. */}
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    className="zx-chart-img"
+                    src={entry.poster}
+                    alt=""
+                    width={420}
+                    height={630}
+                    loading={index < 2 ? 'eager' : 'lazy'}
+                    decoding="async"
+                  />
 
                   {/* Source app icon, top-right — the service's own store icon,
                       full color. aria-hidden: the platform is not part of the
@@ -72,7 +102,7 @@ export function TopChart({
                   <span className="zx-chart-badge" aria-hidden="true">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
-                      src={platform.icon || '/placeholder.svg'}
+                      src={platform.icon}
                       alt=""
                       width={44}
                       height={44}
@@ -91,20 +121,22 @@ export function TopChart({
         })}
       </ul>
 
-      {/* Tail action for the rail: the catalogue is the promise, so "see more"
+      {/* Tail action for BOTH rails: the catalogue is the promise, so "see more"
           resolves to the only thing that can actually deliver it — the install.
           Outlined on purpose: the filled CTA stays the section-level primary. */}
-      <div className="zx-shell zx-chart-more-wrap">
-        <button
-          type="button"
-          className="zx-chart-more"
-          onClick={() => download('chart_more')}
-        >
-          {moreLabel}
-          <md-icon aria-hidden="true">arrow_forward</md-icon>
-        </button>
-        <p className="zx-chart-more-hint">{moreHint}</p>
-      </div>
+      {more ? (
+        <div className="zx-shell zx-chart-more-wrap">
+          <button
+            type="button"
+            className="zx-chart-more"
+            onClick={() => download('chart_more')}
+          >
+            {more.label}
+            <md-icon aria-hidden="true">arrow_forward</md-icon>
+          </button>
+          <p className="zx-chart-more-hint">{more.hint}</p>
+        </div>
+      ) : null}
     </section>
   )
 }

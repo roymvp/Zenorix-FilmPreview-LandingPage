@@ -15,7 +15,6 @@ export function DownloadCta({
   sub,
   source,
   className = 'zx-cta-button',
-  bare = false,
   autoFocus = false,
 }: {
   label: string
@@ -31,11 +30,6 @@ export function DownloadCta({
    * and making it the visual focal point instead of this CTA.
    */
   autoFocus?: boolean
-  /**
-   * Render just the button, without the `.zx-cta` column wrapper. Used by the
-   * compact top-bar instance, which sits in a flex row of its own.
-   */
-  bare?: boolean
 }) {
   const { download } = useConversion()
 
@@ -51,8 +45,6 @@ export function DownloadCta({
       {label}
     </md-filled-button>
   )
-
-  if (bare) return button
 
   return (
     <div className="zx-cta">

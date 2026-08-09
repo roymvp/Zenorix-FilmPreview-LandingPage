@@ -1,13 +1,25 @@
 import type { Metadata } from 'next'
 import { SITE } from '@/lib/config/site'
-import type { Movie } from '@/lib/content/movies'
 import { fill, type Dictionary } from '@/lib/i18n/dictionaries'
-import { locales, localeMeta, moviePath, type Locale } from '@/lib/i18n/config'
+import { locales, localeMeta, type Locale } from '@/lib/i18n/config'
+
+/**
+ * The share card for a market, built by `scripts/build-share-cards.mjs`.
+ *
+ * One card PER MARKET, because the card's headline is the price and the price is
+ * different in each ($1.25 / R$ 6,20 / 43 บาท per month). A single shared card
+ * quoted one market's currency to all three.
+ */
+const shareCard = (locale: Locale) => `/media/share/zenorix-${locale}.jpg`
+
+/** Matches the `WIDTH`/`HEIGHT` the generator writes. A mismatch makes scrapers
+    reserve the wrong box and crop the card. */
+const SHARE_CARD_SIZE = { width: 1200, height: 630 } as const
 
 /**
  * Every market page is independently indexable: its own canonical URL, its own
  * localized title/description, and a reciprocal hreflang set pointing at the
- * same film in the other two markets (plus x-default on English).
+ * same page in the other two markets (plus x-default on English).
  */
 export function buildLocaleAlternates(
   path: (locale: Locale) => string,
@@ -20,35 +32,58 @@ export function buildLocaleAlternates(
   return { languages }
 }
 
-export function buildMovieMetadata({
-  movie,
+/**
+ * Metadata for a market page.
+ *
+ * There are exactly three of these — `/en`, `/pt-br`, `/th` — and each describes
+ * the product, not a film. An earlier version keyed this off a featured `Movie`,
+ * which meant the title of the whole site changed with whichever film sat first
+ * in an array, and promised a specific film to anyone who saw the link.
+ */
+export function buildMarketMetadata({
   locale,
   dict,
   path,
+  titles,
 }: {
-  movie: Movie
   locale: Locale
   dict: Dictionary
-  /** Resolver so the home route and the /movie/[slug] route share this logic. */
+  /** Resolves this page's URL in any market, for canonical + hreflang. */
   path: (locale: Locale) => string
+  /**
+   * The chart titles this market's page actually renders, from
+   * `getChartTitles`. Appended to `keywords` — see the note there.
+   */
+  titles: string[]
 }): Metadata {
-  const copy = movie.copy[locale]
-  const values = {
-    title: copy.title,
-    year: movie.releaseYear,
-    country: dict.market.country,
-  }
-  const title = fill(dict.meta.title, values)
+  const values = { country: dict.market.country, countryShort: dict.market.countryShort }
   const description = fill(dict.meta.description, values)
   const canonical = `${SITE.url}${path(locale)}`
 
   return {
-    title,
+    title: fill(dict.meta.title, values),
     description,
-    keywords: fill(dict.meta.keywords, values),
+    /* The market's own generic terms FIRST, then the twenty titles the rails
+       render this week.
+
+       An ARRAY, not `${dict.meta.keywords}, ${titles.join(', ')}`: Next joins it
+       into the meta tag itself, so no separator is hand-built and a title
+       containing a comma cannot silently split into two keywords.
+
+       Worth doing even though Google has ignored this tag for years — Baidu still
+       reads it, and it is the cheapest place the film names become machine-
+       readable at all. The cards render NO title text (the posters carry their own
+       lettering), so without this the only copies of these twenty names in the
+       document are `aria-label` attributes, which crawlers do not index as
+       content. The titles come from the same function that builds the rails, so
+       this list cannot name a film the page does not show — the line between
+       legitimate keywords and stuffing. */
+    keywords: [dict.meta.keywords, ...titles],
     alternates: { canonical, ...buildLocaleAlternates(path) },
     openGraph: {
-      type: 'video.movie',
+      /* `website`, not `video.movie`: this page is the product's home, and
+         claiming a film type made scrapers look for a film the page never had. */
+      type: 'website',
       siteName: SITE.name,
       locale: localeMeta[locale].ogLocale,
       url: canonical,
@@ -56,10 +91,9 @@ export function buildMovieMetadata({
       description,
       images: [
         {
-          url: `${SITE.url}${movie.backdrop}`,
-          width: 1536,
-          height: 864,
-          alt: fill(dict.meta.imageAlt, values),
+          url: `${SITE.url}${shareCard(locale)}`,
+          ...SHARE_CARD_SIZE,
+          alt: dict.meta.imageAlt,
         },
       ],
     },
@@ -67,53 +101,50 @@ export function buildMovieMetadata({
       card: 'summary_large_image',
       title: fill(dict.meta.ogTitle, values),
       description,
-      images: [`${SITE.url}${movie.backdrop}`],
+      images: [`${SITE.url}${shareCard(locale)}`],
     },
     robots: { index: true, follow: true },
   }
 }
 
 /**
- * JSON-LD for the three things this page actually is: a film, an installable
- * Android app, and an FAQ. Emitted as one graph so crawlers get all of it.
+ * JSON-LD for the two things this page actually is: an installable Android app,
+ * and an FAQ. Emitted as one graph so crawlers get both.
+ *
+ * There is deliberately NO `Movie` node. One used to be emitted for a featured
+ * film, which told crawlers this URL was a page about that film — a claim the
+ * page never backed up, since it shows a chart of twenty titles and an install
+ * pitch. Structured data has to describe what is actually on the page.
  */
 export function buildStructuredData({
-  movie,
   locale,
   dict,
   path,
+  charts,
 }: {
-  movie: Movie
   locale: Locale
   dict: Dictionary
   path: (locale: Locale) => string
+  /**
+   * The two rails as rendered, so the `ItemList` nodes below describe the real
+   * page. Each rail's heading comes along because it is the list's visible name.
+   */
+  charts: { name: string; titles: string[] }[]
 }) {
-  const copy = movie.copy[locale]
   const url = `${SITE.url}${path(locale)}`
 
   return {
     '@context': 'https://schema.org',
     '@graph': [
       {
-        '@type': 'Movie',
-        name: copy.title,
+        '@type': 'WebSite',
+        name: SITE.name,
         url,
-        image: `${SITE.url}${movie.poster}`,
-        description: copy.synopsis,
-        genre: copy.genres,
-        datePublished: String(movie.releaseYear),
-        duration: `PT${movie.runtimeMinutes}M`,
         inLanguage: localeMeta[locale].hreflang,
-        potentialAction: {
-          '@type': 'WatchAction',
-          target: url,
-          expectsAcceptanceOf: {
-            '@type': 'Offer',
-            price: '0',
-            priceCurrency: dict.market.currency,
-            eligibleRegion: dict.market.countryShort,
-          },
-        },
+        description: fill(dict.meta.description, {
+          country: dict.market.country,
+          countryShort: dict.market.countryShort,
+        }),
       },
       {
         '@type': 'SoftwareApplication',
@@ -130,7 +161,10 @@ export function buildStructuredData({
         fileFormat: 'application/vnd.android.package-archive',
         softwareVersion: SITE.apkVersion,
         fileSize: SITE.apkSize,
-        installUrl: `${SITE.url}${SITE.apkUrl}`,
+        /* Used BARE, not joined to `SITE.url`: the APK lives on its own update
+           host, so prefixing the site origin would emit a broken
+           "https://zenorix.apphttps://update.vinextv.co/..." here. */
+        installUrl: SITE.apkUrl,
         /* AggregateOffer rather than a bare Offer list: this app has THREE price
            points per market (free trial, monthly, annual) and an aggregate is the
            only shape that states the range explicitly. `lowPrice: 0` is what lets
@@ -196,6 +230,34 @@ export function buildStructuredData({
           acceptedAnswer: { '@type': 'Answer', text: item.a },
         })),
       },
+      /* The two chart rails, as ranked lists of names.
+         
+         This is the honest way to get the film titles into structured data, and it
+         is specifically NOT the `Movie` node this file removed: an `ItemList` says
+         "this page ranks these twenty titles", which is exactly what the rails do,
+         while a top-level `Movie` said "this URL is about one film", which was never
+         true. So an answer engine asked what is trending on Zenorix can name them,
+         and none of them is presented as this page's subject.
+         
+         `ListItem` carries a bare `name` and no nested `Movie`/`TVSeries` and no
+         `url`: the page shows a poster and a rank for each title and nothing else —
+         no synopsis, no cast, no year, no per-film page to link to (that route was
+         a doorway page and was deleted). A `Movie` node here would be a promise of
+         detail the document does not contain.
+         
+         `itemListOrder` is explicit because the order IS the content — it is a
+         chart, and each market ranks the same catalogue differently. */
+      ...charts.map((chart) => ({
+        '@type': 'ItemList',
+        name: chart.name,
+        itemListOrder: 'https://schema.org/ItemListOrderDescending',
+        numberOfItems: chart.titles.length,
+        itemListElement: chart.titles.map((title, index) => ({
+          '@type': 'ListItem',
+          position: index + 1,
+          name: title,
+        })),
+      })),
     ],
   }
 }
@@ -219,5 +281,3 @@ export function marketValues(dict: Dictionary) {
     total: SITE.library.total,
   }
 }
-
-export { moviePath }

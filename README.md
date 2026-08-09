@@ -62,7 +62,7 @@ Routing is fully built\. Add new films to the `movies` array with slug, assets, 
 
 ### D\. Production Deployment
 
-Next\.js 16 compatibility: Rename `middleware.ts` to `proxy.ts` \(current build shows a deprecation warning; functionality is unaffected\)\.
+Next\.js 16 compatibility: **done** — `middleware.ts` has been renamed to `proxy.ts` \(and its exported function to `proxy`\), so the build is warning\-free\. Note `proxy.ts` runs on the Node\.js runtime only; there is no Edge option\.
 
 ---
 
@@ -220,6 +220,7 @@ app/
   layout.tsx · [lang]/layout.tsx   # Global shell, locale config
   globals.css · landing.css        # Design tokens · page styles
   robots.ts · sitemap.ts           # Auto-generated SEO endpoints
+  llms.txt/route.ts                # Plain-text facts for AI answer engines
 components/landing/                # Business components
   conversion-provider.tsx          # Funnel state, central download()
   immersive-player.tsx             # 10-minute preview gate core
@@ -230,5 +231,5 @@ lib/
   analytics.ts                     # Central analytics entry point
   i18n/ · seo.ts                   # Locale rules · SEO generation
 dictionaries/{en,pt-br,th}.json    # Localized UI strings
-middleware.ts                      # Locale detection & redirects
+proxy.ts                           # Locale detection & redirects
 ```

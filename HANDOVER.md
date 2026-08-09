@@ -63,7 +63,7 @@ That is ~1,100 lines and covers every integration point.
 ## 2. Architecture
 
 ```
-Request  →  middleware.ts  →  static page  →  React hydrate  →  md-* upgrade
+Request  →  proxy.ts       →  static page  →  React hydrate  →  md-* upgrade
             (only runtime      (SSG, zero      (6 client        (Material web
              work in the app)   server work)    islands)         components)
 ```
@@ -72,20 +72,23 @@ Request  →  middleware.ts  →  static page  →  React hydrate  →  md-* upg
 
 Every page is **statically generated** (`generateStaticParams`). There are no
 server actions, no API routes, no database, no server-side fetching. The only
-request-time code is `middleware.ts`, which locale-prefixes unprefixed URLs.
+request-time code is `proxy.ts`, which locale-prefixes unprefixed URLs.
 
 `pnpm build` output:
 
 ```
 ● /[lang]                        → /en, /pt-br, /th
-● /[lang]/[segment]/[slug]       → 9 paths (3 films × 3 locales)
-○ /robots.txt  ○ /sitemap.xml  ○ /_not-found
+○ /llms.txt  ○ /robots.txt  ○ /sitemap.xml  ○ /_not-found
 ƒ Proxy (Middleware)
 ```
 
+`/llms.txt` is a route handler, not a file in `public/`, so the prices and version
+numbers it states to AI answer engines are generated from `SITE` and the market
+dictionaries and cannot drift from the visible page.
+
 ### Routing & locale resolution
 
-`middleware.ts` resolves a locale in strict priority order:
+`proxy.ts` resolves a locale in strict priority order:
 
 1. `NEXT_LOCALE` cookie (explicit user choice wins)
 2. `x-vercel-ip-country` header — `US→en`, `BR→pt-br`, `TH→th`
@@ -346,21 +349,34 @@ Verify after switching: the gate reads `video.currentTime` against `cap`, which
 works identically for HLS — but confirm `timeupdate` still fires at your segment
 cadence, and that seeking past the wall is still intercepted.
 
-### Top 10 posters (item 11)
+### Top 10 posters (item 11) — DONE
 
-Three steps, all sign-posted in code:
+`ChartEntry.poster` is wired and every `chartPool` entry has its own tile; the
+placeholder tile and its `.zx-chart-ph` CSS are gone. To swap in licensed art,
+replace the file and keep the two rules below.
 
-1. `lib/content/movies.ts` — add `poster: string` to `ChartEntry`.
-2. Set it on every `chartPool` entry.
-3. `top-chart.tsx` — replace the placeholder `<span className="zx-chart-ph">`
-   with:
-   ```tsx
-   <img className="zx-chart-img" src={entry.poster} alt="" loading="lazy" decoding="async" />
-   ```
+**Tiles are built, not referenced raw.** `scripts/build-poster-tiles.mjs` trims
+each source in `public/media/poster-*.png` and covers it into a 420x630 WebP in
+`public/media/tiles/`. Add a source there, re-run the script, then point
+`chartPool` (rail) or `lib/content/poster-wall.ts` (hero) at the output. Never
+reference a `poster-*.png` from a component — the sources are three different
+aspect ratios, and the letterboxed ones show black gutters inside the tile.
 
-`.zx-chart-art` **already owns** the 2:3 aspect ratio, radius and clipping — no
-CSS change needed. Keep `alt=""`: the card's accessible name already carries rank
-+ title, and the rail intentionally shows no visible titles.
+Two constraints that are easy to break:
+
+1. **Rail art must be untitled and unbranded.** Each card overlays its own
+   platform badge and takes its title from data, so a poster with a service logo
+   or the film's name burned in contradicts the card around it. The three
+   licensed platform posters (`72-hours`, `walter-boys`, `the-last-house`) are
+   therefore **hero-wall only** — there they are small, scrimmed background
+   texture. The script tags each source `branded: true/false`.
+2. **One tile per rail entry.** Ten cards are visible at once, so a reused tile
+   reads immediately as filler. The hero wall is the opposite case and reuses six
+   tiles across twelve slots on purpose (see `buildWall`).
+
+Keep `alt=""`: the card's accessible name already carries rank + title, and the
+rail intentionally shows no visible titles. The first two cards load eagerly
+(above the fold on a phone), the rest lazily.
 
 ---
 
@@ -412,37 +428,38 @@ OG/Twitter cards, JSON-LD, and 3 new `sitemap.xml` entries with alternates.
 
 ## 9. TODO D — Second-phase dev, QA, deploy
 
-### Known chore: `middleware.ts` → `proxy.ts`
+### DONE: `middleware.ts` → `proxy.ts`
 
-The build prints:
-
-```
-⚠ The "middleware" file convention is deprecated. Please use "proxy" instead.
-```
-
-Next.js 16 renamed the convention. Behaviour is unaffected today (it still builds
-and runs as `ƒ Proxy (Middleware)`), but rename the file and its exported
-`middleware` function per the Next.js migration note before it becomes a hard
-error.
+Renamed, along with its exported function (`middleware` → `proxy`), so the build
+no longer prints the Next.js 16 deprecation warning. Worth knowing why it is not
+purely cosmetic: `proxy.ts` runs **only** on the Node.js runtime — there is no
+Edge option. This app is unaffected (it reads two request headers and a cookie),
+but anything added there later cannot assume Edge.
 
 ### Not yet present — add during second-phase dev
 
 - No test script, no test framework, no CI config.
 - No lint script (no ESLint config); the code carries
   `eslint-disable-next-line @next/next/no-img-element` comments anticipating one.
-- `next.config.mjs` is **empty** (`{}`). Two things belong there:
-  1. **Security headers** — none are currently set. Recommended baseline:
-     `X-Content-Type-Options: nosniff`, `Referrer-Policy:
-     strict-origin-when-cross-origin`, `Strict-Transport-Security`,
-     `Permissions-Policy` denying unused features, and a
-     `Content-Security-Policy-Report-Only` tightened before enforcing. Note
-     `connect-src` must list your Firebase and media-CDN origins or analytics and
-     playback break when enforced.
-  2. **`images`** config if you migrate to `next/image` (see §10).
+- **`images`** config in `next.config.mjs` if you migrate to `next/image` (see §10).
+
+### DONE: security headers
+
+`next.config.mjs` (was empty) now sets `X-Content-Type-Options`,
+`Referrer-Policy`, `Strict-Transport-Security`, `X-Frame-Options`,
+`Permissions-Policy` and a `Content-Security-Policy-Report-Only`. See the
+comments in that file — they record what is still blocking enforcement.
+
+**One open item:** the CSP is still REPORT-ONLY, which logs violations and
+protects nothing. `script-src 'self'` is the blocker (29 inline hydration scripts
+in the production build); fix with a nonce, not `'unsafe-inline'`, then rename the
+header to `Content-Security-Policy`. Also note `connect-src 'self'` — add your
+Firebase and media-CDN origins there before enforcing, or analytics and playback
+break.
 
 ### Deployment
 
-Vercel is the natural target — `middleware.ts` already reads
+Vercel is the natural target — `proxy.ts` already reads
 `x-vercel-ip-country` for geo-routing, which is a Vercel-provided header. On
 another platform, replace that lookup with your CDN's equivalent (e.g.
 `CF-IPCountry`) or geo-detection stops working and every visitor falls through to

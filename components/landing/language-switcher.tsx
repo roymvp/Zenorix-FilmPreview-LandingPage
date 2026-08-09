@@ -1,6 +1,6 @@
 'use client'
 
-import { useId, useRef, useState } from 'react'
+import { useId, useState } from 'react'
 import { trackEvent } from '@/lib/analytics'
 import { locales, localeMeta, type Locale } from '@/lib/i18n/config'
 
@@ -20,11 +20,12 @@ export function LanguageSwitcher({
   hrefs: Record<Locale, string>
 }) {
   const [open, setOpen] = useState(false)
+  /* `useId()` contains colons, which are invalid in an HTML id used as md-menu's
+     `anchor` selector. Stripped, not replaced, so the id stays unique per instance. */
   const anchorId = useId().replace(/:/g, '')
-  const wrapRef = useRef<HTMLDivElement>(null)
 
   return (
-    <div className="zx-lang" ref={wrapRef}>
+    <div className="zx-lang">
       {/* A plain button, not an outlined MD button: in the top bar this is a
           tertiary control next to the install CTA, and button chrome made the
           two read as competing actions. Just the locale code and a caret. */}

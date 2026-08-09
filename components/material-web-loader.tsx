@@ -11,8 +11,9 @@ import { useEffect } from 'react'
  * React hydrates the plain server-rendered tags first, then the elements
  * upgrade in place.
  *
- * `all.js` registers every non-labs component. Labs components (cards,
- * segmented buttons, etc.) must be added here individually.
+ * ONLY the five elements this page renders are registered. Nothing else may be
+ * added speculatively: an unused registration is pure download weight on a page
+ * that has no other use for it.
  *
  * WHY THIS IS RETRIED AND AWAITED
  * Until these imports resolve, every `md-*` tag on the page is an unknown
@@ -28,14 +29,29 @@ import { useEffect } from 'react'
  * finally logged instead of vanishing.
  */
 
-/** Each entry is a thunk so a retry re-invokes the import from scratch. */
+/**
+ * Each entry is a thunk so a retry re-invokes the import from scratch.
+ *
+ * This list must match the `md-*` tags actually present in the markup — grep for
+ * `<md-` to confirm. It is currently exactly five:
+ *   md-filled-button  download CTA + dialog action
+ *   md-dialog         the one conversion dialog (x2 instances)
+ *   md-icon           8 icons across the page
+ *   md-menu           language switcher
+ *   md-menu-item      language switcher options
+ *
+ * This used to be `all.js` plus four labs imports. `all.js` pulls in EVERY
+ * non-labs component, so the bundle carried sliders, checkboxes, switches,
+ * radios, tabs, lists, chips and progress indicators that appear nowhere in this
+ * app; the four labs imports (three card variants + badge) were not rendered at
+ * all. Registering only what exists dropped the definitions chunk from 443 KB.
+ */
 const REGISTRATIONS: Array<() => Promise<unknown>> = [
-  () => import('@material/web/all.js'),
-  // Labs elements are not part of all.js and must be registered explicitly.
-  () => import('@material/web/labs/card/elevated-card.js'),
-  () => import('@material/web/labs/card/outlined-card.js'),
-  () => import('@material/web/labs/card/filled-card.js'),
-  () => import('@material/web/labs/badge/badge.js'),
+  () => import('@material/web/button/filled-button.js'),
+  () => import('@material/web/dialog/dialog.js'),
+  () => import('@material/web/icon/icon.js'),
+  () => import('@material/web/menu/menu.js'),
+  () => import('@material/web/menu/menu-item.js'),
 ]
 
 const MAX_ATTEMPTS = 3
@@ -49,8 +65,8 @@ export function MaterialWebLoader() {
     const load = async () => {
       for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt += 1) {
         try {
-          // Promise.all, so the five chunks still download in parallel exactly as
-          // before — awaiting adds error visibility, not latency.
+          // Promise.all, so the chunks download in parallel — awaiting adds
+          // error visibility, not latency.
           await Promise.all(REGISTRATIONS.map((register) => register()))
           return
         } catch (error) {
