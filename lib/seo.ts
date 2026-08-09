@@ -57,8 +57,10 @@ export function buildMovieMetadata({
       images: [
         {
           url: `${SITE.url}${movie.backdrop}`,
-          width: 1536,
-          height: 864,
+          /* Must match the output size in `scripts/build-share-cards.mjs`. A
+             mismatch makes scrapers reserve the wrong box and crop the card. */
+          width: 1200,
+          height: 630,
           alt: fill(dict.meta.imageAlt, values),
         },
       ],

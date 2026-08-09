@@ -32,9 +32,19 @@ export type Movie = {
   releaseYear: number
   /** Full runtime. Emitted as the Movie node's ISO 8601 `duration`. */
   runtimeMinutes: number
-  /** Portrait key art (2:3). The Movie node's `image`. */
+  /**
+   * Portrait key art (2:3) — the real licensed poster, shared with the chart
+   * rails. The Movie node's `image`.
+   */
   poster: string
-  /** Landscape key art, used for the og:image / twitter:image share card. */
+  /**
+   * Landscape share card (1200x630) for og:image / twitter:image, built from the
+   * poster above by `scripts/build-share-cards.mjs`.
+   *
+   * Never point this at the portrait poster: the dimensions declared in
+   * `lib/seo.ts` are landscape, so an unfurl would letterbox the card or crop the
+   * title lettering straight off the art.
+   */
   backdrop: string
   copy: Record<Locale, MovieCopy>
 }
@@ -46,85 +56,96 @@ export type Movie = {
    brand billboard now, so there is no video element to feed, no poster frame to
    show behind it and no metadata row to badge. */
 
+/**
+ * The films that own a route. Real titles, real release years, real runtimes —
+ * every value here is emitted into the document head and the `Movie` JSON-LD
+ * node, so an invented figure is a factual claim made to crawlers and answer
+ * engines. `runtimeMinutes` in particular becomes `duration: PT{n}M`; leave a
+ * film out rather than guess it.
+ *
+ * Titles are NOT translated per market: these are the distributed international
+ * titles, and localizing them would break the match against what a user actually
+ * searches for. Only `synopsis` and `genres` are localized.
+ */
 export const movies: Movie[] = [
   {
-    slug: 'nocturne-protocol',
-    releaseYear: 2026,
-    runtimeMinutes: 128,
-    poster: '/media/poster-nocturne-protocol.png',
-    backdrop: '/media/nocturne-protocol-backdrop.png',
-    copy: {
-      en: {
-        title: 'Nocturne Protocol',
-        synopsis:
-          'A burned intelligence officer wakes with no memory and eleven hours to stop a blackout that will erase a city. Every ally he finds is already compromised. The only person he can trust is the one he was sent to kill.',
-        genres: ['Sci-Fi', 'Thriller', 'Action'],
-      },
-      'pt-br': {
-        title: 'Nocturne Protocol',
-        synopsis:
-          'Um oficial de inteligência queimado acorda sem memória e com onze horas para impedir um apagão que vai apagar uma cidade. Todo aliado que ele encontra já está comprometido. A única pessoa em quem pode confiar é justamente a que ele foi enviado para matar.',
-        genres: ['Ficção científica', 'Suspense', 'Ação'],
-      },
-      th: {
-        title: 'Nocturne Protocol',
-        synopsis:
-          'เจ้าหน้าที่ข่าวกรองที่ถูกทิ้งตื่นขึ้นมาโดยไม่มีความจำ และเหลือเวลาเพียงสิบเอ็ดชั่วโมงเพื่อหยุดเหตุไฟดับที่จะลบเมืองทั้งเมือง พันธมิตรทุกคนที่เขาเจอถูกซื้อตัวไปแล้ว คนเดียวที่เขาไว้ใจได้ คือคนที่เขาถูกส่งมาสังหาร',
-        genres: ['ไซไฟ', 'ระทึกขวัญ', 'แอ็กชัน'],
-      },
-    },
-  },
-  {
-    slug: 'crimson-harbor',
+    slug: 'avatar-fire-and-ash',
     releaseYear: 2025,
-    runtimeMinutes: 116,
-    poster: '/media/poster-crimson-harbor.png',
-    backdrop: '/media/poster-crimson-harbor.png',
+    runtimeMinutes: 195,
+    poster: '/media/posters/avatar-fire-and-ash.png',
+    backdrop: '/media/share/avatar-fire-and-ash.png',
     copy: {
       en: {
-        title: 'Crimson Harbor',
+        title: 'Avatar: Fire and Ash',
         synopsis:
-          'A harbor inspector finds a container that was never on any manifest. Pulling the thread costs her the badge, the city and almost the people she loves.',
-        genres: ['Crime', 'Drama', 'Mystery'],
+          'Still grieving the son they lost, Jake Sully and Neytiri find Pandora turned against them by a Na’vi clan they never knew existed. The Ash People answer fire with fire, and their leader has no interest in peace with anyone.',
+        genres: ['Sci-Fi', 'Adventure', 'Action'],
       },
       'pt-br': {
-        title: 'Crimson Harbor',
+        title: 'Avatar: Fire and Ash',
         synopsis:
-          'Uma inspetora portuária encontra um contêiner que nunca constou em nenhum manifesto. Puxar esse fio lhe custa o cargo, a cidade e quase todos que ela ama.',
-        genres: ['Crime', 'Drama', 'Mistério'],
+          'Ainda de luto pelo filho que perderam, Jake Sully e Neytiri encontram Pandora voltada contra eles por um clã Na’vi que desconheciam. O Povo das Cinzas responde fogo com fogo, e sua líder não tem interesse em paz com ninguém.',
+        genres: ['Ficção científica', 'Aventura', 'Ação'],
       },
       th: {
-        title: 'Crimson Harbor',
+        title: 'Avatar: Fire and Ash',
         synopsis:
-          'เจ้าหน้าที่ตรวจท่าเรือพบตู้คอนเทนเนอร์ที่ไม่เคยปรากฏในเอกสารใด การสาวไปถึงต้นตอทำให้เธอเสียทั้งตำแหน่ง เมือง และเกือบเสียคนที่เธอรัก',
-        genres: ['อาชญากรรม', 'ดราม่า', 'สืบสวน'],
+          'ขณะที่ยังโศกเศร้ากับการสูญเสียลูกชาย เจค ซัลลี และเนย์ทีรี ต้องเผชิญกับแพนดอร่าที่หันมาเป็นศัตรู จากเผ่านาวีที่พวกเขาไม่เคยรู้ว่ามีอยู่ ชนเผ่าเถ้าถ่านตอบโต้ไฟด้วยไฟ และผู้นำของพวกเขาไม่ต้องการสันติภาพกับใคร',
+        genres: ['ไซไฟ', 'ผจญภัย', 'แอ็กชัน'],
       },
     },
   },
   {
-    slug: 'the-last-signal',
+    slug: 'project-hail-mary',
     releaseYear: 2026,
-    runtimeMinutes: 134,
-    poster: '/media/poster-the-last-signal.png',
-    backdrop: '/media/poster-the-last-signal.png',
+    runtimeMinutes: 156,
+    poster: '/media/posters/project-hail-mary.png',
+    backdrop: '/media/share/project-hail-mary.png',
     copy: {
       en: {
-        title: 'The Last Signal',
+        title: 'Project Hail Mary',
         synopsis:
-          'A decommissioned desert array picks up a transmission that predates the station itself. The astronomer who decodes it realizes the message is a countdown — and it is already halfway done.',
-        genres: ['Sci-Fi', 'Mystery', 'Drama'],
+          'Ryland Grace wakes alone on a spacecraft light years from Earth, with no memory of who he is or why he is there. Piecing it together, he learns he is the last surviving member of a mission to stop the sun from dying.',
+        genres: ['Sci-Fi', 'Adventure', 'Drama'],
       },
       'pt-br': {
-        title: 'The Last Signal',
+        title: 'Project Hail Mary',
         synopsis:
-          'Um radiotelescópio desativado no deserto capta uma transmissão mais antiga que a própria estação. A astrônoma que a decodifica descobre que a mensagem é uma contagem regressiva — e já passou da metade.',
-        genres: ['Ficção científica', 'Mistério', 'Drama'],
+          'Ryland Grace acorda sozinho em uma nave a anos-luz da Terra, sem lembrar quem é nem por que está ali. Ao reconstruir a própria história, descobre que é o último sobrevivente de uma missão para impedir a morte do Sol.',
+        genres: ['Ficção científica', 'Aventura', 'Drama'],
       },
       th: {
-        title: 'The Last Signal',
+        title: 'Project Hail Mary',
         synopsis:
-          'จานรับสัญญาณกลางทะเลทรายที่ถูกปลดระวางจับสัญญาณที่เก่าแก่กว่าตัวสถานีเอง นักดาราศาสตร์ที่ถอดรหัสได้พบว่าข้อความนั้นคือการนับถอยหลัง และมันผ่านมาครึ่งทางแล้ว',
-        genres: ['ไซไฟ', 'สืบสวน', 'ดราม่า'],
+          'ไรแลนด์ เกรซ ตื่นขึ้นมาลำพังบนยานอวกาศที่อยู่ห่างจากโลกหลายปีแสง โดยไม่จำได้ว่าตัวเองเป็นใครหรือมาอยู่ที่นี่ได้อย่างไร เมื่อค่อย ๆ ปะติดปะต่อความจริง เขาพบว่าตนเป็นผู้รอดชีวิตคนสุดท้ายของภารกิจหยุดยั้งการดับสูญของดวงอาทิตย์',
+        genres: ['ไซไฟ', 'ผจญภัย', 'ดราม่า'],
+      },
+    },
+  },
+  {
+    slug: 'mortal-kombat-2',
+    releaseYear: 2026,
+    runtimeMinutes: 116,
+    poster: '/media/posters/mortal-kombat-2.png',
+    backdrop: '/media/share/mortal-kombat-2.png',
+    copy: {
+      en: {
+        title: 'Mortal Kombat II',
+        synopsis:
+          'Earthrealm’s fighters are drawn back into the tournament, and this time the invitation comes from Outworld itself. Johnny Cage talks his way onto a roster that will not all be coming home.',
+        genres: ['Action', 'Fantasy', 'Martial Arts'],
+      },
+      'pt-br': {
+        title: 'Mortal Kombat II',
+        synopsis:
+          'Os lutadores do Reino da Terra são puxados de volta ao torneio, e desta vez o convite vem do próprio Outworld. Johnny Cage se enfia à força em uma escalação da qual não voltarão todos.',
+        genres: ['Ação', 'Fantasia', 'Artes marciais'],
+      },
+      th: {
+        title: 'Mortal Kombat II',
+        synopsis:
+          'นักสู้แห่งโลกมนุษย์ถูกดึงกลับเข้าสู่การประลองอีกครั้ง และคราวนี้คำเชิญมาจากเอาต์เวิร์ลด์โดยตรง จอห์นนี่ เคจ พูดจนได้เข้าร่วมทีมที่ไม่ใช่ทุกคนจะได้กลับบ้าน',
+        genres: ['แอ็กชัน', 'แฟนตาซี', 'ศิลปะการต่อสู้'],
       },
     },
   },

@@ -10,9 +10,9 @@ type RouteParams = { lang: string; segment: string; slug: string }
 
 /**
  * Independent, fully static page per market:
- *   /en/movie/nocturne-protocol
- *   /pt-br/filme/nocturne-protocol
- *   /th/หนัง/nocturne-protocol
+ *   /en/movie/avatar-fire-and-ash
+ *   /pt-br/filme/avatar-fire-and-ash
+ *   /th/หนัง/avatar-fire-and-ash
  *
  * The localized path segment is part of the URL (not a query flag) so each
  * market accrues its own link equity and reads natively to local users.
