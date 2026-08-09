@@ -1,6 +1,7 @@
 'use client'
 
 import { useConversion } from '@/components/landing/conversion-provider'
+import type { CtaSource } from '@/lib/analytics'
 
 /**
  * The one and only download control. Rendered at every scroll depth with the
@@ -20,8 +21,12 @@ export function DownloadCta({
   label: string
   /** Risk-reducing microcopy directly under the button. */
   sub?: string
-  /** Funnel position, reported with the conversion event. */
-  source: string
+  /**
+   * Funnel position, reported as the `source` of `apk_download_click`. A closed
+   * union rather than `string`, because it is a dashboard group-by key and an
+   * interpolated value fragments the report — see `CtaSource` in lib/analytics.ts.
+   */
+  source: CtaSource
   className?: string
   /**
    * Make this the initial focus target inside an md-dialog. Only the dialog

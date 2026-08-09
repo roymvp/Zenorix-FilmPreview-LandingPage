@@ -8,7 +8,7 @@ import {
   useState,
   type ReactNode,
 } from 'react'
-import { trackEvent } from '@/lib/analytics'
+import { trackEvent, type CtaSource } from '@/lib/analytics'
 import { SITE } from '@/lib/config/site'
 
 /**
@@ -39,8 +39,12 @@ export type LockedContent = {
 }
 
 type ConversionState = {
-  /** Fires the APK download and reports the source that earned the click. */
-  download: (source: string) => void
+  /**
+   * Fires the APK download and reports the source that earned the click. Typed to
+   * the closed `CtaSource` union so a new CTA cannot invent a group-by value that
+   * quietly fragments the funnel report.
+   */
+  download: (source: CtaSource) => void
   /** Locked-content upsell, triggered from the Top 10 rail. */
   content: LockedContent | null
   openContent: (content: LockedContent) => void
@@ -52,7 +56,7 @@ const ConversionContext = createContext<ConversionState | null>(null)
 export function ConversionProvider({ children }: { children: ReactNode }) {
   const [content, setContent] = useState<LockedContent | null>(null)
 
-  const download = useCallback((source: string) => {
+  const download = useCallback((source: CtaSource) => {
     trackEvent('apk_download_click', { source, version: SITE.apkVersion })
     // RESERVED: swap for a signed, per-market CDN URL or an attribution link.
     window.location.href = SITE.apkUrl
