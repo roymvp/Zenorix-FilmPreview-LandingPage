@@ -34,12 +34,20 @@ const CSP = [
   "object-src 'none'",
   /* Local posters/logos. `data:` covers the inline SVG placeholders Next emits. */
   "img-src 'self' data:",
+  /* 'unsafe-inline' is needed for real: the document carries 4 `style=` attributes
+     (poster-wall tile positioning and the comparison bars' widths, both computed
+     per render). A nonce cannot cover style ATTRIBUTES, only <style> elements, of
+     which the page has none. */
   `style-src 'self' 'unsafe-inline' ${FONT_CSS}`,
   `font-src 'self' ${FONT_FILES}`,
   "connect-src 'self'",
-  /* Next.js injects inline hydration scripts, so expect script-src reports here.
-     The correct fix is a nonce; 'unsafe-inline' would only silence the reports and
-     give up most of what CSP is for. Resolve this BEFORE switching to enforcing. */
+  /* THE ONE BLOCKER to enforcing this policy. Measured against a production build:
+     29 inline hydration scripts, every external script same-origin, and zero
+     `eval` — so a nonce is sufficient and no 'unsafe-eval' is needed. (A dev server
+     reports `eval` violations from webpack/HMR; those do not exist in the build.)
+
+     Fix with a nonce, not 'unsafe-inline', which would silence the reports and give
+     up most of what CSP is for. Resolve BEFORE switching to enforcing. */
   "script-src 'self'",
   'upgrade-insecure-requests',
 ].join('; ')
