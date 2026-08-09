@@ -7,7 +7,7 @@
  *
  * Every entry is a normalized 2:3 WebP produced by
  * `scripts/build-poster-tiles.mjs` — do NOT reference a raw source poster here.
- * The wall lays twelve tiles side by side, so mismatched aspect ratios show up
+ * The wall lays dozens of tiles side by side, so mismatched aspect ratios show up
  * immediately as black gutters inside individual tiles.
  *
  * This pool intentionally stays at six even though the tile directory now holds
@@ -31,18 +31,43 @@ const TILES = [
   '/media/tiles/devil-wears-prada-2.webp',
 ] as const
 
-/** Tiles per column, and columns per wall. 3x4 fills a phone-width hero. */
+/* Tiles per column, and columns per wall.
+ *
+ * COLUMNS is 8 rather than the 3 a phone needs, because the wall is sized by TILE
+ * WIDTH and not by column count: `.zx-hero-wall-column` takes a fixed
+ * `--zx-wall-col`, so how many columns a viewport SHOWS falls out of its own
+ * width. A phone lays out ~4 of the 8 and `.zx-hero-wall`'s `overflow: hidden`
+ * clips the rest; the 1200px desktop hero shows all 8. One number covers every
+ * width, which is why the wall needs no breakpoint of its own.
+ *
+ * Two things to know before changing it:
+ *
+ * - it costs no extra NETWORK at any width. All 8 columns draw from the same
+ *   six-file pool, so the clipped columns resolve to images already being
+ *   fetched — the count only ever adds layout nodes, never requests.
+ * - it must stay large enough to cover the WIDEST hero. At the desktop
+ *   `--zx-wall-col` (184px) eight columns span ~1536px, which is the 1200px page
+ *   cap plus the layer's own -14% inline overhang. Raise that cap and this has to
+ *   grow with it, or the rotated wall exposes black canvas at the corners.
+ */
 const ROWS = 4
-const COLUMNS = 3
+const COLUMNS = 8
 
 /**
  * Builds one wall as an array of columns.
  *
  * `offset` rotates the source list so each layer of the carousel is a DIFFERENT
  * arrangement of the same six posters. That is the whole reason the wall reads as
- * a deep catalogue rather than as six images: with a 6-tile pool and 12 slots
- * every layer must repeat, but a co-prime stride (7 against a pool of 6) means no
- * tile ever lands next to, above or below a copy of itself.
+ * a deep catalogue rather than as six images: with a 6-tile pool and 32 slots
+ * every layer must repeat, and the strides decide WHERE it is allowed to.
+ *
+ * What the arithmetic guarantees, mod the 6-tile pool: neighbours differ by 1
+ * vertically, by ROWS (4) horizontally and by 3 or 5 diagonally — none of which is
+ * 0 — so no tile ever touches a copy of itself on any axis. What it does NOT
+ * avoid is a whole column recurring: 4 and 6 share a factor, so columns repeat
+ * with a period of 3 (columns 0, 3 and 6 are identical). That is the best a 6-tile
+ * pool and 4 rows can do, and it is invisible in place — the wall sits behind a
+ * scrim that runs from 50% to fully opaque black.
  *
  * Pure function of its argument — no randomness — so the server and client render
  * byte-identical markup.

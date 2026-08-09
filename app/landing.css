@@ -2,9 +2,12 @@
  * Zenorix landing layout.
  * Plain CSS (flexbox / grid) over M3 tokens — no utility framework.
  *
- * MOBILE-ONLY BY DESIGN. There is exactly one layout: the phone one. The page
- * caps itself at --zx-page-max and centers on wider screens rather than
- * reflowing into a desktop composition.
+ * MOBILE-FIRST, WITH ONE DESKTOP TIER. The phone layout is the base and is still
+ * what every unconditional rule in this file describes. Wider screens are handled
+ * by exactly one breakpoint at the very bottom of the file (see "DESKTOP TIER"),
+ * which widens --zx-page-max and reflows four blocks. Do not scatter new
+ * `min-width` queries through the file — add to that single block instead, so the
+ * desktop composition stays readable in one place.
  *
  * ONE BACKGROUND. Every section — info, Top 10, About Zenorix, FAQ,
  * final CTA, footer — paints nothing and inherits `--md-sys-color-surface` from
@@ -16,10 +19,12 @@
  * background gradients, no backdrop images behind copy. Sections are separated
  * by spacing and hairlines only.
  *
- * Consequence, and the reason this file has no `min-width` media queries:
- * media queries match the VIEWPORT, not this capped container, so any
- * `min-width` rule would fire on a desktop viewport and restyle a 420px-wide
- * column with desktop values. Keep all sizing unconditional.
+ * THE ONE RULE THAT MAKES THE BREAKPOINT SAFE: a media query matches the
+ * VIEWPORT, not this capped container, so a `min-width` rule is only ever correct
+ * here if the column itself also widens at that width. That is exactly why the
+ * desktop tier's FIRST declaration is `--zx-page-max`. Never add a `min-width`
+ * rule that restyles content without moving the cap with it — that is what would
+ * put desktop values on a phone-width column.
  */
 
 .zx-page {
@@ -397,22 +402,38 @@
   animation: zx-wall-cycle 18s var(--zx-wall-delay, 0s) linear infinite;
 }
 
+/* FIXED width, not `flex: 1`, and that is what makes one wall serve every
+   viewport. Sharing the layer's width between however many columns exist ties
+   tile size to the container: the same 8 columns that read correctly at 184px on
+   desktop would be 60px slivers on a phone, and the 3 columns a phone wants would
+   be 400px slabs in a 1200px hero — one poster per screen, not a wall.
+
+   Sized by the tile instead, the tile is constant and the COLUMN COUNT is what
+   varies: a phone lays out ~4 of the 8 and `.zx-hero-wall` clips the rest, the
+   desktop hero shows all 8. So the wall needs no breakpoint — only
+   `--zx-wall-col` moves, and it moves for art-direction (bigger key art on a
+   bigger screen), not to repair the layout. */
 .zx-hero-wall-column {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  flex: 1;
+  flex: 0 0 var(--zx-wall-col, 130px);
   min-width: 0;
 }
 
-/* Vertical offsets so the three columns don't line up into visible horizontal
-   bands — the tiles are all one aspect ratio, so without this the wall reads as
-   a grid rather than as a stack of shelves. */
-.zx-hero-wall-column:nth-child(2) {
+/* Vertical offsets so the columns don't line up into visible horizontal bands —
+   the tiles are all one aspect ratio, so without this the wall reads as a grid
+   rather than as a stack of shelves.
+
+   Stated as a repeating 3-step (`3n+2`, `3n+3`) rather than as the literal 2nd
+   and 3rd columns it once was: the wall now renders 8 columns and any un-offset
+   column past the third would restore exactly the banding this prevents. Column 1
+   keeps no offset, so the pattern still starts where it always did. */
+.zx-hero-wall-column:nth-child(3n + 2) {
   translate: 0 -7%;
 }
 
-.zx-hero-wall-column:nth-child(3) {
+.zx-hero-wall-column:nth-child(3n + 3) {
   translate: 0 5%;
 }
 
@@ -2098,4 +2119,203 @@
    and the identical in-page one cannot drift apart. */
 .zx-dialog-actions .zx-cta-sub {
   justify-content: center;
+}
+
+/* ========================================================================== */
+/* DESKTOP TIER — the file's only breakpoints, kept together on purpose.       */
+/*                                                                            */
+/* Everything above this line is the phone layout and stays unconditional. Two */
+/* tiers widen it, and BOTH open by moving `--zx-page-max`, because a media    */
+/* query matches the viewport while the content lives in a capped container —  */
+/* restyling without moving the cap is what would put desktop values on a      */
+/* phone-width column. See the note in the file header.                        */
+/*                                                                            */
+/* Every value below is a token override or a reflow of an existing block. No  */
+/* new component, no new colour, no desktop-only element: the page must stay   */
+/* ONE page, so a change to a card or a CTA above keeps applying at every      */
+/* width. That is also why the type scale is overridden as TOKENS rather than  */
+/* per-component — the tier ordering (h1 > h2 > amount > lg > body > meta) is  */
+/* preserved at every width, so nothing changes rank on a wider screen.        */
+/* ========================================================================== */
+
+/* TABLET — a wider column, deliberately NOT a desktop composition. At 420px a
+   tablet showed a phone column stranded in black margins; this gives the content
+   room without reflowing anything into multiple columns, so the single-column
+   reading order survives to the point where there is genuinely width for two. */
+@media (min-width: 720px) {
+  .zx-page {
+    --zx-page-max: 680px;
+    --zx-gutter: 32px;
+    /* The one rhythm value that scales with the viewport: at 680px wide the 40px
+       step reads tight, and section separation is what carries structure once the
+       column is too wide to take in at a glance. */
+    --zx-section-y: 56px;
+    --zx-text-h1: 34px;
+    --zx-text-h2: 24px;
+    --zx-text-amount: 23px;
+  }
+
+  /* Wider column, so more of the rail is visible at once — the cards grow with it
+     rather than leaving a 680px row showing the same 124px thumbnails. */
+  .zx-rail {
+    grid-auto-columns: 148px;
+  }
+}
+
+/* DESKTOP — the reflow tier. Four blocks become multi-column here, and the hero
+   changes composition; everything else just inherits the wider column. */
+@media (min-width: 1024px) {
+  .zx-page {
+    /* The answer to "no infinite full-screen": the column stops at 1200px and
+       centres on the page's own black, at every viewport width above it. The hero
+       stops here too — it is inside this column, so the poster wall spans the full
+       content width rather than bleeding to the viewport edge. */
+    --zx-page-max: 1200px;
+    --zx-gutter: 40px;
+    --zx-section-y: 72px;
+    --zx-text-h1: 44px;
+    --zx-text-h2: 28px;
+    --zx-text-amount: 26px;
+    /* Body copy moves up one step too. 14px is right at arm's length on a phone
+       and small at desktop viewing distance; 16/15/14 keeps `lg > body > meta`
+       ordered exactly as the phone scale has it. */
+    --zx-text-lg: 17px;
+    --zx-text-body: 16px;
+    --zx-text-meta: 14px;
+  }
+
+  /* ------------------------------------------------------------------- hero */
+
+  /* Bigger key art for a bigger screen — this is the only reason the wall has a
+     desktop value at all, since its column COUNT already adapts on its own (see
+     `.zx-hero-wall-column`). 184px against the 8 rendered columns spans the
+     1200px cap plus the layer's -14% overhang. */
+  .zx-hero-billboard {
+    --zx-wall-col: 184px;
+    /* Taller, but still capped rather than tied to `svh` alone: a 1700px-tall
+       window would otherwise hand the hero 1300px and push every rail below the
+       fold. The cap is what keeps the catalogue reachable without scrolling far. */
+    min-height: min(86svh, 760px);
+  }
+
+  /* Copy goes LEFT, which is the one real composition change on the page. Centred
+     copy works at 420px because the column IS the measure; at 1120px it strands
+     each line's start in a different place and the eye has to re-find the left
+     edge on every line. Anchoring the block gives all four elements — headline,
+     price, CTA, store row — one shared start edge. */
+  .zx-hero-copy {
+    align-items: flex-start;
+    text-align: start;
+    padding-block-end: var(--zx-space-10);
+  }
+
+  /* A measure, not a width. Left-aligned 44px type across the full 1120px column
+     would run past the ~75-character line the eye can track, so the headline is
+     capped well short of its container while the wall keeps the full width. */
+  .zx-hero-headline {
+    max-width: 620px;
+  }
+
+  /* The install cluster keeps ONE width for both members, so the CTA and the two
+     store tiles under it stay a single left-anchored block instead of a
+     full-width button with a full-width pair beneath it. */
+  .zx-hero-copy .zx-cta,
+  .zx-hero-copy .zx-store-row {
+    width: 100%;
+    max-width: 360px;
+  }
+
+  /* ----------------------------------------------------------------- top 10 */
+
+  .zx-rail {
+    grid-auto-columns: 172px;
+    gap: var(--zx-space-4);
+  }
+
+  /* Both tail actions stop being full-width. A 1120px pill reads as a banner
+     rather than a button, and its label ends up marooned in the middle of a very
+     wide empty stroke — so each is capped and centred in its own block. */
+  .zx-chart-more-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .zx-chart-more {
+    width: 100%;
+    max-width: 360px;
+  }
+
+  /* ------------------------------------------------------------------ about */
+
+  /* 2x2, the reflow with the most to gain: these four cards are peers making one
+     argument (catalogue, price, quality, trial), and stacked in a 1120px column
+     each one became a very wide short band with the reader scrolling between
+     claims that belong side by side. */
+  /* `minmax(0, 1fr)`, NOT `1fr`, and this is load-bearing rather than defensive.
+     `1fr` is shorthand for `minmax(auto, 1fr)`, so each track is floored at its
+     item's MIN-CONTENT width — and the networks card contains `.zx-logo-marquee`,
+     a horizontal scroller whose min-content is its entire un-scrolled logo track.
+     Measured with plain `1fr` the two tracks resolved to 1322px and 190px instead
+     of 548px each, which pushed the price and trial cards to x=1850, outside the
+     1200px column, where `.zx-page`'s `overflow-x: clip` silently ate them: two of
+     the four claims simply were not on the page.
+
+     Flooring at 0 lets the scroller stay a scroller — the same reason `.zx-rail`
+     sets `min-width: 0` and `.zx-spec-label` does too. Any future card holding an
+     overflowing child depends on this, so keep it. */
+  .zx-about {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    /* One step up from the phone's 20px. The cards are outlined with no fill, so
+       the gap is the only thing separating two ADJACENT columns as well as two
+       rows now, and it has to stay clearly wider than the 24px padding inside
+       each card or the pair reads as one box. */
+    gap: var(--zx-space-6);
+  }
+
+  .zx-about-cta {
+    align-items: center;
+  }
+
+  .zx-about-cta .zx-cta {
+    width: 100%;
+    max-width: 360px;
+  }
+
+  /* -------------------------------------------------------------------- faq */
+
+  /* Two columns, flowing row-major so the visual order still matches the DOM
+     order a screen reader and a keyboard follow. The hairlines have to be
+     re-owned: the list's single top border only spans the grid's first row, so the
+     border moves onto the two items IN that row and the list drops its own. Every
+     item keeps its bottom border, so an open answer stretches its grid row and
+     both rules stay aligned across the pair. */
+  .zx-faq-list {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    column-gap: var(--zx-space-10);
+    border-block-start: 0;
+  }
+
+  .zx-faq-item:nth-child(-n + 2) {
+    border-block-start: 1px solid var(--md-sys-color-outline-variant);
+  }
+
+  /* -------------------------------------------------------- final cta, footer */
+
+  .zx-final .zx-cta {
+    width: 100%;
+    max-width: 360px;
+  }
+
+  /* One row instead of a centred stack. With 1120px available, three short items
+     centred on three lines leaves two thirds of the band empty; spread apart they
+     read as what they are — support, legal, copyright. */
+  .zx-footer-inner {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: var(--zx-space-4);
+  }
 }
