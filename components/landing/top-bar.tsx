@@ -27,8 +27,11 @@ export function TopBar({
   homeLabel: string
   languageMenuLabel: string
   localeHrefs: Record<Locale, string>
-  /** Support link shown beside the language switcher. */
-  contact: { label: string; aria: string }
+  /**
+   * Support link shown beside the language switcher. Only the accessible name is
+   * needed — this placement renders no visible label.
+   */
+  contact: { aria: string }
 }) {
   return (
     <header className="zx-topbar">
@@ -61,19 +64,19 @@ export function TopBar({
           If a persistent install affordance is wanted back, prefer a sticky
           bottom bar over restoring this one: it would not compete with the hero. */}
       <div className="zx-topbar-actions">
-        {/* Deliberately the SAME quiet treatment as the language trigger — text
-            and a glyph, no fill. The note above records why the install pill was
-            pulled from this bar: it was the only opaque element on the glass and
-            it competed with the hero's own CTA. A support link is tertiary, so
-            giving it button chrome here would repeat that mistake for a weaker
-            action. Its label collapses to the icon under 480px (see CSS), where
-            the bar has to hold the wordmark and the locale too. */}
+        {/* Glyph only, and no fill. The note above records why the install pill
+            was pulled from this bar: it was the only opaque element on the glass
+            and it competed with the hero's own CTA. Support is tertiary, so
+            button chrome here would repeat that mistake for a weaker action.
+
+            `contact.label` is deliberately NOT passed — no visible text at any
+            width. The accessible name still arrives via `aria-label`, and mouse
+            users get it as a tooltip; see contact-link.tsx. */}
         <ContactLink
-          label={contact.label}
           ariaLabel={contact.aria}
           source="topbar"
           className="zx-contact zx-contact--bar"
-          icon="chat"
+          icon="chat_bubble"
         />
         <LanguageSwitcher
           current={locale}

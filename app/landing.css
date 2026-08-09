@@ -182,10 +182,10 @@
    `max(100%, 48px)` per axis grows ONLY the deficient axis — the brand link keeps
    its width and gains height, rather than collapsing to a 48px square.
 
-   The top-bar contact link (84x18) is included for the same reason as the brand
-   link: it is a standalone control in the bar, not running text. Its width already
-   clears 48px, so only its height grows — which is what keeps its overlay from
-   reaching the language trigger 4px away.
+   The top-bar contact link is included for the same reason: it is a standalone
+   control in the bar, not running text. Being icon-only it is ~18px square, so
+   BOTH axes grow to 48 — see `.zx-contact--bar` for the margin that keeps that
+   square from overlapping the language trigger's own overlay.
 
    Not applied to footer links, nor to the contact link inside the About sentence:
    inline text in a sentence-like row is WCAG-exempt, and an expanded box on each
@@ -1734,6 +1734,14 @@
    surface, not for poster art showing through. */
 .zx-contact--bar {
   color: var(--zx-on-media-variant);
+  /* Icon-only, so this is a 15px square whose 48px hit overlay overflows it by
+     16.5px per side; the language trigger's own overlay overflows its 40px box by
+     4px. With only the 4px flex gap between them the two overlays intersected by
+     5px (measured), and whichever painted later would swallow the other's taps.
+     16px restores a clear boundary: 16.5 - 4(gap) - 4(their overflow) rounded up.
+     Margin, not a wider `gap`: the gap is shared with any future sibling, while
+     the overflow being corrected belongs to this control alone. */
+  margin-inline-end: 16px;
 }
 
 .zx-contact--bar:hover {
@@ -1744,12 +1752,10 @@
   outline-color: var(--zx-on-media);
 }
 
-/* The label is NEVER collapsed to the bare glyph, at any width. Measured at
-   360px: wordmark 127px + this link 84px + the locale trigger + gaps = 255px in
-   a 360px bar, so there is nothing to reclaim. Collapsing it would also cost the
-   touch target — an 84x18 link grows to 84x48 under the rule below without
-   touching its neighbour, whereas a 15x15 glyph would have to grow on BOTH axes
-   and would then overlap the language trigger's own hit area. */
+/* The bar renders the GLYPH ALONE at every width — no visible label, and no
+   responsive variant that adds one. The label is simply not passed in the markup
+   (see top-bar.tsx), so there is no text node here to hide; the accessible name
+   comes from `aria-label` and the hover affordance from `title`. */
 
 /* About. Muted to match the APK caption it follows — this is the section's
    THIRD-priority element, after the install button and its meta line. */

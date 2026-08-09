@@ -21,15 +21,22 @@ export function ContactLink({
   source,
   className = 'zx-contact',
   /**
-   * Accessible name. The visible label is usually just "Contact us", which does
-   * not say that the link leaves for Telegram — the destination belongs in the
-   * name, not only in the icon.
+   * Accessible name, and the ONLY name when `label` is omitted. Always spelled
+   * out ("Contact us on Telegram") rather than mirroring the visible label: the
+   * destination belongs in the name, not just in the icon.
    */
   ariaLabel,
-  /** Leading glyph. Omitted in the footer, where the row is plain text links. */
+  /** Leading glyph. */
   icon,
 }: {
-  label: string
+  /**
+   * Visible text. Omitted in the top bar, which renders the glyph alone — the
+   * bar is 32px of content height shared with the wordmark and the locale, and
+   * it already establishes itself as a row of icon controls. Dropping the text
+   * costs nothing here because `ariaLabel` carries the accessible name either
+   * way, so screen readers and the tooltip are unaffected.
+   */
+  label?: string
   source: string
   className?: string
   ariaLabel: string
@@ -42,6 +49,10 @@ export function ContactLink({
       target="_blank"
       rel="noopener noreferrer"
       aria-label={ariaLabel}
+      /* Only in the icon-only case: with a visible label a tooltip just repeats
+         what is already on screen, but a lone glyph needs a hover affordance for
+         sighted mouse users, who get nothing from `aria-label`. */
+      title={label ? undefined : ariaLabel}
       onClick={() => trackEvent('contact_click', { source })}
     >
       {icon ? <md-icon aria-hidden="true">{icon}</md-icon> : null}

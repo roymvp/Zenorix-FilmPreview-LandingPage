@@ -100,7 +100,7 @@ export function MarketLanding({
             homeLabel={dict.nav.home}
             languageMenuLabel={dict.nav.languageMenu}
             localeHrefs={localeHrefs}
-            contact={{ label: dict.contact.label, aria: dict.contact.aria }}
+            contact={{ aria: dict.contact.aria }}
           />
 
           <HeroBillboard

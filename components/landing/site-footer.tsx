@@ -35,7 +35,7 @@ export function SiteFooter({
           ariaLabel={contact.aria}
           source="footer"
           className="zx-contact zx-contact--footer"
-          icon="chat"
+          icon="chat_bubble"
         />
 
         <ul className="zx-footer-links">
