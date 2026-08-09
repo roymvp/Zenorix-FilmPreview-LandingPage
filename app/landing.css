@@ -149,24 +149,17 @@
   padding-block: var(--zx-section-y) 0;
 }
 
-/* Skips rendering work for the two HEAVY below-the-fold sections until they are
-   scrolled near. Applied only to these two, on measured evidence rather than to
-   every section: About is the tallest block on the page (~906px) and is the only one
-   running a 34s infinite marquee (`zx-logo-drift`) plus eleven logo images, and FAQ
-   is second (~676px) with a details element per question. The Top 10 strip is
-   deliberately EXCLUDED — it sits near the fold on a phone, so skipping it would
-   risk deferring work the user sees immediately.
+/* Skips rendering work for the two HEAVY below-the-fold sections until scrolled
+   near. Only these two, on measured evidence: About is the tallest block (~906px)
+   and the only one running a 34s infinite marquee plus eleven logo images, FAQ is
+   second (~676px). Top 10 is deliberately EXCLUDED — it sits near the fold on a
+   phone, so skipping it would defer work the user sees immediately.
 
-   `contain-intrinsic-size: auto <height>` matters more than the literal number: the
-   `auto` keyword tells the browser to remember each section's REAL size once it has
-   been rendered, so the placeholder estimate is used only for the very first
-   scrollbar calculation. The lengths are the measured desktop heights; being off on
-   a narrow viewport costs a scrollbar adjustment, not a layout shift of visible
-   content, because a skipped section is by definition outside the viewport.
-
-   This is also why the marquee is worth containing: off-screen, an infinite
-   animation otherwise keeps generating style and paint work for a strip nobody is
-   looking at. */
+   In `contain-intrinsic-size: auto <height>` the `auto` keyword matters more than
+   the number: the browser remembers each section's real size after first render, so
+   the estimate only ever affects the initial scrollbar. Being off on a narrow
+   viewport costs a scrollbar adjustment, not a visible shift — a skipped section is
+   by definition off-screen. */
 .zx-section--about {
   content-visibility: auto;
   contain-intrinsic-size: auto 906px;
@@ -181,21 +174,16 @@
 }
 
 /* --- 48px minimum touch targets -------------------------------------------
-   Two controls are drawn smaller than the 48x48 minimum because the design needs
-   them visually compact: the language trigger (40x32) and the brand link
-   (~110x26, height only).
+   The language trigger (40x32) and brand link (~110x26) are drawn compact on
+   purpose. Instead of inflating them and breaking the bar's proportions, each gets
+   a transparent centred overlay that grows the HIT AREA to 48x48; `absolute` keeps
+   it out of layout so no spacing shifts.
 
-   Rather than inflate them — which would break the top bar's proportions — each
-   gets a transparent, centred overlay that grows the HIT AREA to 48x48 while
-   leaving the painted size untouched. `position: absolute` means the overlay never
-   affects layout, so no spacing changes anywhere.
+   `max(100%, 48px)` per axis grows ONLY the deficient axis — the brand link keeps
+   its width and gains height, rather than collapsing to a 48px square.
 
-   `max(100%, 48px)` per axis, so an element already larger on one axis keeps its
-   own size there and only the deficient axis grows — the brand link keeps its width
-   and gains height only, instead of being squeezed to a 48px square.
-
-   Not applied to the footer links: those are inline text inside a sentence-like row,
-   which WCAG exempts, and an expanded box on each would overlap its neighbours. */
+   Not applied to footer links: inline text in a sentence-like row is WCAG-exempt,
+   and an expanded box on each would overlap its neighbours. */
 .zx-brand,
 .zx-lang-trigger {
   /* The overlay's containing block. */
@@ -242,21 +230,10 @@
    and run behind the chrome — the hero's copy block pays for that by padding
    itself by `--zx-topbar-h` so a tall headline can never slide underneath.
 
-   NOTE: this was an opaque LIGHT island. It re-declared the entire light Material
-   scheme locally (`color-scheme: light`, a near-white surface, #1668cf primary,
-   plus five container/outline steps) because it was the one part of the page
-   excluded from the black canvas, and its Material children would otherwise have
-   painted dark-scheme on-dark colors onto it and gone invisible.
-
-   None of that survives, and the reason is the reason for the whole page: with a
-   film playing in a 16/9 frame, chrome floating over it would have collided with
-   the playback controls, so the bar had to be a real row — and a real row on a
-   dark page reads better light. There is no player now. The hero is a full-bleed
-   billboard, so the bar's job flipped from "be a header" to "stay out of the
-   art's way", which means translucent, dark, and on top.
-
-   Being dark again also means it inherits the page's dark scheme, so the local
-   override block is not just unnecessary, it would be actively wrong. */
+   Do NOT re-declare a local Material scheme here. The bar is dark and inherits
+   the page's dark scheme, so a `color-scheme: light` island (which this once was,
+   back when the bar was an opaque row) would now fight the tokens rather than
+   help them. */
 .zx-topbar {
   position: absolute;
   inset-block-start: 0;
@@ -320,26 +297,18 @@
   width: auto;
 }
 
-/* Wordmark, set in live text beside the mark — and since the hero dropped its
-   lockup, the only place the brand name appears on the page.
-   
-   Set in the DISPLAY face (Orbitron 900, loaded in app/layout.tsx) to match the
-   logo's lettering: wide, squared, very heavy, all caps. In Roboto Bold this read
-   as a generic app header sitting next to an unrelated logo.
+/* Wordmark, in live text beside the mark — the only place the brand name appears.
 
-   Four properties do the matching, and all four are load-bearing:
-   - `--font-orbitron` FIRST, then the body stack as the swap/failure fallback;
-   - `uppercase`, because the lockup is all caps and `SITE.name` is title case.
-     Transformed rather than re-cased in config, so the config value stays the
-     human-readable brand name used in <title> and prose;
-   - 900, the one weight loaded — do not ask for a weight that is not in the
-     layout's `weight` array or the browser synthesises it;
-   - open tracking, mirroring the lockup, which is generously letter-spaced.
+   Set in the display face (Orbitron 900, loaded in app/layout.tsx) to match the
+   logo's lettering. All four properties below are load-bearing:
+   - `--font-orbitron` FIRST, body stack after as the swap/failure fallback;
+   - `uppercase`, because the lockup is caps but `SITE.name` is title case — cased
+     here so config keeps the readable name used in <title> and prose;
+   - 900, the ONLY weight loaded; any other value gets synthesised by the browser;
+   - open tracking, mirroring the lockup's own letter-spacing.
 
-   Stays on the `lg` tier it always used: Orbitron's caps run wider and taller than
-   Roboto's at the same `font-size`, but 15px still measures shorter than the 26px
-   mark beside it, so the lockup reads as mark-plus-wordmark rather than as two
-   competing elements. */
+   Keep it on `lg`: at 15px it still measures shorter than the 26px mark, so the
+   pair reads as mark-plus-wordmark rather than two competing elements. */
 .zx-brand-name {
   font-family: var(--font-orbitron), var(--md-ref-typeface-brand);
   font-size: var(--zx-text-lg);
@@ -1091,24 +1060,16 @@
   margin-block-start: var(--zx-space-6);
 }
 
-/* OUTLINED pill, transparent fill. `align-items: flex-start` on the card keeps it
-   hugging its own text instead of stretching the full card width.
+/* The page's eyebrow treatment: OUTLINED pill, transparent fill.
 
-   It was a filled pill using `primary-container`, and on a pure-black canvas that
-   mid-grey slab (L* 35) was the muddiest object on the page — a grey block sitting on
-   black, dragging the whole section's perceived brightness down while the label inside
-   it fought its own backing for contrast. A hairline stroke with the silver text
-   showing straight through to the canvas removes the slab entirely and lets the label
-   read at full silver.
+   Keep it unfilled. As a filled `primary-container` pill, that mid-grey slab (L* 35)
+   on pure black was the muddiest object on the page and the label fought its own
+   backing for contrast. A hairline stroke lets the label read at full silver.
 
-   This also brings it into line with `.zx-dialog-lead`, the same eyebrow rank, which
-   is already unfilled bright silver.
+   `align-self: flex-start` is load-bearing precisely BECAUSE there is no fill: the
+   element is still a block, so without it the invisible stroke spans the whole card.
 
-   `align-self: flex-start` matters now: with no fill there is no visible box, but the
-   element is still a block, so without it the invisible stroke would span the card. */
-/* The page's eyebrow treatment. `.zx-dialog-lead` is the same rank and MUST keep
-   the same size/weight/tracking — it was 11px/700 against this rule's 11px/600,
-   so the two eyebrows were subtly different weights for no reason. */
+   `.zx-dialog-lead` is the same rank and MUST keep the same size/weight/tracking. */
 .zx-about-label {
   margin: 0;
   align-self: flex-start;
@@ -1152,16 +1113,11 @@
    The unit is stated once on the key line rather than on each figure, which is what let
    the bars stop being sized around four extra characters apiece.
 
-   Two failures worth not repeating:
-   - The grid must live on the element the markup actually uses. It was once split onto a
-     `.zx-compare-rows` wrapper; when the wrapper was deleted the class went with it while
-     the rules stayed behind, so the chart silently fell back to `display: block` and the
-     bars stacked as plain blocks with every grid rule dead.
-   - Do not give the prices their own column to buy a shorter bar. Tried twice: capping that
-     column at 6.5rem made the long Thai and Portuguese prices wrap to two lines and left
-     the card TALLER than before, and letting it size to content detached each number from
-     the bar tip it belongs to. The price belongs inside its bar; the bar's minimum length
-     is the price it holds. */
+   Do NOT give the prices their own grid column to buy a shorter bar. Tried twice: capping
+   that column at 6.5rem wrapped the long Thai and Portuguese prices to two lines and left
+   the card TALLER than before, and letting it size to content detached each number from the
+   bar tip it belongs to. The price belongs inside its bar; the bar's minimum length is the
+   price it holds. */
 /* The merged key line: `▪ Zenorix  vs  ▪▪▪ Disney + HBO + Netflix        per month`.
    
    It replaces two separate label rows, so it does four jobs at once — names both
@@ -1267,18 +1223,13 @@
 /* Each bar is a flex container because it holds its own price, and the `dd` for the plan
    named above it.
 
-   The two bars differ in LENGTH and in FILL. Length carries the quantity; fill carries only
-   series identity, keyed by the swatches on the line above. An earlier version held the
-   fill identical so that length would be the sole variable — the cost was a key that could
-   only tell the two apart by chip length, which is a far weaker signal than color at
-   caption size. Two encodings for identity plus one for quantity is the standard
-   two-series convention; the risk to avoid is letting the fill imply a magnitude, which is
-   why the swatches are equal in size and carry no length of their own.
+   The two bars differ in LENGTH and in FILL: length carries the quantity, fill carries only
+   series identity (keyed by the swatches above). Keep the swatches equal in size so fill
+   never implies a magnitude of its own.
 
-   No background track behind either bar: an unfilled track behind a short bar reads as a
-   STACKED bar, as if the remainder were another segment of the same total, which is the
-   opposite of "ours is a fraction of theirs". With no track, length alone carries the
-   quantity. */
+   No background track behind either bar. An unfilled track behind a short bar reads as a
+   STACKED bar — as if the remainder were another segment of the same total — which is the
+   opposite of "ours is a fraction of theirs". */
 .zx-compare-bar {
   /* REQUIRED, not tidiness. A `dd` carries a UA default `margin-inline-start: 40px`, and
      the BAR is the `dd` — without this reset both bars are pushed 40px right of the names
@@ -1337,18 +1288,14 @@
    `secondary` fill, which is why the pair still reads as one chart rather than two unrelated
    colors. Fill separation is now 6.78:1, up from 1.81:1 when this was `outline`.
 
-   That number was previously stuck, and it is worth recording why. Fill alone cannot get
-   there on this near-black page: every token that separates well from our silver (>=5:1)
-   also falls to <=2.6:1 against the #08090b background, and at that point the bar DEFINING
-   100% is the one that fades out — measured twice, once at 1.47:1 and once at 1.14:1, and
-   both times the rival bar and its key swatch visibly disappeared. Brighter fills fix the
-   visibility and lose the distinction; darker fills do the reverse.
+   Fill ALONE cannot satisfy both constraints on this near-black page: any token that
+   separates well from our silver (>=5:1) drops to <=2.6:1 against the #08090b background,
+   and then the bar defining 100% is the one that fades out. The border below breaks the
+   deadlock — the fill goes dark for separation, the border keeps the extent legible.
 
-   The border below is what breaks that deadlock, so the two constraints stop fighting:
-   the FILL is free to go dark for maximum separation from ours, while the BORDER guarantees
-   the bar's extent stays legible. Note the card itself is transparent — an earlier round of
-   these numbers was computed against a #1d2126 card that does not exist, which made the
-   dark fills look ~1.8x safer than they are. */
+   Compute any new numbers against the PAGE background: the card is transparent, and an
+   earlier pass measured against a #1d2126 card that does not exist, which made dark fills
+   look ~1.8x safer than they are. */
 .zx-compare-bar--rival {
   box-sizing: border-box;
   width: 100%;
@@ -1828,14 +1775,6 @@
   --md-menu-item-label-text-weight: var(--zx-weight-regular);
 }
 
-/* NOTE: the top bar used to be cinema black and needed an --zx-on-media
-   override here. It is a light surface now, so the base on-surface color above
-   is correct in both the top bar and the footer. */
-
-/* NOTE: a fixed bottom download bar used to live here. It was removed — the
-   page now closes on the in-flow final CTA, so nothing permanently covers
-   content and the page needs no bottom spacer. */
-
 /* ----------------------------------------------------------------- dialogs */
 
 /* Bottom sheet, not a centered dialog.
@@ -2052,9 +1991,8 @@
   min-width: 0;
 }
 
-/* NOTE: this used to also set `font-size: 13.5px`, making the dialog's install
-   caption a different size from the identical in-page one. The size now comes
-   solely from `.zx-cta-sub`; only the centering is dialog-specific. */
+/* Centering only. Size stays with `.zx-cta-sub` so the dialog's install caption
+   and the identical in-page one cannot drift apart. */
 .zx-dialog-actions .zx-cta-sub {
   justify-content: center;
 }
