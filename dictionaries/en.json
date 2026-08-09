@@ -30,7 +30,9 @@
     "ctaMeta": "Android APK · {size} · {downloads}",
     "stores": {
       "upcoming": "Coming soon",
-      "ios": "iOS",
+      "iosEyebrow": "Coming soon to the",
+      "ios": "App Store",
+      "googlePlayEyebrow": "Coming soon to",
       "googlePlay": "Google Play",
       "unavailable": "{store} — coming soon"
     }

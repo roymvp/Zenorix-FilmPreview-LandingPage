@@ -11,34 +11,66 @@
  * gets looked at directly). The wall lays dozens of tiles side by side, so a
  * mismatched aspect ratio shows up immediately as black gutters inside one tile.
  *
- * Twenty theatrical one-sheets, chosen to span the catalogue rather than to rank:
- * tentpole sequels, three anime features, awards drama, animation, and Indian
- * cinema. Breadth is the whole job — the viewer never reads one of these, they
- * register "there is a lot here" from the mix of palettes and eras scrolling past.
+ * Thirty-nine one-sheets — theatrical features and streaming originals — chosen to
+ * span the catalogue rather than to rank it: tentpole sequels, anime, awards drama,
+ * animation, Indian and Korean cinema, prestige TV. Breadth is the whole job. The
+ * viewer never reads one of these; they register "there is a lot here" from the mix
+ * of palettes and eras drifting past.
+ *
+ * DELIBERATELY INTERLEAVED, not grouped by studio or year. The drift means
+ * neighbouring tiles are seen together, so a run of one palette (the near-monochrome
+ * dramas, the three Spider-Man sheets) would read as a dead patch or as a duplicate.
+ * Alternating warm/cool and photographic/illustrated keeps every neighbourhood of
+ * the wall mixed.
  *
  * Burned-in titles and studio logos are fine HERE and only here: the wall overlays
  * no badge and makes no per-title claim, so nothing can contradict the art.
+ *
+ * One supplied poster is deliberately ABSENT. `blade-runner-2099` is a centred logo
+ * on near-black, and the 2:3 crop leaves fragments of "prime original" and "E RUN"
+ * floating on an otherwise empty tile — at this size, behind the scrim, that reads
+ * as a broken image rather than as texture. Its source stays in
+ * `assets/hero-posters/` in case full-bleed key art arrives later.
  */
 const TILES = [
   '/media/wall/spider-man-no-way-home.webp',
+  '/media/wall/the-shards.webp',
   '/media/wall/dune-part-two.webp',
+  '/media/wall/elle.webp',
   '/media/wall/demon-slayer-infinity-castle.webp',
+  '/media/wall/my-daughters-father.webp',
   '/media/wall/oppenheimer.webp',
+  '/media/wall/five-star-weekend.webp',
   '/media/wall/the-wild-robot.webp',
+  '/media/wall/neuromancer.webp',
   '/media/wall/12th-fail.webp',
+  '/media/wall/lanterns.webp',
   '/media/wall/across-the-spider-verse.webp',
+  '/media/wall/the-rapture.webp',
   '/media/wall/the-odyssey.webp',
+  '/media/wall/fightland.webp',
   '/media/wall/klaus.webp',
+  '/media/wall/lucky.webp',
   '/media/wall/top-gun-maverick.webp',
+  '/media/wall/ann-droid.webp',
   '/media/wall/attack-on-titan-last-attack.webp',
+  '/media/wall/the-east-palace.webp',
   '/media/wall/the-father.webp',
+  '/media/wall/stuart-fails-universe.webp',
   '/media/wall/chainsaw-man-reze-arc.webp',
+  '/media/wall/ride-or-die.webp',
   '/media/wall/jai-bhim.webp',
+  '/media/wall/carrie.webp',
   '/media/wall/1917.webp',
+  '/media/wall/musafir-cafe.webp',
   '/media/wall/project-hail-mary.webp',
+  '/media/wall/furious.webp',
   '/media/wall/hamilton.webp',
+  '/media/wall/elite-force.webp',
   '/media/wall/maharaja.webp',
+  '/media/wall/the-westies.webp',
   '/media/wall/i-swear.webp',
+  '/media/wall/the-hawk.webp',
   '/media/wall/spider-man-brand-new-day.webp',
 ] as const
 
@@ -74,11 +106,12 @@ const ROWS = 5
  * Consequently the array must be exactly two identical halves; adding a stray
  * tile to one half breaks the loop rather than just changing the art.
  *
- * The `* 7` column stride is co-prime with the 20-tile pool, and that is doing
- * real work. With a plain `* ROWS` stride, 5 and 20 share a factor and every
- * fifth column is an identical strip (columns 0, 5 and 10 all visible at once);
- * at 7 no two of the twelve columns repeat, vertical neighbours differ by 1 and
- * horizontal by 7, so no tile ever touches a copy of itself.
+ * The `* 7` column stride is co-prime with the 39-tile pool, and that is doing
+ * real work. With a plain `* ROWS` stride, 5 and a multiple-of-5 pool would share
+ * a factor and repeat whole columns; 7 shares no factor with 39, so no two of the
+ * twelve columns repeat, vertical neighbours differ by 1 and horizontal by 7, and
+ * no tile ever touches a copy of itself. (7 is also co-prime with 12, so the
+ * columns themselves don't fall into a short cycle.)
  *
  * Pure function of its argument — no randomness — so server and client render
  * byte-identical markup and hydration cannot mismatch.

@@ -30,7 +30,9 @@
     "ctaMeta": "APK Android · {size} · {downloads}",
     "stores": {
       "upcoming": "เร็วๆ นี้",
-      "ios": "iOS",
+      "iosEyebrow": "เร็วๆ นี้บน",
+      "ios": "App Store",
+      "googlePlayEyebrow": "เร็วๆ นี้บน",
       "googlePlay": "Google Play",
       "unavailable": "{store} — เร็วๆ นี้"
     }

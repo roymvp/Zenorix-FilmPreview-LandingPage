@@ -623,6 +623,20 @@
 
 /* The hero's one number. Sits a tier below the headline on purpose: the pitch is
    the promise, the price is the proof of it. */
+/* THE PRICE, and the only coloured text in the hero.
+
+   It was `--zx-on-media` white — the same value as the headline above it and the
+   CTA label below it — so the single most persuasive fact on the page (the whole
+   pitch is "$1.25 instead of $60+") carried no more weight than the sentence
+   introducing it. Colour buys it rank without growing the type, which would have
+   started competing with the h1 two lines up.
+
+   `--md-sys-color-tertiary` (#9bdcff) and NOT a new value: it is the scheme's
+   existing accent, so this adds no fourth hue to a page that is otherwise
+   black / white / silver. It is also the only candidate that works — `primary` is
+   a near-white indistinguishable from the body copy, and `error` red would read as
+   a warning attached to a price. Sky blue on the near-black scrim clears AA by a
+   wide margin at this size. */
 .zx-hero-price {
   margin: 0;
   display: flex;
@@ -633,9 +647,13 @@
   font-weight: var(--zx-weight-bold);
   letter-spacing: 0.01em;
   font-variant-numeric: tabular-nums;
-  color: var(--zx-on-media);
+  color: var(--md-sys-color-tertiary);
 }
 
+/* Stays NEUTRAL, and that is what makes the colour above work. This is a child of
+   `.zx-hero-price`, so it would otherwise inherit the accent and both lines would be
+   blue — at which point the colour marks "this block" rather than "this number", and
+   the emphasis is spent. The re-declaration is load-bearing, not redundant. */
 .zx-hero-price-note {
   font-size: var(--zx-text-meta);
   font-weight: var(--zx-weight-regular);
