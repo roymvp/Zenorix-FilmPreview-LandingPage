@@ -163,9 +163,17 @@ export function ConversionDialog({ copy }: { copy: DialogCopy }) {
       open={content !== null}
       aria-label={copy.heading}
     >
-      <div slot="headline" className="zx-dialog-headline">
-        <strong className="zx-dialog-title">{copy.heading}</strong>
-      </div>
+      {/* NO `slot="headline"`. The title used to live there, but md-dialog renders
+          that slot in its own shadow-DOM row ABOVE the content slot, so anything
+          in it necessarily spans the full width and pushes the poster onto a
+          second line — which is exactly why the poster sat under the title. A
+          media query cannot fix that: the headline is a sibling of the content
+          row, not a child of it, so no amount of CSS can move it into the poster's
+          flex row. The title has to be in the content slot to sit beside the art.
+
+          The dialog is still named: `aria-label` on the host below carries the
+          same string, so dropping the headline slot costs nothing for a screen
+          reader. */}
 
       {/* A plain div, not a `<form method="dialog">`. The form only existed so
           a Close button could submit it via `form="…"`, but React assigns that
@@ -201,16 +209,28 @@ export function ConversionDialog({ copy }: { copy: DialogCopy }) {
           />
         ) : null}
 
-        <div className="zx-dialog-body">
-          <p className="zx-dialog-lead">{copy.body}</p>
-          <ul className="zx-dialog-bullets">
-            {copy.bullets.map((bullet) => (
-              <li key={bullet}>
-                <md-icon aria-hidden="true">check</md-icon>
-                {bullet}
-              </li>
-            ))}
-          </ul>
+        {/* The right column: the title and the benefit panel as ONE block, so the
+            poster sits beside both instead of only beside the bullets.
+
+            `display: contents` at phone width, where there is no poster and no
+            column to form — the title and the panel then lay out as direct slot
+            children exactly as they did when the title was in the headline slot,
+            which is what keeps the sheet pixel-identical. It only becomes a real
+            flex column at the desktop tier. */}
+        <div className="zx-dialog-main">
+          <strong className="zx-dialog-title">{copy.heading}</strong>
+
+          <div className="zx-dialog-body">
+            <p className="zx-dialog-lead">{copy.body}</p>
+            <ul className="zx-dialog-bullets">
+              {copy.bullets.map((bullet) => (
+                <li key={bullet}>
+                  <md-icon aria-hidden="true">check</md-icon>
+                  {bullet}
+                </li>
+              ))}
+            </ul>
+          </div>
         </div>
       </div>
 

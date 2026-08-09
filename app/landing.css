@@ -2129,15 +2129,17 @@
     0 -18px 48px rgba(0, 0, 0, 0.55);
 }
 
-.zx-dialog-headline {
-  display: flex;
-  flex-direction: column;
-  gap: var(--zx-space-15);
-  /* Neutralizes md-dialog's `slot[name=headline]::slotted(*){align-items:center}`.
-     That rule assumes a ROW of icon + text; this slot is a COLUMN, so the cross
-     axis is horizontal and it centered the title and eyebrow sideways. Stretch
-     left-aligns them to match the body copy below. */
-  align-items: stretch;
+/* The right-hand column, and NOT A BOX at this tier — same reasoning as
+   `.zx-dialog-content` below, which it sits inside.
+
+   It exists so the desktop tier can group the title with the benefit panel and
+   set the pair beside the poster. At phone width there is no poster, so a real
+   box here would add a second nesting level between the slot and the title for
+   no visual gain; `contents` makes the two children lay out as direct slot
+   children, which is exactly where they were when the title still lived in
+   md-dialog's headline slot. That equivalence is what keeps the sheet unchanged. */
+.zx-dialog-main {
+  display: contents;
 }
 
 /* The sheet title, deliberately identical to `.zx-section-title` ("About Zenorix",
@@ -2151,6 +2153,14 @@
    so it sits at the top of the hierarchy alongside the CTA, with the benefit panel
    below deliberately quieter. */
 .zx-dialog-title {
+  /* Load-bearing: this is a `<strong>`, i.e. INLINE. It used to be blockified for
+     free by `.zx-dialog-headline`'s flex container, and when that wrapper went away
+     the element fell back to inline flow, where horizontal padding does not offset
+     the box and vertical padding adds no height at all — measured, the title
+     dropped from 24px→396px to 0px→397px and its first line was clipped by the
+     sheet's top edge. The desktop tier hid the bug because `.zx-dialog-main` is a
+     flex column there, which blockifies its items. */
+  display: block;
   margin: 0;
   /* The h2 tier, shared with `.zx-section-title`. Both read from the same tokens
      now, so the two can no longer drift apart. */
@@ -2165,6 +2175,15 @@
      natural greedy break and only resolves orphans, so lines break where the
      sentence does. */
   text-wrap: pretty;
+  /* Reproduces `slot[name=headline]::slotted(*){padding:24px 24px 0}`, which is
+     what inset this title before it moved into the content slot to sit beside the
+     poster. The slot's padding does not follow it: `.zx-dialog-content` is
+     `display: contents`, so md-dialog's content-slot padding never applies either
+     and without this the title would go edge-to-edge on the sheet. 24px is
+     Material's own dialog rhythm — the same figure its headline and actions slots
+     use — so the title still lines up with the CTA below it.
+     Dropped at the desktop tier, where the wrapper carries the inset instead. */
+  padding: var(--zx-space-6) var(--zx-space-6) 0;
 }
 
 /* The dismiss control is md-dialog's own: it light-dismisses on a click outside
@@ -2695,9 +2714,36 @@
     display: flex;
     align-items: stretch;
     gap: var(--zx-space-5);
-    /* md-dialog's `::slotted(*){padding:24px}` now lands on a real box. Zeroed,
-       because the host already insets the slot and `.zx-dialog-body` carries its
-       own padding — left in place it would double-inset the pair. */
+    /* 24px sides and top, 0 bottom — NOT the `padding: 0` this used to carry.
+       That zero was based on a wrong assumption ("the host already insets the
+       slot"): nothing else insets it. Measured, the row then ran 696px→1416px
+       inside a dialog whose own box is 696px→1416px, so the poster's left edge sat
+       flush on the dialog's border. The benefit panel only LOOKED inset because it
+       has 20px of its own padding, which hid the same bug on the right.
+
+       So this restores md-dialog's own `::slotted(*){padding:24px}` horizontally
+       rather than cancelling it, keeping the poster on the same 24px line as the
+       title above and the CTA below. Bottom stays 0 because
+       `.zx-dialog-actions` already contributes its own 24px top padding — 24px
+       here as well would read as a 48px gap before the button. */
+    padding: var(--zx-space-6) var(--zx-space-6) 0;
+  }
+
+  /* The real column at this tier: title stacked over the benefit panel, with the
+     poster beside the pair. `min-width: 0` because a flex item's default `auto`
+     minimum is its content width — a long bullet would otherwise refuse to wrap
+     and push the poster out of the dialog instead. */
+  .zx-dialog-main {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  /* The wrapper now supplies the 24px inset for the whole column, so the phone
+     tier's own padding on the title would double it and knock the title out of
+     line with the panel directly beneath it. */
+  .zx-dialog-title {
     padding: 0;
   }
 
@@ -2732,22 +2778,21 @@
        poster's edge dissolves into the dialog exactly as the sheet's top edge
        once did into the page. */
     box-shadow: 0 0 0 1px var(--md-sys-color-outline-variant);
-    /* The panel beside it has `margin-block-start: 4px` to separate it from the
-       title; the art matches so their top edges align. */
-    margin-block-start: var(--zx-space-1);
+    /* No top margin any more. It used to carry the benefit panel's 4px so the two
+       aligned when the panel was the poster's only neighbour; the poster now sits
+       beside the TITLE as well, and the title is the top of that column, so 4px
+       here would drop the art a step below the headline it should line up with. */
   }
 
-  /* Takes the remainder of the row. `min-width: 0` because a flex item's default
-     `auto` minimum is its content width — a long bullet would otherwise refuse to
-     wrap and push the poster out of the dialog instead. */
+  /* The panel is no longer the flex item — `.zx-dialog-main` is, and it carries the
+     `flex`/`min-width` that used to live here. What is left is the panel's own
+     behaviour inside that column: it takes the space under the title, so the
+     poster's height is driven by title + panel together. */
   .zx-dialog-body {
     flex: 1 1 auto;
-    min-width: 0;
-    /* The poster is the taller of the two columns, so `stretch` grows this panel
-       past its own content and leaves slack. Centring the label and bullets in it
-       splits that slack evenly above and below, where it reads as generous padding;
-       left at the default it all pooled under the last bullet and looked like a
-       list that had lost its final item. */
+    /* Centres the label and bullets in whatever height the panel ends up with, so
+       any slack splits evenly above and below instead of pooling under the last
+       bullet, where it read as a list missing its final item. */
     justify-content: center;
   }
 }
