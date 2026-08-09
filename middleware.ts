@@ -1,11 +1,9 @@
 import { NextResponse, type NextRequest } from 'next/server'
-import { featuredSlug } from '@/lib/content/movies'
 import {
   defaultLocale,
   isLocale,
   locales,
   localeMeta,
-  moviePath,
   type Locale,
 } from '@/lib/i18n/config'
 
@@ -58,8 +56,11 @@ export function middleware(request: NextRequest) {
 
   const locale = detectLocale(request)
   const url = request.nextUrl.clone()
-  url.pathname =
-    pathname === '/' ? moviePath(locale, featuredSlug) : `/${locale}${pathname}`
+
+  /* `/` lands on the market page itself. It used to redirect to the featured
+     film's deep URL, which sent every single visitor to a doorway page (and made
+     the site's real entry point a URL naming a film chosen by array order). */
+  url.pathname = pathname === '/' ? `/${locale}` : `/${locale}${pathname}`
 
   return NextResponse.redirect(url)
 }

@@ -1,63 +1,89 @@
 /**
- * Builds the landscape share card (og:image / twitter:image) for each film in
- * `movies` — the deep `/movie/[slug]` routes and each market home.
+ * Builds the brand share card (og:image / twitter:image) for the three market
+ * pages.
  *
- * Why this exists at all: the licensed art in `public/media/posters/` is portrait
- * 2:3, and a share card is ~1.91:1. Declaring a portrait file at 1200x630 makes
- * every Facebook/X/WhatsApp unfurl letterbox or centre-crop the title lettering
- * off the poster. Generating fresh landscape art instead would mean inventing key
- * art for a real film, which is exactly what this project just finished removing.
+ * There is ONE card, not one per film. The site is a single page per market, so a
+ * card showing one film would promise a destination about that film and deliver
+ * the generic landing page instead. The card previews what the link actually
+ * opens: the brand, over the same poster wall the hero renders behind its scrim.
  *
- * So the card is DERIVED from the real poster and nothing else: the poster
- * scaled up and blurred to fill the frame, with the untouched poster composited
- * on top at full height. Every pixel still comes from the real art, the poster's
- * own title lettering stays legible and uncropped, and the ratio is correct.
+ * Why generated rather than hand-made: the licensed art is portrait 2:3 and a
+ * share card is ~1.91:1, so pointing og:image at a poster makes every unfurl
+ * letterbox it or crop the lettering off. Inventing fresh landscape art would
+ * mean fabricating key art, which is what this project just finished removing —
+ * so every pixel here comes from real art plus the real brand lockup.
  *
- * Run after adding a film: `node scripts/build-share-cards.mjs`
+ * Run after changing the lockup or the wall tiles:
+ *   node scripts/build-share-cards.mjs
  */
 import { mkdir } from 'node:fs/promises'
 import sharp from 'sharp'
 
-/* 1200x630 is the size Facebook, X and LinkedIn all document, and the value
-   declared in `lib/seo.ts`. Keep the two in sync. */
+/* The size Facebook, X, WhatsApp and LinkedIn all document, and the value
+   declared in `lib/seo.ts`. Keep the two in sync or scrapers crop the card. */
 const WIDTH = 1200
 const HEIGHT = 630
 
-const SOURCE_DIR = 'public/media/posters'
-const OUT_DIR = 'public/media/share'
+const OUT = 'public/media/share/zenorix.png'
 
-/* Only the films that own a route need a card, so this list is explicit rather
-   than directory-driven: the poster folder also holds the twenty chart tiles,
-   which are never shared as a link. Keys match the `slug` in `movies`. */
-const CARDS = {
-  'avatar-fire-and-ash': 'avatar-fire-and-ash.png',
-  'project-hail-mary': 'project-hail-mary.png',
-  'mortal-kombat-2': 'mortal-kombat-2.png',
-}
+/* The same six posters as the hero wall in `lib/content/poster-wall.ts`, in the
+   same order, so the card and the page agree. */
+const TILES = [
+  'house-of-the-dragon',
+  'avatar-fire-and-ash',
+  'rick-and-morty',
+  'project-hail-mary',
+  'mortal-kombat-2',
+  'devil-wears-prada-2',
+]
 
-await mkdir(OUT_DIR, { recursive: true })
+const COLUMN_W = Math.ceil(WIDTH / TILES.length)
 
-for (const [slug, file] of Object.entries(CARDS)) {
-  const src = `${SOURCE_DIR}/${file}`
+/* Each poster fills one full-bleed column. `cover` at a taller-than-column box
+   keeps the art's own proportions and crops the overflow, rather than squashing a
+   2:3 poster into a narrow strip. */
+const columns = await Promise.all(
+  TILES.map((slug, i) =>
+    sharp(`public/media/posters/${slug}.png`)
+      .resize(COLUMN_W, HEIGHT, {
+        fit: 'cover',
+        /* Alternate the crop window so six posters cropped identically don't
+           produce a visible repeating band across the card. */
+        position: i % 2 === 0 ? 'top' : 'centre',
+      })
+      .toBuffer(),
+  ),
+)
 
-  /* Blurred backdrop: cover the full frame, then blur hard enough that the
-     stretched lettering underneath reads as texture rather than as a second,
-     out-of-focus title competing with the sharp poster on top. */
-  const backdrop = await sharp(src)
-    .resize(WIDTH, HEIGHT, { fit: 'cover', position: 'centre' })
-    .blur(40)
-    .modulate({ brightness: 0.55 })
-    .toBuffer()
+/* Scrim: the lockup is light silver, and raw key art behind it leaves the
+   wordmark unreadable at the ~500px a chat client actually renders. */
+const scrim = Buffer.from(
+  `<svg width="${WIDTH}" height="${HEIGHT}">
+     <rect width="${WIDTH}" height="${HEIGHT}" fill="#000" opacity="0.74"/>
+   </svg>`,
+)
 
-  /* Foreground: full poster height, nothing cropped. */
-  const poster = await sharp(src)
-    .resize({ height: HEIGHT, fit: 'inside' })
-    .toBuffer()
+const LOCKUP_W = 440
+const lockup = await sharp('public/brand/zenorix-lockup.webp')
+  .resize({ width: LOCKUP_W })
+  .toBuffer()
+const { height: lockupH = 0 } = await sharp(lockup).metadata()
 
-  const info = await sharp(backdrop)
-    .composite([{ input: poster, gravity: 'centre' }])
-    .png({ quality: 90 })
-    .toFile(`${OUT_DIR}/${slug}.png`)
+await mkdir('public/media/share', { recursive: true })
 
-  console.log('[v0] wrote', `${OUT_DIR}/${slug}.png`, `${Math.round(info.size / 1024)}KB`)
-}
+const info = await sharp({
+  create: { width: WIDTH, height: HEIGHT, channels: 3, background: '#000' },
+})
+  .composite([
+    ...columns.map((input, i) => ({ input, left: i * COLUMN_W, top: 0 })),
+    { input: scrim, left: 0, top: 0 },
+    {
+      input: lockup,
+      left: Math.round((WIDTH - LOCKUP_W) / 2),
+      top: Math.round((HEIGHT - lockupH) / 2),
+    },
+  ])
+  .png({ quality: 90 })
+  .toFile(OUT)
+
+console.log('[v0] wrote', OUT, `${Math.round(info.size / 1024)}KB`)

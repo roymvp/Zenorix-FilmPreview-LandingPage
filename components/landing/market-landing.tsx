@@ -8,34 +8,30 @@ import { SiteFooter } from '@/components/landing/site-footer'
 import { TopBar } from '@/components/landing/top-bar'
 import { TopChart } from '@/components/landing/top-chart'
 import { SITE } from '@/lib/config/site'
-import { getMovieChart, getSeriesChart, type Movie } from '@/lib/content/movies'
+import { getMovieChart, getSeriesChart } from '@/lib/content/charts'
 import { fill, type Dictionary } from '@/lib/i18n/dictionaries'
 import { locales, type Locale } from '@/lib/i18n/config'
 import { buildStructuredData, marketValues } from '@/lib/seo'
 
 /**
- * The landing page itself, shared by the market home route and the localized
- * /movie/[slug] routes.
+ * The landing page — the only page, rendered once per market.
  *
  * Section order is the funnel: brand billboard -> what people are watching ->
  * what Zenorix is -> objections -> close, all wired to one download handler.
  *
- * `movie` no longer drives anything VISIBLE. The hero used to open with that
- * film's preview player and an info block; the page now opens on the brand and
- * the catalogue, so the film survives only in the head — its title in the
- * metadata and its `Movie` node in the JSON-LD graph — which is what keeps each
- * /movie/[slug] route a distinct, indexable entry point.
+ * No film is passed in. This component used to take a `movie` that drove nothing
+ * visible and existed only to vary the <title> across a set of /movie/[slug]
+ * URLs; that route was a doorway page and is gone. The page leads with the brand
+ * and the catalogue, and the head now describes exactly that.
  *
  * The layout is mobile-only by design: `.zx-page` caps itself at a phone width
  * and centers, so the page never stretches into a desktop composition.
  */
-export function FilmLanding({
-  movie,
+export function MarketLanding({
   locale,
   dict,
   path,
 }: {
-  movie: Movie
   locale: Locale
   dict: Dictionary
   /** Resolves this same page's URL in any market, for hreflang + the selector. */
@@ -49,7 +45,7 @@ export function FilmLanding({
     th: path('th'),
   } as const
 
-  const structuredData = buildStructuredData({ movie, locale, dict, path })
+  const structuredData = buildStructuredData({ locale, dict, path })
 
   return (
     <ConversionProvider>

@@ -1,13 +1,15 @@
 import type { Metadata } from 'next'
 import { SITE } from '@/lib/config/site'
-import type { Movie } from '@/lib/content/movies'
 import { fill, type Dictionary } from '@/lib/i18n/dictionaries'
-import { locales, localeMeta, moviePath, type Locale } from '@/lib/i18n/config'
+import { locales, localeMeta, type Locale } from '@/lib/i18n/config'
+
+/** The brand share card built by `scripts/build-share-cards.mjs`. */
+const SHARE_CARD = '/media/share/zenorix.png'
 
 /**
  * Every market page is independently indexable: its own canonical URL, its own
  * localized title/description, and a reciprocal hreflang set pointing at the
- * same film in the other two markets (plus x-default on English).
+ * same page in the other two markets (plus x-default on English).
  */
 export function buildLocaleAlternates(
   path: (locale: Locale) => string,
@@ -20,35 +22,37 @@ export function buildLocaleAlternates(
   return { languages }
 }
 
-export function buildMovieMetadata({
-  movie,
+/**
+ * Metadata for a market page.
+ *
+ * There are exactly three of these — `/en`, `/pt-br`, `/th` — and each describes
+ * the product, not a film. An earlier version keyed this off a featured `Movie`,
+ * which meant the title of the whole site changed with whichever film sat first
+ * in an array, and promised a specific film to anyone who saw the link.
+ */
+export function buildMarketMetadata({
   locale,
   dict,
   path,
 }: {
-  movie: Movie
   locale: Locale
   dict: Dictionary
-  /** Resolver so the home route and the /movie/[slug] route share this logic. */
+  /** Resolves this page's URL in any market, for canonical + hreflang. */
   path: (locale: Locale) => string
 }): Metadata {
-  const copy = movie.copy[locale]
-  const values = {
-    title: copy.title,
-    year: movie.releaseYear,
-    country: dict.market.country,
-  }
-  const title = fill(dict.meta.title, values)
+  const values = { country: dict.market.country, countryShort: dict.market.countryShort }
   const description = fill(dict.meta.description, values)
   const canonical = `${SITE.url}${path(locale)}`
 
   return {
-    title,
+    title: fill(dict.meta.title, values),
     description,
-    keywords: fill(dict.meta.keywords, values),
+    keywords: dict.meta.keywords,
     alternates: { canonical, ...buildLocaleAlternates(path) },
     openGraph: {
-      type: 'video.movie',
+      /* `website`, not `video.movie`: this page is the product's home, and
+         claiming a film type made scrapers look for a film the page never had. */
+      type: 'website',
       siteName: SITE.name,
       locale: localeMeta[locale].ogLocale,
       url: canonical,
@@ -56,12 +60,12 @@ export function buildMovieMetadata({
       description,
       images: [
         {
-          url: `${SITE.url}${movie.backdrop}`,
+          url: `${SITE.url}${SHARE_CARD}`,
           /* Must match the output size in `scripts/build-share-cards.mjs`. A
              mismatch makes scrapers reserve the wrong box and crop the card. */
           width: 1200,
           height: 630,
-          alt: fill(dict.meta.imageAlt, values),
+          alt: dict.meta.imageAlt,
         },
       ],
     },
@@ -69,53 +73,44 @@ export function buildMovieMetadata({
       card: 'summary_large_image',
       title: fill(dict.meta.ogTitle, values),
       description,
-      images: [`${SITE.url}${movie.backdrop}`],
+      images: [`${SITE.url}${SHARE_CARD}`],
     },
     robots: { index: true, follow: true },
   }
 }
 
 /**
- * JSON-LD for the three things this page actually is: a film, an installable
- * Android app, and an FAQ. Emitted as one graph so crawlers get all of it.
+ * JSON-LD for the two things this page actually is: an installable Android app,
+ * and an FAQ. Emitted as one graph so crawlers get both.
+ *
+ * There is deliberately NO `Movie` node. One used to be emitted for a featured
+ * film, which told crawlers this URL was a page about that film — a claim the
+ * page never backed up, since it shows a chart of twenty titles and an install
+ * pitch. Structured data has to describe what is actually on the page.
  */
 export function buildStructuredData({
-  movie,
   locale,
   dict,
   path,
 }: {
-  movie: Movie
   locale: Locale
   dict: Dictionary
   path: (locale: Locale) => string
 }) {
-  const copy = movie.copy[locale]
   const url = `${SITE.url}${path(locale)}`
 
   return {
     '@context': 'https://schema.org',
     '@graph': [
       {
-        '@type': 'Movie',
-        name: copy.title,
+        '@type': 'WebSite',
+        name: SITE.name,
         url,
-        image: `${SITE.url}${movie.poster}`,
-        description: copy.synopsis,
-        genre: copy.genres,
-        datePublished: String(movie.releaseYear),
-        duration: `PT${movie.runtimeMinutes}M`,
         inLanguage: localeMeta[locale].hreflang,
-        potentialAction: {
-          '@type': 'WatchAction',
-          target: url,
-          expectsAcceptanceOf: {
-            '@type': 'Offer',
-            price: '0',
-            priceCurrency: dict.market.currency,
-            eligibleRegion: dict.market.countryShort,
-          },
-        },
+        description: fill(dict.meta.description, {
+          country: dict.market.country,
+          countryShort: dict.market.countryShort,
+        }),
       },
       {
         '@type': 'SoftwareApplication',
@@ -221,5 +216,3 @@ export function marketValues(dict: Dictionary) {
     total: SITE.library.total,
   }
 }
-
-export { moviePath }

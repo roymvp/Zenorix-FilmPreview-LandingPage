@@ -1,30 +1,31 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
-import { FilmLanding } from '@/components/landing/film-landing'
-import { featuredSlug, getMovie } from '@/lib/content/movies'
+import { MarketLanding } from '@/components/landing/market-landing'
 import { getDictionary } from '@/lib/i18n/dictionaries'
 import { isLocale, type Locale } from '@/lib/i18n/config'
-import { buildMovieMetadata } from '@/lib/seo'
+import { buildMarketMetadata } from '@/lib/seo'
 
 type RouteParams = { lang: string }
 
 /**
- * Market home (/en, /pt-br, /th) shows the currently featured film. It reuses
- * the exact same landing composition as the deep movie routes, so there is one
- * conversion funnel to maintain rather than two.
+ * The market page — and the only page. `/en`, `/pt-br` and `/th` are the whole
+ * site: one landing page per market, each with its own localized copy, canonical
+ * URL and hreflang set.
+ *
+ * There used to be a second route, `/[lang]/[segment]/[slug]`, rendering this
+ * exact same component for three films per market. Because nothing about the film
+ * was visible, those nine URLs served byte-identical content under different
+ * titles — doorway pages. They are gone; this is the single entry point.
  */
 async function resolve(params: Promise<RouteParams>) {
   const { lang } = await params
   if (!isLocale(lang)) notFound()
 
   const locale: Locale = lang
-  const movie = getMovie(featuredSlug)
-  if (!movie) notFound()
-
-  return { locale, movie, dict: await getDictionary(locale) }
+  return { locale, dict: await getDictionary(locale) }
 }
 
-/** Home canonicalizes to itself in each market. */
+/** Each market canonicalizes to itself. */
 const homePath = (locale: Locale) => `/${locale}`
 
 export async function generateMetadata({
@@ -32,8 +33,8 @@ export async function generateMetadata({
 }: {
   params: Promise<RouteParams>
 }): Promise<Metadata> {
-  const { locale, movie, dict } = await resolve(params)
-  return buildMovieMetadata({ movie, locale, dict, path: homePath })
+  const { locale, dict } = await resolve(params)
+  return buildMarketMetadata({ locale, dict, path: homePath })
 }
 
 export default async function MarketHomePage({
@@ -41,7 +42,7 @@ export default async function MarketHomePage({
 }: {
   params: Promise<RouteParams>
 }) {
-  const { locale, movie, dict } = await resolve(params)
+  const { locale, dict } = await resolve(params)
 
-  return <FilmLanding movie={movie} locale={locale} dict={dict} path={homePath} />
+  return <MarketLanding locale={locale} dict={dict} path={homePath} />
 }

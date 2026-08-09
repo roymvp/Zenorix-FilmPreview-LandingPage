@@ -1,7 +1,7 @@
 'use client'
 
 import { useConversion } from '@/components/landing/conversion-provider'
-import type { ChartEntry } from '@/lib/content/movies'
+import type { ChartEntry } from '@/lib/content/charts'
 import { PLATFORMS } from '@/lib/content/platforms'
 
 /**
