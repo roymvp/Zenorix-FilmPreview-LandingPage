@@ -146,7 +146,7 @@ export type DialogCopy = {
  * for.
  */
 export function ConversionDialog({ copy }: { copy: DialogCopy }) {
-  const { contentTitle, closeContent } = useConversion()
+  const { content, closeContent } = useConversion()
 
   const contentRef = useRef<HTMLElement | null>(null)
 
@@ -160,7 +160,7 @@ export function ConversionDialog({ copy }: { copy: DialogCopy }) {
     <md-dialog
       ref={contentRef}
       className="zx-dialog"
-      open={contentTitle !== null}
+      open={content !== null}
       aria-label={copy.heading}
     >
       <div slot="headline" className="zx-dialog-headline">
@@ -173,7 +173,34 @@ export function ConversionDialog({ copy }: { copy: DialogCopy }) {
           expose `form` as getter-only — it threw "Cannot set property form of
           #<Button> which has only a getter" and the association never
           happened. An explicit onClick is both simpler and actually works. */}
-      <div slot="content">
+      <div slot="content" className="zx-dialog-content">
+        {/* The art the visitor just clicked, DESKTOP ONLY (`.zx-dialog-art` is
+            `display: none` below the desktop tier). On a 420px sheet there is no
+            room for it beside the bullets and no reason to push the CTA a poster's
+            height further down; on a 720px centred dialog it is what makes the
+            modal read as belonging to the card that opened it instead of as a
+            generic interstitial.
+
+            aria-hidden + alt="": the dialog is already named by the heading, and
+            the title of the locked film is not information the sheet is making a
+            claim about — repeating it here would announce the same string twice.
+            Rendered only when a card is open so the <img> never holds the previous
+            title's art while the sheet animates away.
+            eslint-disable — the chart tiles are pre-sized 2:3 WebP built by
+            scripts/build-poster-tiles.mjs, already in cache from the rail. */}
+        {content ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            className="zx-dialog-art"
+            src={content.poster}
+            alt=""
+            width={420}
+            height={630}
+            aria-hidden="true"
+            decoding="async"
+          />
+        ) : null}
+
         <div className="zx-dialog-body">
           <p className="zx-dialog-lead">{copy.body}</p>
           <ul className="zx-dialog-bullets">

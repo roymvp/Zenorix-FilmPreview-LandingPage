@@ -68,7 +68,11 @@ export function TopChart({
               <button
                 type="button"
                 className="zx-chart-card"
-                onClick={() => openContent(entry.title)}
+                /* The poster travels with the title so the dialog can show the
+                   art the visitor just clicked — see `LockedContent`. */
+                onClick={() =>
+                  openContent({ title: entry.title, poster: entry.poster })
+                }
                 aria-label={`${rankLabel.replace('{rank}', String(index + 1))} · ${entry.title}`}
               >
                 <span className="zx-chart-art">

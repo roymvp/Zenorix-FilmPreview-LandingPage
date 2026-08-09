@@ -97,6 +97,13 @@
   /* Section rhythm, now a scale step rather than a standalone 44px. */
   --zx-section-y: var(--zx-space-10);
 
+  /* THE control height, shared by the primary install button, the secondary
+     "see all" pill and the sticky bar's button. It was the literal `46px`
+     repeated in three rules, which is exactly how the outlined secondary once
+     ended up 6px TALLER than the primary filled button it sits beside. As a token
+     the desktop tier can raise all three in one line and they cannot drift. */
+  --zx-control-h: 46px;
+
   width: 100%;
   max-width: var(--zx-page-max);
   margin-inline: auto;
@@ -458,8 +465,9 @@
   flex: 0 0 var(--zx-wall-col, 130px);
   min-width: 0;
   /* THE DRIFT. Each column holds its five tiles twice (see `buildColumn` in
-     poster-wall.ts), so translating a full -50% lands the second copy exactly
-     where the first began — the loop has no seam to notice, no snap and no reset.
+     poster-wall.ts), so translating by half the strip plus half a gutter lands the
+     second copy exactly where the first began — no seam, no snap, no reset. See
+     `@keyframes zx-wall-drift` for why the gutter term is there.
      `linear` for the same reason: any easing would make the wall visibly slow
      down and speed up once per cycle, which is precisely the tell that gives away
      a loop.
@@ -533,39 +541,39 @@
   border-radius: 10px;
 }
 
-/* Each layer is visible for a third of the cycle with a short crossfade. The
-   stops are deliberately asymmetric: the fade-IN is packed into the last 6% so a
-   layer is already at full opacity when its own 0% comes round, which is what
-   makes three layers on one shared 18s cycle hand over cleanly. */
-@keyframes zx-wall-cycle {
-  0%,
-  27% {
-    opacity: 1;
+/* The seamless loop.
+
+   NOT a flat -50%. The column is five tiles rendered twice with an 8px `gap`
+   between all ten, so its height is `10h + 9g` — half of that is `5h + 4.5g`,
+   which lands the second copy 4px SHORT of where the first began and the wall
+   jumps by half a gutter once per cycle. `calc(-50% - 4px)` is the exact
+   `5h + 5g` the loop needs. Re-derive it if the gap changes: the offset is
+   always `50% + gap / 2`.
+
+   `translate3d` rather than `translateY` to keep the column on its own
+   compositor layer for the whole animation — twelve columns of ten images each
+   are running for as long as the page is open, and this never touches layout. */
+@keyframes zx-wall-drift {
+  from {
+    transform: translate3d(0, 0, 0);
   }
-  33%,
-  94% {
-    opacity: 0;
-  }
-  100% {
-    opacity: 1;
+  to {
+    transform: translate3d(0, calc(-50% - 4px), 0);
   }
 }
 
-/* A wall that silently stops moving, rather than one that keeps cycling at a
-   slower speed: for anyone who has asked for less motion the crossfade has no
-   informational value at all, so the first arrangement simply stays put. */
+/* A wall that silently stops moving. For anyone who has asked for less motion the
+   drift carries no information at all, so the columns simply hold their staggered
+   first-paint arrangement — which is still a full, mismatched wall, because the
+   stagger is a static `translate` and not part of the animation. */
 @media (prefers-reduced-motion: reduce) {
-  .zx-hero-wall-layer {
+  .zx-hero-wall-column {
     animation: none;
   }
-
-  .zx-hero-wall-layer:first-child {
-    opacity: 1;
-  }
 }
 
-/* Two jobs: (1) hold white text to AA over ANY tile the cycle happens to land
-   on — the top stop also darkens the art under the translucent top bar — and
+/* Two jobs: (1) hold white text to AA over ANY tile the drift happens to bring
+   past — the top stop also darkens the art under the translucent top bar — and
    (2) land on solid black at the bottom so the hero has no seam against the
    page. The bottom stop MUST stay fully opaque for that reason. */
 .zx-hero-scrim {
@@ -762,12 +770,13 @@
    secondary action mattered more. Both are now `body`/semibold, and primacy is
    carried by fill-vs-outline where it belongs. */
 .zx-cta-button {
-  /* 46px, matching `.zx-chart-more` — the one height every install control on the page
-     shares, and the number the dialog rule below already documents as "the base".
-     Nothing set it here, so these buttons silently took Material's 40px default and
-     the SECONDARY outlined button ended up 6px taller than the primary filled ones:
-     a size hierarchy inversion, exactly the kind the label-weight note above fixed. */
-  --md-filled-button-container-height: 46px;
+  /* `--zx-control-h`, the same token `.zx-chart-more` reads — the one height every
+     install control on the page shares, and the number the dialog rule below
+     documents as "the base". Nothing set it here at all once, so these buttons
+     silently took Material's 40px default and the SECONDARY outlined button ended
+     up 6px taller than the primary filled ones: a size hierarchy inversion,
+     exactly the kind the label-weight note above fixed. */
+  --md-filled-button-container-height: var(--zx-control-h);
   --md-filled-button-label-text-size: var(--zx-text-body);
   --md-filled-button-label-text-weight: var(--zx-weight-semibold);
 
@@ -1030,7 +1039,9 @@
   justify-content: center;
   gap: var(--zx-space-15);
   width: 100%;
-  min-height: 46px;
+  /* Same token as the primary install button — see `--zx-control-h`. This pill
+     stands beside/below one, so any divergence reads as a hierarchy claim. */
+  min-height: var(--zx-control-h);
   padding: 0 var(--zx-space-5);
   /* Bright border, not the muted `outline` token. This pill is the rail's tail
      action and sits alone on the page surface, where a low-contrast hairline
@@ -2277,6 +2288,13 @@
     --zx-text-lg: 17px;
     --zx-text-body: 16px;
     --zx-text-meta: 14px;
+    /* Controls grow with the type they contain. 46px was sized for a thumb on a
+       420px column; at desktop the label inside it is now 16px, so 46px leaves
+       only 15px of padding above and below and the pill reads as a compact
+       toolbar button rather than as the page's one action. 54px restores the
+       proportion, and because every install control reads this token the primary,
+       the secondary "see all" pill and the sticky bar all move together. */
+    --zx-control-h: 54px;
   }
 
   /* ------------------------------------------------------------------- hero */
@@ -2385,11 +2403,38 @@
     padding-block-end: var(--zx-space-10);
   }
 
-  /* A measure, not a width. Left-aligned 44px type across the full 1120px column
-     would run past the ~75-character line the eye can track, so the headline is
-     capped well short of its container while the wall keeps the full width. */
+  /* The one place on the page with a FLUID size rather than a token step, and the
+     only one that earns it: the hero is the sole full-bleed block, so its
+     headline is the only text whose container grows with the window while every
+     other element stays inside the 1200px column. Held at the token's 44px on a
+     1024px laptop and reaching 64px on a 2128px display, which is where a
+     left-anchored pitch has to compete with 2000px of key art beside it.
+     
+     Capped at 64px, not left open: past that the three lines start eating the
+     vertical the price and the CTA need, and the wall stops being a backdrop and
+     becomes a margin around the type. */
   .zx-hero-headline {
-    max-width: 620px;
+    font-size: clamp(var(--zx-text-h1), 3.4vw, 64px);
+    /* MEASURE, in em — so it scales with the size above and the line length stays
+       constant instead of the wrap point moving as the type grows. 14em is ~620px
+       at the 44px floor, i.e. exactly the fixed px cap this replaced, and ~900px
+       at 64px: the same ~28-character line at both ends. */
+    max-width: 14em;
+    /* -0.02em is tuned for the phone's 26px. At 64px the same relative tracking
+       reads loose, and display type wants tighter as it grows. */
+    letter-spacing: -0.03em;
+  }
+
+  /* Price and its risk-reduction line go SIDE BY SIDE from here up, sharing one
+     baseline. Stacked, they cost two lines of the hero's vertical for eleven
+     words — and at desktop the pair reads as a single statement ("$1.25/month,
+     30 days free") which is how it is spoken. `baseline` rather than `center`
+     because the two sizes differ by 12px and centring them optically floats the
+     smaller one above the number's feet. */
+  .zx-hero-price {
+    flex-direction: row;
+    align-items: baseline;
+    gap: var(--zx-space-3);
   }
 
   /* The install cluster keeps ONE width for both members, so the CTA and the two

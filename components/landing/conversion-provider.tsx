@@ -24,19 +24,33 @@ import { SITE } from '@/lib/config/site'
  * `urgent`) is gone along with the hero player: with no timed preview there is
  * no wall to hit, so a "preview exhausted" state could never be entered.
  */
+/**
+ * The card a visitor just hit, as the dialog needs it.
+ *
+ * The POSTER is here and not looked up from the charts by title, because the
+ * dialog would then need the chart data and a title-to-entry index — and titles
+ * are not guaranteed unique across the two rails. The card already has both
+ * fields in hand at click time, so it passes them.
+ */
+export type LockedContent = {
+  title: string
+  /** Path to the card's own 2:3 tile, shown as the dialog's art panel. */
+  poster: string
+}
+
 type ConversionState = {
   /** Fires the APK download and reports the source that earned the click. */
   download: (source: string) => void
   /** Locked-content upsell, triggered from the Top 10 rail. */
-  contentTitle: string | null
-  openContent: (title: string) => void
+  content: LockedContent | null
+  openContent: (content: LockedContent) => void
   closeContent: () => void
 }
 
 const ConversionContext = createContext<ConversionState | null>(null)
 
 export function ConversionProvider({ children }: { children: ReactNode }) {
-  const [contentTitle, setContentTitle] = useState<string | null>(null)
+  const [content, setContent] = useState<LockedContent | null>(null)
 
   const download = useCallback((source: string) => {
     trackEvent('apk_download_click', { source, version: SITE.apkVersion })
@@ -44,23 +58,23 @@ export function ConversionProvider({ children }: { children: ReactNode }) {
     window.location.href = SITE.apkUrl
   }, [])
 
-  const openContent = useCallback((title: string) => {
-    trackEvent('modal_view', { modal: 'content_lock', title })
-    setContentTitle(title)
+  const openContent = useCallback((next: LockedContent) => {
+    trackEvent('modal_view', { modal: 'content_lock', title: next.title })
+    setContent(next)
   }, [])
 
   // Guarded so it is idempotent. Dismissal arrives from two places — the Close
   // button and the dialog's own `closed` event (scrim tap, Escape) — and the
   // button path triggers the event path too, which would double-report.
   const closeContent = useCallback(() => {
-    if (contentTitle === null) return
+    if (content === null) return
     trackEvent('modal_dismiss', { modal: 'content_lock' })
-    setContentTitle(null)
-  }, [contentTitle])
+    setContent(null)
+  }, [content])
 
   const value = useMemo<ConversionState>(
-    () => ({ download, contentTitle, openContent, closeContent }),
-    [download, contentTitle, openContent, closeContent],
+    () => ({ download, content, openContent, closeContent }),
+    [download, content, openContent, closeContent],
   )
 
   return (
