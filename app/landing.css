@@ -2230,14 +2230,19 @@
   display: none;
 }
 
-/* The benefit block: TINTED FILL, NO BORDER.
+/* The benefit block: NO FILL, NO BORDER — rank carried by color alone.
 
    These bullets are the rationale that supports the download, not the message
-   itself — the title and the CTA are. An outlined panel gave them a hard, drawn
-   edge that competed with the CTA for attention and made all three levels read as
-   equally important. A borderless fill one step up from the sheet's own
-   `surface-container-high` recedes into the surface: it still groups the label
-   with its list, but as a quiet backdrop rather than a framed object. */
+   itself; the title and the CTA are. This used to be a tinted panel, which was
+   already a step down from the outlined box before it, but a fill is still a drawn
+   OBJECT: at 420px it spanned the full sheet width and read as a third competing
+   block between the title and the CTA. With the tint gone the same hierarchy is
+   carried by text color (see the `li` rule), which costs no visual weight.
+
+   Dropping the fill is also what lets the copy line up with the title. A fill needs
+   internal padding to keep text off its edge — that 20px was the whole reason the
+   copy sat 4px inside the title's 24px and looked misaligned. No fill, no need for
+   the inset, so every line in the sheet can share one left edge. */
 .zx-dialog-body {
   display: flex;
   flex-direction: column;
@@ -2247,21 +2252,26 @@
      now 8px (check icon <-> its text) < 12px (bullet <-> bullet) < 16px
      (label <-> list). */
   gap: var(--zx-space-4);
-  /* 20px `space-5` all round, up from `14px 16px` and now on-scale (it was briefly
-     an off-scale 18px). A borderless fill has no drawn edge to define it, so the
-     inset IS the panel — at 14px the text nearly touched the tint's boundary. Even
-     padding also lets the radius read cleanly. Overrides md-dialog's
+  /* 24px sides, 0 top/bottom — replacing the fill's 20px box padding.
+
+     This element is a direct child of md-dialog's content slot at phone width
+     (`.zx-dialog-content` and `.zx-dialog-main` are both `display: contents`), so it
+     is full-bleed: measured, its box ran 0→420 inside a 420px sheet. Without a side
+     inset the copy would touch the sheet edge; at the old 20px it aligned to
+     nothing. 24px is the figure the title above and the CTA below already use, so
+     all three now share one left edge.
+
+     Zero block padding because the fill it used to protect is gone — vertical
+     spacing is `margin-block-start` below plus the CTA's own top padding, so
+     padding here would just double-count it. Also overrides md-dialog's
      `slot[name=content]::slotted(*){padding:24px}`, which document styles beat. */
-  padding: var(--zx-space-5);
-  /* Nudges the panel 4px further from the title above it (24px slot gap -> 28px),
-     reinforcing that the title is a separate, higher tier than this support copy. */
-  margin-block-start: var(--zx-space-1);
-  /* `radius-sm`, the shared token for any card nested inside a surface — the same
-     one `.zx-about-card` uses, so nested panels are consistent across page and
-     sheet. Clearly tighter than the sheet's own `radius-lg` corners, which is what
-     keeps the outer sheet reading as the dominant shape. */
-  border-radius: var(--zx-radius-sm);
-  background: var(--md-sys-color-surface-container-highest);
+  padding: 0 var(--zx-space-6);
+  /* 16px, up from 4px. The 4px was a nudge on top of the fill's own 20px inset
+     (~25px of visible air); with the fill gone it would leave the eyebrow almost
+     touching the title. 16px is the same "label <-> list" step used by `gap` above,
+     so the title-to-eyebrow gap now matches the block's internal rhythm while
+     staying well under the CTA's 24px major separation. */
+  margin-block-start: var(--zx-space-4);
   color: var(--md-sys-color-on-surface-variant);
   /* Explicit, because md-dialog's content slot inherits the host's centering in
      some engines and the whole block is specified as left aligned. */
@@ -2290,11 +2300,17 @@
      float its check against the middle of the block instead of the first line. */
   align-items: flex-start;
   gap: var(--zx-space-2);
-  color: var(--md-sys-color-on-surface);
+  /* NO `color` here on purpose — inherits `on-surface-variant` from
+     `.zx-dialog-body`. This used to override it to the full-strength `on-surface`,
+     which was defensible while the block had a tinted fill to sit these bullets
+     against. Now that the fill is gone, color is the ONLY thing marking them as
+     support copy rather than a third headline, so the override would flatten the
+     title / bullets / CTA into one weight. `on-surface-variant` is Material's own
+     muted-on-surface pairing, so it stays legible while reading a step quieter. */
   /* 14px body tier, was a half-pixel 14.5px. These bullets are body copy and now
      match the synopsis and FAQ answers exactly; the earlier 0.5px difference was
      not a perceivable rank, just a blurrier baseline. Their lower rank against the
-     CTA is carried by the panel's fill and by color, not by half a pixel. */
+     CTA is carried by color, not by half a pixel. */
   font-size: var(--zx-text-body);
   line-height: var(--zx-lh-body);
 }
@@ -2740,10 +2756,13 @@
     min-width: 0;
   }
 
-  /* The wrapper now supplies the 24px inset for the whole column, so the phone
-     tier's own padding on the title would double it and knock the title out of
-     line with the panel directly beneath it. */
-  .zx-dialog-title {
+  /* `.zx-dialog-content` above now supplies the 24px inset for the whole column, so
+     the phone tier's own padding on these two would double it — the title and the
+     copy would sit 48px in while the poster beside them stayed at 24px. Both drop
+     their inset and inherit the column's instead, which is what keeps every line in
+     the right-hand column on one left edge. */
+  .zx-dialog-title,
+  .zx-dialog-body {
     padding: 0;
   }
 
@@ -2771,8 +2790,12 @@
     width: 176px;
     height: auto;
     object-fit: cover;
-    /* Matches `.zx-dialog-body`, so the two columns read as one pair of nested
-       panels rather than as a photo next to a card. */
+    /* `radius-sm`, the shared token for anything nested inside a surface. This used
+       to be justified as "matches `.zx-dialog-body`" — that pairing is gone now the
+       benefit copy has no fill or radius of its own, so the poster is the sheet's
+       only nested object. It keeps the token anyway: an image needs a real edge, and
+       sharing the value with `.zx-about-card` keeps it consistent with every other
+       nested panel while staying tighter than the sheet's own `radius-lg`. */
     border-radius: var(--zx-radius-sm);
     /* The tiles are dark-cornered key art on a dark surface; without this the
        poster's edge dissolves into the dialog exactly as the sheet's top edge
