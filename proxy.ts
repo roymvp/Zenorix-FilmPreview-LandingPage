@@ -47,8 +47,15 @@ function detectLocale(request: NextRequest): Locale {
 /**
  * Locale-prefixes every unprefixed request. Localized pages themselves are
  * static, so this is the only request-time work the app performs.
+ *
+ * THIS FILE IS `proxy.ts`, NOT `middleware.ts`. Next.js 16 renamed the
+ * convention (and the exported function with it) and emits a deprecation warning
+ * on every build for the old name. The rename is not cosmetic: `proxy.ts` runs
+ * only on the Node.js runtime, with no Edge option. That costs this app nothing —
+ * all it reads are two request headers and a cookie — but it is why the old name
+ * still works today and should not be relied on.
  */
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
   const first = decodeURIComponent(pathname.split('/')[1] ?? '')
 

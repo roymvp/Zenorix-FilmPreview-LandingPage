@@ -174,6 +174,47 @@
   box-sizing: border-box;
 }
 
+/* ---------------------------------------------------------------------------
+   TAP RESPONSIVENESS — the 0ms feedback layer. Do not remove.
+
+   `touch-action: manipulation` opts these elements out of the browser's
+   DOUBLE-TAP-TO-ZOOM gesture. That gesture is why a mobile tap feels dead for
+   ~300ms: the browser cannot know a first tap is not the start of a double-tap,
+   so it WITHHOLDS the click while it waits to see. Declaring that this element
+   has no double-tap behaviour lets the click dispatch immediately.
+
+   That delay has NOTHING to do with connection speed, which is what makes it
+   worth calling out: it is indistinguishable from "slow network" when reported
+   ("the button feels laggy"), so it gets chased in the wrong place. These markets
+   are mobile-first and the whole page exists to earn one tap on the install
+   button, so 300ms of manufactured lag is spent on the only interaction that
+   matters. Single-tap zoom (accessibility) and pinch-zoom are untouched —
+   `manipulation` disables double-tap zoom only, and the viewport in layout.tsx
+   deliberately keeps `userScalable`.
+
+   `md-filled-button` is listed explicitly because it is a custom element: it
+   matches none of the native selectors, and it IS the install CTA.
+
+   The tap highlight is cleared because every control here already has its own
+   `:active` and Material ripple feedback; the platform's grey flash lands on top
+   of those, a beat later, and reads as a rendering artifact rather than as
+   acknowledgement. Removing it is only safe BECAUSE of that existing feedback —
+   if a control is ever added without a pressed state, give it one rather than
+   re-enabling this globally. */
+a,
+button,
+label,
+select,
+summary,
+textarea,
+input,
+md-filled-button,
+md-menu-item,
+[role='button'] {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
 html,
 body {
   margin: 0;
