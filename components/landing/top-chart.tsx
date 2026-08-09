@@ -16,6 +16,12 @@ import { PLATFORMS } from '@/lib/content/platforms'
  * rails cannot share one heading id, or `aria-labelledby` on the second section
  * would point at the first section's title.
  *
+ * The tail CTA is OPTIONAL and belongs to the last rail only. Both rails sell the
+ * same install, so two identical buttons 500px apart were the same offer asked
+ * twice — the first one interrupted the browse before the shows rail had made its
+ * case. It lives inside this section rather than in its own block so the
+ * "each section owns only the space above itself" rhythm keeps holding.
+ *
  * Rail length is whatever `entries` holds. No slicing, no padding: the copy in
  * `chart.headingMovies` / `chart.headingSeries` carries no count, so a rail of
  * eight and a rail of twelve are both honest, and the catalogue never has to
@@ -26,8 +32,7 @@ export function TopChart({
   entries,
   heading,
   rankLabel,
-  moreLabel,
-  moreHint,
+  more,
 }: {
   /** Unique per rail; used for the section's heading id. */
   id: string
@@ -35,10 +40,11 @@ export function TopChart({
   heading: string
   /** "Number {rank}" template, used to build each poster's accessible name. */
   rankLabel: string
-  /** Outlined tail button that jumps straight to the download. */
-  moreLabel: string
-  /** Catalogue size line under the button — the payoff for tapping it. */
-  moreHint: string
+  /**
+   * Outlined tail button that jumps straight to the download, plus the catalogue
+   * size line under it. Omit on every rail but the last — the page carries one.
+   */
+  more?: { label: string; hint: string }
 }) {
   const { openContent, download } = useConversion()
   const headingId = `zx-chart-heading-${id}`
@@ -111,22 +117,22 @@ export function TopChart({
         })}
       </ul>
 
-      {/* Tail action for the rail: the catalogue is the promise, so "see more"
+      {/* Tail action for BOTH rails: the catalogue is the promise, so "see more"
           resolves to the only thing that can actually deliver it — the install.
           Outlined on purpose: the filled CTA stays the section-level primary. */}
-      <div className="zx-shell zx-chart-more-wrap">
-        <button
-          type="button"
-          className="zx-chart-more"
-          /* Per-rail source: the films rail and the shows rail are separate
-             offers, so a single `chart_more` would hide which one converts. */
-          onClick={() => download(`chart_more:${id}`)}
-        >
-          {moreLabel}
-          <md-icon aria-hidden="true">arrow_forward</md-icon>
-        </button>
-        <p className="zx-chart-more-hint">{moreHint}</p>
-      </div>
+      {more ? (
+        <div className="zx-shell zx-chart-more-wrap">
+          <button
+            type="button"
+            className="zx-chart-more"
+            onClick={() => download('chart_more')}
+          >
+            {more.label}
+            <md-icon aria-hidden="true">arrow_forward</md-icon>
+          </button>
+          <p className="zx-chart-more-hint">{more.hint}</p>
+        </div>
+      ) : null}
     </section>
   )
 }

@@ -36,10 +36,9 @@
     }
   },
   "chart": {
-    "headingMovies": "Filmes em alta {country} nesta semana",
-    "headingSeries": "Séries em alta {country} nesta semana",
+    "headingMovies": "Filmes em alta",
+    "headingSeries": "Séries em alta",
     "rank": "Número {rank}",
-    "seeAllShort": "Ver tudo",
     "more": "Baixe o app Zenorix para ver mais sucessos",
     "moreHint": "Mais de 28.000 filmes, 8.000 séries e canais de TV ao vivo"
   },

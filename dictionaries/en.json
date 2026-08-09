@@ -36,10 +36,9 @@
     }
   },
   "chart": {
-    "headingMovies": "Movies Trending in {country} This Week",
-    "headingSeries": "Shows Trending in {country} This Week",
+    "headingMovies": "Trending Movies",
+    "headingSeries": "Trending Shows",
     "rank": "Number {rank}",
-    "seeAllShort": "See all",
     "more": "Install Zenorix App for More Hits",
     "moreHint": "28,000+ movies, 8,000+ shows & live TV channels"
   },

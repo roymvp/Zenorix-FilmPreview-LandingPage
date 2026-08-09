@@ -114,25 +114,25 @@ export function MarketLanding({
 
         <main id="zx-main">
           {/* Films first, then shows: the film rail leads with the biggest
-              theatrical titles, which is the strongest hook this page has. Both
-              rails share the tail CTA and the rank label — only the heading and
-              the catalogue differ. */}
+              theatrical titles, which is the strongest hook this page has.
+
+              Only the SHOWS rail carries the tail CTA. Both rails sell the same
+              install, so a button under each was one offer made twice — and the
+              first one broke the browse before the second rail had argued for it.
+              Headings take no `fill`: they hold no placeholders now. */}
           <TopChart
             id="movies"
             entries={getMovieChart(locale)}
-            heading={fill(dict.chart.headingMovies, values)}
+            heading={dict.chart.headingMovies}
             rankLabel={dict.chart.rank}
-            moreLabel={dict.chart.more}
-            moreHint={dict.chart.moreHint}
           />
 
           <TopChart
             id="series"
             entries={getSeriesChart(locale)}
-            heading={fill(dict.chart.headingSeries, values)}
+            heading={dict.chart.headingSeries}
             rankLabel={dict.chart.rank}
-            moreLabel={dict.chart.more}
-            moreHint={dict.chart.moreHint}
+            more={{ label: dict.chart.more, hint: dict.chart.moreHint }}
           />
 
           {/* Sits after the charts: the platform wall and the price both land
