@@ -218,7 +218,7 @@ export function ConversionDialog({ copy }: { copy: DialogCopy }) {
         <DownloadCta
           label={copy.cta}
           sub={copy.ctaMeta}
-          source={`content_lock:${contentTitle ?? 'unknown'}`}
+          source={`content_lock:${content?.title ?? 'unknown'}`}
           autoFocus
         />
       </div>

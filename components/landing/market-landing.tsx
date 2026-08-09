@@ -24,8 +24,9 @@ import { buildStructuredData, marketValues } from '@/lib/seo'
  * URLs; that route was a doorway page and is gone. The page leads with the brand
  * and the catalogue, and the head now describes exactly that.
  *
- * The layout is mobile-only by design: `.zx-page` caps itself at a phone width
- * and centers, so the page never stretches into a desktop composition.
+ * One DOM for every width. `.zx-page` widens its column in tiers (420 -> 680 ->
+ * 1200px) and the sections rearrange in CSS, so no component branches on
+ * viewport and nothing is rendered twice to be hidden at one size.
  */
 export function MarketLanding({
   locale,
@@ -45,7 +46,21 @@ export function MarketLanding({
     th: path('th'),
   } as const
 
-  const structuredData = buildStructuredData({ locale, dict, path })
+  /* Resolved ONCE and shared between the rails below and the JSON-LD, so the
+     `ItemList` in the head is literally the array the rails render rather than a
+     second call that could be reordered independently. */
+  const movies = getMovieChart(locale)
+  const series = getSeriesChart(locale)
+
+  const structuredData = buildStructuredData({
+    locale,
+    dict,
+    path,
+    charts: [
+      { name: dict.chart.headingMovies, titles: movies.map((e) => e.title) },
+      { name: dict.chart.headingSeries, titles: series.map((e) => e.title) },
+    ],
+  })
 
   return (
     <ConversionProvider>
@@ -123,14 +138,14 @@ export function MarketLanding({
               Headings take no `fill`: they hold no placeholders now. */}
           <TopChart
             id="movies"
-            entries={getMovieChart(locale)}
+            entries={movies}
             heading={dict.chart.headingMovies}
             rankLabel={dict.chart.rank}
           />
 
           <TopChart
             id="series"
-            entries={getSeriesChart(locale)}
+            entries={series}
             heading={dict.chart.headingSeries}
             rankLabel={dict.chart.rank}
             more={{ label: dict.chart.more, hint: dict.chart.moreHint }}

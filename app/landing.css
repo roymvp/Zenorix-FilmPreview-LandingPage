@@ -2105,6 +2105,28 @@
   color: var(--md-sys-color-primary);
 }
 
+/* The content slot's wrapper, which on a phone is NOT A BOX.
+
+   `display: contents` is load-bearing, not tidiness. This element only exists so
+   the desktop tier has something to lay the poster and the benefit panel out
+   side by side in; at phone width there is no poster, so a real box here would
+   insert md-dialog's `slot[name=content]::slotted(*){padding:24px}` as a second
+   inset OUTSIDE `.zx-dialog-body`'s own 20px — the panel would lose 24px on each
+   side and the sheet would read as inset twice. With `contents` the wrapper
+   generates no box at all and `.zx-dialog-body` sits in the slot exactly as it
+   did before this element existed. */
+.zx-dialog-content {
+  display: contents;
+}
+
+/* Hidden here, shown at the desktop tier. `display: none` and not a media-scoped
+   render, because at 420px the sheet has no horizontal room for a 2:3 poster and
+   stacking it would push the CTA a full poster-height below the fold — on the one
+   surface whose entire job is to get that CTA tapped. */
+.zx-dialog-art {
+  display: none;
+}
+
 /* The benefit block: TINTED FILL, NO BORDER.
 
    These bullets are the rationale that supports the download, not the message
@@ -2538,5 +2560,110 @@
     flex-wrap: wrap;
     justify-content: space-between;
     gap: var(--zx-space-4);
+  }
+
+  /* ------------------------------------------------------------------ dialogs */
+
+  /* CENTRED DIALOG, not a bottom sheet.
+
+     A sheet pinned to the bottom edge is a phone convention — it is reachable by
+     a thumb and it keeps the page visible above it. On a 2128px display neither
+     applies: the sheet lands 1400px below the eye, off to the bottom of a mostly
+     empty scrim, and a 420px column of it looks like a phone screenshot pasted
+     onto the page. Centred, it sits where the cursor and the attention already
+     are.
+
+     This UNDOES the base rule's whole trick rather than tweaking it (see
+     `.zx-dialog`): `margin: auto` on all four sides restores the UA's own
+     centering inside the modal's `inset: 0`, and all four corners round because
+     no edge is flush with the viewport any more. The internal `<dialog>`
+     inherits margin/width/max-height/border-radius from the host, so setting
+     them here is what actually moves the box. */
+  .zx-dialog {
+    --md-dialog-container-shape-end-end: 28px;
+    --md-dialog-container-shape-end-start: 28px;
+
+    margin: auto;
+    /* 720px, not the 420px of the sheet: the poster panel joins the layout at
+       this tier, so the dialog carries two columns instead of one. Still far
+       short of the 1200px page column — a modal that approaches the width of the
+       page behind it stops reading as a layer over it. */
+    max-width: 720px;
+    /* Was `min(680px, 86svh)`. The 680px cap existed to stop the SHEET growing
+       past a comfortable phone height; here the two-column layout is what sets
+       the height, and the poster wants every pixel it can get. 80svh keeps a
+       clear band of scrim above and below so the dialog reads as floating. */
+    max-height: 80svh;
+    /* The base shadow is directional — `0 -1px` and `0 -18px` throw light
+       downward, correct for a box whose only visible edges face up. A centred
+       dialog has all four edges exposed, so the hairline goes all the way round
+       and the drop shadow straightens out. */
+    box-shadow:
+      0 0 0 1px var(--md-sys-color-outline-variant),
+      0 24px 64px rgba(0, 0, 0, 0.55);
+  }
+
+  /* The wrapper becomes a real box at this tier, which is the one place it earns
+     its existence — see `.zx-dialog-content`. `flex`, so the poster keeps its
+     intrinsic 2:3 ratio while the benefit panel takes the rest; `stretch` so the
+     art's height is driven by the copy beside it rather than the reverse. */
+  .zx-dialog-content {
+    display: flex;
+    align-items: stretch;
+    gap: var(--zx-space-5);
+    /* md-dialog's `::slotted(*){padding:24px}` now lands on a real box. Zeroed,
+       because the host already insets the slot and `.zx-dialog-body` carries its
+       own padding — left in place it would double-inset the pair. */
+    padding: 0;
+  }
+
+  .zx-dialog-art {
+    display: block;
+    /* A FIXED-WIDTH PANEL CROPPED TO THE COPY'S HEIGHT, and deliberately not a
+       whole 2:3 poster. Two earlier attempts are why:
+
+       1. `flex: 0 0 168px` + `aspect-ratio: 2/3` made the art 252px tall, taller
+          than the benefit panel, and `align-items: stretch` then grew the panel to
+          match — a band of bare tint under the last bullet.
+       2. Inverting it (`align-self: stretch` + `width: auto` + `aspect-ratio`) to
+          let the copy set the height does NOT work: the `width`/`height` attributes
+          give the item a definite flex basis of 420px, aspect-ratio derives 630px
+          of height from that, and stretch never gets to apply. The dialog rendered
+          a 420x630 poster with the copy crushed into 280px beside it.
+
+       So: width is fixed, height comes from `stretch`, and `object-fit: cover`
+       absorbs the difference. No `aspect-ratio` — that is exactly what fought
+       stretch — and no magic height that has to be kept in sync with a bullet
+       count. 176px reads as a poster at the ~250px the copy is tall, and the ~10%
+       vertical crop lands in the art's bleed, not on a face or a logo. */
+    flex: 0 0 176px;
+    align-self: stretch;
+    width: 176px;
+    height: auto;
+    object-fit: cover;
+    /* Matches `.zx-dialog-body`, so the two columns read as one pair of nested
+       panels rather than as a photo next to a card. */
+    border-radius: var(--zx-radius-sm);
+    /* The tiles are dark-cornered key art on a dark surface; without this the
+       poster's edge dissolves into the dialog exactly as the sheet's top edge
+       once did into the page. */
+    box-shadow: 0 0 0 1px var(--md-sys-color-outline-variant);
+    /* The panel beside it has `margin-block-start: 4px` to separate it from the
+       title; the art matches so their top edges align. */
+    margin-block-start: var(--zx-space-1);
+  }
+
+  /* Takes the remainder of the row. `min-width: 0` because a flex item's default
+     `auto` minimum is its content width — a long bullet would otherwise refuse to
+     wrap and push the poster out of the dialog instead. */
+  .zx-dialog-body {
+    flex: 1 1 auto;
+    min-width: 0;
+    /* The poster is the taller of the two columns, so `stretch` grows this panel
+       past its own content and leaves slack. Centring the label and bullets in it
+       splits that slack evenly above and below, where it reads as generous padding;
+       left at the default it all pooled under the last bullet and looked like a
+       list that had lost its final item. */
+    justify-content: center;
   }
 }

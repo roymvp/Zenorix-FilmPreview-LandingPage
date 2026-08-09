@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { MarketLanding } from '@/components/landing/market-landing'
+import { getChartTitles } from '@/lib/content/charts'
 import { getDictionary } from '@/lib/i18n/dictionaries'
 import { isLocale, type Locale } from '@/lib/i18n/config'
 import { buildMarketMetadata } from '@/lib/seo'
@@ -34,7 +35,14 @@ export async function generateMetadata({
   params: Promise<RouteParams>
 }): Promise<Metadata> {
   const { locale, dict } = await resolve(params)
-  return buildMarketMetadata({ locale, dict, path: homePath })
+  return buildMarketMetadata({
+    locale,
+    dict,
+    path: homePath,
+    /* Read from the chart module, not duplicated here, so the head's keywords
+       list and the rails the page renders can never disagree. */
+    titles: getChartTitles(locale),
+  })
 }
 
 export default async function MarketHomePage({

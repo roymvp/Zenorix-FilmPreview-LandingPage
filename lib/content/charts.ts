@@ -111,3 +111,21 @@ export function getMovieChart(locale: Locale): ChartEntry[] {
 export function getSeriesChart(locale: Locale): ChartEntry[] {
   return seriesOrder[locale].map((id) => chartPool[id])
 }
+
+/**
+ * Every title this market's page shows, in the order it shows them — films then
+ * shows, matching the rail order in the DOM.
+ *
+ * This exists for the head: `lib/seo.ts` needs the titles for `keywords` and for
+ * the `ItemList` in the JSON-LD, and derives them from HERE rather than keeping a
+ * second hand-written list. The posters carry their own title lettering and the
+ * cards render no title text, so this function is the only machine-readable form
+ * these twenty names have — if it drifts from the pool, the head starts naming
+ * films the page does not show, which is the one thing keyword metadata must
+ * never do.
+ */
+export function getChartTitles(locale: Locale): string[] {
+  return [...getMovieChart(locale), ...getSeriesChart(locale)].map(
+    (entry) => entry.title,
+  )
+}

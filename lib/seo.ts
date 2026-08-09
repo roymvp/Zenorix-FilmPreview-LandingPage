@@ -44,11 +44,17 @@ export function buildMarketMetadata({
   locale,
   dict,
   path,
+  titles,
 }: {
   locale: Locale
   dict: Dictionary
   /** Resolves this page's URL in any market, for canonical + hreflang. */
   path: (locale: Locale) => string
+  /**
+   * The chart titles this market's page actually renders, from
+   * `getChartTitles`. Appended to `keywords` — see the note there.
+   */
+  titles: string[]
 }): Metadata {
   const values = { country: dict.market.country, countryShort: dict.market.countryShort }
   const description = fill(dict.meta.description, values)
@@ -57,7 +63,22 @@ export function buildMarketMetadata({
   return {
     title: fill(dict.meta.title, values),
     description,
-    keywords: dict.meta.keywords,
+    /* The market's own generic terms FIRST, then the twenty titles the rails
+       render this week.
+
+       An ARRAY, not `${dict.meta.keywords}, ${titles.join(', ')}`: Next joins it
+       into the meta tag itself, so no separator is hand-built and a title
+       containing a comma cannot silently split into two keywords.
+
+       Worth doing even though Google has ignored this tag for years — Baidu still
+       reads it, and it is the cheapest place the film names become machine-
+       readable at all. The cards render NO title text (the posters carry their own
+       lettering), so without this the only copies of these twenty names in the
+       document are `aria-label` attributes, which crawlers do not index as
+       content. The titles come from the same function that builds the rails, so
+       this list cannot name a film the page does not show — the line between
+       legitimate keywords and stuffing. */
+    keywords: [dict.meta.keywords, ...titles],
     alternates: { canonical, ...buildLocaleAlternates(path) },
     openGraph: {
       /* `website`, not `video.movie`: this page is the product's home, and
@@ -99,10 +120,16 @@ export function buildStructuredData({
   locale,
   dict,
   path,
+  charts,
 }: {
   locale: Locale
   dict: Dictionary
   path: (locale: Locale) => string
+  /**
+   * The two rails as rendered, so the `ItemList` nodes below describe the real
+   * page. Each rail's heading comes along because it is the list's visible name.
+   */
+  charts: { name: string; titles: string[] }[]
 }) {
   const url = `${SITE.url}${path(locale)}`
 
@@ -203,6 +230,34 @@ export function buildStructuredData({
           acceptedAnswer: { '@type': 'Answer', text: item.a },
         })),
       },
+      /* The two chart rails, as ranked lists of names.
+         
+         This is the honest way to get the film titles into structured data, and it
+         is specifically NOT the `Movie` node this file removed: an `ItemList` says
+         "this page ranks these twenty titles", which is exactly what the rails do,
+         while a top-level `Movie` said "this URL is about one film", which was never
+         true. So an answer engine asked what is trending on Zenorix can name them,
+         and none of them is presented as this page's subject.
+         
+         `ListItem` carries a bare `name` and no nested `Movie`/`TVSeries` and no
+         `url`: the page shows a poster and a rank for each title and nothing else —
+         no synopsis, no cast, no year, no per-film page to link to (that route was
+         a doorway page and was deleted). A `Movie` node here would be a promise of
+         detail the document does not contain.
+         
+         `itemListOrder` is explicit because the order IS the content — it is a
+         chart, and each market ranks the same catalogue differently. */
+      ...charts.map((chart) => ({
+        '@type': 'ItemList',
+        name: chart.name,
+        itemListOrder: 'https://schema.org/ItemListOrderDescending',
+        numberOfItems: chart.titles.length,
+        itemListElement: chart.titles.map((title, index) => ({
+          '@type': 'ListItem',
+          position: index + 1,
+          name: title,
+        })),
+      })),
     ],
   }
 }
