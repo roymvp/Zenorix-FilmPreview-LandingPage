@@ -5,20 +5,32 @@ import type { ChartEntry } from '@/lib/content/movies'
 import { PLATFORMS } from '@/lib/content/platforms'
 
 /**
- * Regional Top 10 — key art, rank, source badge. Nothing else.
+ * One regional chart rail — key art, rank, source badge. Nothing else.
  *
  * Every card is a locked door: tapping any title opens the download upsell
  * instead of a detail page. Titles and type labels are deliberately omitted so
  * the rail reads as pure curiosity bait; the accessible name still carries the
  * rank and title for screen readers.
+ *
+ * The page renders this twice — films, then shows — so `id` is required: two
+ * rails cannot share one heading id, or `aria-labelledby` on the second section
+ * would point at the first section's title.
+ *
+ * Rail length is whatever `entries` holds. No slicing, no padding: the copy in
+ * `chart.headingMovies` / `chart.headingSeries` carries no count, so a rail of
+ * eight and a rail of twelve are both honest, and the catalogue never has to
+ * invent an entry to fill a "Top 10" label.
  */
 export function TopChart({
+  id,
   entries,
   heading,
   rankLabel,
   moreLabel,
   moreHint,
 }: {
+  /** Unique per rail; used for the section's heading id. */
+  id: string
   entries: ChartEntry[]
   heading: string
   /** "Number {rank}" template, used to build each poster's accessible name. */
@@ -29,11 +41,12 @@ export function TopChart({
   moreHint: string
 }) {
   const { openContent, download } = useConversion()
+  const headingId = `zx-chart-heading-${id}`
 
   return (
-    <section className="zx-section zx-chart" aria-labelledby="zx-chart-heading">
+    <section className="zx-section zx-chart" aria-labelledby={headingId}>
       <div className="zx-shell">
-        <h2 id="zx-chart-heading" className="zx-section-title">
+        <h2 id={headingId} className="zx-section-title">
           {heading}
         </h2>
       </div>
@@ -105,7 +118,9 @@ export function TopChart({
         <button
           type="button"
           className="zx-chart-more"
-          onClick={() => download('chart_more')}
+          /* Per-rail source: the films rail and the shows rail are separate
+             offers, so a single `chart_more` would hide which one converts. */
+          onClick={() => download(`chart_more:${id}`)}
         >
           {moreLabel}
           <md-icon aria-hidden="true">arrow_forward</md-icon>

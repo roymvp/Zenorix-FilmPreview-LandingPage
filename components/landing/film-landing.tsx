@@ -8,7 +8,7 @@ import { SiteFooter } from '@/components/landing/site-footer'
 import { TopBar } from '@/components/landing/top-bar'
 import { TopChart } from '@/components/landing/top-chart'
 import { SITE } from '@/lib/config/site'
-import { getChart, type Movie } from '@/lib/content/movies'
+import { getMovieChart, getSeriesChart, type Movie } from '@/lib/content/movies'
 import { fill, type Dictionary } from '@/lib/i18n/dictionaries'
 import { locales, type Locale } from '@/lib/i18n/config'
 import { buildStructuredData, marketValues } from '@/lib/seo'
@@ -117,15 +117,29 @@ export function FilmLanding({
         </section>
 
         <main id="zx-main">
+          {/* Films first, then shows: the film rail leads with the biggest
+              theatrical titles, which is the strongest hook this page has. Both
+              rails share the tail CTA and the rank label — only the heading and
+              the catalogue differ. */}
           <TopChart
-            entries={getChart(locale)}
-            heading={fill(dict.chart.heading, values)}
+            id="movies"
+            entries={getMovieChart(locale)}
+            heading={fill(dict.chart.headingMovies, values)}
             rankLabel={dict.chart.rank}
             moreLabel={dict.chart.more}
             moreHint={dict.chart.moreHint}
           />
 
-          {/* Sits after the Top 10: the platform wall and the price both land
+          <TopChart
+            id="series"
+            entries={getSeriesChart(locale)}
+            heading={fill(dict.chart.headingSeries, values)}
+            rankLabel={dict.chart.rank}
+            moreLabel={dict.chart.more}
+            moreHint={dict.chart.moreHint}
+          />
+
+          {/* Sits after the charts: the platform wall and the price both land
               harder once the catalogue has been shown than they would next to a
               single film. */}
           <AboutZenorix

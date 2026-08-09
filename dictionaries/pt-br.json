@@ -36,7 +36,8 @@
     }
   },
   "chart": {
-    "heading": "Top 10 {country} nesta semana",
+    "headingMovies": "Filmes em alta {country} nesta semana",
+    "headingSeries": "Séries em alta {country} nesta semana",
     "rank": "Número {rank}",
     "seeAllShort": "Ver tudo",
     "more": "Baixe o app Zenorix para ver mais sucessos",

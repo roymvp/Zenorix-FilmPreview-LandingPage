@@ -11,24 +11,24 @@
  * immediately as black gutters inside individual tiles.
  *
  * This pool intentionally stays at six even though the tile directory now holds
- * fourteen: the other eight exist for the Top 10 rail. The wall is background
- * texture behind a scrim at ~130px wide, so more variety buys nothing visible
- * while every added tile is another image on the LCP path. Six is also what makes
- * the stride in `buildWall` work.
+ * twenty: the other fourteen exist for the two chart rails. The wall is
+ * background texture behind a scrim at ~130px wide, so more variety buys nothing
+ * visible while every added tile is another image on the LCP path. Six is also
+ * what makes the stride in `buildWall` work.
  *
- * These six are also the ONLY place the licensed platform posters may appear
- * (`72-hours`, `walter-boys` and `the-last-house` carry a burned-in service logo
- * and title lettering). At this size, behind the scrim, that reads as a real
- * catalogue; on a rail card it would contradict the card's own platform badge.
- * See the note in `scripts/build-poster-tiles.mjs`.
+ * The six are picked for CONTRAST rather than for what is ranking: a fantasy
+ * epic, two tentpole sequels, animation, a prestige drama and a fashion comedy,
+ * so the wall reads as a broad catalogue at a glance. Title lettering burned into
+ * the art is fine here — behind the scrim at this size it is texture, and unlike
+ * a rail card the wall overlays no badge that could disagree with it.
  */
 const TILES = [
-  '/media/tiles/nocturne-protocol.webp',
-  '/media/tiles/72-hours.webp',
-  '/media/tiles/the-last-signal.webp',
-  '/media/tiles/walter-boys.webp',
-  '/media/tiles/crimson-harbor.webp',
-  '/media/tiles/the-last-house.webp',
+  '/media/tiles/house-of-the-dragon.webp',
+  '/media/tiles/avatar-fire-and-ash.webp',
+  '/media/tiles/rick-and-morty.webp',
+  '/media/tiles/project-hail-mary.webp',
+  '/media/tiles/mortal-kombat-2.webp',
+  '/media/tiles/devil-wears-prada-2.webp',
 ] as const
 
 /** Tiles per column, and columns per wall. 3x4 fills a phone-width hero. */

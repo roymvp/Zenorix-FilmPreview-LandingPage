@@ -36,7 +36,8 @@
     }
   },
   "chart": {
-    "heading": "Top 10 in {country} This Week",
+    "headingMovies": "Movies Trending in {country} This Week",
+    "headingSeries": "Shows Trending in {country} This Week",
     "rank": "Number {rank}",
     "seeAllShort": "See all",
     "more": "Install Zenorix App for More Hits",
