@@ -1,6 +1,6 @@
 import { DownloadCta } from '@/components/landing/download-cta'
 import { StoreRow } from '@/components/landing/store-row'
-import { posterWalls } from '@/lib/content/poster-wall'
+import { posterColumns } from '@/lib/content/poster-wall'
 import { fill } from '@/lib/i18n/dictionaries'
 
 /**
@@ -11,13 +11,18 @@ import { fill } from '@/lib/i18n/dictionaries'
  * action — instead of playing one specific film. Nothing here is film-specific:
  * no title, no synopsis, no runtime.
  *
- * SERVER COMPONENT, and deliberately zero JavaScript. The "carousel" is three
- * stacked arrangements of the same six posters crossfading on a pure CSS cycle
- * (see `.zx-hero-wall-layer` in landing.css). A JS slider would mean shipping a
- * client component, an interval and hydration for something the visitor never
- * interacts with — and an interval that drifts from the CSS transition it drives.
- * The only interactive element in here is the install CTA, which is already a
- * client island of its own.
+ * SERVER COMPONENT, and deliberately zero JavaScript. The wall's motion is twelve
+ * columns drifting vertically at four different speeds and alternating directions,
+ * driven entirely by CSS (see `.zx-hero-wall-column` in landing.css). A JS
+ * marquee would mean shipping a client component, an interval and hydration for
+ * something the visitor never interacts with — and an interval that drifts out of
+ * step with the transform it is supposed to drive. The only interactive element in
+ * here is the install CTA, already a client island of its own.
+ *
+ * This replaced a three-layer crossfade of the same six posters. Twenty distinct
+ * posters that never stop moving carry "big catalogue" far better than six that
+ * cut between arrangements, and it renders FEWER nodes than the crossfade did
+ * (120 against 144) because there is only one layer now instead of three.
  */
 export function HeroBillboard({
   headline,
@@ -54,45 +59,45 @@ export function HeroBillboard({
           "there is a lot to watch", and the headline beside them already says so.
           Twelve alt strings here would be twelve pieces of noise for a screen
           reader. `aria-hidden` on the wrapper covers every tile at once. */}
+      {/* Two nested boxes, and both are needed. `.zx-hero-wall` is the unrotated
+          clip box; `.zx-hero-wall-track` is the rotated, over-sized flex row. They
+          cannot be merged: an element that is rotated AND clips itself clips in its
+          own rotated frame, which would cut the wall along the tilt and leave black
+          triangles in the hero's corners. */}
       <div className="zx-hero-wall" aria-hidden="true">
-        {posterWalls.map((columns, layer) => (
-          <div
-            key={layer}
-            className="zx-hero-wall-layer"
-            style={{
-              /* Negative offsets into a single shared 18s cycle, so layer 0 is
-                 the one visible at t=0 and each other layer is already past its
-                 own visible window. A POSITIVE stagger would leave every layer
-                 showing its opening keyframe (opacity 1) until its delay
-                 elapsed, i.e. all three visible at once on first paint. */
-              ['--zx-wall-delay' as string]: `-${((3 - layer) % 3) * 6}s`,
-            }}
-          >
-            {columns.map((tiles, column) => (
-              <div key={column} className="zx-hero-wall-column">
-                {tiles.map((src, row) => (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    key={`${src}-${row}`}
-                    className="zx-hero-tile"
-                    src={src}
-                    alt=""
-                    width={420}
-                    height={630}
-                    /* Only the first layer is on screen at first paint, so only
-                       it is eager and only it competes for early bandwidth. The
-                       other two are lazy and cost nothing extra anyway — all
-                       three layers draw from the same six files, so by the time
-                       one fades in the bytes are already cached. */
-                    loading={layer === 0 ? 'eager' : 'lazy'}
-                    fetchPriority={layer === 0 ? 'high' : 'low'}
-                    decoding="async"
-                  />
-                ))}
-              </div>
-            ))}
-          </div>
-        ))}
+        <div className="zx-hero-wall-track">
+          {posterColumns.map((tiles, column) => (
+            <div key={column} className="zx-hero-wall-column">
+              {tiles.map((src, row) => (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  key={`${src}-${row}`}
+                  className="zx-hero-tile"
+                  src={src}
+                  alt=""
+                  width={320}
+                  height={480}
+                  /* Only the four columns the narrowest viewport actually lays
+                     out are eager; the rest exist for the full-bleed desktop
+                     wall and are fetched as the browser gets to them.
+
+                     `fetchPriority="low"` on ALL of them, including the eager
+                     ones. The wall is texture behind a scrim — what has to paint
+                     first is the headline and the install button, and twenty
+                     tiles competing for the first connections is exactly how
+                     that gets delayed.
+
+                     The duplicate half of each column costs no network: it
+                     repeats the same URLs, so the browser serves it from the
+                     same fetch. */
+                  loading={column < 4 ? 'eager' : 'lazy'}
+                  fetchPriority="low"
+                  decoding="async"
+                />
+              ))}
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Two jobs, one element: darkens the art enough for white text to clear AA

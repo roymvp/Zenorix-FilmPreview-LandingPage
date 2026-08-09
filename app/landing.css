@@ -400,21 +400,19 @@
   overflow: hidden;
 }
 
-/* One arrangement of the wall. All three layers are stacked in the same box and
-   crossfade; only their opacity is ever animated (never a transform or a layout
-   property), so the whole effect stays on the compositor.
+/* The rotated track that holds every column.
 
-   Inset NEGATIVELY on all sides: the layer is rotated, and a rotated rectangle
-   no longer covers the corners of its own box. The overhang is what keeps the
-   wall bleeding past every edge instead of showing triangles of black canvas. */
-.zx-hero-wall-layer {
+   Inset NEGATIVELY on all sides because it is rotated, and a rotated rectangle no
+   longer covers the corners of its own box. The overhang is what keeps the wall
+   bleeding past every edge instead of showing triangles of black canvas. The
+   vertical -20% also hides the top and bottom of the drifting columns, so a tile
+   is always entering and leaving out of sight. */
+.zx-hero-wall-track {
   position: absolute;
   inset: -20% -14%;
   display: flex;
   gap: 8px;
   rotate: -9deg;
-  opacity: 0;
-  animation: zx-wall-cycle 18s var(--zx-wall-delay, 0s) linear infinite;
 }
 
 /* FIXED width, not `flex: 1`, and that is what makes one wall serve every
@@ -459,22 +457,68 @@
   gap: 8px;
   flex: 0 0 var(--zx-wall-col, 130px);
   min-width: 0;
+  /* THE DRIFT. Each column holds its five tiles twice (see `buildColumn` in
+     poster-wall.ts), so translating a full -50% lands the second copy exactly
+     where the first began — the loop has no seam to notice, no snap and no reset.
+     `linear` for the same reason: any easing would make the wall visibly slow
+     down and speed up once per cycle, which is precisely the tell that gives away
+     a loop.
+
+     Only `transform` is animated, so this stays on the compositor and never
+     triggers layout — that matters when it is twelve columns of ten images each,
+     running for as long as the page is open. Speeds and directions are assigned
+     per column below. */
+  animation: zx-wall-drift var(--zx-wall-drift, 150s) linear infinite;
 }
 
-/* Vertical offsets so the columns don't line up into visible horizontal bands —
-   the tiles are all one aspect ratio, so without this the wall reads as a grid
-   rather than as a stack of shelves.
+/* Four speeds and two directions, cycled across the twelve columns.
 
-   Stated as a repeating 3-step (`3n+2`, `3n+3`) rather than as the literal 2nd
-   and 3rd columns it once was: the wall now renders 8 columns and any un-offset
-   column past the third would restore exactly the banding this prevents. Column 1
-   keeps no offset, so the pattern still starts where it always did. */
+   The point is DESYNC, not variety for its own sake. Columns that share a period
+   stay locked in formation and the wall reads as one sliding sheet; at four
+   co-prime-ish periods with alternate columns reversed, no two neighbours ever
+   travel together for long and the surface keeps reorganising itself.
+
+   All four are slow on purpose — 150s means a tile takes roughly 40 seconds to
+   cross the hero. This is background texture behind a scrim, sitting under a
+   headline someone is trying to read; anything faster competes with the copy and
+   turns into a distraction rather than a sense of depth.
+
+   `reverse` rather than a negative duration (invalid) or reversed keyframes (a
+   second @keyframes block to keep in sync). */
+.zx-hero-wall-column:nth-child(4n + 1) {
+  --zx-wall-drift: 150s;
+}
+
+.zx-hero-wall-column:nth-child(4n + 2) {
+  --zx-wall-drift: 190s;
+  animation-direction: reverse;
+}
+
+.zx-hero-wall-column:nth-child(4n + 3) {
+  --zx-wall-drift: 170s;
+}
+
+.zx-hero-wall-column:nth-child(4n + 4) {
+  --zx-wall-drift: 210s;
+  animation-direction: reverse;
+}
+
+/* Static stagger, so the columns are already offset from each other at first
+   paint instead of starting as one flat row and only separating as the drift
+   diverges.
+
+   Fixed px, NOT the percentage this once used: percentages resolve against the
+   column's own height, and the column is twice as tall as it looks (five tiles
+   duplicated). A -7% offset would eat 7% of the doubled strip — enough to pull the
+   bottom edge into view at the narrowest tile. 40px is an optical amount that
+   holds at every tile size, and the loop's margin is measured against it (see
+   ROWS in poster-wall.ts). */
 .zx-hero-wall-column:nth-child(3n + 2) {
-  translate: 0 -7%;
+  translate: 0 -40px;
 }
 
 .zx-hero-wall-column:nth-child(3n + 3) {
-  translate: 0 5%;
+  translate: 0 24px;
 }
 
 /* `flex: 0 0 auto` so tiles keep their 2:3 ratio and overflow the column instead
