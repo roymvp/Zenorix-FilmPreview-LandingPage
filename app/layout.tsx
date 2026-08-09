@@ -100,10 +100,34 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       suppressHydrationWarning
     >
       <head>
-        {/* Material Symbols for <md-icon>. */}
+        {/* The icon font is served from a second origin, so the connection is
+            opened in parallel with this document instead of after the CSS
+            arrives. `crossOrigin` is required on the gstatic hint — fonts are
+            fetched in CORS mode, and a hint without it opens a connection the
+            font request cannot reuse. */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        {/* Material Symbols for <md-icon>, SUBSET to the eight glyphs this page
+            actually renders (`icon_names`, alphabetical as Google requires).
+
+            Without that parameter Google serves the entire Material Symbols
+            library: measured at 3871 KB versus 8 KB for this subset. That full
+            download blocked first paint on exactly the mobile connections these
+            markets are on, to deliver ~1900 glyphs the page never shows.
+
+            KEEP THIS LIST IN SYNC. An <md-icon> whose name is missing here
+            renders as its literal text ("expand_more") rather than a glyph, so
+            adding an icon to a component means adding it here too. Current
+            users: 4k / high_quality / surround_sound / bolt in the spec grid
+            (about-zenorix), arrow_forward (top-chart), check
+            (conversion-dialogs + language-switcher), expand_more (faq-section +
+            language-switcher), verified_user (download-cta).
+
+            The axis ranges are kept so the subset stays a variable font — it
+            still advertises `font-weight: 100 700`. */}
         <link
           rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=4k,arrow_forward,bolt,check,expand_more,high_quality,surround_sound,verified_user"
         />
       </head>
       <body>

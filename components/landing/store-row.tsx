@@ -52,7 +52,7 @@ export function StoreRow({
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               className="zx-store-icon"
-              src={store.icon || '/placeholder.svg'}
+              src={store.icon}
               alt=""
               width={18}
               height={18}

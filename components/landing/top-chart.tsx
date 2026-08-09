@@ -92,7 +92,7 @@ export function TopChart({
                   <span className="zx-chart-badge" aria-hidden="true">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
-                      src={platform.icon || '/placeholder.svg'}
+                      src={platform.icon}
                       alt=""
                       width={44}
                       height={44}

@@ -75,7 +75,7 @@ export function HeroBillboard({
                   <img
                     key={`${src}-${row}`}
                     className="zx-hero-tile"
-                    src={src || '/placeholder.svg'}
+                    src={src}
                     alt=""
                     width={420}
                     height={630}

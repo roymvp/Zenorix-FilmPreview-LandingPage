@@ -235,6 +235,11 @@ md-icon {
    targets precisely that pre-registration window and nothing else — these rules
    stop applying by themselves the moment the definitions land. No JS, no class
    toggling, and no hydration involvement.
+
+   Only the five elements this page renders are listed. The selector list used to
+   name 25, most for components the app does not use; keep it matched to
+   MaterialWebLoader's REGISTRATIONS. `md-ripple`/`md-focus-ring` are NOT needed
+   here — Material renders those inside its own shadow DOM, never in our markup.
    --------------------------------------------------------------------------- */
 
 /* Overlays must NEVER occupy layout while unupgraded. `display: none`, not
@@ -251,29 +256,8 @@ md-menu:not(:defined) {
    `visibility: hidden` also removes them from the accessibility tree and from
    hit-testing, so nothing can be clicked before it works. */
 md-filled-button:not(:defined),
-md-outlined-button:not(:defined),
-md-text-button:not(:defined),
-md-icon-button:not(:defined),
 md-icon:not(:defined),
-md-list:not(:defined),
-md-list-item:not(:defined),
-md-menu-item:not(:defined),
-md-elevated-card:not(:defined),
-md-outlined-card:not(:defined),
-md-filled-card:not(:defined),
-md-badge:not(:defined),
-md-linear-progress:not(:defined),
-md-circular-progress:not(:defined),
-md-slider:not(:defined),
-md-switch:not(:defined),
-md-checkbox:not(:defined),
-md-radio:not(:defined),
-md-chip-set:not(:defined),
-md-assist-chip:not(:defined),
-md-filter-chip:not(:defined),
-md-divider:not(:defined),
-md-ripple:not(:defined),
-md-focus-ring:not(:defined) {
+md-menu-item:not(:defined) {
   visibility: hidden;
 }
 

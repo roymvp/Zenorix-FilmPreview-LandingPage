@@ -177,7 +177,7 @@ export function AboutZenorix({
                         <li key={platform.id}>
                           {/* eslint-disable-next-line @next/next/no-img-element */}
                           <img
-                            src={platform.icon || '/placeholder.svg'}
+                            src={platform.icon}
                             alt={copy === 0 ? platform.name : ''}
                             width={44}
                             height={44}
