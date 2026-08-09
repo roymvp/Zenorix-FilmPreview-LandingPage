@@ -48,9 +48,10 @@ const TILES = [
  *
  * It costs no extra NETWORK at any width: all 12 columns draw from the same
  * six-file pool, so clipped columns resolve to images already being fetched. It
- * does cost DOM nodes, which is why the columns a phone cannot see are
- * `display: none` below the desktop tier rather than laid out and clipped — see
- * `.zx-hero-wall-column:nth-child(n + 5)` in landing.css.
+ * does cost DOM nodes, which is why the columns a narrow viewport cannot see are
+ * `display: none` rather than laid out and clipped — see the column-budget note on
+ * `.zx-hero-wall-column` in landing.css, which is also where to check coverage if
+ * this number or the tile width changes.
  */
 const ROWS = 4
 const COLUMNS = 12

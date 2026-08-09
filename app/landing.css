@@ -436,13 +436,20 @@
    draw from the same six files.
 
    The count is then raised at each tier, because the rotated layer is 128% of the
-   hero and each tier makes the hero wider. Per tier, columns needed vs. shown:
-     - base   hero 420px -> 538px of layer; 4 x 138px = 552 ✓
-     - 720    hero 680px -> 870px of layer; 8 x 138px = 1104 ✓ (4 would be 552 ✗)
-     - 1024   full-bleed -> see the note on `--zx-wall-col`, constant ~10.7 ✓
-   Fall short and the rotated wall exposes black canvas at the corners, so any new
-   width tier has to re-check this. */
-.zx-hero-wall-column:nth-child(n + 5) {
+   hero and each tier makes the hero wider. Measured layer width vs. wall content:
+     - base   538px needed; 5 cols = 682 ✓
+     - 720    870px needed; 8 cols = 1096 ✓ (5 would be 682 ✗)
+     - 1024   full-bleed  -> see `--zx-wall-col`; 12 cols, ~424px spare at 2128 ✓
+   Fall short and the rotated wall exposes black canvas at the corners, so a new
+   width tier has to re-check this.
+
+   Five at base rather than the four that strictly fit: four covers 544 against the
+   538 needed, a 6px margin that any subpixel rounding or user font scaling could
+   eat. The fifth column costs 12 <img> elements and removes the whole class of
+   problem. Verify in LAYOUT coordinates if you re-measure — `getBoundingClientRect`
+   returns the ROTATED bounding box, which is ~25% wider and makes a failing wall
+   look like it passes. */
+.zx-hero-wall-column:nth-child(n + 6) {
   display: none;
 }
 
@@ -2197,6 +2204,13 @@
   .zx-rail {
     grid-auto-columns: 148px;
   }
+
+  /* Four more wall columns. The hero is 680px wide here, so its rotated layer needs
+     ~870px of wall and the phone's four columns (552px) would leave black at the
+     corners. See the column-budget note on `.zx-hero-wall-column`. */
+  .zx-hero-wall-column:nth-child(n + 6):nth-child(-n + 8) {
+    display: flex;
+  }
 }
 
 /* DESKTOP — the reflow tier. Four blocks become multi-column here, and the hero
@@ -2273,6 +2287,25 @@
       var(--zx-hero-scrim-vertical);
   }
 
+  /* The bar's BAND still runs the full viewport (that is the header's "only seam"
+     rule), but its CONTENTS now stop where the page column does. The bar is
+     `position: absolute; inset-inline: 0` against the hero, and the hero is
+     full-bleed from here down — so without this the wordmark sat hard against the
+     window edge, ~470px left of the headline it belongs with, reading as a stray
+     element rather than as the top of this page.
+
+     `100%` is the bar's own width, i.e. the viewport, so the first term is the
+     black margin beside the column; adding the gutter lands the wordmark on the
+     exact inline start as the hero copy and every card below it. `max()` keeps the
+     plain gutter on narrow screens, where the column already fills the width and
+     the first term would go negative. */
+  .zx-topbar {
+    padding-inline: max(
+      var(--zx-gutter),
+      calc((100% - var(--zx-page-max)) / 2 + var(--zx-gutter))
+    );
+  }
+
   /* Bigger key art for a bigger screen — and a `vw` term, which is what lets ONE
      column count cover every desktop width. The rotated layer is 128% of the hero
      (`inset: -20% -14%`), so filling it needs `1.28 * 100vw` of columns: with a
@@ -2284,8 +2317,8 @@
 
      `max()` keeps the floor: below ~1530px the 184px branch wins, so a 1024px
      window still gets full-size key art rather than 123px slivers. */
-  /* The eight columns a phone does not lay out. The full-bleed hero needs all 12. */
-  .zx-hero-wall-column:nth-child(n + 5) {
+  /* The columns narrower tiers do not lay out. The full-bleed hero needs all 12. */
+  .zx-hero-wall-column:nth-child(n + 6) {
     display: flex;
   }
 
