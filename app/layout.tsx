@@ -120,7 +120,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             adding an icon to a component means adding it here too. Current
             users: 4k / high_quality / surround_sound / bolt in the spec grid
             (about-zenorix), arrow_forward (top-chart), check
-            (conversion-dialogs + language-switcher), expand_more (faq-section +
+            (conversion-dialog + language-switcher), expand_more (faq-section +
             language-switcher), verified_user (download-cta).
 
             The axis ranges are kept so the subset stays a variable font — it

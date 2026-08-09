@@ -1,89 +1,262 @@
 /**
- * Builds the brand share card (og:image / twitter:image) for the three market
- * pages.
+ * Builds the Open Graph share card for each market — the image that appears when
+ * someone pastes a zenorix.app link into WhatsApp, Telegram, X or iMessage.
  *
- * There is ONE card, not one per film. The site is a single page per market, so a
- * card showing one film would promise a destination about that film and deliver
- * the generic landing page instead. The card previews what the link actually
- * opens: the brand, over the same poster wall the hero renders behind its scrim.
+ * Run: `node scripts/build-share-cards.mjs`
+ * Out: `public/media/share/zenorix-{en,pt-br,th}.jpg` (1200x630)
  *
- * Why generated rather than hand-made: the licensed art is portrait 2:3 and a
- * share card is ~1.91:1, so pointing og:image at a poster makes every unfurl
- * letterbox it or crop the lettering off. Inventing fresh landscape art would
- * mean fabricating key art, which is what this project just finished removing —
- * so every pixel here comes from real art plus the real brand lockup.
+ * THREE CARDS, NOT ONE. The pitch on the card is the price, and the price differs
+ * in every market ($1.25 / R$ 6,20 / 43 บาท per month). One English card would
+ * quote US dollars to a Brazilian reader.
  *
- * Run after changing the lockup or the wall tiles:
- *   node scripts/build-share-cards.mjs
+ * WHY THE COPY IS NOT WRITTEN HERE: every string is read out of
+ * `dictionaries/*.json` — the same file the page renders from. Hardcoding card
+ * copy is how a share card ends up advertising a price the site no longer
+ * charges, silently, because nobody re-reads a generated PNG.
+ *
+ * WHY THE POSTERS GO THROUGH SHARP: the tiles are WebP and satori's image support
+ * does not cover WebP. Each is converted to a PNG buffer and inlined as a data
+ * URI, so this script needs no network and no undocumented decoder path.
+ *
+ * WHY THE FONTS ARE VENDORED: satori has no system fonts to fall back on and
+ * cannot read woff2. `assets/fonts/*.ttf` are real TrueType files committed to
+ * the repo. Without them every glyph renders as a tofu box — and it fails
+ * SILENTLY, producing a card that looks fine to the script and broken to
+ * everyone else. Thai needs its own face; Roboto carries no Thai glyphs.
+ *
+ * The 1200x630 output must stay in sync with the dimensions declared in
+ * `lib/seo.ts`, or scrapers reserve the wrong box and crop the card.
  */
-import { mkdir } from 'node:fs/promises'
+
+import { createElement as h } from 'react'
+import { readFile, writeFile, mkdir, readdir } from 'node:fs/promises'
+import { createRequire } from 'node:module'
+import path from 'node:path'
 import sharp from 'sharp'
 
-/* The size Facebook, X, WhatsApp and LinkedIn all document, and the value
-   declared in `lib/seo.ts`. Keep the two in sync or scrapers crop the card. */
+/* `next/og` ships as CommonJS with no ESM export condition, so a bare
+   `import ... from 'next/og'` throws ERR_MODULE_NOT_FOUND here. */
+const { ImageResponse } = createRequire(import.meta.url)('next/og')
+
 const WIDTH = 1200
 const HEIGHT = 630
 
-const OUT = 'public/media/share/zenorix.png'
+const TILE_DIR = 'public/media/tiles'
+const FONT_DIR = 'assets/fonts'
+const OUT_DIR = 'public/media/share'
 
-/* The same six posters as the hero wall in `lib/content/poster-wall.ts`, in the
-   same order, so the card and the page agree. */
-const TILES = [
-  'house-of-the-dragon',
-  'avatar-fire-and-ash',
-  'rick-and-morty',
-  'project-hail-mary',
-  'mortal-kombat-2',
-  'devil-wears-prada-2',
+/** Must match `locales` in `lib/i18n/config.ts`. */
+const LOCALES = ['en', 'pt-br', 'th']
+
+/** Mirrors `--md-sys-color-*` in `app/globals.css`. */
+const SURFACE = '#08090b'
+const ON_SURFACE = '#ffffff'
+const MUTED = '#a4aebc'
+
+/** Replaces `{token}` placeholders, matching `fill()` in `lib/i18n`. */
+const fill = (template, values) =>
+  template.replace(/\{(\w+)\}/g, (_, key) => String(values[key] ?? `{${key}}`))
+
+const dataUri = async (file) => {
+  const png = await sharp(file).png().toBuffer()
+  return `data:image/png;base64,${png.toString('base64')}`
+}
+
+/**
+ * The poster wall behind the copy: six staggered columns bleeding off every edge.
+ * The stagger — plus columns taller than the card — is what stops it reading as a
+ * tidy grid of thumbnails.
+ */
+function collage(posters) {
+  const columns = 6
+  const colWidth = Math.ceil(WIDTH / columns)
+  const tileHeight = Math.round(colWidth * 1.5)
+  /* Per-column vertical offsets so no two adjacent posters share a top edge. */
+  const offsets = [-150, -40, -230, -90, -190, -20]
+
+  return h(
+    'div',
+    {
+      style: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        width: WIDTH,
+        height: HEIGHT,
+        display: 'flex',
+        alignItems: 'flex-start',
+      },
+    },
+    offsets.map((offset, col) =>
+      h(
+        'div',
+        {
+          key: col,
+          style: {
+            display: 'flex',
+            flexDirection: 'column',
+            width: colWidth,
+            marginTop: offset,
+          },
+        },
+        /* Three per column always overfills 630px given the offsets above. */
+        [0, 1, 2].map((row) =>
+          h('img', {
+            key: row,
+            src: posters[(col * 3 + row) % posters.length],
+            width: colWidth,
+            height: tileHeight,
+            style: { objectFit: 'cover' },
+          }),
+        ),
+      ),
+    ),
+  )
+}
+
+function card({ lockup, posters, headline, price, trial, specs }) {
+  return h(
+    'div',
+    {
+      style: {
+        position: 'relative',
+        display: 'flex',
+        width: WIDTH,
+        height: HEIGHT,
+        backgroundColor: SURFACE,
+        fontFamily: 'Roboto, NotoSansThai',
+      },
+    },
+    collage(posters),
+    /* Scrim: opaque behind the copy, thinning to the right so the posters still
+       read as posters. Without it the headline sits on top of faces. */
+    h('div', {
+      style: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        width: WIDTH,
+        height: HEIGHT,
+        backgroundImage: `linear-gradient(100deg, ${SURFACE} 0%, rgba(8,9,11,0.96) 40%, rgba(8,9,11,0.72) 64%, rgba(8,9,11,0.42) 100%)`,
+      },
+    }),
+    h(
+      'div',
+      {
+        style: {
+          position: 'relative',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          width: 760,
+          height: HEIGHT,
+          padding: '64px 72px',
+        },
+      },
+      h('img', { src: lockup, width: 132, height: 123 }),
+      h(
+        'div',
+        {
+          style: {
+            display: 'flex',
+            marginTop: 26,
+            fontSize: 52,
+            fontWeight: 700,
+            lineHeight: 1.16,
+            letterSpacing: -1.2,
+            color: ON_SURFACE,
+          },
+        },
+        headline,
+      ),
+      h(
+        'div',
+        { style: { display: 'flex', alignItems: 'center', marginTop: 30 } },
+        /* Inverted pill — the price IS the pitch, so it gets the only solid fill. */
+        h(
+          'div',
+          {
+            style: {
+              display: 'flex',
+              backgroundColor: ON_SURFACE,
+              color: SURFACE,
+              fontSize: 30,
+              fontWeight: 700,
+              padding: '12px 24px',
+              borderRadius: 999,
+            },
+          },
+          price,
+        ),
+        h(
+          'div',
+          { style: { display: 'flex', marginLeft: 20, fontSize: 26, color: MUTED } },
+          trial,
+        ),
+      ),
+      h(
+        'div',
+        { style: { display: 'flex', marginTop: 26, fontSize: 22, color: MUTED } },
+        specs,
+      ),
+    ),
+  )
+}
+
+const tiles = (await readdir(TILE_DIR)).filter((f) => f.endsWith('.webp')).sort()
+if (tiles.length === 0) {
+  throw new Error(`No tiles in ${TILE_DIR} — run scripts/build-poster-tiles.mjs first`)
+}
+
+const posters = await Promise.all(tiles.map((f) => dataUri(path.join(TILE_DIR, f))))
+const lockup = await dataUri('public/brand/zenorix-lockup.webp')
+
+const fonts = [
+  {
+    name: 'Roboto',
+    data: await readFile(path.join(FONT_DIR, 'roboto-700.ttf')),
+    weight: 700,
+    style: 'normal',
+  },
+  {
+    name: 'NotoSansThai',
+    data: await readFile(path.join(FONT_DIR, 'noto-sans-thai-700.ttf')),
+    weight: 700,
+    style: 'normal',
+  },
 ]
 
-const COLUMN_W = Math.ceil(WIDTH / TILES.length)
+await mkdir(OUT_DIR, { recursive: true })
 
-/* Each poster fills one full-bleed column. `cover` at a taller-than-column box
-   keeps the art's own proportions and crops the overflow, rather than squashing a
-   2:3 poster into a narrow strip. */
-const columns = await Promise.all(
-  TILES.map((slug, i) =>
-    sharp(`public/media/posters/${slug}.png`)
-      .resize(COLUMN_W, HEIGHT, {
-        fit: 'cover',
-        /* Alternate the crop window so six posters cropped identically don't
-           produce a visible repeating band across the card. */
-        position: i % 2 === 0 ? 'top' : 'centre',
-      })
-      .toBuffer(),
-  ),
-)
+for (const locale of LOCALES) {
+  const dict = JSON.parse(await readFile(`dictionaries/${locale}.json`, 'utf8'))
+  const viewing = dict.about.viewing.specs
 
-/* Scrim: the lockup is light silver, and raw key art behind it leaves the
-   wordmark unreadable at the ~500px a chat client actually renders. */
-const scrim = Buffer.from(
-  `<svg width="${WIDTH}" height="${HEIGHT}">
-     <rect width="${WIDTH}" height="${HEIGHT}" fill="#000" opacity="0.74"/>
-   </svg>`,
-)
+  const element = card({
+    lockup,
+    posters,
+    headline: dict.about.apps.label,
+    price: fill(dict.hero.price, dict.market),
+    trial: dict.about.trial.value,
+    specs: `${viewing.resolution} · ${viewing.audio} · ${viewing.playback}`,
+  })
 
-const LOCKUP_W = 440
-const lockup = await sharp('public/brand/zenorix-lockup.webp')
-  .resize({ width: LOCKUP_W })
-  .toBuffer()
-const { height: lockupH = 0 } = await sharp(lockup).metadata()
+  const png = Buffer.from(
+    await new ImageResponse(element, { width: WIDTH, height: HEIGHT, fonts }).arrayBuffer(),
+  )
 
-await mkdir('public/media/share', { recursive: true })
+  /* JPEG, not the PNG satori hands back. The card is 80% photographic poster art,
+     which PNG cannot compress: the same image is 930 KB as PNG and 94 KB at q84,
+     visually identical. Chat clients refetch this on every unfurl, so the extra
+     836 KB buys nothing. `4:4:4` keeps full chroma resolution so the coloured
+     wordmark and the white-on-dark type stay crisp — the usual `4:2:0` halves
+     chroma and fringes exactly that kind of edge. No alpha channel is needed
+     since the card is a full-bleed rectangle. */
+  const buffer = await sharp(png)
+    .jpeg({ quality: 84, mozjpeg: true, chromaSubsampling: '4:4:4' })
+    .toBuffer()
 
-const info = await sharp({
-  create: { width: WIDTH, height: HEIGHT, channels: 3, background: '#000' },
-})
-  .composite([
-    ...columns.map((input, i) => ({ input, left: i * COLUMN_W, top: 0 })),
-    { input: scrim, left: 0, top: 0 },
-    {
-      input: lockup,
-      left: Math.round((WIDTH - LOCKUP_W) / 2),
-      top: Math.round((HEIGHT - lockupH) / 2),
-    },
-  ])
-  .png({ quality: 90 })
-  .toFile(OUT)
-
-console.log('[v0] wrote', OUT, `${Math.round(info.size / 1024)}KB`)
+  const out = path.join(OUT_DIR, `zenorix-${locale}.jpg`)
+  await writeFile(out, buffer)
+  console.log(`[v0] wrote ${out}  ${(buffer.length / 1024).toFixed(0)} KB`)
+}

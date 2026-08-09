@@ -3,8 +3,18 @@ import { SITE } from '@/lib/config/site'
 import { fill, type Dictionary } from '@/lib/i18n/dictionaries'
 import { locales, localeMeta, type Locale } from '@/lib/i18n/config'
 
-/** The brand share card built by `scripts/build-share-cards.mjs`. */
-const SHARE_CARD = '/media/share/zenorix.png'
+/**
+ * The share card for a market, built by `scripts/build-share-cards.mjs`.
+ *
+ * One card PER MARKET, because the card's headline is the price and the price is
+ * different in each ($1.25 / R$ 6,20 / 43 บาท per month). A single shared card
+ * quoted one market's currency to all three.
+ */
+const shareCard = (locale: Locale) => `/media/share/zenorix-${locale}.jpg`
+
+/** Matches the `WIDTH`/`HEIGHT` the generator writes. A mismatch makes scrapers
+    reserve the wrong box and crop the card. */
+const SHARE_CARD_SIZE = { width: 1200, height: 630 } as const
 
 /**
  * Every market page is independently indexable: its own canonical URL, its own
@@ -60,11 +70,8 @@ export function buildMarketMetadata({
       description,
       images: [
         {
-          url: `${SITE.url}${SHARE_CARD}`,
-          /* Must match the output size in `scripts/build-share-cards.mjs`. A
-             mismatch makes scrapers reserve the wrong box and crop the card. */
-          width: 1200,
-          height: 630,
+          url: `${SITE.url}${shareCard(locale)}`,
+          ...SHARE_CARD_SIZE,
           alt: dict.meta.imageAlt,
         },
       ],
@@ -73,7 +80,7 @@ export function buildMarketMetadata({
       card: 'summary_large_image',
       title: fill(dict.meta.ogTitle, values),
       description,
-      images: [`${SITE.url}${SHARE_CARD}`],
+      images: [`${SITE.url}${shareCard(locale)}`],
     },
     robots: { index: true, follow: true },
   }

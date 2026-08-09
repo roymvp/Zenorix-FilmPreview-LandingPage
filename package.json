@@ -1,11 +1,12 @@
 {
-  "name": "material-web-starter",
+  "name": "zenorix-site",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "assets": "node scripts/build-brand-icons.mjs && node scripts/build-poster-tiles.mjs && node scripts/build-share-cards.mjs"
   },
   "dependencies": {
     "@material/web": "^2.4.1",

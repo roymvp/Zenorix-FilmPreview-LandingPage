@@ -134,25 +134,18 @@ export type DialogCopy = {
   ctaMeta: string
 }
 
-/* NOTE: `CornerClose` lived here — a top-right dismiss disc. The sheet now relies
-   on md-dialog's own light dismiss instead: `handleDialogClick` fires `cancel` and
-   closes whenever the click did not originate inside `.container`, so tapping the
-   scrim (and Escape, which stays for keyboard users) already routed through the
-   same `closed` event the provider listens to. The button was a second, redundant
-   path to a behaviour the component gave us for free, and removing it hands the
-   corner back to the title.
-
-   NOTE: a second sheet lived here too — the preview gate, opened when the hero
-   player hit its 10-minute wall. The hero has no player any more, so that sheet
-   could never be opened and went with it, along with its `modals.preview` copy. */
-
 /**
- * The locked-title upsell sheet, fired from the Top 10 rail.
+ * The one modal on the site: the locked-title upsell sheet, fired from the Top 10
+ * rail.
  *
- * Mounted once at page level rather than per card so the page has exactly one
- * modal layer, and driven purely by conversion context state.
+ * Mounted once at page level rather than per card, so the page has a single modal
+ * layer, and driven purely by conversion context state.
+ *
+ * It adds no close button — md-dialog light-dismisses on a scrim click and on
+ * Escape, both of which arrive as the same `closed` event the provider listens
+ * for.
  */
-export function ConversionDialogs({ copy }: { copy: DialogCopy }) {
+export function ConversionDialog({ copy }: { copy: DialogCopy }) {
   const { contentTitle, closeContent } = useConversion()
 
   const contentRef = useRef<HTMLElement | null>(null)

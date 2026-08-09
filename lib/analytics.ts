@@ -7,11 +7,16 @@
  * Nothing else in the app talks to an analytics SDK, so wiring Firebase (or
  * GA4 / AppsFlyer) is a one-file change.
  */
+/**
+ * Every event this app can emit — grep each one and you will find its call site.
+ *
+ * Four `preview_*` events used to sit here (play, unmute, limit_reached,
+ * scrub_locked) from when the page was a film detail page with a trailer player.
+ * That player is gone, so they were names for things that can no longer happen —
+ * a union member with no emitter is worse than nothing, because it implies a
+ * funnel step and quietly turns up empty in whatever dashboard is wired later.
+ */
 export type ConversionEvent =
-  | 'preview_play'
-  | 'preview_unmute'
-  | 'preview_limit_reached'
-  | 'preview_scrub_locked'
   | 'modal_view'
   | 'modal_dismiss'
   | 'apk_download_click'

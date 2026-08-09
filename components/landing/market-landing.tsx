@@ -1,5 +1,5 @@
 import { AboutZenorix } from '@/components/landing/about-zenorix'
-import { ConversionDialogs } from '@/components/landing/conversion-dialogs'
+import { ConversionDialog } from '@/components/landing/conversion-dialog'
 import { ConversionProvider } from '@/components/landing/conversion-provider'
 import { FaqSection } from '@/components/landing/faq-section'
 import { FinalCta } from '@/components/landing/final-cta'
@@ -185,7 +185,7 @@ export function MarketLanding({
           copyright={fill(dict.footer.copyright, { year: 2026 })}
         />
 
-        <ConversionDialogs
+        <ConversionDialog
           copy={{
             heading: dict.modals.content.heading,
             body: dict.modals.content.body,
