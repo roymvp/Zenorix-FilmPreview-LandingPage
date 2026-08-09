@@ -584,6 +584,109 @@
   width: 100%;
 }
 
+/* The two upcoming store builds, under the hero's APK button.
+   
+   Two equal columns rather than a centered flex row: the pair then shares one
+   axis with the full-width CTA above, and neither item shifts when its label
+   length changes between locales ("Google Play" is fixed, but the Thai and
+   Portuguese "coming soon" badges are not).
+
+   Pulled up against the CTA with a negative margin that cancels the hero copy's
+   own 20px block gap down to 12px. These belong to the install cluster, not to
+   the hero as a third peer block — at the full 20px they floated between the
+   button and the section edge, reading as unrelated. */
+.zx-store-row {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--zx-space-2);
+  margin: calc(var(--zx-space-3) - var(--zx-space-5)) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Deliberately NOT button-shaped: a dashed hairline and no fill, where every real
+   control on this page is either a filled plate or a solid outline. The dash is
+   the signal — it reads as a placeholder slot at a glance, before the badge text
+   is read, and it cannot be mistaken for the silver CTA 12px above it.
+
+   `cursor: default` because the default `text` cursor over a label invites a
+   selection drag on something that behaves like a control. No hover or active
+   state at all: there is nothing to press. */
+.zx-store {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  padding: var(--zx-space-15) var(--zx-space-2);
+  /* Literal rgba, not a token: there is no `--zx-on-media-rgb` channel triplet to
+     compose with, and `--zx-on-media` is a hex so it cannot take an alpha here.
+     This is white at 28% — the same on-media hairline weight the glass top bar
+     uses for its own bottom edge. */
+  border: 1px dashed rgba(255, 255, 255, 0.28);
+  border-radius: var(--zx-radius-sm);
+  cursor: default;
+}
+
+/* Grid, not a wrapping flex row. Flex-wrap was tried first and produced the exact
+   defect this replaces: "iOS COMING SOON" fits one line while "Google Play COMING
+   SOON" does not, so one tile wrapped and the other didn't — two tiles of different
+   heights and different internal layouts, side by side.
+
+   So the badge ALWAYS gets its own line, in both tiles, regardless of whether it
+   would have fit. The mark and the store name share row 1; the badge sits under the
+   name in row 2, aligned to the name rather than to the tile, which is what keeps
+   the icon reading as a prefix to the whole block instead of to just one line. */
+.zx-store-face {
+  display: grid;
+  grid-template-columns: auto auto;
+  /* 6px column: the icon-to-its-own-label step. 2px row: the badge is a state
+     attached to the name directly above it, the tightest joint on the page. */
+  gap: var(--zx-space-05) var(--zx-space-15);
+  align-items: center;
+  /* Centers the two-column block inside the tile, so both tiles are optically
+     centered even though their names differ in width. */
+  justify-content: center;
+}
+
+/* Both marks are single-path monochrome SVGs authored in black, so they are
+   inverted to sit on the hero's dark scrim. `brightness(0) invert(1)` is used
+   rather than shipping white-filled copies: it guarantees both marks land on
+   exactly the same white as the text beside them, and it survives replacing
+   either file with a different variant. Opacity, not a grey fill, keeps them
+   one step quieter than the label. */
+.zx-store-icon {
+  /* Column 1, spanning BOTH rows, so the mark is centered against the name+badge
+     block as a whole rather than sitting beside only the name. */
+  grid-row: 1 / span 2;
+  width: 18px;
+  height: 18px;
+  filter: brightness(0) invert(1);
+  opacity: 0.8;
+}
+
+.zx-store-name {
+  font-size: var(--zx-text-meta);
+  font-weight: var(--zx-weight-semibold);
+  line-height: 1.2;
+  color: var(--zx-on-media);
+}
+
+/* The "Coming soon" state, in the page's established eyebrow treatment
+   (uppercase, 11px, tracked) so it reads as a status tag and not as body copy.
+   `--zx-on-media-variant` puts it a step below the store name it qualifies. */
+.zx-store-badge {
+  /* Row 2 of column 2 — under the name, not under the icon. Start-aligned so it
+     shares a left edge with the name above it. */
+  justify-self: start;
+  font-size: var(--zx-text-label);
+  font-weight: var(--zx-weight-semibold);
+  letter-spacing: 0.08em;
+  line-height: 1.2;
+  text-transform: uppercase;
+  color: var(--zx-on-media-variant);
+}
+
 /* Primary CTA cluster (repeated at several scroll depths) */
 
 .zx-cta {
@@ -1339,15 +1442,22 @@
   color: var(--md-sys-color-outline);
 }
 
-/* Grid rather than flex: three EQUAL tracks are what keep the tiles the same
-   width. With flex each tile would size to its own label, so "Lag-Free" would be
-   visibly narrower than "4K Ultra HD" and three equal-rank specs would read as
-   three different-rank ones. */
+/* Grid rather than flex: EQUAL tracks are what keep the tiles the same width. With
+   flex each tile would size to its own label, so "Lag-Free" would be visibly
+   narrower than "Lossless Quality" and four equal-rank specs would read as four
+   different-rank ones.
+
+   TWO columns, was three — a fourth spec joined the card. Four across would squeeze
+   each label to ~80px and break "4K Ultra HD" over three lines, so the row wraps
+   into a 2x2 block instead. Both dimensions are explicit: `1fr` columns keep the
+   tiles equal in width, and the tiles' own `stretch` keeps each ROW equal in height,
+   so a label that wraps cannot make its neighbour shorter. */
 .zx-about-specs {
   width: 100%;
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  /* Sibling step, matching the compare card's row gap. */
+  grid-template-columns: repeat(2, 1fr);
+  /* Sibling step, matching the compare card's row gap. Applies on both axes here,
+     so the 2x2 block's vertical and horizontal joints agree. */
   gap: var(--zx-space-3);
   margin: 0;
   padding: 0;
@@ -1360,16 +1470,21 @@
    them instead, which is also why the 12px gap can equal the 12px padding here —
    the tile boundary is drawn, so it does not have to be implied by whitespace.
 
-   `align-items: stretch` from the grid keeps all three the same height even
-   though "Lag-Free" is one line where "4K Ultra HD" wraps to two, so the badges
-   still sit on one line across the row. */
+   `align-items: stretch` from the grid keeps tiles in the same row equal in height
+   even though "Lag-Free" is one line where "Lossless Quality" may wrap to two.
+
+   ROW, not column: the badge sits beside its label rather than above it. Centered
+   on the cross axis so a wrapping two-line label stays visually paired with its
+   glyph instead of leaving it hanging at the top. This is the change that paid for
+   the fourth spec — see the note on `.zx-about-specs`. */
 .zx-spec {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  /* 6px, was 8px. Icon and label are the tightest possible pair — a glyph and the
-     two words naming it — so this is where height comes out of this card first. */
-  gap: var(--zx-space-15);
+  flex-direction: row;
+  align-items: center;
+  /* 8px. One step up from the 6px the stacked layout used: side by side the glyph
+     and the text share a line box, and 6px horizontally read as the icon touching
+     its label. Still the tightest joint in the card. */
+  gap: var(--zx-space-2);
   /* 10px, was 12px. The tile keeps its own fill, so its edge is still drawn rather
      than implied; 10px is enough inset to read as a tile at this size. */
   padding: var(--zx-space-25);
@@ -1387,18 +1502,29 @@
      the glyphs crop. */
   width: 24px;
   height: 24px;
+  /* Now that the icon is a FLEX SIBLING of the label rather than stacked above it,
+     it is shrinkable — without this the glyph gets squeezed narrower than its own
+     box (and clips) in the narrowest column, e.g. the longer Thai and Portuguese
+     labels at 390px. */
+  flex-shrink: 0;
   color: var(--md-sys-color-on-surface);
 }
 
 /* Same weight and color as .zx-about-value so this card still belongs to the
-   set; only the size drops, because three labels have to share one row. */
+   set; only the size drops, because two labels have to share one row. */
 .zx-spec-label {
   font-size: var(--zx-text-meta);
   font-weight: var(--zx-weight-bold);
   line-height: 1.3;
   letter-spacing: -0.01em;
   color: var(--md-sys-color-on-surface);
+  /* `balance`, not `pretty`: these are 2-3 word labels, so when one wraps the goal
+     is two even lines rather than a long line plus an orphan. */
   text-wrap: balance;
+  /* The label is the flex item that must give way. Without it a long unbroken word
+     sets the tile's min-content width, and two such tiles overflow the 1fr track
+     instead of wrapping inside it. */
+  min-width: 0;
 }
 
 .zx-about-note {

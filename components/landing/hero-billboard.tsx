@@ -1,5 +1,7 @@
 import { DownloadCta } from '@/components/landing/download-cta'
+import { StoreRow } from '@/components/landing/store-row'
 import { posterWalls } from '@/lib/content/poster-wall'
+import { fill } from '@/lib/i18n/dictionaries'
 
 /**
  * Brand hero: a tilted wall of key art, a scrim, and the pitch on top.
@@ -23,6 +25,7 @@ export function HeroBillboard({
   priceNote,
   cta,
   ctaMeta,
+  stores,
 }: {
   /** The page's single <h1>. */
   headline: string
@@ -32,6 +35,18 @@ export function HeroBillboard({
   priceNote: string
   cta: string
   ctaMeta: string
+  /**
+   * Copy for the two not-yet-shipped store builds. `unavailable` is a template
+   * taking `{store}`; it exists so the screen-reader sentence is one translatable
+   * string per locale rather than being concatenated from a name plus a badge,
+   * which would not reorder correctly in every language.
+   */
+  stores: {
+    upcoming: string
+    ios: string
+    googlePlay: string
+    unavailable: string
+  }
 }) {
   return (
     <div className="zx-hero-billboard">
@@ -104,6 +119,27 @@ export function HeroBillboard({
         </p>
 
         <DownloadCta label={cta} sub={ctaMeta} source="hero" />
+
+        {/* Below the APK button, not beside it: only one of the three platforms
+            actually ships today, so they are not peers. See StoreRow for why
+            these are static text rather than disabled buttons. */}
+        <StoreRow
+          upcomingLabel={stores.upcoming}
+          stores={[
+            {
+              id: 'ios',
+              name: stores.ios,
+              icon: '/brand/apple.svg',
+              srLabel: fill(stores.unavailable, { store: stores.ios }),
+            },
+            {
+              id: 'google-play',
+              name: stores.googlePlay,
+              icon: '/brand/google-play.svg',
+              srLabel: fill(stores.unavailable, { store: stores.googlePlay }),
+            },
+          ]}
+        />
       </div>
     </div>
   )

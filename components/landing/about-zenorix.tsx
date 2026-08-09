@@ -10,9 +10,19 @@ import { PLATFORMS, PLATFORM_ORDER } from '@/lib/content/platforms'
  * are keyed rather than index-matched so reordering or retranslating a label can
  * never silently pair "Dolby Atmos" with the 4K plate.
  */
+/**
+ * Order is not arbitrary — these are read as a 2x2 grid that fills row-wise, so
+ * the pairs are what the rows say: row 1 is PICTURE (resolution, then the
+ * compression behind it), row 2 is SOUND and SMOOTHNESS. Reordering this array
+ * regroups the card.
+ */
 const VIEWING_SPECS = [
   // The literal 4K plate broadcasters and disc cases use.
   { id: 'resolution', icon: '4k' },
+  // The "HQ" plate. Sits beside 4K deliberately: 4K is how many pixels arrive,
+  // lossless is whether they survive compression — the second is the claim that
+  // stops "4K" from meaning a heavily-compressed 4K stream.
+  { id: 'lossless', icon: 'high_quality' },
   // Speaker throwing concentric arcs — the standard surround/spatial mark.
   { id: 'audio', icon: 'surround_sound' },
   // Smooth playback has no industry plate, so this borrows the universal
@@ -258,12 +268,18 @@ export function AboutZenorix({
 
           <li className="zx-about-card">
             <p className="zx-about-label">{viewing.label}</p>
-            {/* Three equal tiles side by side, each with its badge over its label
-                and both left-aligned to the tile's own edge. Icons are the
-                industry's own marks (a 4K plate, a surround-sound speaker), so the
-                claim is recognized before it is read. Decorative by design: each
-                label already states its spec, so announcing the glyph too would
-                only double up for screen readers. */}
+            {/* Four equal tiles on a 2x2 grid, each badge BESIDE its label rather
+                than above it. The row layout is what let a fourth spec in without
+                growing the card: stacked, four tiles meant either a 4-across row
+                (labels down to ~80px, so "4K Ultra HD" broke onto three lines) or
+                two stacked rows of two, which added a whole second icon+label
+                column height. Side by side, the icon shares the label's line box,
+                so the 2x2 grid costs one text row instead of one tile.
+
+                Icons are the industry's own marks (a 4K plate, an HQ plate, a
+                surround-sound speaker), so the claim is recognized before it is
+                read. Decorative by design: each label already states its spec, so
+                announcing the glyph too would only double up for screen readers. */}
             <ul className="zx-about-specs">
               {VIEWING_SPECS.map((spec) => (
                 <li key={spec.id} className="zx-spec">

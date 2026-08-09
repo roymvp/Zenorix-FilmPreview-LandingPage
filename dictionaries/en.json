@@ -23,11 +23,17 @@
     "languageMenu": "Choose your language"
   },
   "hero": {
-    "headline": "Get Netflix, Disney+, HBO Max & 20+ premium networks. Watch any movie & series you want to watch.",
+    "headline": "Netflix, Disney+, HBO Max & 20+ networks. Every movie and series, one app.",
     "price": "{annualPerMonth}/MONTH",
     "priceNote": "30 days free · no card needed",
     "cta": "Get Zenorix",
-    "ctaMeta": "Android APK · {size} · {downloads}"
+    "ctaMeta": "Android APK · {size} · {downloads}",
+    "stores": {
+      "upcoming": "Coming soon",
+      "ios": "iOS",
+      "googlePlay": "Google Play",
+      "unavailable": "{store} — coming soon"
+    }
   },
   "chart": {
     "heading": "Top 10 in {country} This Week",
@@ -55,6 +61,7 @@
       "label": "Cinematic Viewing",
       "specs": {
         "resolution": "4K Ultra HD",
+        "lossless": "Lossless Quality",
         "audio": "Dolby Atmos",
         "playback": "Lag-Free"
       }

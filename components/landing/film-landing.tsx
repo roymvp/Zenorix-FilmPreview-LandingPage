@@ -112,6 +112,7 @@ export function FilmLanding({
             priceNote={dict.hero.priceNote}
             cta={dict.hero.cta}
             ctaMeta={fill(dict.hero.ctaMeta, values)}
+            stores={dict.hero.stores}
           />
         </section>
 
