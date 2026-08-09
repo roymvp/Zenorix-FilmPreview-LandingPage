@@ -1058,6 +1058,13 @@
    members standing off the card group, so they stand off it equally. */
 .zx-about-cta {
   margin-block-start: var(--zx-space-6);
+  /* Now a two-child stack (the CTA block, then the support line), so it owns a
+     joint. 16px, the same step `.zx-cta` uses to bind a button to its own
+     caption: the support line is a sibling of that whole CTA block, so it stands
+     one step off it rather than joining the button's own 8px caption pairing. */
+  display: flex;
+  flex-direction: column;
+  gap: var(--zx-space-4);
 }
 
 /* The page's eyebrow treatment: OUTLINED pill, transparent fill.
@@ -1671,6 +1678,87 @@
   width: 100%;
 }
 
+/* ----------------------------------------------------------------- contact */
+
+/* One support link, three placements (top bar, about, footer). The base rule
+   owns everything shared — inline layout, the icon sizing, the hover and the
+   focus ring — so a placement modifier only ever restates its own colour or
+   spacing, never the mechanics. */
+.zx-contact {
+  /* inline-flex, not flex: in the about placement this sits INSIDE a sentence
+     ("Questions before you install? Contact us"), so it has to stay on the text
+     baseline. A block-level flex would break onto its own line. */
+  display: inline-flex;
+  align-items: center;
+  /* 6px, the scale's documented "icon <-> its own label" step — the same joint
+     `.zx-cta-sub` uses for its shield glyph. */
+  gap: var(--zx-space-15);
+  color: var(--md-sys-color-primary);
+  font-size: var(--zx-text-meta);
+  line-height: 1.4;
+  text-decoration: none;
+  transition: color 120ms ease;
+}
+
+.zx-contact md-icon {
+  /* Same treatment as `.zx-cta-sub md-icon`: pinned to the `lg` step and given
+     an explicit box so the glyph rides the label's line box instead of dictating
+     it. Without the width/height an md-icon defaults to 24px and pushes the row
+     taller than the 12px text beside it. */
+  font-size: var(--zx-text-lg);
+  width: 15px;
+  height: 15px;
+}
+
+.zx-contact:hover {
+  color: var(--md-sys-color-on-surface);
+}
+
+.zx-contact:focus-visible {
+  outline: 2px solid var(--md-sys-color-primary);
+  outline-offset: 3px;
+  border-radius: 3px;
+}
+
+/* Top bar. Takes the MEDIA tokens, not the surface ones, for the same reason the
+   comment above `.zx-topbar-actions` gives: this sits on glass with key art
+   running underneath, and `--md-sys-color-primary` is tuned for the flat page
+   surface, not for poster art showing through. */
+.zx-contact--bar {
+  color: var(--zx-on-media-variant);
+}
+
+.zx-contact--bar:hover {
+  color: var(--zx-on-media);
+}
+
+.zx-contact--bar:focus-visible {
+  outline-color: var(--zx-on-media);
+}
+
+/* Under 480px the bar has to hold the wordmark, this link and the locale, so the
+   label collapses to its glyph. The accessible name is unaffected: it comes from
+   `aria-label` on the anchor, not from this text. */
+@media (max-width: 479px) {
+  .zx-contact--bar {
+    /* Zero out the label's own box rather than `display: none` on a child: the
+       text node has no element to target, so it is hidden by clipping the line
+       box down to the icon. */
+    gap: 0;
+    font-size: 0;
+  }
+}
+
+/* About. Muted to match the APK caption it follows — this is the section's
+   THIRD-priority element, after the install button and its meta line. */
+.zx-about-contact {
+  margin: 0;
+  color: var(--md-sys-color-on-surface-variant);
+  font-size: var(--zx-text-caption);
+  line-height: var(--zx-lh-body);
+  text-align: center;
+}
+
 /* ------------------------------------------------------------------ footer */
 
 .zx-footer {
@@ -1689,6 +1777,13 @@
   flex-direction: column;
   align-items: center;
   gap: var(--zx-space-25);
+}
+
+/* Keeps the base `primary` colour rather than muting to the legal links' grey.
+   That difference is the point: it is the only actionable link in the footer, and
+   the row above the legal list is where a reader looking for help will scan. */
+.zx-contact--footer {
+  font-size: var(--zx-text-meta);
 }
 
 .zx-footer-links {

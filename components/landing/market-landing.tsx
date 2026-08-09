@@ -100,6 +100,7 @@ export function MarketLanding({
             homeLabel={dict.nav.home}
             languageMenuLabel={dict.nav.languageMenu}
             localeHrefs={localeHrefs}
+            contact={{ label: dict.contact.label, aria: dict.contact.aria }}
           />
 
           <HeroBillboard
@@ -159,6 +160,7 @@ export function MarketLanding({
             trial={dict.about.trial}
             cta={dict.about.cta}
             ctaMeta={fill(dict.about.ctaMeta, values)}
+            contact={dict.contact}
           />
 
           <FaqSection
@@ -183,6 +185,7 @@ export function MarketLanding({
             { label: dict.footer.dmca, href: `/${locale}#dmca` },
           ]}
           copyright={fill(dict.footer.copyright, { year: 2026 })}
+          contact={{ label: dict.contact.label, aria: dict.contact.aria }}
         />
 
         <ConversionDialog

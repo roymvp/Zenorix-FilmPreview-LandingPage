@@ -134,6 +134,11 @@
       "ctaMeta": "APK Android · {size} · {downloads}"
     }
   },
+  "contact": {
+    "label": "Fale com a gente",
+    "prompt": "Dúvidas antes de instalar?",
+    "aria": "Fale com a gente no Telegram"
+  },
   "footer": {
     "privacy": "Privacidade",
     "terms": "Termos",

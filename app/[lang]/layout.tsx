@@ -124,7 +124,7 @@ export default async function LocaleLayout({
             font request cannot reuse. */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        {/* Material Symbols for <md-icon>, SUBSET to the eight glyphs this page
+        {/* Material Symbols for <md-icon>, SUBSET to the nine glyphs this page
             actually renders (`icon_names`, alphabetical as Google requires).
 
             Without that parameter Google serves the entire Material Symbols
@@ -136,15 +136,15 @@ export default async function LocaleLayout({
             renders as its literal text ("expand_more") rather than a glyph, so
             adding an icon to a component means adding it here too. Current
             users: 4k / high_quality / surround_sound / bolt in the spec grid
-            (about-zenorix), arrow_forward (top-chart), check
-            (conversion-dialog + language-switcher), expand_more (faq-section +
-            language-switcher), verified_user (download-cta).
+            (about-zenorix), arrow_forward (top-chart), chat (contact-link),
+            check (conversion-dialog + language-switcher), expand_more
+            (faq-section + language-switcher), verified_user (download-cta).
 
             The axis ranges are kept so the subset stays a variable font — it
             still advertises `font-weight: 100 700`. */}
         <link
           rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=4k,arrow_forward,bolt,check,expand_more,high_quality,surround_sound,verified_user"
+          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=4k,arrow_forward,bolt,chat,check,expand_more,high_quality,surround_sound,verified_user"
         />
       </head>
       <body>

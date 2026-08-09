@@ -1,5 +1,6 @@
 import type { CSSProperties } from 'react'
 
+import { ContactLink } from '@/components/landing/contact-link'
 import { DownloadCta } from '@/components/landing/download-cta'
 import { PLATFORMS, PLATFORM_ORDER } from '@/lib/content/platforms'
 
@@ -71,6 +72,7 @@ export function AboutZenorix({
   trial,
   cta,
   ctaMeta,
+  contact,
 }: {
   heading: string
   /** Card 1 label. Its "content" is the platform icon matrix itself. */
@@ -108,6 +110,8 @@ export function AboutZenorix({
   cta: string
   /** APK facts rendered directly beneath that button. */
   ctaMeta: string
+  /** Support escape hatch under the button, for readers who are not ready yet. */
+  contact: { label: string; prompt: string; aria: string }
 }) {
   // The rival bar is always full, so our bar is our share of its cost.
   //
@@ -317,6 +321,22 @@ export function AboutZenorix({
             the exact moment the reader is deciding. */}
         <div className="zx-about-cta">
           <DownloadCta label={cta} sub={ctaMeta} source="about" />
+          {/* The section's four cards answer "is this worth it?", but a reader
+              still holding a question has had nowhere to put it — the only exit
+              was to install anyway or leave. This is that exit.
+
+              It sits BELOW the APK meta line, not beside the button: the prompt
+              is a question, so putting it above or alongside would have it argue
+              with the CTA at the moment of the decision. Reached only after the
+              primary action has been offered and declined. */}
+          <p className="zx-about-contact">
+            {contact.prompt}{' '}
+            <ContactLink
+              label={contact.label}
+              ariaLabel={contact.aria}
+              source="about"
+            />
+          </p>
         </div>
       </div>
     </section>

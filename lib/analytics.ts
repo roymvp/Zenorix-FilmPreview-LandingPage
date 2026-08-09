@@ -21,6 +21,10 @@ export type ConversionEvent =
   | 'modal_dismiss'
   | 'apk_download_click'
   | 'language_switch'
+  /* Emitted by `<ContactLink>`, which reports its placement as `source`: the
+     three entry points sit at very different scroll depths, so a single
+     undifferentiated count could not say which one actually earns the ask. */
+  | 'contact_click'
 
 export function trackEvent(
   name: ConversionEvent,

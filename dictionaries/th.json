@@ -134,6 +134,11 @@
       "ctaMeta": "APK Android · {size} · {downloads}"
     }
   },
+  "contact": {
+    "label": "ติดต่อเรา",
+    "prompt": "มีคำถามก่อนติดตั้งไหม",
+    "aria": "ติดต่อเราทาง Telegram"
+  },
   "footer": {
     "privacy": "ความเป็นส่วนตัว",
     "terms": "ข้อกำหนด",

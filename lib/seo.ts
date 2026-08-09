@@ -134,7 +134,10 @@ export function buildStructuredData({
         fileFormat: 'application/vnd.android.package-archive',
         softwareVersion: SITE.apkVersion,
         fileSize: SITE.apkSize,
-        installUrl: `${SITE.url}${SITE.apkUrl}`,
+        /* Used BARE, not joined to `SITE.url`: the APK lives on its own update
+           host, so prefixing the site origin would emit a broken
+           "https://zenorix.apphttps://update.vinextv.co/..." here. */
+        installUrl: SITE.apkUrl,
         /* AggregateOffer rather than a bare Offer list: this app has THREE price
            points per market (free trial, monthly, annual) and an aggregate is the
            only shape that states the range explicitly. `lowPrice: 0` is what lets
