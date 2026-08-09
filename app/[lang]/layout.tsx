@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 import type { Metadata, Viewport } from 'next'
 import { notFound } from 'next/navigation'
 import { Roboto, Noto_Sans_Thai, Orbitron } from 'next/font/google'
+import { Analytics } from '@vercel/analytics/next'
 import { MaterialWebLoader } from '@/components/material-web-loader'
 import { SITE } from '@/lib/config/site'
 import { isLocale, localeMeta, locales } from '@/lib/i18n/config'
@@ -151,6 +152,18 @@ export default async function LocaleLayout({
       <body>
         <MaterialWebLoader />
         {children}
+        {/* Loads the Web Analytics collector, which counts page views on its own
+            and is also what makes `trackEvent` in lib/analytics.ts do anything —
+            `track()` is a silent no-op when this is absent, so removing it would
+            not break a build or a test, it would just stop the funnel data
+            without any signal. Mounted in the root layout so it covers all three
+            locales from one place.
+
+            It stays out of <head> intentionally: this renders no markup, only a
+            deferred same-origin script, so it has no reason to compete with the
+            hero for the critical path. Same-origin (`/_vercel/insights/*`) also
+            means it needs no new CSP origin. */}
+        <Analytics />
       </body>
     </html>
   )

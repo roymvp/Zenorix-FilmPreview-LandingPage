@@ -215,12 +215,19 @@ export function ConversionDialog({ copy }: { copy: DialogCopy }) {
       </div>
 
       <div slot="actions" className="zx-dialog-actions">
-        <DownloadCta
-          label={copy.cta}
-          sub={copy.ctaMeta}
-          source={`content_lock:${content?.title ?? 'unknown'}`}
-          autoFocus
-        />
+        {/* A FIXED string, not `content_lock:${content.title}` as it was before
+            analytics was wired up. `source` becomes a group-by key in the Web
+            Analytics dashboard, so interpolating the title turned the one number
+            that matters here — how well the locked-content modal converts
+            compared to the hero, footer and final CTA — into one sparse row per
+            title, none of them comparable to anything.
+
+            The title is not lost: `modal_view` reports it, and it necessarily
+            fires before any click in here, so title-level interest is still
+            answerable. Note the 2-property ceiling on Pro means it cannot simply
+            be added here as a second property either — `apk_download_click`
+            already carries `source` + `version`. */}
+        <DownloadCta label={copy.cta} sub={copy.ctaMeta} source="content_lock" autoFocus />
       </div>
     </md-dialog>
   )
