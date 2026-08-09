@@ -41,13 +41,33 @@ const CSP = [
   `style-src 'self' 'unsafe-inline' ${FONT_CSS}`,
   `font-src 'self' ${FONT_FILES}`,
   "connect-src 'self'",
-  /* THE ONE BLOCKER to enforcing this policy. Measured against a production build:
-     29 inline hydration scripts, every external script same-origin, and zero
-     `eval` — so a nonce is sufficient and no 'unsafe-eval' is needed. (A dev server
-     reports `eval` violations from webpack/HMR; those do not exist in the build.)
+  /* WHY THIS POLICY STAYS REPORT-ONLY. A production build emits 38 inline scripts
+     per page (React hydration payloads), so enforcing this as-is would break the
+     site. All three standard fixes were measured against a real build, and each was
+     rejected on evidence rather than taste:
 
-     Fix with a nonce, not 'unsafe-inline', which would silence the reports and give
-     up most of what CSP is for. Resolve BEFORE switching to enforcing. */
+       nonce   Requires dynamic rendering on every page — Next.js injects nonces
+               during SSR, so a prerendered page has no request to draw one from.
+               These pages are static and CDN-served (verified: `x-vercel-cache:
+               HIT`), which is what buys the ~630ms LCP. Trading that away is a
+               real, every-visitor cost.
+       SRI     `experimental.sri` builds fine and keeps pages static, but it only
+               stamped `integrity` on the 6 EXTERNAL scripts. `integrity` is
+               meaningless for inline code, so all 38 inline scripts stay blocked.
+       hashes  Enumerating sha256 hashes of those inline scripts yielded 72 across
+               the three locales, only 18 of them shared — the rest embed localized
+               data. Every copy edit would silently invalidate a hash and
+               white-screen a page: a permanent release hazard, not a one-time setup.
+
+     So, stated honestly: this header currently protects nothing (report-only only
+     logs), and the page it guards has no form, no cookie, and no user data, so the
+     realistic XSS surface is small. Do NOT "fix" this by adding 'unsafe-inline' —
+     that silences the reports while giving up most of what CSP is for, which is
+     worse than the current honest no-op.
+
+     What would change the calculus: React shipping nonce-less streaming hydration,
+     or dynamic rendering becoming acceptable because the page gains authenticated
+     or user-specific behavior. Re-measure then rather than assuming. */
   "script-src 'self'",
   'upgrade-insecure-requests',
 ].join('; ')

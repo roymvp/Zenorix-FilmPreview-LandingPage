@@ -41,12 +41,20 @@ pnpm start
 
 | Var | Default if unset | Purpose |
 | --- | --- | --- |
-| `NEXT_PUBLIC_SITE_URL` | `https://zenorix.app` | Canonical origin for canonical URLs, hreflang, OG images, sitemap, robots |
+| `NEXT_PUBLIC_SITE_URL` | `https://zenorix.app` (dev fallback — **not** the live origin) | Canonical origin for canonical URLs, hreflang, OG images, sitemap, robots |
 | `NEXT_PUBLIC_APK_URL` | `/download/zenorix.apk` | APK download target |
 
-Both have working dev fallbacks, so a fresh clone runs with no `.env`. **Both
-must be set in production** — an unset `NEXT_PUBLIC_SITE_URL` silently publishes
-`zenorix.app` absolute URLs into your sitemap and share cards.
+Both have working dev fallbacks, so a fresh clone runs with no `.env`. **Both must
+be set in production.** The live value of `NEXT_PUBLIC_SITE_URL` is
+`https://zenorix.space`, already set on all three Vercel environments.
+
+The fallback is a trap worth understanding: `zenorix.app` is a domain this project
+does not own, and an unset variable fails *silently* — the build succeeds and the
+page looks perfect while every canonical tag, hreflang pair, sitemap entry, JSON-LD
+block and `llms.txt` line points at someone else's domain. Production was in exactly
+that state until this was set. If you ever fork this for another origin, set the
+variable first, then verify with
+`curl -s https://<host>/en | grep canonical` rather than trusting the build.
 
 ### First 15 minutes — read these five files in order
 
@@ -450,12 +458,28 @@ but anything added there later cannot assume Edge.
 `Permissions-Policy` and a `Content-Security-Policy-Report-Only`. See the
 comments in that file — they record what is still blocking enforcement.
 
-**One open item:** the CSP is still REPORT-ONLY, which logs violations and
-protects nothing. `script-src 'self'` is the blocker (29 inline hydration scripts
-in the production build); fix with a nonce, not `'unsafe-inline'`, then rename the
-header to `Content-Security-Policy`. Also note `connect-src 'self'` — add your
-Firebase and media-CDN origins there before enforcing, or analytics and playback
-break.
+**The CSP is deliberately REPORT-ONLY, which logs violations and protects
+nothing.** An earlier draft of this doc said "fix it with a nonce." That advice was
+tested and is wrong for this site; all three standard fixes were measured against a
+real production build and rejected:
+
+| Fix | Measured result |
+| --- | --- |
+| nonce | Requires dynamic rendering on every page. These pages are static and CDN-served (`x-vercel-cache: HIT`), which is what buys the ~630ms LCP. |
+| `experimental.sri` | Builds fine, pages stay static, but stamps `integrity` only on the 6 **external** scripts. The 38 **inline** ones stay blocked — `integrity` is meaningless for inline code. |
+| inline hashes | 72 sha256 hashes across the three locales, only 18 shared; the rest embed localized text. Any copy edit silently invalidates one and white-screens that page. |
+
+Full reasoning is in the `script-src` comment in `next.config.mjs`. **Do not
+"resolve" this by adding `'unsafe-inline'`** — it silences the reports while giving
+up most of what CSP is for, which is worse than the current honest no-op. The page
+has no form, no cookie, and no user data, so the real XSS surface is small.
+
+Revisit when React ships nonce-less streaming hydration, or when the page gains
+authenticated behavior that makes dynamic rendering worth paying for anyway.
+
+Independently of that: `connect-src 'self'` will block your Firebase and media-CDN
+origins the moment this is ever enforced. Add them at the same time, or analytics
+and playback break.
 
 ### Deployment
 
@@ -465,11 +489,31 @@ another platform, replace that lookup with your CDN's equivalent (e.g.
 `CF-IPCountry`) or geo-detection stops working and every visitor falls through to
 `Accept-Language`.
 
+#### Live domain topology
+
+Two separate Vercel projects share the one domain, so check which you are touching
+before changing anything:
+
+| Host | Vercel project | GitHub repo | Serves |
+| --- | --- | --- | --- |
+| `zenorix.space` | `zenorix-website` | `Zenorix-FilmPreview-LandingPage` | **This** site (canonical) |
+| `www.zenorix.space` | `zenorix-website` | — | 308 → apex |
+| `play.zenorix.space` | `zenorix` | `zenorix-LandingPage-FakeGooglePlay` | The older demo page |
+
+`www` used to be the canonical host and the apex redirected *to* it; that is now
+reversed. Two gotchas found while moving the domain: a host cannot be attached to
+two projects at once (detach first, and detach the apex before the host its
+redirect points at), and attaching a domain does **not** alias it to a deployment —
+`play` returned `DEPLOYMENT_NOT_FOUND` until `vercel alias set` pointed a build at
+it. Also note `vercel domains rm` deletes the domain from the *account*; use the
+project-level API endpoint to detach.
+
 Pre-deploy:
 
-1. Set `NEXT_PUBLIC_SITE_URL` to the production origin and
-   `NEXT_PUBLIC_APK_URL` to the real APK. Rebuild — both are inlined at build
-   time, so changing them requires a rebuild, not just a restart.
+1. ~~Set `NEXT_PUBLIC_SITE_URL`~~ — **done**, set to `https://zenorix.space` for
+   production, preview and development. Still set `NEXT_PUBLIC_APK_URL` to the real
+   APK. Both are inlined at build time, so changing either needs a rebuild, not just
+   a restart.
 2. Host the APK (or point at the CDN) and confirm the Android
    `Content-Type: application/vnd.android.package-archive`.
 3. Verify `/sitemap.xml` shows your production origin and submit it.
