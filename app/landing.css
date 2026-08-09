@@ -671,8 +671,8 @@
    
    Two equal columns rather than a centered flex row: the pair then shares one
    axis with the full-width CTA above, and neither item shifts when its label
-   length changes between locales ("Google Play" is fixed, but the Thai and
-   Portuguese "coming soon" badges are not).
+   length changes between locales (the wordmarks are fixed, but the Thai and
+   Portuguese "coming soon" eyebrows are not).
 
    Pulled up against the CTA with a negative margin that cancels the hero copy's
    own 20px block gap down to 12px. These belong to the install cluster, not to
@@ -688,27 +688,93 @@
   list-style: none;
 }
 
-/* Deliberately NOT button-shaped: a dashed hairline and no fill, where every real
-   control on this page is either a filled plate or a solid outline. The dash is
-   the signal — it reads as a placeholder slot at a glance, before the badge text
-   is read, and it cannot be mistaken for the silver CTA 12px above it.
+/* The official App Store / Google Play badge silhouette: rounded rect, solid dark
+   fill, hairline border, fixed height. This replaces an earlier dashed-outline
+   "placeholder slot" treatment. The dash did communicate unavailability, but it
+   cost the pair its recognisability — a visitor scanning the hero saw two empty
+   dashed boxes and had to READ them to learn iOS and Play were coming. The store
+   lockup is recognised pre-reading, so it now carries that message at a glance
+   and the copy inside states the truth.
 
-   `cursor: default` because the default `text` cursor over a label invites a
-   selection drag on something that behaves like a control. No hover or active
-   state at all: there is nothing to press. */
+   The fill is black at 55% rather than opaque: these sit on the poster wall, and
+   the hero's own scrim already darkens what is behind them, so a solid black
+   plate would punch two dead rectangles into the artwork.
+
+   Still not a control: `cursor: default` (the default `text` cursor over a label
+   invites a selection drag), and no hover or active state at all. Deliberately one
+   step quieter than the silver CTA 12px above it — outline plus translucent fill
+   against that button's solid plate — so the badge shape never competes with the
+   one action that works today. */
 .zx-store {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 40px;
-  padding: var(--zx-space-15) var(--zx-space-2);
+  /* 48px, the real badges' proportion at this width. Not `min-height`: both
+     badges must be exactly the same height even when one locale's eyebrow wraps
+     differently, which is what a fixed height guarantees and a minimum does not. */
+  height: 48px;
+  padding: 0 var(--zx-space-25);
+  background: rgba(0, 0, 0, 0.55);
   /* Literal rgba, not a token: there is no `--zx-on-media-rgb` channel triplet to
      compose with, and `--zx-on-media` is a hex so it cannot take an alpha here.
-     This is white at 28% ��� the same on-media hairline weight the glass top bar
+     This is white at 28% — the same on-media hairline weight the glass top bar
      uses for its own bottom edge. */
-  border: 1px dashed rgba(255, 255, 255, 0.28);
+  border: 1px solid rgba(255, 255, 255, 0.28);
   border-radius: var(--zx-radius-sm);
   cursor: default;
+}
+
+/* Mark on the left, two stacked lines of type on the right — the badge lockup.
+   Centered as a block inside the badge (rather than stretched to it) so both
+   badges are optically centered even though "App Store" and "Google Play" differ
+   in width. */
+.zx-store-face {
+  display: flex;
+  align-items: center;
+  gap: var(--zx-space-15);
+  min-width: 0;
+}
+
+/* Both marks are single-path monochrome SVGs authored in black, so they are
+   inverted to sit on the hero's dark scrim. `brightness(0) invert(1)` is used
+   rather than shipping white-filled copies: it guarantees both marks land on
+   exactly the same white as the text beside them, and it survives replacing
+   either file with a different variant. */
+.zx-store-icon {
+  /* Never shrinks: it is the recognisable half of the lockup, so a long Thai or
+     Portuguese eyebrow must compress the text column, not the glyph. */
+  flex: none;
+  width: 22px;
+  height: 22px;
+  filter: brightness(0) invert(1);
+}
+
+.zx-store-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+/* The eyebrow carries the availability ("Coming soon to the"), so it is sentence
+   case at small size — NOT the page's uppercase tracked eyebrow treatment, which
+   is reserved for status tags and would read as a label rather than as the first
+   half of a sentence that continues into the wordmark below. */
+.zx-store-eyebrow {
+  font-size: var(--zx-text-label);
+  font-weight: var(--zx-weight-regular);
+  line-height: 1.25;
+  color: var(--zx-on-media-variant);
+}
+
+/* The store wordmark: the badge's dominant line, set noticeably larger than the
+   eyebrow above it. That size step is most of what makes the lockup read as a
+   store badge rather than as two lines of caption. */
+.zx-store-name {
+  font-size: var(--zx-text-body);
+  font-weight: var(--zx-weight-semibold);
+  line-height: 1.2;
+  color: var(--zx-on-media);
+  white-space: nowrap;
 }
 
 /* Grid, not a wrapping flex row. Flex-wrap was tried first and produced the exact

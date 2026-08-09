@@ -41,14 +41,21 @@ export function HeroBillboard({
   cta: string
   ctaMeta: string
   /**
-   * Copy for the two not-yet-shipped store builds. `unavailable` is a template
-   * taking `{store}`; it exists so the screen-reader sentence is one translatable
-   * string per locale rather than being concatenated from a name plus a badge,
-   * which would not reorder correctly in every language.
+   * Copy for the two not-yet-shipped store builds. Each badge is a two-line
+   * lockup, so every store needs its own eyebrow AND wordmark: the eyebrow
+   * carries the preposition that agrees with the store name ("Coming soon to
+   * the App Store" vs "Coming soon to Google Play"), which no single shared
+   * string can produce across locales.
+   *
+   * `unavailable` is a template taking `{store}`; it exists so the
+   * screen-reader sentence is one translatable string per locale rather than
+   * being concatenated from an eyebrow plus a name, which would not reorder
+   * correctly in every language.
    */
   stores: {
-    upcoming: string
+    iosEyebrow: string
     ios: string
+    googlePlayEyebrow: string
     googlePlay: string
     unavailable: string
   }
@@ -129,16 +136,17 @@ export function HeroBillboard({
             actually ships today, so they are not peers. See StoreRow for why
             these are static text rather than disabled buttons. */}
         <StoreRow
-          upcomingLabel={stores.upcoming}
           stores={[
             {
               id: 'ios',
+              eyebrow: stores.iosEyebrow,
               name: stores.ios,
               icon: '/brand/apple.svg',
               srLabel: fill(stores.unavailable, { store: stores.ios }),
             },
             {
               id: 'google-play',
+              eyebrow: stores.googlePlayEyebrow,
               name: stores.googlePlay,
               icon: '/brand/google-play.svg',
               srLabel: fill(stores.unavailable, { store: stores.googlePlay }),
