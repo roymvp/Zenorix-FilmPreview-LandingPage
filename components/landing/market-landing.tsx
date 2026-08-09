@@ -128,7 +128,17 @@ export function MarketLanding({
           />
         </section>
 
-        <main id="zx-main">
+        {/* `tabIndex={-1}` is what makes the skip link above actually work, and it
+            is not decorative. <main> is not natively focusable, so activating
+            `#zx-main` only SCROLLED the page while keyboard focus stayed on the
+            body — measured in-browser: `document.activeElement` was still BODY
+            after following the link. The next Tab therefore walked back into the
+            top bar, meaning the skip link moved the viewport but skipped nothing,
+            for exactly the keyboard and screen-reader users it exists to serve.
+
+            -1 keeps it out of the tab order (it must not become a stop of its own)
+            while still accepting fragment and programmatic focus. */}
+        <main id="zx-main" tabIndex={-1}>
           {/* Films first, then shows: the film rail leads with the biggest
               theatrical titles, which is the strongest hook this page has.
 

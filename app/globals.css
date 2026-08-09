@@ -327,3 +327,23 @@ html[lang='th-TH'] body {
   white-space: nowrap;
   border: 0;
 }
+
+/* The skip link's landing target. `<main>` carries `tabIndex={-1}` so that
+   following `#zx-main` actually MOVES FOCUS and not just the scroll position
+   (without it, focus stayed on <body> and the next Tab went back to the top bar —
+   the skip link skipped nothing).
+
+   Making a full-page container focusable has one side effect that must be undone
+   here: Chrome treats programmatic focus from a fragment as `:focus-visible` and
+   draws its default ring around the ENTIRE element, which is the whole page
+   column — verified as a white outline down the left, top and right of the
+   viewport. So the ring is removed on this container only.
+
+   This suppresses NOTHING real: `<main>` is not a control, it cannot be tabbed to
+   (-1), and the user's next Tab lands on the first card, which draws its own
+   `:focus-visible` ring. Do NOT generalise this rule to other elements — every
+   actual control on this page depends on its focus ring. */
+main[tabindex='-1']:focus,
+main[tabindex='-1']:focus-visible {
+  outline: none;
+}
