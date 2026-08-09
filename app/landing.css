@@ -102,8 +102,14 @@
   margin-inline: auto;
   display: flex;
   flex-direction: column;
-  /* The Top 10 rail scrolls inside itself and must never widen the document. */
-  overflow-x: clip;
+  /* NOT clipped, deliberately. `overflow-x: clip` lived here to stop the rails
+     widening the document, but a clip applies to every descendant however it is
+     positioned — including the hero, which on desktop has to escape this column to
+     bleed the poster wall to the viewport edge. The rail guard moved DOWN to
+     `#zx-main`, which is where the rails actually are.
+
+     Do not re-add a clip here: it would silently cap the desktop hero back to
+     `--zx-page-max` with nothing to indicate why. */
   /* Stays as the positioned ancestor for the absolutely positioned things inside
      the column. `z-index` previously also had to lift this above a `body::before`
      header band, which no longer exists — see the note where it was, in
@@ -135,6 +141,15 @@
 .zx-shell {
   width: 100%;
   padding-inline: var(--zx-gutter);
+}
+
+/* The rail-overflow guard, moved here from `.zx-page` (see the note there). Every
+   rail is inside <main>, so this clips exactly what needs clipping while leaving
+   the hero — the one section outside <main> — free to bleed on desktop.
+   `clip` rather than `hidden` on purpose: `hidden` would make this a scroll
+   container, which silently breaks `position: sticky` for anything inside it. */
+#zx-main {
+  overflow-x: clip;
 }
 
 /* SECTION RHYTHM — single-owner model.
@@ -413,6 +428,24 @@
    desktop hero shows all 8. So the wall needs no breakpoint — only
    `--zx-wall-col` moves, and it moves for art-direction (bigger key art on a
    bigger screen), not to repair the layout. */
+/* COLUMN BUDGET. The pool holds 12 (see COLUMNS in poster-wall.ts) because the
+   full-bleed desktop hero needs all of them; a phone needs four. The surplus is
+   `display: none` rather than laid out and clipped, since `overflow: hidden` still
+   paints and measures what it crops — and eight extra columns is 32 <img> elements
+   on the viewport least able to afford them. Costs no requests either way: all 12
+   draw from the same six files.
+
+   The count is then raised at each tier, because the rotated layer is 128% of the
+   hero and each tier makes the hero wider. Per tier, columns needed vs. shown:
+     - base   hero 420px -> 538px of layer; 4 x 138px = 552 ✓
+     - 720    hero 680px -> 870px of layer; 8 x 138px = 1104 ✓ (4 would be 552 ✗)
+     - 1024   full-bleed -> see the note on `--zx-wall-col`, constant ~10.7 ✓
+   Fall short and the rotated wall exposes black canvas at the corners, so any new
+   width tier has to re-check this. */
+.zx-hero-wall-column:nth-child(n + 5) {
+  display: none;
+}
+
 .zx-hero-wall-column {
   display: flex;
   flex-direction: column;
@@ -489,7 +522,10 @@
   inset: 0;
   z-index: 1;
   pointer-events: none;
-  background: linear-gradient(
+  /* Held in a variable so the desktop tier can stack a horizontal scrim ON TOP of
+     this exact ramp without restating its four stops — one definition, two
+     compositions. */
+  --zx-hero-scrim-vertical: linear-gradient(
     to top,
     /* First stop is the PAGE surface, not the media black used by every stop
        above it — this is the pixel that has to match the section below the hero.
@@ -499,6 +535,7 @@
     rgb(var(--zx-media-black-rgb) / 0.6) 62%,
     rgb(var(--zx-media-black-rgb) / 0.5) 100%
   );
+  background: var(--zx-hero-scrim-vertical);
 }
 
 .zx-hero-copy {
@@ -2186,12 +2223,74 @@
 
   /* ------------------------------------------------------------------- hero */
 
-  /* Bigger key art for a bigger screen — this is the only reason the wall has a
-     desktop value at all, since its column COUNT already adapts on its own (see
-     `.zx-hero-wall-column`). 184px against the 8 rendered columns spans the
-     1200px cap plus the layer's -14% overhang. */
+  /* FULL BLEED, and the one thing on the page that is allowed to leave the 1200px
+     column. The art spans the viewport; the COPY does not — see the padding below.
+     That split is the whole point: "no infinite full-screen" applies to content
+     (headline, price, CTA, every rail and card stay capped), while the poster wall
+     behind it is backdrop, and a backdrop stopping short of the window edge would
+     read as a framed picture rather than as a cinema screen.
+     
+     The `margin/padding` pair is what does it, on BOTH elements:
+     - the negative margin pulls each edge out to the viewport;
+     - the equal positive padding pushes the CONTENT box back to 1200px.
+     Percentages in both resolve against the same containing block, so the two
+     always cancel — the pair stays correct at any viewport width and needs no
+     second breakpoint.
+     
+     `.zx-hero` needs it too, not just the billboard: it owns `overflow: hidden`
+     (which crops the rotated wall) and the page-black background, so leaving it at
+     1200px would clip the bleed straight back off and leave a visible seam where
+     its background ended. Both also depend on `.zx-page` no longer clipping and on
+     `html { overflow-x: clip }` absorbing the `vw`-vs-scrollbar difference. */
+  .zx-hero,
   .zx-hero-billboard {
-    --zx-wall-col: 184px;
+    margin-inline: calc(50% - 50vw);
+    padding-inline: calc(50vw - 50%);
+  }
+
+  /* A SECOND, horizontal scrim — and it only exists because of the bleed above.
+     The base scrim is purely vertical, which is exactly right on a phone where the
+     copy spans the full column: every pixel of text gets the same darkening.
+     Full-bleed breaks that assumption. The headline now ends at ~53% of a 2128px
+     viewport, so the vertical ramp is spending its darkness across 1000px of empty
+     right-hand art while the copy crosses whatever poster happens to land behind
+     it — measured, that includes the white gown of `devil-wears-prada-2`, i.e.
+     white type on white key art.
+
+     So this darkens the COPY SIDE and fades out before the right edge: the text
+     gets a guaranteed floor, and the art stays bright where nothing sits on it.
+     Listed FIRST because in a multi-value `background` the first layer paints on
+     top; the vertical ramp underneath still owns the bottom hand-off to the page
+     surface, which this layer cannot disturb since it is transparent by then. */
+  .zx-hero-scrim {
+    background:
+      linear-gradient(
+        to right,
+        rgb(var(--zx-media-black-rgb) / 0.7) 0%,
+        rgb(var(--zx-media-black-rgb) / 0.58) 34%,
+        transparent 68%
+      ),
+      var(--zx-hero-scrim-vertical);
+  }
+
+  /* Bigger key art for a bigger screen — and a `vw` term, which is what lets ONE
+     column count cover every desktop width. The rotated layer is 128% of the hero
+     (`inset: -20% -14%`), so filling it needs `1.28 * 100vw` of columns: with a
+     FIXED tile that requirement grows without bound (a 2560px window would want 18
+     columns), but with a tile that is itself 12vw the ratio is constant at
+     1.28 / 0.12 ≈ 10.7 columns at EVERY width. Twelve columns therefore cover any
+     viewport, which is why `COLUMNS` in poster-wall.ts is 12 and does not need to
+     track the maximum monitor size.
+
+     `max()` keeps the floor: below ~1530px the 184px branch wins, so a 1024px
+     window still gets full-size key art rather than 123px slivers. */
+  /* The eight columns a phone does not lay out. The full-bleed hero needs all 12. */
+  .zx-hero-wall-column:nth-child(n + 5) {
+    display: flex;
+  }
+
+  .zx-hero-billboard {
+    --zx-wall-col: max(184px, 12vw);
     /* Taller, but still capped rather than tied to `svh` alone: a 1700px-tall
        window would otherwise hand the hero 1300px and push every rail below the
        fold. The cap is what keeps the catalogue reachable without scrolling far. */

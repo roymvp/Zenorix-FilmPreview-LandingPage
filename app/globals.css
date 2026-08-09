@@ -182,6 +182,15 @@ body {
 
 html {
   scroll-behavior: smooth;
+  /* Guards the hero's desktop full-bleed. That bleed is sized in `vw`, which
+     INCLUDES the vertical scrollbar's width, so on a scrollbar-reserving platform
+     (Windows/Linux Chrome) the hero is a few px wider than the visible viewport —
+     enough to raise a horizontal scrollbar across the whole document.
+
+     `clip` not `hidden`: `hidden` on the root turns the document into a scroll
+     container and kills the `scroll-behavior: smooth` above it, along with
+     `position: sticky` further down the tree. */
+  overflow-x: clip;
 }
 
 @media (prefers-reduced-motion: reduce) {
