@@ -182,16 +182,24 @@
    `max(100%, 48px)` per axis grows ONLY the deficient axis — the brand link keeps
    its width and gains height, rather than collapsing to a 48px square.
 
-   Not applied to footer links: inline text in a sentence-like row is WCAG-exempt,
-   and an expanded box on each would overlap its neighbours. */
+   The top-bar contact link (84x18) is included for the same reason as the brand
+   link: it is a standalone control in the bar, not running text. Its width already
+   clears 48px, so only its height grows — which is what keeps its overlay from
+   reaching the language trigger 4px away.
+
+   Not applied to footer links, nor to the contact link inside the About sentence:
+   inline text in a sentence-like row is WCAG-exempt, and an expanded box on each
+   would overlap its neighbours. */
 .zx-brand,
-.zx-lang-trigger {
+.zx-lang-trigger,
+.zx-contact--bar {
   /* The overlay's containing block. */
   position: relative;
 }
 
 .zx-brand::after,
-.zx-lang-trigger::after {
+.zx-lang-trigger::after,
+.zx-contact--bar::after {
   content: '';
   position: absolute;
   inset-block-start: 50%;
@@ -561,7 +569,7 @@
   padding: var(--zx-space-15) var(--zx-space-2);
   /* Literal rgba, not a token: there is no `--zx-on-media-rgb` channel triplet to
      compose with, and `--zx-on-media` is a hex so it cannot take an alpha here.
-     This is white at 28% — the same on-media hairline weight the glass top bar
+     This is white at 28% ��� the same on-media hairline weight the glass top bar
      uses for its own bottom edge. */
   border: 1px dashed rgba(255, 255, 255, 0.28);
   border-radius: var(--zx-radius-sm);
@@ -1736,18 +1744,12 @@
   outline-color: var(--zx-on-media);
 }
 
-/* Under 480px the bar has to hold the wordmark, this link and the locale, so the
-   label collapses to its glyph. The accessible name is unaffected: it comes from
-   `aria-label` on the anchor, not from this text. */
-@media (max-width: 479px) {
-  .zx-contact--bar {
-    /* Zero out the label's own box rather than `display: none` on a child: the
-       text node has no element to target, so it is hidden by clipping the line
-       box down to the icon. */
-    gap: 0;
-    font-size: 0;
-  }
-}
+/* The label is NEVER collapsed to the bare glyph, at any width. Measured at
+   360px: wordmark 127px + this link 84px + the locale trigger + gaps = 255px in
+   a 360px bar, so there is nothing to reclaim. Collapsing it would also cost the
+   touch target — an 84x18 link grows to 84x48 under the rule below without
+   touching its neighbour, whereas a 15x15 glyph would have to grow on BOTH axes
+   and would then overlap the language trigger's own hit area. */
 
 /* About. Muted to match the APK caption it follows — this is the section's
    THIRD-priority element, after the install button and its meta line. */
