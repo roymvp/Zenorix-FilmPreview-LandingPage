@@ -151,6 +151,7 @@ export function MarketLanding({
             entries={movies}
             heading={dict.chart.headingMovies}
             rankLabel={dict.chart.rank}
+            posterAlt={dict.a11y.posterAlt}
           />
 
           <TopChart
@@ -158,6 +159,7 @@ export function MarketLanding({
             entries={series}
             heading={dict.chart.headingSeries}
             rankLabel={dict.chart.rank}
+            posterAlt={dict.a11y.posterAlt}
             more={{ label: dict.chart.more, hint: dict.chart.moreHint }}
           />
 

@@ -64,10 +64,30 @@ export function proxy(request: NextRequest) {
   const locale = detectLocale(request)
   const url = request.nextUrl.clone()
 
-  /* `/` lands on the market page itself. It used to redirect to the featured
-     film's deep URL, which sent every single visitor to a doorway page (and made
-     the site's real entry point a URL naming a film chosen by array order). */
-  url.pathname = pathname === '/' ? `/${locale}` : `/${locale}${pathname}`
+  /* EVERY unprefixed path lands on the market page, not just `/`.
+
+     This used to preserve the path (`/${locale}${pathname}`), which was broken for
+     anything but `/`: `/[lang]` is the app's ONLY page route, so a preserved path
+     could never resolve. Measured, `/fr` became a 307 to `/en/fr` and then a 404 —
+     a French visitor got an error page instead of the English site, and the old
+     `/movie/<slug>` URLs (a deleted route that may still be indexed or linked)
+     threw away their link equity the same way.
+
+     Collapsing to the locale root fixes both: `/fr` reaches a real page, and the
+     deleted film URLs redirect into the page whose rails actually list those
+     films — a relevant destination, which is what Google asks for when a URL is
+     retired.
+
+     The tradeoff, stated plainly: junk paths (`/wp-login.php`) now 307 to the
+     homepage instead of 404ing, which Google may log as a soft 404. That is
+     acceptable here because those URLs are not ones we want indexed anyway, and
+     it does not mask real 404s — anything ALREADY locale-prefixed skips this
+     branch entirely, so `/en/nonsense` still returns a true 404.
+
+     `/` itself once redirected to the featured film's deep URL, which sent every
+     visitor to a doorway page and made the site's entry point a URL named after
+     whichever film sorted first. */
+  url.pathname = `/${locale}`
 
   return NextResponse.redirect(url)
 }
