@@ -3,6 +3,7 @@
 import { useConversion } from '@/components/landing/conversion-provider'
 import type { ChartEntry } from '@/lib/content/charts'
 import { PLATFORMS } from '@/lib/content/platforms'
+import { fill } from '@/lib/i18n/dictionaries'
 
 /**
  * One regional chart rail — key art, rank, source badge. Nothing else.
@@ -32,6 +33,7 @@ export function TopChart({
   entries,
   heading,
   rankLabel,
+  posterAlt,
   more,
 }: {
   /** Unique per rail; used for the section's heading id. */
@@ -40,6 +42,15 @@ export function TopChart({
   heading: string
   /** "Number {rank}" template, used to build each poster's accessible name. */
   rankLabel: string
+  /**
+   * "Poster for {title}" template — the poster images' `alt` text.
+   *
+   * Separate from `rankLabel` on purpose. `rankLabel` names the BUTTON (rank +
+   * title, the thing you activate); this names the IMAGE (what the picture
+   * depicts). They read differently and only the second one is what Google
+   * Images has to work with.
+   */
+  posterAlt: string
   /**
    * Outlined tail button that jumps straight to the download, plus the catalogue
    * size line under it. Omit on every rail but the last — the page carries one.
@@ -76,8 +87,27 @@ export function TopChart({
                 aria-label={`${rankLabel.replace('{rank}', String(index + 1))} · ${entry.title}`}
               >
                 <span className="zx-chart-art">
-                  {/* alt="": the button's aria-label already carries rank +
-                      title, so a described image would just repeat it.
+                  {/* A REAL alt, not `alt=""`.
+
+                      It used to be empty, reasoned as "the button's aria-label
+                      already carries rank + title, so a described image would
+                      just repeat it". True for screen readers — a button with
+                      `aria-label` takes its name from that label and never
+                      descends into this `<img>`, so nothing is announced twice
+                      (verified in the browser, not assumed).
+
+                      But `aria-label` is not indexable body text, so with an
+                      empty alt these titles existed nowhere a crawler reads:
+                      only in `keywords` (ignored by Google for two decades) and
+                      in JSON-LD. Measured on the served HTML, "Sterling Point"
+                      appeared 0 times in visible text. That left 21 licensed
+                      posters unable to rank in Google Images for the one query
+                      they are the exact answer to.
+
+                      This is description, not keyword stuffing: per the note in
+                      charts.ts these tiles carry their own title lettering, so
+                      "Poster for X" states what the pixels literally show.
+
                       The first two cards are above the fold on a phone, so they
                       load eagerly; the rest are off to the right of the scroll
                       track and wait.
@@ -88,7 +118,7 @@ export function TopChart({
                   <img
                     className="zx-chart-img"
                     src={entry.poster}
-                    alt=""
+                    alt={fill(posterAlt, { title: entry.title })}
                     width={420}
                     height={630}
                     loading={index < 2 ? 'eager' : 'lazy'}

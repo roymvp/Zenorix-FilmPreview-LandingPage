@@ -77,10 +77,26 @@ const orbitron = Orbitron({
   display: 'swap',
 })
 
+/**
+ * Layout-level metadata is FALLBACK ONLY — `[lang]/page.tsx` overrides it per
+ * market, verified on the served HTML (the Thai page ships a Thai title and
+ * description, not these values).
+ *
+ * `description` used to be here too: an English sentence about licensed 4K
+ * content. It was unreachable — the page always replaces it, and the one route
+ * that does not (Next's built-in 404) emits no description at all — so its only
+ * possible effect was to mislead the next person into thinking editing it changed
+ * the site's snippet. Worse, had anything ever fallen through to it, it would have
+ * served English prose on /pt-br and /th. Per-market copy belongs in
+ * dictionaries/*.json, which is where it now lives exclusively.
+ *
+ * `title` stays: it is the brand name, correct in every locale, so it is a safe
+ * net if a future route forgets its own metadata. `metadataBase` is load-bearing —
+ * it resolves the relative canonical and OG image URLs built in lib/seo.ts.
+ */
 export const metadata: Metadata = {
   metadataBase: new URL(SITE.url),
   title: SITE.name,
-  description: `Watch officially licensed movies, series and live TV in 4K on ${SITE.name}.`,
   applicationName: SITE.name,
   formatDetection: { telephone: false },
 }
