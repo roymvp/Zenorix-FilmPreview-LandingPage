@@ -29,7 +29,24 @@ export type OutboundLink = {
   /** Visible label. Brand names stay untranslated in every market. */
   name: string
   href: string
-  /** Square app icon, platforms only. Reference sites are text links. */
+  /**
+   * Square favicon, from `public/favicons/` — built for all twenty links by
+   * `scripts/build-footer-icons.mjs`, which is where the provenance lives.
+   *
+   * ONE SOURCE FOR BOTH GROUPS, and that is the point. The partners used to render
+   * their App Store icons here while the reference sites had no icon at all and
+   * later a hand-picked mix of touch icons, wordmarks and 16px favicons — three
+   * visual families across two adjacent rows. A favicon is also the honest asset for
+   * a link directory: it is what a browser puts next to a URL, whereas an App Store
+   * icon says "installable app", which these links are not.
+   *
+   * Note this is NOT `PLATFORMS[id].icon`. That registry still holds the app icons
+   * and still feeds the trust strip and the Top 10 badges, where "the app" is the
+   * right referent. Only the footer directory reads favicons.
+   *
+   * Still optional: a new link can ship the moment its URL is known and render as
+   * plain text until `build-footer-icons.mjs` is re-run.
+   */
   icon?: string
 }
 
@@ -66,7 +83,9 @@ export function watchLinks(): OutboundLink[] {
   return PLATFORM_ORDER.map((id) => ({
     name: PLATFORMS[id].name,
     href: PLATFORM_SITES[id],
-    icon: PLATFORMS[id].icon,
+    // Favicon, not `PLATFORMS[id].icon` — the slugs match the registry's ids by
+    // construction, so this stays in step with it. See the note on `icon` above.
+    icon: `/favicons/${id}.webp`,
   }))
 }
 
@@ -80,11 +99,15 @@ export function watchLinks(): OutboundLink[] {
  * the question the platform row above raises — which service has this title here.
  */
 const REFERENCE_GLOBAL: OutboundLink[] = [
-  { name: 'IMDb', href: 'https://www.imdb.com' },
-  { name: 'Rotten Tomatoes', href: 'https://www.rottentomatoes.com' },
-  { name: 'Metacritic', href: 'https://www.metacritic.com' },
-  { name: 'Letterboxd', href: 'https://letterboxd.com' },
-  { name: 'JustWatch', href: 'https://www.justwatch.com' },
+  { name: 'IMDb', href: 'https://www.imdb.com', icon: '/favicons/imdb.webp' },
+  {
+    name: 'Rotten Tomatoes',
+    href: 'https://www.rottentomatoes.com',
+    icon: '/favicons/rotten-tomatoes.webp',
+  },
+  { name: 'Metacritic', href: 'https://www.metacritic.com', icon: '/favicons/metacritic.webp' },
+  { name: 'Letterboxd', href: 'https://letterboxd.com', icon: '/favicons/letterboxd.webp' },
+  { name: 'JustWatch', href: 'https://www.justwatch.com', icon: '/favicons/justwatch.webp' },
 ]
 
 /**
@@ -98,12 +121,20 @@ const REFERENCE_GLOBAL: OutboundLink[] = [
 const REFERENCE_LOCAL: Record<Locale, OutboundLink[]> = {
   en: [],
   'pt-br': [
-    { name: 'AdoroCinema', href: 'https://www.adorocinema.com' },
-    { name: 'Filmow', href: 'https://filmow.com' },
+    {
+      name: 'AdoroCinema',
+      href: 'https://www.adorocinema.com',
+      icon: '/favicons/adorocinema.webp',
+    },
+    { name: 'Filmow', href: 'https://filmow.com', icon: '/favicons/filmow.webp' },
   ],
   th: [
-    { name: 'Sanook Movie', href: 'https://movie.sanook.com' },
-    { name: 'Kapook Movie', href: 'https://movie.kapook.com' },
+    {
+      name: 'Sanook Movie',
+      href: 'https://movie.sanook.com',
+      icon: '/favicons/sanook-movie.webp',
+    },
+    { name: 'Kapook Movie', href: 'https://movie.kapook.com', icon: '/favicons/kapook-movie.webp' },
   ],
 }
 

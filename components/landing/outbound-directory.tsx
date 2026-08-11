@@ -4,13 +4,29 @@ import type { OutboundLink } from '@/lib/content/outbound'
  * The footer's outbound directory: the official streaming partners, then the
  * reference sites a visitor checks a title against.
  *
- * Two groups that are NOT peers, and the styling says so. The partners are chips
- * with their app icons — the marks already appear twice higher up the page (trust
- * strip, poster badges) and a reader recognises them faster than their names — and
- * they come first, because whose content is in the catalogue is the strongest
- * claim this footer makes. The reference sites stay plain muted text: they are an
- * unpaid convenience, IMDb and Metacritic have no icon in this project, and
- * inventing favicon chips for them would add requests to buy nothing.
+ * Two groups that are NOT peers, and the styling still says so — the partners are
+ * filled chips and they come first, because whose content is in the catalogue is the
+ * strongest claim this footer makes, while the reference sites are a plain muted row.
+ * But BOTH now carry icons, from one source.
+ *
+ * They did not before, and the note here used to defend that: the reference sites
+ * were text-only because "IMDb and Metacritic have no icon in this project" and
+ * because favicon chips "would add requests to buy nothing". The first half was a
+ * statement about the asset folder, not about the design. The second was answered by
+ * measuring: all twenty marks together are 27KB of WebP, lazy-loaded in the last
+ * block of the page, and what they buy is real — a row of nine foreign-language
+ * brand names is a wall of text, which matters most in the two markets where
+ * "Filmow" and "Kapook" mean nothing to a non-local visitor.
+ *
+ * The icons are FAVICONS for both groups (`public/favicons/`, built by
+ * `scripts/build-footer-icons.mjs`). The partners' App Store icons were the wrong
+ * asset for this block twice over: they made the two rows look like different kinds
+ * of thing, and an app icon promises an installable app where these are just links
+ * to websites. The app icons stay in the trust strip and the Top 10 badges.
+ *
+ * Hierarchy is carried by chip-versus-text and by order, which is where it belongs.
+ * Icon presence was never what distinguished a licensed partner from a site we
+ * merely link to.
  *
  * Each group carries its OWN closing note rather than sharing one, because the two
  * relationships are now genuinely different — see the `watchNote`/`referenceNote`
@@ -26,6 +42,61 @@ import type { OutboundLink } from '@/lib/content/outbound'
  * `noopener` for the same reason it does in `SocialLinks` — none of these
  * destinations needs to be handed the visitor's exact market URL.
  */
+/**
+ * One anchor, used by both groups — which is the reason this exists rather than the
+ * two lists each rendering their own.
+ *
+ * When only the partners had icons, the two lists were legitimately different markup
+ * and duplicating four lines was harmless. Now that both carry an icon and both need
+ * the same `alt=""`, the same conditional guard and the same new-tab suffix, keeping
+ * two copies means every future fix has to be made twice — and the codebase already
+ * has evidence of that failing: the leading-space fix in the accessible name was
+ * applied to the partner list and NOT to the reference list, so those nine links read
+ * as "IMDbopens in a new tab" for as long as both copies existed. One renderer makes
+ * that class of drift impossible.
+ *
+ * `variant` is the only real difference: the partners get the chip modifiers.
+ */
+function DirectoryLink({
+  link,
+  newTab,
+  variant,
+}: {
+  link: OutboundLink
+  newTab: string
+  variant?: 'brand'
+}) {
+  return (
+    <a
+      className={variant === 'brand' ? 'zx-directory-link zx-directory-link--brand' : 'zx-directory-link'}
+      href={link.href}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      {/* Decorative: the name sits right next to it in the same link, so `alt=""` is
+          correct and an alt here would double it up. Rendered only when an icon
+          exists rather than falling back to an empty `src`, which browsers resolve
+          against the current URL and re-request the page as an image. */}
+      {link.icon ? (
+        <img
+          className="zx-directory-icon"
+          src={link.icon}
+          alt=""
+          width={20}
+          height={20}
+          loading="lazy"
+          decoding="async"
+        />
+      ) : null}
+      {link.name}
+      {/* Leading space is inside the string, not JSX whitespace between the two nodes
+          — JSX drops that, and the accessible name came out as "Netflixopens in a new
+          tab" (verified in-browser). */}
+      <span className="zx-visually-hidden">{` ${newTab}`}</span>
+    </a>
+  )
+}
+
 export function OutboundDirectory({
   watch,
   reference,
@@ -76,34 +147,7 @@ export function OutboundDirectory({
         <ul className="zx-directory-list zx-directory-list--brand">
           {watch.map((link) => (
             <li key={link.href}>
-              <a
-                className="zx-directory-link zx-directory-link--brand"
-                href={link.href}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                {/* Decorative: the name sits right next to it in the same link,
-                    so `alt=""` is correct and an alt here would double it up.
-                    Rendered only when an icon exists rather than falling back to
-                    an empty `src`, which browsers resolve against the current URL
-                    and re-request the page as an image. */}
-                {link.icon ? (
-                  <img
-                    className="zx-directory-icon"
-                    src={link.icon}
-                    alt=""
-                    width={20}
-                    height={20}
-                    loading="lazy"
-                    decoding="async"
-                  />
-                ) : null}
-                {link.name}
-                {/* Leading space is inside the string, not JSX whitespace between
-                    the two nodes — JSX drops that, and the accessible name came out
-                    as "Netflixopens in a new tab" (verified in-browser). */}
-                <span className="zx-visually-hidden">{` ${copy.newTab}`}</span>
-              </a>
+              <DirectoryLink link={link} newTab={copy.newTab} variant="brand" />
             </li>
           ))}
         </ul>
@@ -117,15 +161,7 @@ export function OutboundDirectory({
         <ul className="zx-directory-list">
           {reference.map((link) => (
             <li key={link.href}>
-              <a
-                className="zx-directory-link"
-                href={link.href}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                {link.name}
-                <span className="zx-visually-hidden">{copy.newTab}</span>
-              </a>
+              <DirectoryLink link={link} newTab={copy.newTab} />
             </li>
           ))}
         </ul>

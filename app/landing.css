@@ -2437,20 +2437,28 @@
   border-radius: 3px;
 }
 
-/* Rounded to match the marks upstairs (`.zx-logo-set img`, `.zx-chart-badge`),
-   which are the same square store icons at larger sizes — a sharp-cornered 16px
-   copy of an icon the page has already shown rounded reads as a different asset.
-   The hairline ring does the work `box-shadow` does there: several of these icons
-   are pure black or pure white and would otherwise dissolve into the surface. */
+/* ONE RULE FOR BOTH GROUPS, which is the CSS half of the icon consolidation: the
+   partners and the reference sites now render the same asset type (favicons, see
+   `scripts/build-footer-icons.mjs`), so styling them apart would re-introduce by
+   stylesheet exactly the mismatch that was just fixed at the source.
+   
+   Rounded to match the marks upstairs (`.zx-logo-set img`, `.zx-chart-badge`) — those
+   are still the App Store icons at larger sizes, and while these are no longer the
+   same asset, a sharp-cornered small tile next to rounded large ones still reads as a
+   different kind of object. The hairline ring earns its place now more than before:
+   favicons come with their own baked backgrounds, several of them near-black or
+   near-white, and the ring is what keeps those from dissolving into the surface. */
 .zx-directory-icon {
-  /* 20px, up from 16px, matching the markup's intrinsic size. The marks are the
-     reason this group reads as partners rather than as text links, and inside a
-     bounded chip 16px left them looking like favicons. */
+  /* 20px, matching the markup's intrinsic size. */
   width: 20px;
   height: 20px;
   flex: none;
   border-radius: 5px;
-  object-fit: cover;
+  /* `contain`, not `cover`. The build already letterboxes every mark onto a square
+     canvas, so for a square source the two are identical — but a favicon that is not
+     square must never be cropped, and `contain` is what guarantees that if the build
+     ever emits a non-square file. Cropping a mark loses the part that identifies it. */
+  object-fit: contain;
   box-shadow: 0 0 0 1px var(--md-sys-color-outline-variant);
 }
 

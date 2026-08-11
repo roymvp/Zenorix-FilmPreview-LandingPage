@@ -21,48 +21,24 @@ import { statSync } from 'node:fs'
 import sharp from 'sharp'
 
 /**
- * TWO SETS, ONE SCRIPT. The reference-site marks were added second and needed the
- * exact same operation at a different output size, so they are a row in this table
- * rather than a `build-reference-icons.mjs` that would have been this file with two
- * constants changed.
+ * ONE SET: the platform app icons, for the trust strip and the Top 10 badges.
  *
- * `size` is the largest size the set is ever painted at, x3 for high-DPR screens:
- * the platform icons reach 48px (Top 10 badges), the reference marks only 20px in
- * the footer directory. Building the second set at 144 too would trade 9 files'
- * worth of bytes for pixels no screen can resolve.
+ * There was a second set here — `assets/reference` -> `public/reference`, the nine
+ * rating-site marks for the footer directory. It has been removed along with its
+ * sources, and the reason is worth keeping: those nine were each sourced by hand from
+ * whatever the site happened to publish, so the set mixed app icons, apple-touch
+ * icons, an SVG favicon, a wordmark and a 16px `.ico` frame. Beside this set's eleven
+ * uniform App Store icons, the footer ended up showing three different visual
+ * families in two adjacent rows.
  *
- * `withoutEnlargement` on the reference set is the honest half of that: two of
- * those sites publish nothing bigger than a 16 or 32px favicon (see the source
- * table below), and upscaling them to 60 would ship a blurred bitmap that CLAIMS a
- * resolution the original never had. Left at native size, the browser does the
- * same interpolation for fewer bytes. The platform sources are all >=480px so the
- * flag is a no-op there, but it stays per-set rather than global so adding a small
- * platform logo fails visibly instead of silently shipping soft.
+ * The footer now builds ALL twenty of its icons from a single provider in
+ * `build-footer-icons.mjs`. That script owns the footer; this one owns the app icons
+ * that appear on product surfaces, where "the app" is the right referent.
+ *
+ * 144px = the largest painted size (48px) at 3x DPR, which covers every phone these
+ * markets use. Going higher only pays for pixels no screen can resolve.
  */
-const SETS = [
-  { source: 'assets/brands', out: 'public/brands', size: 144 },
-  { source: 'assets/reference', out: 'public/reference', size: 60, withoutEnlargement: true },
-]
-
-/**
- * `assets/reference/` provenance — each file is the site's OWN published icon,
- * fetched once and committed so the build never needs the network:
- *
- *   imdb.svg            theSVG (thesvg.org/icons/imdb) — IMDb's own apple-touch-icon
- *                       is a two-line "IMDb / Mobile" lockup whose second line is an
- *                       illegible smudge at 20px; this is the plain mark.
- *   rotten-tomatoes.jpg rottentomatoes.com apple-touch-icon-152
- *   metacritic.svg      metacritic.com/a/img/favicon.svg
- *   letterboxd.png      a.ltrbxd.com 500px decal
- *   justwatch.png       justwatch.com android_icon_192x192 (from its manifest.json)
- *   adorocinema.png     assets.adorocinema.com apple-touch-icon
- *   filmow.png          32px favicon (filmow.com 403s direct icon requests)
- *   sanook-movie.png    s.isanook.com 144px touch icon
- *   kapook-movie.png    kapook.com/favicon.ico, 16px BMP frame decoded to PNG
- *
- * Every mark remains the trademark of its owner; they are used here to identify the
- * site each link points at, which is what the footer's reference note says.
- */
+const SETS = [{ source: 'assets/brands', out: 'public/brands', size: 144 }]
 let before = 0
 let after = 0
 let count = 0
@@ -70,9 +46,9 @@ let count = 0
 for (const set of SETS) {
   await mkdir(set.out, { recursive: true })
 
-  /* `.svg` is in the filter for the reference set — two of those sites publish a
-     vector favicon, and sharp rasterises it at `density` rather than at its
-     intrinsic 24-88px box, which is what keeps the mark crisp at 60px. */
+  /* `.svg` stays in the filter even though every current source is a raster: it costs
+     nothing, and sharp rasterises vectors at `density` rather than at their intrinsic
+     box, so a vector logo dropped in here builds crisp instead of being skipped. */
   const files = (await readdir(set.source)).filter((file) =>
     /\.(png|jpe?g|webp|svg)$/i.test(file),
   )
