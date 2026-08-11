@@ -149,6 +149,27 @@
       "aria": "Entre na comunidade Zenorix no X"
     }
   },
+  "title": {
+    "metaSuffix": "Elenco, Notas e Detalhes",
+    "breadcrumb": "Trilha de navegação",
+    "kindMovie": "Filme",
+    "kindSeries": "Série",
+    "details": "Detalhes",
+    "cast": "Elenco",
+    "released": "Lançamento",
+    "runtime": "Duração",
+    "minutes": "{count} min",
+    "director": "Direção",
+    "writer": "Roteiro",
+    "genre": "Gênero",
+    "studio": "Produção",
+    "distributor": "Distribuição",
+    "streamingOn": "Disponível em",
+    "reviews": "{count} críticas",
+    "asOf": "em {date}",
+    "cta": "Assista no Zenorix",
+    "ctaMeta": "APK Android · {size} · 30 dias grátis"
+  },
   "footer": {
     "privacy": "Privacidade",
     "terms": "Termos",

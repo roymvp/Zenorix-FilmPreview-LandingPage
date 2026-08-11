@@ -160,6 +160,20 @@ export function getSeriesChart(locale: Locale): ChartEntry[] {
  * films the page does not show, which is the one thing keyword metadata must
  * never do.
  */
+/**
+ * One pool entry by id, for the title detail route.
+ *
+ * This does NOT reintroduce the deleted `/movie/[slug]` route. That route failed
+ * because it rendered the landing page under a different `<title>` — the entry it
+ * looked up carried nothing but a name and a poster, exactly what this type still
+ * holds. The per-title FACTS live in `lib/content/titles.ts`, and a detail page
+ * only exists where a record there does. This function supplies the two fields
+ * that file deliberately does not duplicate: display title and poster.
+ */
+export function getChartEntry(id: string): ChartEntry | undefined {
+  return chartPool[id]
+}
+
 export function getChartTitles(locale: Locale): string[] {
   return [...getMovieChart(locale), ...getSeriesChart(locale)].map(
     (entry) => entry.title,

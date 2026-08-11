@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { identityProfiles, ORG, SITE, SOCIAL } from '@/lib/config/site'
 import type { LegalSlug } from '@/lib/content/legal'
+import type { TitleRecord } from '@/lib/content/titles'
 import { fill, type Dictionary } from '@/lib/i18n/dictionaries'
 import { locales, localeMeta, type Locale } from '@/lib/i18n/config'
 
@@ -148,6 +149,157 @@ export function buildLegalMetadata({
        are what a reviewer looks for to decide the site is a real operation, and
        `follow` passes their link back to the market page. */
     robots: { index: true, follow: true },
+  }
+}
+
+/**
+ * `<head>` metadata for one title page.
+ *
+ * The description is the record's own synopsis, and the title leads with the film
+ * name and year rather than the brand. Someone searching a film name wants
+ * confirmation they have the right thing; a `<title>` that opens with "Zenorix"
+ * answers a question nobody asked and loses the match on the one they did.
+ */
+export function buildTitleMetadata({
+  locale,
+  dict,
+  record,
+  title,
+  poster,
+}: {
+  locale: Locale
+  dict: Dictionary
+  record: TitleRecord
+  /** The display name, from the chart entry — `charts.ts` owns it. */
+  title: string
+  poster: string
+}): Metadata {
+  const path = (target: Locale) => `/${target}/titles/${record.slug}`
+  const canonical = `${SITE.url}${path(locale)}`
+  const year = record.released.slice(0, 4)
+  const heading = `${title} (${year}) — ${dict.title.metaSuffix}`
+
+  return {
+    title: heading,
+    description: record.synopsis,
+    alternates: { canonical, ...buildLocaleAlternates(path) },
+    openGraph: {
+      /* `video.movie` is correct HERE, unlike on the market page where it was
+         removed: this URL really is about one title. */
+      type: 'video.movie',
+      siteName: SITE.name,
+      locale: localeMeta[locale].ogLocale,
+      url: canonical,
+      title: heading,
+      description: record.synopsis,
+      /* The poster, not the market share card. A share of this URL should show the
+         thing the URL is about. */
+      images: [{ url: `${SITE.url}${poster}`, width: 420, height: 630 }],
+    },
+    robots: { index: true, follow: true },
+  }
+}
+
+/**
+ * JSON-LD for one title: what it is, who made it, how critics scored it.
+ *
+ * This is the page type where structured data earns the most and risks the most,
+ * so two rules are absolute:
+ *
+ *  1. `aggregateRating` is emitted ONLY from a researched score. Google treats
+ *     invented review scores as spam eligible for manual action, so a title with
+ *     no verified aggregator number gets no rating node rather than a guessed one.
+ *     The `Score` type in titles.ts is what makes that structural instead of a
+ *     convention someone has to remember.
+ *  2. Every rating carries its `ratingCount` and the organization that published
+ *     it. A `ratingValue` with no count and no author is not a checkable claim,
+ *     and an unattributed one implies the score is this site's own.
+ */
+export function buildTitleStructuredData({
+  locale,
+  record,
+  title,
+  poster,
+  kind,
+}: {
+  locale: Locale
+  record: TitleRecord
+  title: string
+  poster: string
+  /** From the chart entry, which already decides which rail the title sits in. */
+  kind: 'movie' | 'series'
+}) {
+  const url = `${SITE.url}/${locale}/titles/${record.slug}`
+
+  const rating = (
+    score: NonNullable<TitleRecord['rottenTomatoes']>,
+    author: string,
+  ) => ({
+    '@type': 'AggregateRating',
+    ratingValue: score.value,
+    /* The scale MUST be stated: both of these are out of 100, and schema.org
+       defaults to a 5-point scale, so an unqualified 90 reads as 90 out of 5. */
+    bestRating: 100,
+    worstRating: 0,
+    ratingCount: score.reviewCount,
+    reviewCount: score.reviewCount,
+    author: { '@type': 'Organization', name: author },
+  })
+
+  const ratings = [
+    record.rottenTomatoes ? rating(record.rottenTomatoes, 'Rotten Tomatoes') : null,
+    record.metacritic ? rating(record.metacritic, 'Metacritic') : null,
+  ].filter(Boolean)
+
+  return {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        /* `Movie` or `TVSeries` from the chart entry's `kind` rather than from
+           `record.runtime` being present — deriving it from the runtime would make
+           a second, weaker source of truth for the same fact. */
+        '@type': kind === 'series' ? 'TVSeries' : 'Movie',
+        '@id': url,
+        url,
+        name: title,
+        description: record.synopsis,
+        image: `${SITE.url}${poster}`,
+        inLanguage: localeMeta[locale].hreflang,
+        genre: record.genres,
+        datePublished: record.released,
+        /* ISO 8601 duration, films only — a series has no single runtime, which is
+           why the field is optional on the record. */
+        ...(record.runtime ? { duration: `PT${record.runtime}M` } : {}),
+        director: record.directors.map((name) => ({ '@type': 'Person', name })),
+        ...(record.writers
+          ? { author: record.writers.map((name) => ({ '@type': 'Person', name })) }
+          : {}),
+        actor: record.cast.map((name) => ({ '@type': 'Person', name })),
+        productionCompany: record.productionCompanies.map((name) => ({
+          '@type': 'Organization',
+          name,
+        })),
+        /* BOTH ratings when both exist, rather than picking one. Mortal Kombat II
+           is 64% on RT and 46 on Metacritic; collapsing that spread to a single
+           number would misrepresent both sources. */
+        ...(ratings.length > 0 ? { aggregateRating: ratings } : {}),
+      },
+      /* Market page -> this title. Two levels because that is the real depth —
+         there is no intermediate index URL to name, and inventing one would put a
+         404 in the trail. Last crumb carries no `item`, same as the legal pages. */
+      {
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          {
+            '@type': 'ListItem',
+            position: 1,
+            name: SITE.name,
+            item: `${SITE.url}/${locale}`,
+          },
+          { '@type': 'ListItem', position: 2, name: title },
+        ],
+      },
+    ],
   }
 }
 

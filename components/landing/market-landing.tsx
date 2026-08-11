@@ -151,6 +151,7 @@ export function MarketLanding({
               Headings take no `fill`: they hold no placeholders now. */}
           <TopChart
             id="movies"
+            locale={locale}
             entries={movies}
             heading={dict.chart.headingMovies}
             rankLabel={dict.chart.rank}
@@ -159,6 +160,7 @@ export function MarketLanding({
 
           <TopChart
             id="series"
+            locale={locale}
             entries={series}
             heading={dict.chart.headingSeries}
             rankLabel={dict.chart.rank}

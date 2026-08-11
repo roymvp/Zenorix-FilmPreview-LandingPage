@@ -84,6 +84,12 @@ export type CtaSource =
   /* The locked-content upsell modal — one value for the whole modal, not one per
      title. See the comment at the top of this file. */
   | 'content_lock'
+  /* The per-title detail page. ONE value for every one of those pages rather than
+     one per title, for the same reason `content_lock` is single: the question is
+     "does a detail page convert at all", and a per-title key would split that
+     answer into dozens of single-hit rows. Which title was being read is already
+     in the page path the event is attributed to. */
+  | 'title_detail'
 
 export function trackEvent(
   name: ConversionEvent,

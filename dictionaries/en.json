@@ -149,6 +149,27 @@
       "aria": "Join the Zenorix community on X"
     }
   },
+  "title": {
+    "metaSuffix": "Cast, Ratings & Details",
+    "breadcrumb": "Breadcrumb",
+    "kindMovie": "Film",
+    "kindSeries": "Series",
+    "details": "Details",
+    "cast": "Cast",
+    "released": "Released",
+    "runtime": "Runtime",
+    "minutes": "{count} min",
+    "director": "Director",
+    "writer": "Writer",
+    "genre": "Genre",
+    "studio": "Production",
+    "distributor": "Distributor",
+    "streamingOn": "Streaming on",
+    "reviews": "{count} reviews",
+    "asOf": "as of {date}",
+    "cta": "Watch on Zenorix",
+    "ctaMeta": "Android APK · {size} · 30 days free"
+  },
   "footer": {
     "privacy": "Privacy",
     "terms": "Terms",
