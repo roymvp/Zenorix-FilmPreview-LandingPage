@@ -428,6 +428,92 @@ const TITLES: Partial<Record<ChartEntryId, TitleRecord>> = {
     rottenTomatoes: { value: 76, reviewCount: 41, asOf: '2026-08-06', url: 'https://www.rottentomatoes.com/tv/stuart_fails_to_save_the_universe/s01' },
     metacritic:     { value: 62, reviewCount: 19, asOf: '2026-07-29', url: 'https://www.metacritic.com/tv/stuart-fails-to-save-the-universe/season-1/' },
   },
+
+  /* The two 2026-08-07 wide releases below deliberately omit `streamingOn`, even
+     though `charts.ts` assigns each a platform (Peacock and HBO Max respectively).
+     Five days after a theatrical opening neither is streaming anywhere yet, and
+     "Streaming on Peacock" is a concrete, checkable claim that would be false
+     today. A chart badge pointing at where a film will land is fine; this page
+     states facts, so it says nothing rather than something wrong. Add the field
+     when each actually hits its service. */
+
+  oneNight: {
+    id: 'oneNight',
+    slug: 'one-night-only',
+    synopsis: 'Premarital sex has been outlawed for three years, with one 12-hour exemption a year. Two strangers spend that night crossing New York looking for someone worth it, and keep running into each other instead.',
+    released: '2026-08-07',
+    runtime: 102,
+    directors: ['Will Gluck'],
+    /* Braun is the ONLY credited writer, so he is the only name here. Deadline and
+       Variety both report Gluck rewrote the script himself, and he says so on the
+       record — but an uncredited rewrite is not a writing credit, and this field
+       mirrors the credits rather than the reporting. */
+    writers: ['Travis Braun'],
+    cast: ['Monica Barbaro', 'Callum Turner', 'Molly Ringwald', 'LeVar Burton', 'Maya Hawke', 'Julia Fox', 'Nicholas Braun', 'Pete Davidson'],
+    genres: ['Romantic comedy'],
+    productionCompanies: ['Olive Bridge Entertainment'],
+    distributors: ['Universal Pictures'],
+    rottenTomatoes: { value: 44, reviewCount: 131, asOf: '2026-08-10', url: 'https://www.rottentomatoes.com/m/one_night_only_2026' },
+    metacritic:     { value: 43, reviewCount: 31,  asOf: '2026-08-07', url: 'https://www.metacritic.com/movie/one-night-only-2026/' },
+  },
+
+  iceCream: {
+    id: 'iceCream',
+    slug: 'ice-cream-man',
+    synopsis: 'An ice cream truck arrives in a quiet bayside town and the children who eat from it start killing the adults, leaving a lactose-intolerant boy who never touched the stuff to work out why.',
+    released: '2026-08-07',
+    runtime: 86,
+    directors: ['Eli Roth'],
+    writers: ['Eli Roth', 'Noah Belson'],
+    cast: ['Ari Millen', 'Charlie Zeltzer', 'Shiloh O\u2019Reilly', 'Kiori Mirza Waldman', 'Sarah Abbott', 'Benjamin Byron Davis'],
+    genres: ['Slasher', 'Horror'],
+    productionCompanies: ['The Horror Section', 'MCT Studios'],
+    distributors: ['Iconic Events Releasing'],
+    rottenTomatoes: { value: 28, reviewCount: 107, asOf: '2026-08-11', url: 'https://www.rottentomatoes.com/m/ice_cream_man_2026' },
+    metacritic:     { value: 34, reviewCount: 18,  asOf: '2026-08-06', url: 'https://www.metacritic.com/movie/ice-cream-man-2026/' },
+  },
+
+  sterling: {
+    id: 'sterling',
+    slug: 'sterling-point',
+    synopsis: 'Annie Jacobson inherits her estranged grandfather\u2019s island in Ontario cottage country and spends a summer there among new friends, first romances and the family secrets the place was hiding.',
+    released: '2026-08-05',
+    seasons: 1,
+    episodes: 8,
+    network: 'Prime Video',
+    creators: ['Megan Park'],
+    cast: ['Ella Rubin', 'Am\u00e9lie Hoeferle', 'Jacob Whiteduck-Lavoie', 'Daniel Quinn-Toye', 'Bo Bragason', 'Keen Ruffalo', 'Missi Pyle', 'Jay Duplass', 'Jeffrey Dean Morgan'],
+    genres: ['Drama', 'Coming-of-age'],
+    productionCompanies: ['LuckyChap', 'Fake Empire', 'Heart Fugue Productions', 'Reunion Pacific Entertainment', 'Amazon MGM Studios'],
+    distributors: ['Prime Video'],
+    streamingOn: 'prime-video',
+    rottenTomatoes: { value: 93, reviewCount: 28, asOf: '2026-08-10', url: 'https://www.rottentomatoes.com/tv/sterling_point/s01' },
+    metacritic:     { value: 76, reviewCount: 6,  asOf: '2026-08-04', url: 'https://www.metacritic.com/tv/sterling-point/season-1/' },
+  },
+
+  curtis: {
+    id: 'curtis',
+    slug: 'president-curtis',
+    synopsis: 'A Rick and Morty spin-off in which President Andre Curtis and his staff handle the interdimensional, paranormal and otherwise unexplained crises that Rick tends to walk away from.',
+    released: '2026-07-26',
+    seasons: 1,
+    /* 3, NOT 10. Season 1 is a ten-episode order airing weekly, and three had aired
+       as of this writing — the field is documented as episodes RELEASED. Bump this
+       as the season airs; it is the one number on this record with a known
+       expiry. */
+    episodes: 3,
+    network: 'Adult Swim',
+    creators: ['James Siciliano', 'Dan Harmon'],
+    cast: ['Keith David', 'Stephanie Beatriz', 'Jim Rash'],
+    genres: ['Adult animation', 'Science fiction', 'Satire'],
+    productionCompanies: ['Pug Party', 'Harmonious Claptrap', 'Williams Street'],
+    distributors: ['Adult Swim'],
+    streamingOn: 'hbo-max',
+    /* No Metacritic score exists for this season, so the field is absent rather
+       than filled in from the Rotten Tomatoes average. 12 critics on a show three
+       episodes into its run is why the count is printed beside the 100%. */
+    rottenTomatoes: { value: 100, reviewCount: 12, asOf: '2026-07-24', url: 'https://www.rottentomatoes.com/tv/president_curtis/s01' },
+  },
 }
 
 /* The key and the record's own `id` are two places to write the same string, so

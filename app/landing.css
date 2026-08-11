@@ -3502,6 +3502,16 @@
   border-top: 1px solid var(--md-sys-color-outline-variant);
 }
 
+/* `.zx-cta` is `align-items: stretch`, which is right where it was written — the
+   landing hero and both dialogs put it in a column around 360px wide. This page's
+   column is 1120px, and a pill button stretched that far stops reading as a button
+   at all. Cap it and centre it instead of changing the shared rule, which would
+   affect the hero, the sticky bar and the dialogs. */
+.zx-title-cta .zx-cta {
+  max-width: 360px;
+  margin: 0 auto;
+}
+
 .zx-title-section-heading {
   margin: var(--zx-space-8) 0 var(--zx-space-4);
   font-size: var(--zx-text-h2);
