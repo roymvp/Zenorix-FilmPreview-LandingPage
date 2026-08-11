@@ -189,6 +189,7 @@
     "helpHeading": "Get in touch",
     "legalHeading": "Legal",
     "installHeading": "Get the app",
+    "installCta": "Download for Android",
     "installNote": "Android {minAndroid}+ · {size} · v{version}",
     "directory": {
       "watchHeading": "Official streaming partners",

@@ -2497,30 +2497,52 @@
   margin-block-end: var(--zx-space-10);
 }
 
-/* The brand column: wordmark, one-line pitch, install CTA. */
+/* The brand column: mark, wordmark, one-line pitch, operating entity.
+   
+   `gap` is `space-4` (16px), up from the `space-3` it used while this column also held
+   a button and a version note. Five items at one 12px rhythm is what made the column
+   read as a list of unrelated lines; three items at 16px read as a block. */
 .zx-footer-brand {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: var(--zx-space-3);
+  gap: var(--zx-space-4);
 }
 
+/* THE LOCKUP: mark plus wordmark, matching `.zx-brand` in the top bar.
+   
+   This was 15px bold body type with -0.01em tracking — a wordmark the footer invented
+   for itself. It is now the top bar's treatment (Orbitron 900, uppercase, +0.08em)
+   beside the same `zenorix-mark.webp`, so the page opens and closes on one brand. */
 .zx-footer-wordmark {
+  display: flex;
+  align-items: center;
+  gap: var(--zx-space-2);
   margin: 0;
+  /* `on-surface`, the brightest text token — one step above the tagline under it, and
+     the only full-strength text in the band besides the column headings. */
   color: var(--md-sys-color-on-surface);
-  /* The one place in the footer allowed to be typographically loud. It is the
-     brand, it opens the band, and at the footer's default 13px the masthead had no
-     anchor at all — every column started at the same visual weight.
-     
-     `--zx-text-lg`, which the scale documents as exactly "brand wordmark" and which
-     the top bar's mark already uses. My first pass reached for a `--zx-text-h3`
-     that does not exist in this stylesheet — the scale jumps h2 (21px) straight to
-     `lg` (15px) — and an undefined custom property makes `font-size` invalid,
-     silently inheriting instead of failing loudly. */
+  /* Orbitron with the brand typeface as the fallback, exactly as `.zx-brand-name`
+     declares it. `--zx-text-lg` is the scale step documented as "brand wordmark". */
+  font-family: var(--font-orbitron), var(--md-ref-typeface-brand);
   font-size: var(--zx-text-lg);
-  font-weight: var(--zx-weight-bold);
-  letter-spacing: -0.01em;
+  font-weight: 900;
+  /* POSITIVE tracking now, where this rule had -0.01em. Tight tracking is for large
+     mixed-case display type; uppercase at 15px needs the opposite, and +0.08em is the
+     value the top bar's wordmark already uses. */
+  letter-spacing: 0.08em;
   line-height: var(--zx-lh-snug);
+  text-transform: uppercase;
+}
+
+/* 22px against the top bar's 26px: the footer wordmark sits at the same 15px as the
+   bar's, but this is a masthead rather than a fixed chrome element, so the mark is
+   pulled fractionally closer to the cap height beside it. `width: auto` preserves the
+   256x196 aspect from the intrinsic attributes. */
+.zx-footer-mark {
+  height: 22px;
+  width: auto;
+  flex: none;
 }
 
 .zx-footer-tagline {
@@ -2535,6 +2557,22 @@
      is the measure, and at ~44% of the shell it is already inside a readable range. */
 }
 
+/* THE INSTALL COLUMN. Heading, filled button, platform note, two store badges.
+   
+   `align-items: stretch`, unlike the other three columns which are `flex-start`. Every
+   item here is a full-width block — the button and the badge grid both want the
+   column's measure — so there is nothing to hug. This is also what lets the button drop
+   its `align-self: stretch` hack; see the note on that rule. */
+.zx-footer-app {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  /* Matches `.zx-footer-col`'s heading-to-content step so all four columns start their
+     content on the same line. The tighter internal spacing between the button, its note
+     and the badges is handled by margins on those items rather than by shrinking this. */
+  gap: var(--zx-space-4);
+}
+
 /* The footer's only filled control, and the only coloured thing in the band.
    Sized off the shared control-height token so it matches the hero and sticky-bar
    buttons rather than inventing a third footer-specific height. */
@@ -2545,20 +2583,17 @@
   gap: var(--zx-space-15);
   min-height: var(--zx-control-h);
   padding-inline: var(--zx-space-5);
-  /* FILLS THE COLUMN. The brand column is `align-items: flex-start`, so this shrank
-     to its label and sat as a small pill under a much wider tagline — at the desktop
-     column width it read as a leftover chip rather than as the band's one action.
+  /* `align-self: stretch` is GONE — `.zx-footer-app` is `align-items: stretch`, so the
+     column now hands this its full measure by default. The declaration existed only to
+     override the brand column's `flex-start`, which is no longer this item's parent.
      
-     `align-self: stretch` rather than `width: 100%`: it overrides only this item's
-     cross-axis alignment and needs no box-sizing assumption, and because the column
-     is a flex container the two produce the same box — but `stretch` keeps working if
-     the column ever gains inline padding. The column is what bounds the width, which
-     is the point: at every breakpoint the button is exactly as wide as the group it
-     belongs to, and never wider than the tagline above it.
+     What changed materially is the measure itself. In the brand column at ~44% of the
+     shell the button stretched to 448px, which is why it read as the loudest object in
+     the footer; in a 1.6fr install track it lands around 275px — still unmistakably the
+     band's one action, but proportionate to a masthead rather than to a hero.
      
-     `justify-content: center` was already here and only starts mattering now — while
-     the box hugged its content there was nothing to centre within. */
-  align-self: stretch;
+     `justify-content: center` above matters for the same reason it did before: the box
+     is wider than its label, so the label needs centring within it. */
   border-radius: 999px;
   background: var(--md-sys-color-primary);
   color: var(--md-sys-color-on-primary);
@@ -2579,11 +2614,66 @@
   flex: none;
 }
 
+/* The version/size line. Pulled UP against the button it describes: the column's 16px
+   `gap` is the step between groups, and this note belongs to the button rather than
+   being a third peer. `calc` subtracts most of that gap instead of hardcoding a
+   negative, so it tracks the column if the gap ever changes. */
 .zx-footer-install-note {
-  margin: 0;
+  margin: calc(var(--zx-space-2) - var(--zx-space-4)) 0 0;
   color: var(--md-sys-color-on-surface-variant);
   font-size: var(--zx-text-caption);
   line-height: 1.5;
+}
+
+/* THE STORE BADGES INSIDE THE FOOTER.
+   
+   `StoreRow` is shared with the hero, and its own rules are tuned for a dark poster
+   scrim: `rgba(0,0,0,0.55)` fill, `rgba(255,255,255,0.28)` hairline, and `--zx-on-media`
+   text. Those are on-MEDIA values — they assume an image behind them. Dropped onto the
+   footer's flat surface the tiles read as black holes with light-grey text, brighter
+   than the surrounding copy while describing the one thing you cannot do yet.
+   
+   Scoped to `.zx-footer-app` rather than added as a `variant` prop on the component:
+   this is entirely a question of which surface the tiles sit on, so it belongs to the
+   stylesheet, and the component stays a zero-prop server render shared by both callers.
+   
+   Everything else — the grid, the fixed 48px height, the two-row icon/name/badge
+   composition — is inherited untouched. Only the colours and the row's hero-specific
+   negative margin are restated. */
+.zx-footer-app .zx-store-row {
+  /* The hero pulls the row up under its CTA with a negative top margin. Here the note
+     above already sits tight to the button, so the badges need the column's normal
+     group step instead. */
+  margin: 0;
+}
+
+.zx-footer-app .zx-store {
+  /* One rung above the footer's own background, matching `.zx-directory-link--brand` in
+     the partner directory below. That chip is the same KIND of object — a bordered,
+     filled, non-primary tile in the footer — so sharing its surface is what keeps the
+     band reading as one system. */
+  background: var(--md-sys-color-surface-container-high);
+  border-color: var(--md-sys-color-outline-variant);
+}
+
+/* Both marks are authored in black and the shared rule inverts them to white for the
+   hero. On this lighter tile white is too bright for a disabled state, so the inversion
+   is kept (the tile is still dark) but taken a step further down in opacity than the
+   hero's 0.8. */
+.zx-footer-app .zx-store-icon {
+  opacity: 0.65;
+}
+
+/* `--zx-on-media` -> `on-surface`. Same relationship as the hero (name brighter than
+   eyebrow), expressed in surface tokens so the tile respects the theme rather than
+   assuming an image behind it. */
+.zx-footer-app .zx-store-name {
+  color: var(--md-sys-color-on-surface);
+}
+
+.zx-footer-app .zx-store-eyebrow,
+.zx-footer-app .zx-store-badge {
+  color: var(--md-sys-color-on-surface-variant);
 }
 
 /* A link column. `gap` is the title-to-content step, so the heading sits closer to
@@ -3484,32 +3574,40 @@
     padding-block-start: var(--zx-space-1);
   }
 
-  /* THE MASTHEAD GRID. Brand column plus two link columns.
-     
-     The `space-14` column gap survives the drop from four columns to three, and it is
-     still doing the same job: at a normal 24px gutter adjacent lists merge into one
-     field of grey text, and a reader cannot tell where one group stops. At 56px each
-     column is unmistakably its own object. With three columns it also stops the wide
-     brand block from crowding the contact list beside it. */
+  /* THE MASTHEAD GRID. Brand, install, contact, legal. */
   .zx-footer-cols {
     display: grid;
-    /* THREE COLUMNS, was `1.4fr 1fr 1fr 1fr`. The two trending-title columns are gone
-       and support/legal split into two, so the count went 4 -> 3.
+    /* FOUR COLUMNS, was `1.6fr 1fr 1fr` — the install block left the brand column and
+       became its own track. See the component note for why that split fixes the brand
+       column; this rule is about the widths it needs.
        
-       The brand share GREW from 1.4/4.4 (~32%) to 1.6/3.6 (~44%), which is deliberate
-       rather than incidental. It now carries the entity block as well as the wordmark,
-       tagline, button and note, while the two columns beside it hold four and three
-       short rows. Splitting the remaining width evenly would have handed the legal
-       column ~33% for three links and squeezed the address into a narrow gutter — the
-       asymmetry is what keeps all three bottoming out at roughly the same depth, which
-       is the same reason the old `1.4fr` existed.
+       Brand comes DOWN from 1.6/3.6 (~44%) to 1.5/5.1 (~29%). It was widened to ~44%
+       specifically to hold a stretched button and an entity block; with the button gone
+       it keeps only type, and 44% would have set the tagline and the address on a
+       measure far wider than either wants.
        
-       `minmax(0, ...)` on the fr tracks: a grid item's default `min-width: auto` floors
+       Install gets 1.6fr, the widest track and the only one above 1fr besides brand.
+       It has the most demanding content in the row: a filled button with a 5-6 word
+       label, plus TWO store badges side by side, each carrying an eyebrow and a
+       wordmark. At 1fr those badges are ~150px and "Coming soon to the" wraps; at
+       1.6fr they hold their line. This is also the widest the button gets — ~275px at
+       the 1280px shell rather than the 448px it stretched to in the brand column.
+       
+       `column-gap` drops 56px -> 40px. The 56px was set to keep adjacent columns of
+       grey links from merging into one field, and that reasoning holds for the three
+       text columns. But four columns at 56px spend 168px of a 1280px shell on gutters,
+       and the install column pays for it in badge width. At 40px the separation still
+       reads — the install column's button and badges are filled objects, so its edges
+       are unambiguous regardless of gutter.
+       
+       `minmax(0, ...)` on every fr track: a grid item's default `min-width: auto` floors
        a track at its longest unbreakable content, and this row contains an email
        address and a registration number that must not be allowed to push the track
        wider than its share. */
-    grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr) minmax(0, 1fr);
-    column-gap: var(--zx-space-14);
+    grid-template-columns:
+      minmax(0, 1.5fr) minmax(0, 1.6fr)
+      minmax(0, 1fr) minmax(0, 1fr);
+    column-gap: var(--zx-space-10);
     row-gap: var(--zx-space-10);
     margin-block-end: var(--zx-space-14);
   }

@@ -189,6 +189,7 @@
     "helpHeading": "Fale com a gente",
     "legalHeading": "Jurídico",
     "installHeading": "Baixar o app",
+    "installCta": "Baixar para Android",
     "installNote": "Android {minAndroid}+ · {size} · v{version}",
     "directory": {
       "watchHeading": "Parceiros oficiais de streaming",
