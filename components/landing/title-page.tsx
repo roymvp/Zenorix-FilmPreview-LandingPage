@@ -79,6 +79,25 @@ export function TitlePage({
       : []),
     ...(record.writers ? [{ label: copy.writer, value: record.writers.join(', ') }] : []),
     { label: copy.genre, value: record.genres.join(', ') },
+    /* The age rating, with the issuing body's own descriptor appended when there
+       is one. The descriptor is the part a parent is reading for, so "PG-13" alone
+       throws away the answer and keeps the label. Absent on the unreleased titles,
+       which get no row rather than a guess — see `contentRating` in titles.ts.
+
+       The descriptor stays in English in all three markets on purpose: it is a
+       quotation of what the MPA published, and a translated citation is no longer
+       the citation. The LABEL is localized and says whose rating this is
+       ("Classificação (EUA)"), which is the part a reader outside the US needs. */
+    ...(record.contentRating
+      ? [
+          {
+            label: copy.rated,
+            value: record.contentRating.reason
+              ? `${record.contentRating.value} · ${record.contentRating.reason}`
+              : record.contentRating.value,
+          },
+        ]
+      : []),
     { label: copy.studio, value: record.productionCompanies.join(', ') },
     /* A series airs on a network; a film is handled by a distributor. Same row
        position, different label, because "Distributor: HBO" misstates what HBO is

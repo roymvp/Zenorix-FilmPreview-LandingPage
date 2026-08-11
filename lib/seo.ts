@@ -267,6 +267,11 @@ export function buildTitleStructuredData({
         inLanguage: localeMeta[locale].hreflang,
         genre: record.genres,
         datePublished: record.released,
+        /* The bare rating code, NOT the code plus the descriptor the visible row
+           shows: `contentRating` is a coded value crawlers match against a known
+           set ("PG-13", "TV-MA"), and appending prose makes it match nothing.
+           Omitted, not empty, where the title has no rating yet. */
+        ...(record.contentRating ? { contentRating: record.contentRating.value } : {}),
         /* ISO 8601 duration, films only — a series has no single runtime, which is
            why the field is optional on the record. */
         ...(record.runtime ? { duration: `PT${record.runtime}M` } : {}),

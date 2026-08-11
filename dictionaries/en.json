@@ -167,6 +167,7 @@
     "creator": "Creator",
     "writer": "Writer",
     "genre": "Genre",
+    "rated": "Rated",
     "studio": "Production",
     "distributor": "Distributor",
     "network": "Network",
