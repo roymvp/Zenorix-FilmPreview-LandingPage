@@ -1,7 +1,6 @@
-import { ContactLink } from '@/components/landing/contact-link'
+import { FooterContacts } from '@/components/landing/footer-contacts'
 import { OutboundDirectory } from '@/components/landing/outbound-directory'
-import { SocialLinks } from '@/components/landing/social-links'
-import { ORG, SITE, orgLine } from '@/lib/config/site'
+import { SITE, orgLine } from '@/lib/config/site'
 import { legalLinks } from '@/lib/content/legal'
 import { referenceLinks, watchLinks } from '@/lib/content/outbound'
 import { catalogueLinks } from '@/lib/content/titles'
@@ -129,19 +128,11 @@ export function SiteFooter({ locale, dict }: { locale: Locale; dict: Dictionary 
               legal links would leave most of its width empty. */}
           <div className="zx-footer-col">
             <h2 className="zx-footer-heading">{copy.helpHeading}</h2>
-            <div className="zx-footer-connect">
-              <ContactLink
-                label={dict.contact.label}
-                ariaLabel={dict.contact.aria}
-                source="footer"
-                className="zx-contact zx-contact--footer"
-                icon="chat_bubble"
-              />
-              <SocialLinks
-                follow={dict.social.follow}
-                community={dict.social.community}
-              />
-            </div>
+            {/* All four channels — support, X, community, email — in one uniform
+                list. They used to be three components in a wrapper plus a fourth
+                link stranded in the baseline band, each with its own format; see the
+                note in `FooterContacts` for why that was worth collapsing. */}
+            <FooterContacts contact={dict.contact} social={dict.social} />
 
             <h2 className="zx-footer-heading zx-footer-heading--second">
               {copy.legalHeading}
@@ -171,24 +162,25 @@ export function SiteFooter({ locale, dict }: { locale: Locale; dict: Dictionary 
             address live on the legal pages, and reproducing them on every screen
             is what turned the old footer into a brand slab. What stays is the pair
             a reader — or a reviewer — checks first: who runs this, and under what
-            registration. `ORG.email` is here rather than in the support column on
-            purpose: it is the company's address of record for rights and privacy
-            correspondence, NOT the support channel, and the two must not be
-            presented as alternatives (see the note on `SITE.contactUrl`). */}
+            registration.
+            
+            `ORG.email` USED TO BE HERE, deliberately kept out of the support column
+            so the address of record would not read as a support alternative. It has
+            moved up into the contact list, because that separation was being enforced
+            in the wrong place: a reader looking for how to reach anyone scans the
+            column headed "Get in touch", and an email hidden in the copyright band is
+            not found by the people who need it — rights holders included. The
+            distinction it was protecting survives inside the list, as ordering and as
+            an accessible name (see `FooterContacts`), rather than as exile. */}
         <div className="zx-footer-base">
           <p className="zx-footer-org">{orgLine()}</p>
-          <p className="zx-footer-baseline">
-            <a className="zx-footer-mail" href={`mailto:${ORG.email}`}>
-              {ORG.email}
-            </a>
-            {/* The year was hardcoded as `2026` in all three callers. It is derived
-                now: this is a server component with no `use client` anywhere up its
-                tree, so the call runs at build time only — no hydration mismatch is
-                possible, and the difference is simply that a rebuild refreshes the
-                year instead of it silently going stale in January. */}
-            <span className="zx-footer-copy">
-              {fill(copy.copyright, { year: String(new Date().getFullYear()) })}
-            </span>
+          {/* The year was hardcoded as `2026` in all three callers. It is derived
+              now: this is a server component with no `use client` anywhere up its
+              tree, so the call runs at build time only — no hydration mismatch is
+              possible, and the difference is simply that a rebuild refreshes the
+              year instead of it silently going stale in January. */}
+          <p className="zx-footer-copy">
+            {fill(copy.copyright, { year: String(new Date().getFullYear()) })}
           </p>
         </div>
       </div>

@@ -2373,9 +2373,11 @@
   font-size: var(--zx-text-meta);
   line-height: 1.4;
   text-decoration: none;
-  /* ~30px tall against the 24px AA floor for target size. Deliberately not the 44px
-     `.zx-social-link` gets: that row is three links, this one is twenty, and 44px
-     each would stack the block taller than the FAQ it sits under. */
+  /* ~30px tall against the 24px AA floor for target size. Deliberately not 44px:
+     this block is twenty links, and 44px each would stack it taller than the FAQ it
+     sits under. (The 44px comparison used to point at `.zx-social-link`, which was
+     replaced by `.zx-footer-contact` — now ~30px like this rule, so the footer no
+     longer has two target heights for the same kind of link.) */
   padding-block: var(--zx-space-15);
   transition: color 120ms ease;
 }
@@ -2625,101 +2627,105 @@
   border-radius: 3px;
 }
 
-/* Keeps the base `primary` colour rather than muting to the legal links' grey.
-   That difference is the point: it is the only actionable link in the footer, and
-   the row above the legal list is where a reader looking for help will scan. */
-.zx-contact--footer {
-  font-size: var(--zx-text-meta);
-}
+/* ---------------------------------------------- the contact list
 
-/* The "reach us" group: contact on top, social beneath. Start-aligned at EVERY
-   width now — it lives inside a footer column whose heading and link list are both
-   left-aligned, so the old centring (plus a desktop override to undo it) would have
-   left this one group off-axis from the column it belongs to. */
-.zx-footer-connect {
+   FOUR RULES REPLACED SEVEN. `.zx-contact--footer`, `.zx-footer-connect`,
+   `.zx-social`, `.zx-social-link` (+ `:hover`), `.zx-social-mark`,
+   `.zx-social-link md-icon` (+ `:hover`) and `.zx-footer-mail` all styled one idea
+   — "a way to reach us" — four different ways, in two different bands of the
+   footer. They are gone rather than left behind; nothing renders those classes now.
+   
+   The collapse also retires the special cases each of them existed to manage: a
+   `primary` colour on exactly one channel, a `min-width` to stop an icon-only link
+   from being narrower than its labelled sibling, a negative inline margin to pull a
+   padded row back onto the column's left edge, and one glyph held at a different
+   pixel size from another. Every one of those was a correction for a difference that
+   no longer exists — which is the practical argument for the uniform format, over
+   and above how it reads. */
+
+.zx-footer-contact-list {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  /* Tighter than it looks it should be, because `.zx-social-link` carries 12px of
-     block padding for its tap target — the optical gap is that padding plus this,
-     so a full step here would read as a much larger hole than one step. */
-  gap: var(--zx-space-05);
-}
-
-.zx-social {
-  display: flex;
-  align-items: center;
-  gap: var(--zx-space-3);
+  /* Same tight step as `.zx-footer-col-list`: these are rows of ONE list, and the
+     links' own block padding does most of the optical spacing. Matching that list
+     is deliberate — the legal column beside this one is built the same way, so both
+     columns now scan at the same rhythm. */
+  gap: var(--zx-space-1);
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
-.zx-social-link {
+.zx-footer-contact {
   display: inline-flex;
   align-items: center;
-  /* 6px, the scale's "icon <-> its own label" step, same joint `.zx-contact` uses. */
+  /* 6px, the scale's "icon <-> its own label" step. */
   gap: var(--zx-space-15);
-  /* Muted, NOT primary. The contact link directly above is the coloured one, and
-     two primary-coloured links stacked would compete for the same attention. */
+  /* Muted like every other footer link, including support — which used to be
+     `primary` as "the only actionable link down here". That claim stopped being true
+     when the install button arrived: the footer has exactly one coloured action, and
+     it is the filled CTA in the about column. A second primary-coloured item in a
+     list of four made support look like a different KIND of link than the community
+     beside it, which is the inconsistency this whole change is about. */
   color: var(--md-sys-color-on-surface-variant);
   font-size: var(--zx-text-meta);
   line-height: 1.4;
   text-decoration: none;
-  /* Grows the tap target without moving the ink: the negative inline margin gives
-     the horizontal padding back to the layout, so the row stays optically flush
-     with the contact link above instead of appearing indented.
-     
-     Measured at 44px tall, which is the AA target size floor — the block padding
-     is what buys it, since the 13px label's own line box is only ~18px. These are
-     NOT covered by the 48px `::after` overlay used for the top bar controls: that
-     technique needs an element with no interactive neighbours, and two adjacent
-     48px squares here would overlap each other. Real padding is the correct fix
-     for a row of sibling links. */
-  padding: var(--zx-space-3) var(--zx-space-15);
-  margin-inline: calc(var(--zx-space-15) * -1);
-  /* The floor, not the height. Padding alone got the labelled link to exactly 44px
-     but left the icon-only one at 38x26 — measured — because a 14px mark is shorter
-     and far narrower than a 13px label, so identical padding cannot produce
-     identical boxes. This guarantees both regardless of content. */
-  min-width: 44px;
-  min-height: 44px;
-  /* With a min-width now in play, an icon-only link would centre its mark in a
-     44px box and sit 6px left of the contact link above (measured). Justifying to
-     the start keeps every item's ink on the group's left edge. */
-  justify-content: flex-start;
-  box-sizing: border-box;
+  /* ~30px, matching `.zx-footer-col-list a` and clearing the 24px AA target-size
+     floor. NOT the 44px the old social row used: that value was chosen when these
+     were two icons in a horizontal strip with room to spare. As a four-row vertical
+     list, 44px apiece would make the contact column taller than the legal column
+     next to it for no gain — and the `min-width: 44px` that came with it exists
+     only to equalise an icon-only link, which no longer occurs. */
+  padding-block: var(--zx-space-15);
   transition: color 120ms ease;
 }
 
-.zx-social-link:hover {
+.zx-footer-contact:hover {
   color: var(--md-sys-color-on-surface);
 }
 
-/* Sized to the label's line box rather than left at the SVG's default, the same
-   correction `.zx-contact md-icon` makes for the icon font. 14px against the 16px
-   `group` glyph beside it because the X mark is a dense square with no interior
-   counters — matched pixel sizes would make it read as the heavier of the two. */
-.zx-social-mark {
-  width: 14px;
-  height: 14px;
-  flex: none;
+.zx-footer-contact:focus-visible {
+  outline: 2px solid var(--md-sys-color-primary);
+  outline-offset: 3px;
+  border-radius: 3px;
 }
 
-.zx-social-link md-icon {
-  --md-icon-size: 16px;
-  width: 16px;
-  height: 16px;
+/* ONE ICON SLOT, ONE SIZE, for both the icon font and the inline SVG.
+   
+   This is what actually makes the four rows read as a list: identical box widths put
+   all four LABELS on the same left edge. The previous rules sized the X mark at 14px
+   against a 16px `group` glyph — correct in isolation, since the mark is a dense
+   square with no interior counters and matched sizes make it look heavier, but as
+   soon as both carry labels that 2px difference becomes 2px of label misalignment,
+   which is visible in a vertical stack in a way it never was side by side.
+   
+   The density is compensated with `scale` instead, which shrinks the ink inside a box
+   that stays 18px. */
+.zx-footer-contact md-icon,
+.zx-footer-contact-mark {
+  --md-icon-size: 18px;
+  width: 18px;
+  height: 18px;
   flex: none;
-  /* Held back from the label it introduces. An icon font glyph at 16px carries
-     more ink than 13px text, so at equal colour it out-weighed the word beside it
-     — the label is the thing being read. Not applied to the X mark, which has no
-     label to defer to and is the whole content of its link. */
+  /* Held back from the label it introduces: a glyph at 18px carries more ink than
+     13px text, so at equal colour it out-weighs the word beside it, and the label is
+     the thing being read. Now applied to the X mark TOO — it was exempt before
+     precisely because it had no label to defer to, and it has one now. */
   opacity: 0.75;
+  transition: opacity 120ms ease;
 }
 
-.zx-social-link:hover md-icon {
+.zx-footer-contact:hover md-icon,
+.zx-footer-contact:hover .zx-footer-contact-mark {
   opacity: 1;
+}
+
+.zx-footer-contact-mark {
+  /* ~15px of ink in the shared 18px box. See the note above: this is the optical
+     correction for the mark's density, done without changing the box that keeps the
+     labels aligned. */
+  transform: scale(0.85);
 }
 
 /* ============================================================ the baseline */
@@ -2743,39 +2749,11 @@
   padding-block-start: var(--zx-space-6);
 }
 
-/* Address and copyright on one line where there is room, stacked where there is
-   not. `space-between` on desktop pushes the copyright to the far edge, which is
-   what makes the band read as a closing rule rather than as another list. */
-.zx-footer-baseline {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: var(--zx-space-2) var(--zx-space-5);
-  margin: 0;
-}
-
-.zx-footer-mail {
-  /* `inline-block` + block padding takes the box from 18px to 26px, clearing the
-     24px AA target-size floor. Measured in the browser at 18px before this — the
-     only target in the footer I introduced below the floor. */
-  display: inline-block;
-  padding-block: var(--zx-space-1);
-  color: var(--md-sys-color-on-surface-variant);
-  font-size: var(--zx-text-caption);
-  line-height: 1.5;
-  text-decoration: none;
-  transition: color 120ms ease;
-}
-
-.zx-footer-mail:hover {
-  color: var(--md-sys-color-on-surface);
-}
-
-.zx-footer-mail:focus-visible {
-  outline: 2px solid var(--md-sys-color-primary);
-  outline-offset: 3px;
-  border-radius: 3px;
-}
+/* `.zx-footer-baseline` and `.zx-footer-mail` (+ `:hover`, `:focus-visible`) were
+   here: the flex row that put the email address on one line with the copyright, and
+   the address link's own styling. The email is a row of `.zx-footer-contact-list`
+   now, so the baseline holds one paragraph and needs no row layout — and the link
+   needs no separate rules, which is the point of the consolidation. */
 
 /* The operating entity. Quieter and smaller than the copyright beside it: this
    line exists to be FOUND rather than read — nobody scanning a footer wants a
@@ -3488,13 +3466,10 @@
     margin-block-end: var(--zx-space-14);
   }
 
-  /* Address left, copyright hard right — the classic closing rule. Only applied at
-     this tier because on a phone the two stack, and `space-between` on a wrapped
-     flex line would strand the copyright alone on the second row. */
-  .zx-footer-baseline {
-    justify-content: space-between;
-    width: 100%;
-  }
+  /* The desktop `.zx-footer-baseline` override — `space-between` to push the
+     copyright to the far edge — went with the rule it modified. The email it was
+     spacing away from now lives in the contact column, leaving nothing to justify
+     against. */
 
   /* ------------------------------------------------------------------ dialogs */
 
