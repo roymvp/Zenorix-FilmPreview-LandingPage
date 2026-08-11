@@ -3619,18 +3619,24 @@
        two-line tagline and a four-line address into 294px. Moving 0.25fr from each
        link column to brand spends that slack where it is short, and legal at ~155px
        still clears its widest link. */
-    /* Measured, not guessed. At `2 1.6 0.75 0.75` the two link columns resolved to
-       147px each against brand's 392px — `contact@zenorix.space` nearly filled its own
-       track, and the pair sat as a cramped block at the shell's right edge while the
-       band's slack pooled on the left where nothing needed it.
+    /* Measured across two passes, not guessed.
        
-       `1.3 1.5 1.1 1.1` moves ~60px per column out of brand and install into the two
-       link columns. Brand still holds the address on two lines, install still fits both
-       badges on one row, and the link columns gain the room that stops them reading as
-       a single field of grey text. */
+       `2 1.6 0.75 0.75` (the initial values) starved the link columns: 147px each
+       against brand's 392px, so `contact@zenorix.space` nearly filled its own track and
+       the pair sat as a cramped block at the shell's right edge.
+       
+       `1.3 1.5 1.1 1.1` overcorrected the other way. Brand fell to 260px, which is
+       narrower than the registered address wants — it broke to three lines and wrapped
+       mid-phrase ("... Road Town, Tortola, VG1110, / British Virgin Islands") while the
+       link columns sat at 220px holding one word each.
+       
+       `1.6 1.5 1 1` is the balance: brand gets the widest track because it holds the
+       only two multi-line strings in the band (tagline and address), install stays just
+       under it since a 300px button and two 146px badges are its real floor, and the
+       link columns take what is left — enough for the email, no more. */
     grid-template-columns:
-      minmax(0, 1.3fr) minmax(0, 1.5fr)
-      minmax(0, 1.1fr) minmax(0, 1.1fr);
+      minmax(0, 1.6fr) minmax(0, 1.5fr)
+      minmax(0, 1fr) minmax(0, 1fr);
     column-gap: var(--zx-space-10);
     row-gap: var(--zx-space-10);
     margin-block-end: var(--zx-space-14);
