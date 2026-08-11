@@ -1,5 +1,6 @@
 import { SiteFooter } from '@/components/landing/site-footer'
 import { TopBar } from '@/components/landing/top-bar'
+import { ORG, orgAddressLine } from '@/lib/config/site'
 import { legalLinks, type LegalSlug } from '@/lib/content/legal'
 import { fill, type Dictionary } from '@/lib/i18n/dictionaries'
 import type { Locale } from '@/lib/i18n/config'
@@ -86,6 +87,46 @@ export function LegalPage({
                 <p className="zx-doc-text">{section.p}</p>
               </section>
             ))}
+
+            {/* WHO this document is a commitment by, at the end of every one of
+                them.
+                
+                A policy is only worth as much as the identifiability of whoever
+                wrote it: "we delete your data on request" means nothing without a
+                named party bound by it and an address to send the request to. So
+                this is not a footer decoration, it is the clause that makes the
+                rest enforceable — which is why it repeats on all three documents
+                rather than living on one "about" page.
+                
+                <address> is the correct element and it is NOT only for postal
+                addresses: it marks up contact information for the nearest
+                article, which is exactly what this is. Browsers italicise it by
+                default; the stylesheet resets that. */}
+            <address className="zx-doc-entity">
+              <p className="zx-doc-entity-name">{ORG.legalName}</p>
+              <dl className="zx-doc-entity-rows">
+                <div className="zx-doc-entity-row">
+                  <dt>{dict.legal.entity.registration}</dt>
+                  <dd>{ORG.registrationNumber}</dd>
+                </div>
+                <div className="zx-doc-entity-row">
+                  <dt>{dict.legal.entity.office}</dt>
+                  <dd>{orgAddressLine()}</dd>
+                </div>
+                <div className="zx-doc-entity-row">
+                  <dt>{dict.legal.entity.notices}</dt>
+                  <dd>
+                    {/* The company address, not the Telegram handle the landing
+                        page's CTA uses. A rights holder filing a DMCA notice and a
+                        regulator checking the operator both need a written channel
+                        that belongs to the entity above — a personal messaging
+                        handle reads as an individual running a side project, which
+                        is the impression these pages exist to correct. */}
+                    <a href={`mailto:${ORG.email}`}>{ORG.email}</a>
+                  </dd>
+                </div>
+              </dl>
+            </address>
 
             {/* The one link out, at the end: a reader who has finished should not
                 have to go back up to the bar to leave. */}

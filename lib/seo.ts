@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { SITE } from '@/lib/config/site'
+import { ORG, SITE } from '@/lib/config/site'
 import { fill, type Dictionary } from '@/lib/i18n/dictionaries'
 import { locales, localeMeta, type Locale } from '@/lib/i18n/config'
 
@@ -193,13 +193,53 @@ export function buildStructuredData({
          identify this entity, and there are none — the "Zenorix" YouTube channel
          and the zenorix.in site in the search results belong to other people, and
          the support Telegram is a personal handle rather than a brand profile.
-         Listing any of them would point Google at somebody else's identity. This
-         is the one field that would most help disambiguation, so it is worth
-         filling in the moment real official profiles exist. */
+         Listing any of them would point Google at somebody else's identity. The
+         registered-entity fields below now carry most of the disambiguation weight
+         `sameAs` would have, but it remains worth filling in the moment real
+         official profiles exist. */
       {
         '@type': 'Organization',
         '@id': organizationId,
         name: SITE.name,
+        /* The registered entity, machine-readable.
+           
+           This is the strongest single fix available for the disambiguation
+           problem described above: "Zenorix" as a bare string collides with six
+           other organizations, but `Zenorix TV Limited` incorporated in the BVI
+           under a stated registration number is a unique, checkable claim that no
+           other holder of the name can match.
+           
+           It also matters for the SafeSearch flag. Anonymity is one of the signals
+           weighed against a cheap streaming site, and every field below is one a
+           reviewer can independently verify against a public register — which is
+           precisely what makes them worth emitting rather than decorative. */
+        legalName: ORG.legalName,
+        identifier: {
+          '@type': 'PropertyValue',
+          name: 'BVI Business Company number',
+          value: ORG.registrationNumber,
+        },
+        address: {
+          '@type': 'PostalAddress',
+          streetAddress: ORG.address.street,
+          addressLocality: ORG.address.locality,
+          addressRegion: ORG.address.region,
+          postalCode: ORG.address.postalCode,
+          /* ISO 3166-1 alpha-2. schema.org accepts a country name here, but the
+             code is unambiguous and is what consumers normalize to anyway. */
+          addressCountry: ORG.address.countryCode,
+        },
+        /* The company address, matching what the legal pages display. A
+           `ContactPoint` rather than a bare `email` because the type states what
+           the address is FOR — a rights holder or regulator looking for the
+           notice channel, not general enquiries, which go to Telegram. */
+        contactPoint: {
+          '@type': 'ContactPoint',
+          contactType: 'legal',
+          email: ORG.email,
+          /* All three markets are served by this one address. */
+          availableLanguage: ['en', 'pt-BR', 'th'],
+        },
         url: SITE.url,
         /* The mark rather than the lockup: Google wants a logo that stays legible
            when squared off, and it is served from this origin so it is crawlable

@@ -151,6 +151,11 @@
   "legal": {
     "updated": "Last updated {date}",
     "backToHome": "Back to Zenorix",
+    "entity": {
+      "registration": "Registration number",
+      "office": "Registered office",
+      "notices": "Notices and requests"
+    },
     "privacy": {
       "title": "Privacy Policy",
       "description": "How the Zenorix Android app collects, uses and stores your data, and the choices you have.",
@@ -174,7 +179,7 @@
         },
         {
           "h": "Retention and deletion",
-          "p": "Account and playback data is kept while your account is active. You can ask us to delete your account and its history at any time through the support contact below; deletion is completed within 30 days and cannot be undone."
+          "p": "Account and playback data is kept while your account is active. You can ask us to delete your account and its history at any time by writing to the address at the end of this page; deletion is completed within 30 days and cannot be undone."
         },
         {
           "h": "Children",
@@ -182,7 +187,7 @@
         },
         {
           "h": "Contact",
-          "p": "For any privacy request — access, correction or deletion — reach us on the support channel linked in the footer of this site."
+          "p": "For any privacy request — access, correction or deletion — write to the company address at the end of this page. Please use the same address for questions about this policy, so that your request is on record."
         }
       ]
     },
@@ -231,6 +236,10 @@
       "intro": "Zenorix streams content it has licensed for distribution. We take copyright seriously, and this page explains both our position and how to reach us if you believe something is wrong.",
       "sections": [
         {
+          "h": "Who operates Zenorix",
+          "p": "Zenorix is operated by Zenorix TV Limited, a company incorporated in the British Virgin Islands under registration number BVI-BC-2024-117892, with its registered office in Road Town, Tortola. Full details are at the end of this page. We publish them because a copyright notice is only worth as much as the identifiability of the party it is served on."
+        },
+        {
           "h": "Our catalogue is licensed",
           "p": "Every film, series and channel available in the Zenorix app is distributed under a licence covering the territory it is offered in. We are not a search index, a link aggregator or a peer-to-peer client, and the app provides no facility to upload, share or publish content."
         },
@@ -240,7 +249,7 @@
         },
         {
           "h": "Submitting a notice",
-          "p": "If you own a copyright, or are authorised to act for the owner, and believe material in the app is available without authorisation, send us a notice through the support channel linked in the footer. This is the fastest route to a human and we treat these reports as a priority."
+          "p": "If you own a copyright, or are authorised to act for the owner, and believe material in the app is available without authorisation, send a notice to the company address at the end of this page. It reaches the people responsible for the catalogue directly, and we treat these reports as a priority."
         },
         {
           "h": "What to include",

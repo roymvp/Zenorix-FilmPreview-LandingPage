@@ -238,6 +238,67 @@
   text-wrap: pretty;
 }
 
+/* THE ENTITY BLOCK, closing every legal document.
+   
+   Set apart with a rule and a tinted panel rather than running on as another
+   clause, because it is a different KIND of content: the clauses above are the
+   commitment, this is the identity of whoever is bound by it. A reader looking
+   for "who runs this" should find it by scanning, without reading the prose. */
+.zx-doc-entity {
+  margin-top: var(--zx-space-8);
+  padding-top: var(--zx-space-6);
+  border-top: 1px solid var(--md-sys-color-outline-variant);
+  /* <address> is italic by default in every browser. These are proper nouns and a
+     registration number — italics would read as emphasis that is not intended. */
+  font-style: normal;
+}
+
+.zx-doc-entity-name {
+  margin: 0 0 var(--zx-space-3);
+  font-size: var(--zx-text-body);
+  font-weight: var(--zx-weight-semibold);
+  color: var(--md-sys-color-on-surface);
+}
+
+.zx-doc-entity-rows {
+  display: grid;
+  gap: var(--zx-space-2);
+  margin: 0;
+}
+
+/* Label above value, not beside it. A two-column <dl> would need a fixed label
+   column wide enough for "ที่ตั้งสำนักงานจดทะเบียน" and
+   "Notificações e solicitações", which would leave the English labels swimming and
+   squeeze the registered address into a narrow ragged column on a phone. Stacking
+   is the layout that survives all three languages at every width. */
+.zx-doc-entity-row {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.zx-doc-entity-row dt {
+  font-size: var(--zx-text-caption);
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.zx-doc-entity-row dd {
+  margin: 0;
+  font-size: var(--zx-text-meta);
+  line-height: 1.5;
+  color: var(--md-sys-color-on-surface);
+}
+
+/* The notice address is the one thing in this block anyone acts on, so it is the
+   one thing that looks actionable. */
+.zx-doc-entity-row dd a {
+  color: var(--md-sys-color-primary);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  /* Long address in a narrow column on a phone: break rather than overflow. */
+  overflow-wrap: anywhere;
+}
+
 .zx-doc-back {
   margin: var(--zx-space-10) 0 0;
   font-size: var(--zx-text-meta);
@@ -2205,6 +2266,35 @@
   border-radius: 3px;
 }
 
+/* Entity + copyright as ONE group. They are the same kind of thing — a statement
+   of who is behind the site — and keeping them together is what stops the entity
+   line becoming a fourth column in the desktop row below. */
+.zx-footer-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+/* The operating entity. Quieter and smaller than the copyright beside it: this
+   line exists to be FOUND rather than read — nobody scanning a footer wants a
+   registration number, but a reviewer or a rights holder checking who runs this
+   needs it to be there. No margin; the group above owns the gap. */
+.zx-footer-org {
+  margin: 0;
+  color: var(--md-sys-color-on-surface-variant);
+  /* One step below the copyright's caption size, and it is the only place in the
+     stylesheet that goes this small — justified because the string is long, is
+     never the reason anyone came, and must not compete with the legal row above
+     it. Still ~11px, so it stays legible rather than becoming decoration. */
+  font-size: 0.6875rem;
+  line-height: 1.5;
+  text-align: center;
+  /* Long enough to wrap on a phone; keeps the break sensible when it does. */
+  text-wrap: pretty;
+  opacity: 0.75;
+}
+
 .zx-footer-copy {
   margin: 0;
   color: var(--md-sys-color-on-surface-variant);
@@ -2852,12 +2942,27 @@
 
   /* One row instead of a centred stack. With 1120px available, three short items
      centred on three lines leaves two thirds of the band empty; spread apart they
-     read as what they are — support, legal, copyright. */
+     read as what they are — support, legal, and the identity block.
+     
+     Still THREE items, not four: the entity line and the copyright are one group
+     (`.zx-footer-meta`) rather than two flex children. Spread as peers of the
+     legal row they read as a fourth navigational column, and `space-between` on
+     four items of very different widths pulls the whole band out of balance. */
   .zx-footer-inner {
     flex-direction: row;
     flex-wrap: wrap;
     justify-content: space-between;
     gap: var(--zx-space-4);
+  }
+
+  /* Right-aligned as the closing block, since it is the last thing in the row. */
+  .zx-footer-meta {
+    align-items: flex-end;
+  }
+
+  .zx-footer-org,
+  .zx-footer-copy {
+    text-align: right;
   }
 
   /* ------------------------------------------------------------------ dialogs */

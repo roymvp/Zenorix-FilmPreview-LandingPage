@@ -1,7 +1,8 @@
 import { ContactLink } from '@/components/landing/contact-link'
+import { orgLine } from '@/lib/config/site'
 
 /**
- * Minimal footer: support, then legal links, then the copyright line.
+ * Minimal footer: support, then legal links, then the entity and copyright lines.
  *
  * Everything else that used to live here has been removed on purpose — brand
  * block, tagline, trademark disclaimer, language selector (it already exists in
@@ -46,7 +47,23 @@ export function SiteFooter({
           ))}
         </ul>
 
-        <p className="zx-footer-copy">{copyright}</p>
+        {/* Entity and copyright as ONE group, not two siblings.
+            
+            On desktop `.zx-footer-inner` becomes a `space-between` row built around
+            three items — support, legal, identity. Adding the entity line as a
+            fourth child would spread it as a peer of the legal links, where it
+            reads as another nav column, so it is grouped with the copyright it
+            belongs with instead.
+            
+            One line, not a block: the registered address and the notice address
+            live on the legal pages, and reproducing them on every screen would
+            turn the footer back into the brand slab that was deliberately deleted
+            from it. What stays here is the pair a reader (or a reviewer) checks
+            first — who operates this, and under what registration. */}
+        <div className="zx-footer-meta">
+          <p className="zx-footer-org">{orgLine()}</p>
+          <p className="zx-footer-copy">{copyright}</p>
+        </div>
       </div>
     </footer>
   )
