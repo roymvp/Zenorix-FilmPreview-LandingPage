@@ -6,6 +6,11 @@
  * http-equiv>` because a meta tag cannot express report-only CSP at all, and an
  * enforcing meta CSP breaks the v0 preview.
  *
+ * CSP ships as TWO headers: an enforced policy covering every resource type that
+ * can be locked down today, and a report-only policy carrying the strict
+ * `script-src` that cannot be. The reasoning, and the measurements behind it, are
+ * at `ENFORCED_DIRECTIVES` below.
+ *
  * The v0 chat preview strips framing and CSP headers so the page still renders in
  * an iframe; everything else passes through, and all of it applies on the deployed
  * site.
@@ -22,55 +27,132 @@
 const FONT_CSS = 'https://fonts.googleapis.com'
 const FONT_FILES = 'https://fonts.gstatic.com'
 
-const CSP = [
-  "default-src 'self'",
-  "base-uri 'self'",
-  /* No <form> on the page, so nothing legitimately submits anywhere. */
-  "form-action 'none'",
+/* EVERY DIRECTIVE THIS SITE NEEDS, in one place so the two policies below cannot
+   drift apart. Each value was verified against a real production build rather than
+   assumed — see the notes on the individual entries. */
+const DIRECTIVES = {
+  'default-src': "'self'",
+  'base-uri': "'self'",
+  /* 'self', NOT 'none' — and this is the one directive the audit changed my mind
+     about. None of OUR pages contain a <form>; the earlier comment here said so and
+     concluded 'none' was free. Scanning the 101 prerendered pages found one anyway:
+     Next.js's own `_global-error.html` implements its "Reload" button as
+     `<form style="margin:0"><button type="submit">Reload</button></form>`. A form
+     with no `action` submits to the current URL, which is exactly how that button
+     reloads.
+     
+     Under 'none' that submission is blocked, so the single recovery control on the
+     crash page would silently do nothing — the worst possible moment for a dead
+     button. 'self' allows it and still blocks the actual attack, which is an
+     injected form POSTing scraped data to someone else's host. Effectively all of
+     the protection, none of the breakage.
+     
+     Worth noting the failure mode: this would never have shown up in normal
+     browsing, because the page it breaks only renders after an unhandled error. */
+  'form-action': "'self'",
   /* Nothing is embedded, and nothing may embed this — the modern equivalent of the
      X-Frame-Options below, which is kept for older browsers. */
-  "frame-ancestors 'none'",
-  "frame-src 'none'",
-  "object-src 'none'",
-  /* Local posters/logos. `data:` covers the inline SVG placeholders Next emits. */
-  "img-src 'self' data:",
-  /* 'unsafe-inline' is needed for real: the document carries 4 `style=` attributes
-     (poster-wall tile positioning and the comparison bars' widths, both computed
-     per render). A nonce cannot cover style ATTRIBUTES, only <style> elements, of
-     which the page has none. */
-  `style-src 'self' 'unsafe-inline' ${FONT_CSS}`,
-  `font-src 'self' ${FONT_FILES}`,
-  "connect-src 'self'",
-  /* WHY THIS POLICY STAYS REPORT-ONLY. A production build emits 38 inline scripts
-     per page (React hydration payloads), so enforcing this as-is would break the
-     site. All three standard fixes were measured against a real build, and each was
-     rejected on evidence rather than taste:
+  'frame-ancestors': "'none'",
+  'frame-src': "'none'",
+  'object-src': "'none'",
+  /* Local posters/logos. `data:` covers the inline SVG placeholders Next emits.
+     Verified: of 115 requests on the built homepage, the only cross-origin ones are
+     the two font hosts below. Every image is same-origin. */
+  'img-src': "'self' data:",
+  /* No <video>/<audio> anywhere in app/ or components/ — this is here so that
+     omitting it from the enforced list below cannot leave media unrestricted. */
+  'media-src': "'self'",
+  /* 'unsafe-inline' is needed for real, and for two separate reasons — the second
+     of which the previous comment here got wrong by claiming the pages had no
+     <style> elements:
+       - 14 `style=` ATTRIBUTES across the build (poster-wall tile positioning and
+         the comparison bars' widths, both computed per render). A nonce cannot
+         cover style attributes at all, only <style> elements.
+       - 2 <style> ELEMENTS, in Next.js's own `_global-error.html` and
+         `_not-found.html`, which inline their `--next-error-*` theme variables.
+     Both are same-document inline CSS, so 'unsafe-inline' is unavoidable here. It
+     is a far smaller concession than it would be for scripts: inline CSS cannot
+     execute, and the exfiltration trick it can theoretically enable (smuggling data
+     out through a crafted background-image URL) is shut off by `img-src 'self'`. */
+  'style-src': `'self' 'unsafe-inline' ${FONT_CSS}`,
+  'font-src': `'self' ${FONT_FILES}`,
+  /* 'self' IS correct in production even though the site loads Vercel Analytics.
+     Confirmed by reading @vercel/analytics' own `getScriptSrc()`: the cross-origin
+     `va.vercel-scripts.com/v1/script.debug.js` is returned only when
+     `isDevelopment()`; production returns the same-origin `/_vercel/insights/
+     script.js`, which Vercel's edge proxies. That same-origin path is the whole
+     reason the endpoint lives under `/_vercel/` — it is designed to survive ad
+     blockers, and it survives this too. The `insights/event` URL that does appear
+     with a host attached is in the package's SERVER bundle, which CSP does not
+     govern because it never runs in a browser.
+     
+     This is the highest-value directive in the enforced set: it is what stops an
+     injected script from POSTING anything it scrapes to an attacker's server. */
+  'connect-src': "'self'",
+  'script-src': "'self'",
+}
 
-       nonce   Requires dynamic rendering on every page — Next.js injects nonces
-               during SSR, so a prerendered page has no request to draw one from.
-               These pages are static and CDN-served (verified: `x-vercel-cache:
-               HIT`), which is what buys the ~630ms LCP. Trading that away is a
-               real, every-visitor cost.
-       SRI     `experimental.sri` builds fine and keeps pages static, but it only
-               stamped `integrity` on the 6 EXTERNAL scripts. `integrity` is
-               meaningless for inline code, so all 38 inline scripts stay blocked.
-       hashes  Enumerating sha256 hashes of those inline scripts yielded 72 across
-               the three locales, only 18 of them shared — the rest embed localized
-               data. Every copy edit would silently invalidate a hash and
-               white-screen a page: a permanent release hazard, not a one-time setup.
+/* WHICH DIRECTIVES ARE ENFORCED TODAY.
+   
+   Note what is NOT in this list: `script-src` AND `default-src`. That pairing is the
+   entire trick, and getting it wrong white-screens the site. A production build
+   emits 39–41 inline scripts per page (React hydration payloads) and inline code
+   does not match `'self'`; because CSP falls back to `default-src` for any directive
+   you omit, shipping `default-src` here would silently re-impose the same
+   restriction on scripts and break all 101 prerendered pages. Leaving both out
+   means scripts are unrestricted in the ENFORCED policy while every other resource
+   type is locked down — and the strict `script-src` keeps reporting via the
+   report-only policy below.
+   
+   This replaces an earlier all-or-nothing arrangement where the whole policy sat in
+   report-only and therefore blocked exactly nothing. The three textbook ways to
+   enforce `script-src` were each measured against a real build and rejected on
+   evidence:
+   
+     nonce   Requires dynamic rendering on every page — Next.js injects nonces
+             during SSR, so a prerendered page has no request to draw one from.
+             These pages are static and CDN-served (verified: `x-vercel-cache:
+             HIT`), which is what buys the ~690ms LCP. Trading that away is a real,
+             every-visitor cost.
+     SRI     `experimental.sri` builds fine and keeps pages static, but it only
+             stamps `integrity` on the 9 EXTERNAL scripts. `integrity` is
+             meaningless for inline code, so the ~40 inline scripts stay blocked.
+     hashes  Enumerating sha256 hashes of those inline scripts yielded 107 distinct
+             values across the three locales out of 143 total — only 36 shared, the
+             rest embed localized data. Every copy edit would silently invalidate a
+             hash and white-screen a page: a permanent release hazard, not one-time
+             setup.
+   
+   So `script-src` stays report-only, and that limitation is stated plainly rather
+   than papered over. Do NOT "fix" it by adding 'unsafe-inline' and promoting it —
+   that silences the reports while giving up most of what CSP is for, which is worse
+   than an honest gap. What would change the calculus: React shipping nonce-less
+   streaming hydration, or dynamic rendering becoming acceptable because the page
+   gains authenticated behavior. Re-measure then rather than assuming. */
+const ENFORCED_DIRECTIVES = [
+  'base-uri',
+  'form-action',
+  'frame-ancestors',
+  'frame-src',
+  'object-src',
+  'img-src',
+  'media-src',
+  'style-src',
+  'font-src',
+  'connect-src',
+]
 
-     So, stated honestly: this header currently protects nothing (report-only only
-     logs), and the page it guards has no form, no cookie, and no user data, so the
-     realistic XSS surface is small. Do NOT "fix" this by adding 'unsafe-inline' —
-     that silences the reports while giving up most of what CSP is for, which is
-     worse than the current honest no-op.
+const serializeCsp = (names) =>
+  [...names.map((name) => `${name} ${DIRECTIVES[name]}`), 'upgrade-insecure-requests'].join('; ')
 
-     What would change the calculus: React shipping nonce-less streaming hydration,
-     or dynamic rendering becoming acceptable because the page gains authenticated
-     or user-specific behavior. Re-measure then rather than assuming. */
-  "script-src 'self'",
-  'upgrade-insecure-requests',
-].join('; ')
+/* Enforced: everything above that is accurate and cannot break the build output. */
+const CSP_ENFORCED = serializeCsp(ENFORCED_DIRECTIVES)
+
+/* Report-only: the strict policy, INCLUDING `default-src` and `script-src`, so the
+   inline-script violations keep arriving in the console and the day a real fix
+   becomes available there is a live signal to verify it against. Sending both
+   headers is explicitly supported — the browser evaluates each independently. */
+const CSP_REPORT_ONLY = serializeCsp(Object.keys(DIRECTIVES))
 
 const securityHeaders = [
   /* Stops the browser from second-guessing our Content-Type — the .apk and the
@@ -92,11 +174,19 @@ const securityHeaders = [
     key: 'Permissions-Policy',
     value: 'camera=(), microphone=(), geolocation=(), payment=(), usb=()',
   },
-  /* REPORT-ONLY on purpose. Report-only logs and protects nothing, so this is a
-     staging step, not the finish line: watch the console for violations (chiefly
-     the inline-script reports noted above), then rename this header to
-     `Content-Security-Policy` to actually enforce it. */
-  { key: 'Content-Security-Policy-Report-Only', value: CSP },
+  /* TWO CSP HEADERS, on purpose — see the notes above `ENFORCED_DIRECTIVES`.
+     
+     This one is ENFORCED and actually blocks: an injected script cannot phone home
+     (`connect-src`), cannot rewrite relative URLs out from under the page
+     (`base-uri`), cannot submit anywhere (`form-action`), and cannot pull in an
+     external stylesheet, font, image or plugin. It deliberately omits `script-src`
+     and `default-src`, which is what keeps React's inline hydration payloads
+     running. */
+  { key: 'Content-Security-Policy', value: CSP_ENFORCED },
+  /* And this one REPORTS ONLY, carrying the strict `script-src` that cannot be
+     enforced yet. It blocks nothing by design; its job is to keep the violation
+     stream alive so the gap stays visible instead of being forgotten. */
+  { key: 'Content-Security-Policy-Report-Only', value: CSP_REPORT_ONLY },
 ]
 
 /* The canonical host, derived from the same env var lib/config/site.ts reads so this
