@@ -120,6 +120,7 @@ export function MarketLanding({
 
           <HeroBillboard
             headline={dict.hero.headline}
+            networksLabel={dict.hero.networksLabel}
             price={fill(dict.hero.price, values)}
             priceNote={dict.hero.priceNote}
             cta={dict.hero.cta}

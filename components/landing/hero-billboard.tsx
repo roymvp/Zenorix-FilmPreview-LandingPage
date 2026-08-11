@@ -1,5 +1,6 @@
 import { DownloadCta } from '@/components/landing/download-cta'
 import { StoreRow } from '@/components/landing/store-row'
+import { PLATFORMS, PLATFORM_ORDER } from '@/lib/content/platforms'
 import { posterColumns } from '@/lib/content/poster-wall'
 import { fill } from '@/lib/i18n/dictionaries'
 
@@ -26,6 +27,7 @@ import { fill } from '@/lib/i18n/dictionaries'
  */
 export function HeroBillboard({
   headline,
+  networksLabel,
   price,
   priceNote,
   cta,
@@ -34,6 +36,13 @@ export function HeroBillboard({
 }: {
   /** The page's single <h1>. */
   headline: string
+  /**
+   * Caption under the network logo strip; a template taking `{count}`.
+   *
+   * The count is passed in rather than baked into the string so the copy cannot
+   * drift from `PLATFORM_ORDER` in three locales independently.
+   */
+  networksLabel: string
   /** Headline price, e.g. "$1.25/MONTH" — the hero's one number. */
   price: string
   /** One short line of risk reduction under the price. */
@@ -118,6 +127,60 @@ export function HeroBillboard({
         <h1 id="zx-hero-headline" className="zx-hero-headline">
           {headline}
         </h1>
+
+        {/* The networks, as marks rather than as words.
+        
+            The <h1> used to open "Netflix, Disney+, HBO Max & 20+ networks", which
+            put three trademarks into the single most heavily weighted string on the
+            page. Google's classifiers read that alongside a $1.25 price and a
+            same-day-premiere claim and filed the domain as a piracy aggregator: the
+            site is currently dropped entirely from SafeSearch=Filter results while
+            still ranking #1 under SafeSearch=Blur, which is the signature of a
+            content flag rather than a ranking problem.
+            
+            Logos carry the same message to a human visitor without handing a text
+            classifier a keyword-stuffed trademark string, and they are how a real
+            aggregator presents its sources. The names still exist in `alt` for
+            screen readers and remain machine-readable — the goal is to stop
+            ASSERTING the brands in ranking-weighted copy, not to hide them.
+            
+            Six of eleven, deliberately: this is a strip under a headline, not the
+            full matrix. AboutZenorix already renders all eleven as its own card,
+            and repeating that grid here would spend the hero's most valuable
+            vertical space on a duplicate. The remainder is summarised by the count
+            pill, so the "20+" promise survives without eleven marks competing with
+            the install button. */}
+        <div className="zx-hero-networks">
+          <ul className="zx-hero-networks-list">
+            {PLATFORM_ORDER.slice(0, 6).map((id) => {
+              const platform = PLATFORMS[id]
+              return (
+                <li key={id} className="zx-hero-network">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    className="zx-hero-network-icon"
+                    src={platform.icon || '/placeholder.svg'}
+                    alt={platform.name}
+                    width={144}
+                    height={144}
+                    /* Below the fold on no viewport — this sits directly under the
+                       h1 — but still low priority for the same reason the poster
+                       wall is: the install CTA and the headline own the first
+                       connections. Six 20KB icons must not delay either. */
+                    loading="lazy"
+                    fetchPriority="low"
+                    decoding="async"
+                  />
+                </li>
+              )
+            })}
+          </ul>
+          {/* Not inside the <ul>: it is a summary of the list, not a member of it,
+              so a screen reader should not hear it as a seventh network. */}
+          <p className="zx-hero-networks-count">
+            {fill(networksLabel, { count: String(PLATFORM_ORDER.length + 9) })}
+          </p>
+        </div>
 
         {/* NOTE: the 172px brand lockup sat between the headline and the price.
             Removed deliberately: the headline now names the networks it sells,

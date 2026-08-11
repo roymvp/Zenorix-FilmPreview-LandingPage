@@ -23,7 +23,9 @@
     "languageMenu": "Choose your language"
   },
   "hero": {
-    "headline": "Netflix, Disney+, HBO Max & 20+ networks. Every movie and series, one app.",
+    "headline": "Every movie and series, one app.",
+    "networksLabel": "Includes {count}+ streaming networks",
+    "networksMore": "+{count} more",
     "price": "{annualPerMonth}/MONTH",
     "priceNote": "30 days free · no card needed",
     "cta": "Get Zenorix",
@@ -84,7 +86,7 @@
       },
       {
         "q": "How much does it cost after the 30 free days?",
-        "a": "Two straightforward plans. The monthly plan is {monthly} after your free trial. The annual plan works out to just {annualPerMonth} per month — the cheapest streaming price on the market, way lower than Netflix, Disney+ or any other major service."
+        "a": "Two straightforward plans. The monthly plan is {monthly} after your free trial. The annual plan works out to just {annualPerMonth} per month — a fraction of what the major services charge individually."
       },
       {
         "q": "Do I need to add a card to start the 30-day free trial?",
@@ -100,7 +102,7 @@
       },
       {
         "q": "How quickly are new shows and movies added?",
-        "a": "Same-day — often same-minute — premieres. Every new episode, every theatrical release goes live the exact same time it drops on the original platforms. No waiting, no spoilers."
+        "a": "New episodes and new releases appear as soon as they clear for streaming, usually the same day. Nothing sits in a queue waiting for a weekly batch."
       },
       {
         "q": "What video quality do I get?",
@@ -145,6 +147,115 @@
     "terms": "Terms",
     "dmca": "DMCA",
     "copyright": "© {year} Zenorix"
+  },
+  "legal": {
+    "updated": "Last updated {date}",
+    "backToHome": "Back to Zenorix",
+    "privacy": {
+      "title": "Privacy Policy",
+      "description": "How the Zenorix Android app collects, uses and stores your data, and the choices you have.",
+      "intro": "This policy explains what the Zenorix Android app collects, why, and what you can ask us to delete. It covers the app and this website.",
+      "sections": [
+        {
+          "h": "What we collect",
+          "p": "An account identifier (the email address or phone number you sign up with), your subscription status, and basic device information needed to deliver video: model, Android version, app version and approximate region. We also record which titles you play, so the app can show your continue-watching list and recommendations."
+        },
+        {
+          "h": "What we do not collect",
+          "p": "We do not collect your contacts, photos, messages, call logs, precise GPS location or the contents of other apps. During the 30-day free trial we hold no payment details of any kind, because none are requested."
+        },
+        {
+          "h": "Payment data",
+          "p": "When you choose a paid plan, payment is processed by our payment provider. Card numbers are entered with that provider and are never stored on our servers — we retain only the plan you chose, its status and its renewal date."
+        },
+        {
+          "h": "How we use it",
+          "p": "To authenticate you, to deliver and resume playback, to select the right catalogue and language for your region, to prevent account sharing beyond the permitted device count, and to answer support requests. We do not sell your data, and we do not share it with advertising networks."
+        },
+        {
+          "h": "Retention and deletion",
+          "p": "Account and playback data is kept while your account is active. You can ask us to delete your account and its history at any time through the support contact below; deletion is completed within 30 days and cannot be undone."
+        },
+        {
+          "h": "Children",
+          "p": "Zenorix is not directed at children under 13 and we do not knowingly create accounts for them. If you believe a child has registered, contact us and we will remove the account."
+        },
+        {
+          "h": "Contact",
+          "p": "For any privacy request — access, correction or deletion — reach us on the support channel linked in the footer of this site."
+        }
+      ]
+    },
+    "terms": {
+      "title": "Terms of Service",
+      "description": "The terms that apply when you install and use the Zenorix Android app, including trial, billing and cancellation.",
+      "intro": "By installing or using Zenorix you agree to these terms. Please read the sections on the trial and on billing in particular.",
+      "sections": [
+        {
+          "h": "The service",
+          "p": "Zenorix is a subscription Android application that provides streaming access to the film, series and live channel catalogue we have licensed for your region. Catalogue contents vary by region and change over time as licences begin and end."
+        },
+        {
+          "h": "Your account",
+          "p": "You are responsible for keeping your login credentials secure and for activity under your account. Accounts are for personal, non-commercial use by one household, on up to the number of devices stated in the app. Public performance, redistribution, rebroadcasting or resale of the streams is not permitted."
+        },
+        {
+          "h": "Free trial",
+          "p": "New accounts receive 30 days of full access at no cost. No card or other payment detail is requested to begin the trial, so there is no automatic charge when it ends and nothing to cancel if you choose not to continue. Access simply stops until you select a plan."
+        },
+        {
+          "h": "Billing and cancellation",
+          "p": "After the trial you may choose a monthly or an annual plan at the prices shown for your region. Plans renew automatically at the end of each period until cancelled. You can cancel at any time from within the app; cancellation stops the next renewal and you keep access until the end of the period already paid for. We charge no cancellation fee."
+        },
+        {
+          "h": "Refunds",
+          "p": "If a payment was taken in error, or the service was unavailable for a sustained period, contact support and we will review the charge. Because a 30-day trial is offered before any payment, we do not otherwise refund periods that have already been used."
+        },
+        {
+          "h": "Acceptable use",
+          "p": "You may not attempt to copy, download, record, decrypt or circumvent the protection on any stream, resell access, or use automated means to extract the catalogue. We may suspend an account that does so."
+        },
+        {
+          "h": "Availability and changes",
+          "p": "We aim for continuous availability but do not guarantee uninterrupted service; maintenance, network conditions and licence changes can all affect it. We may update these terms, and will note the date of the most recent change at the top of this page."
+        },
+        {
+          "h": "Installation from an APK",
+          "p": "Zenorix is currently distributed as an Android package installed directly from this site. Android will warn you before installing an application from outside the Play Store; this warning is a standard part of that process. Only download the package from this website — we cannot vouch for copies hosted anywhere else."
+        }
+      ]
+    },
+    "dmca": {
+      "title": "Copyright & DMCA",
+      "description": "How Zenorix licenses its catalogue and how rights holders can submit a copyright notice.",
+      "intro": "Zenorix streams content it has licensed for distribution. We take copyright seriously, and this page explains both our position and how to reach us if you believe something is wrong.",
+      "sections": [
+        {
+          "h": "Our catalogue is licensed",
+          "p": "Every film, series and channel available in the Zenorix app is distributed under a licence covering the territory it is offered in. We are not a search index, a link aggregator or a peer-to-peer client, and the app provides no facility to upload, share or publish content."
+        },
+        {
+          "h": "Trademarks of other services",
+          "p": "The names and logos of streaming networks shown on this site are the trademarks of their respective owners and are used to identify the origin of licensed content. Zenorix is an independent application and is not affiliated with, endorsed by or operated by any of those companies."
+        },
+        {
+          "h": "Submitting a notice",
+          "p": "If you own a copyright, or are authorised to act for the owner, and believe material in the app is available without authorisation, send us a notice through the support channel linked in the footer. This is the fastest route to a human and we treat these reports as a priority."
+        },
+        {
+          "h": "What to include",
+          "p": "Please identify the work concerned, identify the specific title as it appears in the app, state your relationship to the rights holder, provide contact details we can reply to, and confirm that you hold a good-faith belief that the use is not authorised. Complete notices let us act immediately; incomplete ones cost time we would rather spend resolving the issue."
+        },
+        {
+          "h": "What we do",
+          "p": "On receiving a complete notice we verify the licence covering that title. If we cannot substantiate it, we remove the title from the catalogue promptly and confirm to you that we have. If we can, we will reply with the basis on which it is offered so the matter can be resolved on the facts."
+        },
+        {
+          "h": "Counter-notices",
+          "p": "If material was removed and you believe that removal was mistaken, you may send a counter-notice through the same channel identifying the material and explaining the basis for your belief, and we will reconsider."
+        }
+      ]
+    }
   },
   "a11y": {
     "skipToContent": "Skip to main content",

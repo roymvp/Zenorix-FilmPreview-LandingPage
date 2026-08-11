@@ -621,6 +621,77 @@
   color: var(--zx-on-media);
 }
 
+/* The network logo strip, directly under the <h1>.
+
+   Replaces the three trademarks that used to open the headline (see HeroBillboard
+   for why). It has to read as supporting evidence rather than as a competing
+   block, so it paints nothing: no card, no border, no background — just the marks
+   and their caption, inside the headline's own centred column. */
+.zx-hero-networks {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* Tighter than the hero copy's own 20px block gap, because the caption belongs
+     TO the strip: the pair has to group as one unit rather than read as two more
+     siblings in the hero stack. */
+  gap: var(--zx-space-15);
+}
+
+.zx-hero-networks-list {
+  /* The list semantics are load-bearing (six named marks for a screen reader);
+     none of the default list PRESENTATION is. */
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  /* Wraps rather than scrolls. This is six icons in a 420px column, so they fit on
+     one line at every width the page supports — but Thai and Portuguese share this
+     layout, and a wrap is the graceful failure if a future locale widens the
+     caption. Unlike the About card's marquee, nothing here needs to be one
+     predictable repeat width, so there is no reason to forbid the second row. */
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: var(--zx-space-2);
+}
+
+.zx-hero-network {
+  display: flex;
+}
+
+/* Each service's own store icon, unmodified and in full colour — same rule the
+   About card's marquee and the Top 10 badges follow, so a network can never appear
+   with two different marks.
+
+   28px against the marquee's 48px: that card's logos ARE its whole argument, while
+   these are a qualifier under the headline and must stay subordinate to the price
+   and the install button below them. The radius holds the marquee's corner-to-edge
+   proportion at the smaller size (48:14 -> 28:8), so the two sets of icons read as
+   the same object at two sizes. */
+.zx-hero-network-icon {
+  display: block;
+  flex: 0 0 auto;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  object-fit: cover;
+  /* A hairline ring, in WHITE rather than the marquee's `outline-variant`. These
+     icons sit on the scrimmed poster wall, not on a card: the surface token is
+     tuned for flat black and disappears over key art, and each icon carries its
+     own flat background that would otherwise float as a bright tile with no
+     defined edge. */
+  box-shadow: 0 0 0 1px rgb(255 255 255 / 0.14);
+}
+
+.zx-hero-networks-count {
+  margin: 0;
+  font-size: var(--zx-text-meta);
+  font-weight: var(--zx-weight-regular);
+  /* The same variant tone as the price note one tier below: this is the strip's
+     caption, and it must not compete with the number under it. */
+  color: var(--zx-on-media-variant);
+}
+
 /* The hero's one number. Sits a tier below the headline on purpose: the pitch is
    the promise, the price is the proof of it. */
 /* THE PRICE, and the only coloured text in the hero.
