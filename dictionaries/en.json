@@ -174,7 +174,9 @@
     "reviews": { "one": "{count} review", "other": "{count} reviews" },
     "asOf": "as of {date}",
     "cta": "Watch on Zenorix",
-    "ctaMeta": "Android APK · {size} · 30 days free"
+    "ctaMeta": "Android APK · {size} · 30 days free",
+    "photoCredits": "Cast photo credits",
+    "photoSource": "Portraits come from Wikimedia Commons and are reused under the licence shown against each photographer. Zenorix is not affiliated with them."
   },
   "footer": {
     "privacy": "Privacy",

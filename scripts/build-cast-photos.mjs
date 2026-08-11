@@ -72,6 +72,19 @@ const slugify = (name) =>
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 
+/**
+ * A GET that survives Wikidata's rate limiter.
+ *
+ * The limiter answers with a PLAIN-TEXT "too many requests" body and a 200, not a
+ * 429, so the only way to detect it is that the body does not parse as JSON.
+ *
+ * Returns `{}` rather than throwing once the retries are spent. Throwing was the
+ * previous behaviour and it was wrong: this script's phases are independent, so a
+ * limiter that trips during the last-ditch name search should cost the handful of
+ * names that search was for, not the 138 portraits already resolved by the batch
+ * phase before it. An empty object flows through every caller as "no data for this
+ * request", and the person lands in the no-photo report at the end.
+ */
 async function json(url, attempt = 1) {
   await sleep(400)
   const response = await fetch(url, { headers: UA })
@@ -79,7 +92,10 @@ async function json(url, attempt = 1) {
   try {
     return JSON.parse(body)
   } catch {
-    if (attempt > 4) throw new Error(`${url}\n  gave up: ${body.slice(0, 120)}`)
+    if (attempt > 4) {
+      console.log(`  !! gave up on ${url.slice(0, 80)}: ${body.slice(0, 60)}`)
+      return {}
+    }
     await sleep(attempt * 4000)
     console.log(`  ...throttled, retry ${attempt}`)
     return json(url, attempt + 1)
@@ -154,21 +170,49 @@ for (const group of chunk(names, BATCH)) {
 
 /* ---- 2. per-name search for whatever the batch missed ------------------ */
 
-for (const name of [...unresolved]) {
+/* Two phases, not a per-name search-then-fetch loop.
+   
+   `wbsearchentities` takes one term per call, so the searches cannot be batched —
+   but they are cheap, and it is the FOLLOW-UP entity fetch that doubles the request
+   count. So: collect every candidate id from every search first, then fetch them
+   all in 50s. On the current data that turns ~74 requests into ~40, which is the
+   difference between finishing and getting hard-limited partway through (the
+   previous version died here with "too many requests" that no backoff cleared).
+   
+   `limit=3` rather than 5 for the same reason: three hits is enough to get past a
+   disambiguation page, and every extra candidate is an entity that has to be
+   fetched and checked. */
+const candidates = new Map()
+
+for (const name of unresolved) {
   const search = await json(
     `https://www.wikidata.org/w/api.php?action=wbsearchentities&search=${encodeURIComponent(
       name,
-    )}&language=en&type=item&limit=5&format=json`,
+    )}&language=en&type=item&limit=3&format=json`,
   )
   const ids = (search.search ?? []).map((hit) => hit.id)
-  if (ids.length === 0) continue
+  if (ids.length > 0) candidates.set(name, ids)
+}
+
+const entityById = new Map()
+for (const group of chunk([...new Set([...candidates.values()].flat())], BATCH)) {
   const data = await json(
-    `https://www.wikidata.org/w/api.php?action=wbgetentities&ids=${ids.join(
+    `https://www.wikidata.org/w/api.php?action=wbgetentities&ids=${group.join(
       '|',
     )}&props=claims|descriptions&languages=en&format=json`,
   )
+  for (const [id, entity] of Object.entries(data.entities ?? {})) {
+    entityById.set(id, entity)
+  }
+}
+
+/* First candidate that is a human WITH a portrait wins. Ranking is Wikidata's own
+   search relevance, which for a personal name is reliable enough — and the
+   `instance of human` gate in `pickImage` is what stops a film called "Ballerina"
+   from supplying a face for the actor of the same name. */
+for (const [name, ids] of candidates) {
   for (const id of ids) {
-    const hit = pickImage(data.entities?.[id])
+    const hit = pickImage(entityById.get(id))
     if (hit) {
       found.set(name, hit)
       unresolved.splice(unresolved.indexOf(name), 1)

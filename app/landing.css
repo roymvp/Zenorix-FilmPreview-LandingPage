@@ -3559,25 +3559,102 @@
   text-wrap: pretty;
 }
 
-/* CAST. Chips, not a bulleted column: these are eight or nine short proper nouns,
-   and a vertical list of them would take a full screen to say very little. */
+/* CAST. A face and a name per row, in an auto-fit grid.
+   
+   This was a wrapped row of text chips, and a chip row is the right answer for a
+   list of bare names — but it is the wrong answer once each name has a portrait,
+   because chips of unequal width put every face at a different x and the row stops
+   scanning as a set of people. The grid gives every entry the same box, which is
+   what makes eight faces readable at a glance.
+   
+   `auto-fit` with a 150px min track rather than a column count per breakpoint: the
+   cast length varies from three to twelve, and a fixed `grid-cols-4` leaves a
+   half-empty final row on the short lists. */
 .zx-title-cast {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--zx-space-2);
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr));
+  gap: var(--zx-space-3);
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
 .zx-title-cast li {
-  padding: var(--zx-space-2) var(--zx-space-3);
+  display: flex;
+  align-items: center;
+  gap: var(--zx-space-3);
+  padding: var(--zx-space-2);
   border: 1px solid var(--md-sys-color-outline-variant);
   border-radius: var(--zx-radius-sm);
   background: var(--md-sys-color-surface-container-low);
+  /* A two-word name in a 150px track wraps to two lines; without this the tiles
+     in a row have different heights and the grid looks ragged. */
+  min-width: 0;
+}
+
+/* Circular, and sized in a variable because the initials fallback must land on
+   exactly the same footprint — a square photo next to a round placeholder is the
+   kind of mismatch that reads as a bug. */
+.zx-title-cast li > :first-child {
+  --zx-cast-size: 44px;
+  flex: 0 0 auto;
+  width: var(--zx-cast-size);
+  height: var(--zx-cast-size);
+  border-radius: 999px;
+  /* Commons portraits are arbitrary crops of arbitrary photos, so several are
+     lighter than the tile behind them. A hairline keeps the circle a circle. */
+  border: 1px solid var(--md-sys-color-outline-variant);
+  background: var(--md-sys-color-surface-container-high);
+  object-fit: cover;
+}
+
+.zx-title-cast-initials {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--zx-text-caption);
+  font-weight: var(--zx-weight-semibold);
+  letter-spacing: 0.02em;
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.zx-title-cast-name {
+  min-width: 0;
   font-size: var(--zx-text-meta);
   line-height: var(--zx-lh-snug);
   color: var(--md-sys-color-on-surface);
+  text-wrap: balance;
+}
+
+/* PHOTO CREDITS. The licences oblige this block to exist; nothing obliges it to
+   compete with the cast for attention, hence a closed <details> at caption size. */
+.zx-title-credits {
+  margin-top: var(--zx-space-4);
+  font-size: var(--zx-text-caption);
+  line-height: var(--zx-lh-relaxed);
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.zx-title-credits summary {
+  cursor: pointer;
+  /* 44px of hit area on a phone without a visible button: the row is caption-sized
+     text, and an 18px tap target next to nothing else tappable is a miss. */
+  padding: var(--zx-space-3) 0;
+}
+
+.zx-title-credits ul {
+  margin: 0;
+  padding: 0 0 0 var(--zx-space-4);
+}
+
+.zx-title-credits li {
+  margin-bottom: var(--zx-space-1);
+}
+
+.zx-title-credits p {
+  margin: var(--zx-space-2) 0 0;
+  max-width: 60ch;
+  text-wrap: pretty;
 }
 
 @media (min-width: 720px) {

@@ -4,6 +4,7 @@ import { DownloadCta } from '@/components/landing/download-cta'
 import { SiteFooter } from '@/components/landing/site-footer'
 import { TopBar } from '@/components/landing/top-bar'
 import { SITE } from '@/lib/config/site'
+import { castCredits, castInitials, castPhoto } from '@/lib/content/cast'
 import type { ChartEntry } from '@/lib/content/charts'
 import { legalLinks } from '@/lib/content/legal'
 import { referenceLinks, watchLinks } from '@/lib/content/outbound'
@@ -92,6 +93,11 @@ export function TitlePage({
     { name: 'Rotten Tomatoes', score: record.rottenTomatoes, suffix: '%' },
     { name: 'Metacritic', score: record.metacritic, suffix: '/100' },
   ].filter((row) => row.score)
+
+  /* Photographer credits for whichever of this cast actually has a portrait.
+     Computed here so the markup below can ask one question ("is there anything to
+     credit") instead of walking the cast twice. */
+  const credits = castCredits(record.cast ?? [])
 
   return (
     <>
@@ -254,10 +260,69 @@ export function TitlePage({
                 <>
                   <h2 className="zx-title-section-heading">{copy.cast}</h2>
                   <ul className="zx-title-cast">
-                    {record.cast.map((person) => (
-                      <li key={person}>{person}</li>
-                    ))}
+                    {record.cast.map((person) => {
+                      const photo = castPhoto(person)
+                      return (
+                        <li key={person}>
+                          {/* A face where there is a free-licensed one, initials
+                              where there is not. Roughly a third of the billed
+                              cast has no Commons portrait, and a grey silhouette
+                              placeholder repeated three times in a row reads as a
+                              broken page — two letters reads as a person.
+                              eslint-disable: pre-cropped 168px WebP from
+                              scripts/build-cast-photos.mjs. */}
+                          {photo ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img
+                              className="zx-title-cast-photo"
+                              src={photo.src}
+                              /* Empty alt on purpose: the name is rendered in the
+                                 sibling span, so a described portrait would make a
+                                 screen reader say every actor's name twice. */
+                              alt=""
+                              width={56}
+                              height={56}
+                              loading="lazy"
+                              decoding="async"
+                            />
+                          ) : (
+                            /* aria-hidden because the name is right next to it:
+                               a screen reader announcing "SS Sadie Sink" is worse
+                               than one that just reads the name. */
+                            <span className="zx-title-cast-initials" aria-hidden="true">
+                              {castInitials(person)}
+                            </span>
+                          )}
+                          <span className="zx-title-cast-name">{person}</span>
+                        </li>
+                      )
+                    })}
                   </ul>
+
+                  {/* The attribution the licences require. Commons is free-licensed
+                      by policy, but CC BY and CC BY-SA both oblige crediting the
+                      photographer, so this block is a condition of showing the
+                      photos above rather than a nicety. Collapsed into a <details>
+                      because it is legally necessary and editorially uninteresting:
+                      present in the DOM, discoverable, not competing with the
+                      cast for attention. */}
+                  {credits.length > 0 && (
+                    <details className="zx-title-credits">
+                      <summary>{copy.photoCredits}</summary>
+                      <ul>
+                        {credits.map((credit) => (
+                          <li key={`${credit.artist}-${credit.license}`}>
+                            <a href={credit.source} target="_blank" rel="noopener noreferrer">
+                              {credit.artist}
+                            </a>
+                            {' · '}
+                            {credit.license}
+                          </li>
+                        ))}
+                      </ul>
+                      <p>{copy.photoSource}</p>
+                    </details>
+                  )}
                 </>
               )}
             </article>

@@ -174,7 +174,9 @@
     "reviews": { "one": "{count} crítica", "other": "{count} críticas" },
     "asOf": "em {date}",
     "cta": "Assista no Zenorix",
-    "ctaMeta": "APK Android · {size} · 30 dias grátis"
+    "ctaMeta": "APK Android · {size} · 30 dias grátis",
+    "photoCredits": "Créditos das fotos do elenco",
+    "photoSource": "Os retratos vêm do Wikimedia Commons e são reutilizados sob a licença indicada ao lado de cada fotógrafo. A Zenorix não tem vínculo com eles."
   },
   "footer": {
     "privacy": "Privacidade",
