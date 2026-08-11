@@ -3713,10 +3713,9 @@
    describe the title and belong with its name, while these two describe the world's
    response to it.
    
-   Dots between the members, drawn as `::before` on every child after the first so
-   that a member the record does not have takes its separator with it instead of
-   leaving "· 90%". `align-items: center` with everything sized in `em` keeps the
-   logo, the text and the score marks on one optical baseline. */
+   No separator between the members — see the note below this rule for why the dot
+   that used to sit there is gone. `align-items: center` with everything sized in
+   `em` keeps the logo, the text and the score marks on one optical baseline. */
 .zx-title-eyebrow {
   display: flex;
   flex-wrap: wrap;
@@ -3725,7 +3724,11 @@
   /* Owns the space BELOW itself, not above: it is the first thing in the column, so
      a top margin here would just push the whole header down. */
   margin-bottom: var(--zx-space-3);
-  font-size: var(--zx-text-base);
+  /* `--zx-text-body` (14px). This said `--zx-text-base`, another step that does not
+     exist in this file's scale, so the declaration was dropped and the row inherited
+     its size. One tier ABOVE the tag line's `meta`: the service and the scores are
+     read before the title, the tag line after it. */
+  font-size: var(--zx-text-body);
   color: var(--md-sys-color-on-surface-variant);
 }
 
@@ -3767,7 +3770,13 @@
   margin: var(--zx-space-3) 0 0;
   padding: 0;
   list-style: none;
-  font-size: var(--zx-text-sm);
+  /* `--zx-text-meta` (13px). This said `--zx-text-sm`, which does not exist in this
+     file's scale — the tiers are h1/h2/amount/lg/body/meta/caption/label/micro — so
+     the declaration was invalid and the row silently inherited its size from the
+     header instead of picking a tier. It happened to look close to right, which is
+     why it survived; found by grepping for the token after making the same mistake
+     on the synopsis toggle below. `meta` is the caption tier this row belongs to. */
+  font-size: var(--zx-text-meta);
   color: var(--md-sys-color-on-surface-variant);
   /* Year and runtime are digits read side by side. */
   font-variant-numeric: tabular-nums;
@@ -3890,12 +3899,17 @@
 
 /* THE TOGGLE. A quiet text control, deliberately not a third button style: the page
    already has a filled CTA and an outlined secondary, and a third bordered shape
-   here would compete with both. So it is set as a link-like affordance — brand
-   colour, semibold, underlined on hover — which is the vocabulary for "reveals more
-   of this text" rather than "performs an action".
+   here would compete with both.
    
-   `--zx-text-sm` against the paragraph's `--zx-text-lg`: subordinate to the prose it
-   controls. Same reason the label is one word.
+   THE CHEVRON IS WHAT MARKS IT AS A CONTROL, NOT THE COLOUR. I first built this as
+   a "link-like affordance — brand colour, semibold" and screenshotted it: `primary`
+   in this theme is #fbfcfe, i.e. near-white, so that produced bold white text that
+   read as an emphasised word under the paragraph and not as something to press. On
+   a palette whose brand colour IS white, colour cannot signal interactivity. The
+   rotating chevron can, and it is the same disclosure vocabulary as the FAQ rows.
+   
+   `--zx-text-meta` against the paragraph's `--zx-text-lg`: subordinate to the prose
+   it controls. Same reason the label is one word.
    
    PADDING, NOT A HEIGHT. `min-height` on an inline-level control fights the text
    baseline; the vertical padding gives it a ~30px target, which is the same
@@ -3909,21 +3923,59 @@
   appearance: none;
   background: none;
   border: 0;
+  /* Label and chevron on one line, hence inline-flex — a plain `display: block`
+     button would leave the glyph on its own baseline below the word. */
+  display: inline-flex;
+  align-items: center;
+  gap: var(--zx-space-05);
   /* -4px on the inline start pulls the label back to the paragraph's left edge, so
      the padding that makes the target tappable does not visibly indent it. */
   margin: var(--zx-space-1) 0 0 -4px;
   padding: 4px;
   font: inherit;
-  font-size: var(--zx-text-sm);
+  /* `--zx-text-meta`, not the `--zx-text-sm` I first wrote — there IS no `sm` step
+     in this file's scale (h1/h2/amount/lg/body/meta/caption/label/micro), so that
+     resolved to nothing and the button silently inherited the 15px paragraph size,
+     making the control the same weight as the prose it controls. Picking a TIER
+     rather than a number is the rule at the top of this file; `meta` (13px) is the
+     caption tier, which is what this is. */
+  font-size: var(--zx-text-meta);
   font-weight: var(--zx-weight-semibold);
   line-height: 1.4;
-  color: var(--md-sys-color-primary);
+  color: var(--md-sys-color-on-surface);
   cursor: pointer;
 }
 
 .zx-title-synopsis-toggle:hover {
-  text-decoration: underline;
-  text-underline-offset: 3px;
+  color: var(--md-sys-color-primary);
+}
+
+/* The chevron. Sized to the label rather than left at `md-icon`'s own 24px box —
+   and `width`/`height` alongside `font-size`, because `md-icon` is a custom element
+   carrying its own box and `font-size` alone leaves it 24px wide (measured; the
+   playback chips hit the same thing). */
+.zx-title-synopsis-toggle md-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  line-height: 1;
+  /* Points down when collapsed, up when open. The rotation is the state indicator,
+     so it gets a transition — but only this, not the paragraph's height: animating
+     the clamp release means animating `height`, which cannot be done from `auto`
+     without measuring, and a janky reflow is worse than an instant one. */
+  transition: transform 160ms ease;
+}
+
+.zx-title-synopsis-toggle[aria-expanded='true'] md-icon {
+  transform: rotate(180deg);
+}
+
+/* No transition for anyone who has asked for less motion. The rotation still
+   happens — it is state, not decoration — it just arrives instantly. */
+@media (prefers-reduced-motion: reduce) {
+  .zx-title-synopsis-toggle md-icon {
+    transition: none;
+  }
 }
 
 /* Matches `.zx-chart-more` and `.zx-logo-marquee` — 2px in `primary` at 2px offset
@@ -4237,7 +4289,10 @@
 .zx-title-credits {
   margin-top: var(--zx-space-4);
   font-size: var(--zx-text-caption);
-  line-height: var(--zx-lh-relaxed);
+  /* `--zx-lh-body`. Was `--zx-lh-relaxed`, which is not one of this file's three
+     leading tokens (tight/snug/body), so the declaration was invalid and these lines
+     fell back to the browser's `normal`. */
+  line-height: var(--zx-lh-body);
   color: var(--md-sys-color-on-surface-variant);
 }
 

@@ -74,6 +74,23 @@ export function TitleSynopsis({
         onClick={() => setOpen((v) => !v)}
       >
         {open ? lessLabel : moreLabel}
+        {/* THE CHEVRON, and it is not decoration. Screenshotted without it, the
+            label was bold `primary` text — and `primary` on this palette is
+            #fbfcfe, i.e. near-white, so "More" rendered as simply an emphasised
+            word sitting under the paragraph rather than as something to press. On a
+            palette whose brand colour IS white, colour alone cannot mark a control.
+            The rotating chevron can, and it is the same disclosure vocabulary the
+            FAQ rows on this site already use.
+
+            `expand_more` is already in the font subset that `layout.tsx` requests
+            (the FAQ uses it), so this costs no additional bytes — worth checking
+            before reaching for an icon, since a name that is NOT in the subset
+            silently disables subsetting and ships the full 1.8MB library.
+
+            aria-hidden because `aria-expanded` on the button already conveys the
+            state to a screen reader; the glyph is the visual half of that same
+            fact, and announcing it would duplicate it. */}
+        <md-icon aria-hidden="true">expand_more</md-icon>
       </button>
     </div>
   )
