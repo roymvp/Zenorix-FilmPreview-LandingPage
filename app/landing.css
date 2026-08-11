@@ -3347,35 +3347,9 @@
   padding: var(--zx-space-8) 0 var(--zx-space-10);
 }
 
-/* Breadcrumb. Small, quiet, and above the fold — it mirrors the BreadcrumbList in
-   the JSON-LD, and its job is orientation for someone who landed here from search
-   with no idea what the site is. */
-.zx-title-crumbs {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--zx-space-2);
-  margin-bottom: var(--zx-space-6);
-  font-size: var(--zx-text-meta);
-  color: var(--md-sys-color-on-surface-variant);
-}
-
-.zx-title-crumbs a {
-  color: var(--md-sys-color-on-surface-variant);
-  text-decoration: none;
-}
-
-.zx-title-crumbs a:hover {
-  color: var(--md-sys-color-on-surface);
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-
-/* The current page in the trail. Not a link, and dimmer than the parent it sits
-   next to, so the only thing that looks clickable is the way out. */
-.zx-title-crumbs [aria-current='page'] {
-  color: var(--md-sys-color-on-surface);
-}
+/* `.zx-title-crumbs` and its three children used to sit here, styling the
+   "Zenorix / <title>" trail above the h1. Removed with the markup rather than left
+   behind — see the note in `title-page.tsx` for why the trail went. */
 
 .zx-title-head {
   display: flex;

@@ -200,18 +200,14 @@ export function TitlePage({
             moving focus. */}
         <main id="zx-main" className="zx-title" tabIndex={-1}>
           <div className="zx-shell">
-            {/* A real breadcrumb, matching the BreadcrumbList in the JSON-LD.
-                Unlike the legal pages — where the markup is deliberately
-                trail-less because the top bar is the only way up — this page has
-                a genuine two-level parent (the market page) worth showing, and a
-                visible trail that DISAGREED with the markup would be the worst of
-                both. */}
-            <nav className="zx-title-crumbs" aria-label={copy.breadcrumb}>
-              <a href={`/${locale}`}>{dict.nav.home}</a>
-              <span aria-hidden="true">/</span>
-              <span aria-current="page">{entry.title}</span>
-            </nav>
-
+            {/* NO VISIBLE BREADCRUMB. There was a "Zenorix / <title>" trail here
+                and it is gone: with only two levels it never told the visitor
+                anything the top bar's home link does not already offer, and it put
+                the site name immediately above an h1 that the top bar had already
+                introduced — two lines of chrome in front of the one line the page
+                is about. The `BreadcrumbList` in the JSON-LD stays; a crawler needs
+                the parent relationship spelled out, a reader on a two-level page
+                does not. Same reasoning as the legal pages, see `lib/seo.ts`. */}
             <article className="zx-title-body">
               <header className="zx-title-head">
                 {/* The poster, at its real 2:3. Same tile the rail uses, so it is

@@ -309,7 +309,11 @@ export function buildTitleStructuredData({
       },
       /* Market page -> this title. Two levels because that is the real depth —
          there is no intermediate index URL to name, and inventing one would put a
-         404 in the trail. Last crumb carries no `item`, same as the legal pages. */
+         404 in the trail. Last crumb carries no `item`, same as the legal pages.
+
+         Emitted with NO visible trail on the page, also same as the legal pages:
+         the two-level version told a reader nothing the top bar's home link does
+         not, but a crawler still needs the parent relationship stated somewhere. */
       {
         '@type': 'BreadcrumbList',
         itemListElement: [
