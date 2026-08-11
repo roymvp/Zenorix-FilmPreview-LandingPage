@@ -247,12 +247,19 @@ export function TitlePage({
                 ))}
               </dl>
 
-              <h2 className="zx-title-section-heading">{copy.cast}</h2>
-              <ul className="zx-title-cast">
-                {record.cast.map((person) => (
-                  <li key={person}>{person}</li>
-                ))}
-              </ul>
+              {/* Heading and list stand or fall together — a "Cast" heading over an
+                  empty list reads as a missing section rather than an absent one.
+                  Documentaries (`idaho`) legitimately have no cast. */}
+              {record.cast && record.cast.length > 0 && (
+                <>
+                  <h2 className="zx-title-section-heading">{copy.cast}</h2>
+                  <ul className="zx-title-cast">
+                    {record.cast.map((person) => (
+                      <li key={person}>{person}</li>
+                    ))}
+                  </ul>
+                </>
+              )}
             </article>
           </div>
         </main>

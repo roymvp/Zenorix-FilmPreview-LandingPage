@@ -90,8 +90,17 @@ export type TitleRecord = {
   directors?: Credit[]
   creators?: Credit[]
   writers?: Credit[]
-  /** Billed principal cast, in credit order. Trimmed to the top billing block. */
-  cast: Credit[]
+  /**
+   * Billed principal cast, in credit order. Trimmed to the top billing block.
+   *
+   * Optional, like the other credit fields, because documentaries have no cast.
+   * `idaho` is a true-crime series whose participants are the victims' bereaved
+   * families and the detectives on the case — real people appearing as themselves,
+   * who must not be listed under "Cast" as though they had been booked to play a
+   * part. Omitted there, and the page and the JSON-LD `actor` both drop the block
+   * rather than rendering an empty heading.
+   */
+  cast?: Credit[]
   /** Genre words used as-is for display and for the `genre` field in JSON-LD. */
   genres: string[]
   productionCompanies: string[]
@@ -644,6 +653,99 @@ const TITLES: Partial<Record<ChartEntryId, TitleRecord>> = {
     rottenTomatoes: { value: 33, reviewCount: 39, asOf: '2026-08-09', url: 'https://www.rottentomatoes.com/m/the_devils_mouth' },
     metacritic:     { value: 46, reviewCount: 8,  asOf: '2026-07-31', url: 'https://www.metacritic.com/movie/the-devils-mouth/' },
   },
+
+  minions: {
+    id: 'minions',
+    slug: 'minions-and-monsters',
+    synopsis: 'Old Hollywood, long before the events of Minions. A tribe of Minions stumbles into the silent-film business, and when talkies end their careers one of them sets out to make a monster movie of his own \u2014 using real monsters.',
+    /* The 2026-07-01 US theatrical date, not the 2026-06-21 Annecy premiere. A
+       festival screening is not a release, the same call made for `hours72` above
+       with its Paris Theater premiere. */
+    released: '2026-07-01',
+    runtime: 90,
+    directors: ['Pierre Coffin'],
+    writers: ['Brian Lynch', 'Pierre Coffin'],
+    cast: ['Pierre Coffin', 'Trey Parker', 'Allison Janney', 'Christoph Waltz', 'Jesse Eisenberg', 'Jeff Bridges', 'Zoey Deutch', 'Bobby Moynihan', 'Phil LaMarr'],
+    genres: ['Animation', 'Comedy', 'Family'],
+    productionCompanies: ['Universal Pictures', 'Illumination'],
+    distributors: ['Universal Pictures'],
+    /* No `streamingOn`, though this one is subtler than the theatrical pair above.
+       It reached digital DOWNLOAD on 2026-08-11 — that is a purchase, not a
+       subscription service, and the chart badges it `peacock`, where it has not
+       landed. "Streaming on Peacock" is exactly the claim being avoided. */
+    rottenTomatoes: { value: 89, reviewCount: 179, asOf: '2026-08-11', url: 'https://www.rottentomatoes.com/m/minions_and_monsters' },
+    metacritic:     { value: 70, reviewCount: 30,  asOf: '2026-07-07', url: 'https://www.metacritic.com/movie/minions-and-monsters/' },
+  },
+
+  /* NOT the Prime Video documentary about the same murders. Researching this one
+     turned up "One Night in Idaho: The College Murders" (Liz Garbus, Prime Video,
+     2025) and it looked at first like the chart had the title and platform wrong.
+     It does not: these are two separate productions about the 2022 University of
+     Idaho case, and this is the Netflix one. Verified before changing anything —
+     the near-miss is recorded here so the next person does not "fix" it. */
+  idaho: {
+    id: 'idaho',
+    slug: 'the-idaho-murders-college-nightmare',
+    synopsis: 'A three-part account of the 2022 University of Idaho student murders, built from bodycam footage, text messages and interviews with the victims\u2019 families and the investigators who worked the case.',
+    released: '2026-07-29',
+    seasons: 1,
+    episodes: 3,
+    network: 'Netflix',
+    /* Borgman directed. Joe Berlinger is an executive producer and is deliberately
+       not here — `creators` is a creator/showrunner credit, and an EP credit is a
+       different claim. */
+    creators: ['Skye Borgman'],
+    /* No `cast` — see the field's note. The people on screen are the victims'
+       families and law enforcement, appearing as themselves. */
+    genres: ['Documentary', 'True crime'],
+    productionCompanies: ['RadicalMedia', 'Third Eye Motion Picture Company'],
+    distributors: ['Netflix'],
+    streamingOn: 'netflix',
+    /* NO SCORES AT ALL. Rotten Tomatoes lists the series but publishes no critic
+       score, and it has no Metacritic entry. Both omitted, which is the "honest
+       partial record" the header describes: this page earns its place on credits,
+       network, episode count and synopsis, and the ratings block simply does not
+       render. */
+  },
+
+  invite: {
+    id: 'invite',
+    slug: 'the-invite',
+    /* Kept to the setup. The third act turns on the neighbours' proposition, and a
+       one-line synopsis that leads with it would be both a spoiler and a lurid
+       misread of what the reviews describe as a marital comedy. */
+    synopsis: 'A San Francisco music teacher comes home to find his wife has invited the upstairs neighbours to dinner \u2014 the ones whose noise they have been arguing about. Over one evening the two couples take each other\u2019s marriages apart.',
+    /* The 2026-07-10 WIDE release, not the 2026-06-26 limited one and not the
+       Sundance premiere on 2026-01-24, because the field is defined as first wide
+       release. Wikipedia's infobox leads with the limited date, so this is a
+       deliberate reading of the field rather than a transcription of the box. */
+    released: '2026-07-10',
+    runtime: 107,
+    directors: ['Olivia Wilde'],
+    writers: ['Will McCormack', 'Rashida Jones'],
+    cast: ['Seth Rogen', 'Olivia Wilde', 'Pen\u00e9lope Cruz', 'Edward Norton'],
+    genres: ['Comedy', 'Drama'],
+    productionCompanies: ['Annapurna Pictures', 'FilmNation Entertainment', 'Permut Presentations'],
+    distributors: ['A24'],
+    /* No `streamingOn`. The chart badges `hbo-max` on the strength of A24's output
+       deal, but the film is not on the service — it reached digital purchase on
+       2026-08-11 and nothing more. An expected future window is not a fact about
+       where it streams today, so the field stays off until it lands. */
+    rottenTomatoes: { value: 97, reviewCount: 267, asOf: '2026-08-08', url: 'https://www.rottentomatoes.com/m/the_invite' },
+    metacritic:     { value: 82, reviewCount: 47,  asOf: '2026-07-13', url: 'https://www.metacritic.com/movie/the-invite/' },
+  },
+
+  /* `catFest` (CatVideoFest 2026) IS DELIBERATELY ABSENT, and this note exists so
+     nobody adds it to "finish the set". It is a touring programme of internet cat
+     videos, not a title: there is no director, no cast, no studio and no critic
+     score, because there is nothing for a critic to review but a curator's reel
+     that changes between screenings. Every field this page is built to state would
+     be either empty or invented, which is precisely the doorway page the header
+     describes. It keeps its chart card and its download dialog, which is the
+     correct outcome rather than a gap to be filled.
+
+     Same test for anything else added later: if the honest record is a name and a
+     date, it does not get a page. */
 }
 
 /* The key and the record's own `id` are two places to write the same string, so

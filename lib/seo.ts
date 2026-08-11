@@ -287,7 +287,12 @@ export function buildTitleStructuredData({
         ...(record.writers
           ? { author: record.writers.map((name) => ({ '@type': 'Person', name })) }
           : {}),
-        actor: record.cast.map((name) => ({ '@type': 'Person', name })),
+        /* Conditional for the same reason as the three credits above: a
+           documentary has no `actor`, and an empty array would assert an empty
+           cast rather than an absent one. */
+        ...(record.cast
+          ? { actor: record.cast.map((name) => ({ '@type': 'Person', name })) }
+          : {}),
         productionCompany: record.productionCompanies.map((name) => ({
           '@type': 'Organization',
           name,
