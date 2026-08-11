@@ -142,6 +142,13 @@
     "prompt": "Dúvidas antes de instalar?",
     "aria": "Fale com a gente no Telegram"
   },
+  "social": {
+    "follow": "Zenorix no X",
+    "community": {
+      "label": "Comunidade",
+      "aria": "Entre na comunidade Zenorix no X"
+    }
+  },
   "footer": {
     "privacy": "Privacidade",
     "terms": "Termos",

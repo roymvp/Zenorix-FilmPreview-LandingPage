@@ -144,6 +144,7 @@ export function LegalPage({
           })}
           copyright={fill(dict.footer.copyright, { year: 2026 })}
           contact={{ label: dict.contact.label, aria: dict.contact.aria }}
+          social={dict.social}
         />
       </div>
     </>

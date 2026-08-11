@@ -15,7 +15,7 @@ import { track } from '@vercel/analytics'
  *      Pro includes NO free event allowance ($0.03/1K, page views included), so
  *      every event added here has a real, if small, bill attached. That is the
  *      reason for the "no emitter, no union member" rule below.
- *   2. Pro allows 2 PROPERTIES PER EVENT. All five events sit at 1-2 today, three
+ *   2. Pro allows 2 PROPERTIES PER EVENT. All six events sit at 1-2 today, three
  *      of them exactly at the ceiling. Adding a third property to `modal_view`,
  *      `apk_download_click` or `language_switch` will NOT error — production
  *      silently strips the excess (`parseProperties(..., { strip: true })`), so
@@ -47,6 +47,12 @@ export type ConversionEvent =
      three entry points sit at very different scroll depths, so a single
      undifferentiated count could not say which one actually earns the ask. */
   | 'contact_click'
+  /* Emitted by `<SocialLinks>`, reporting `network` — `x` or `x_community`. ONE
+     event with a property rather than two events: the question is which of the two
+     destinations people choose, which is a group-by on a single bar, not a
+     comparison across separate counters. Both values are fixed strings, so
+     cardinality stays at two. */
+  | 'social_click'
 
 /**
  * Every download CTA on the page, and the `source` property of

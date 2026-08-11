@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { ORG, SITE } from '@/lib/config/site'
+import { identityProfiles, ORG, SITE, SOCIAL } from '@/lib/config/site'
 import { fill, type Dictionary } from '@/lib/i18n/dictionaries'
 import { locales, localeMeta, type Locale } from '@/lib/i18n/config'
 
@@ -99,6 +99,11 @@ export function buildMarketMetadata({
     },
     twitter: {
       card: 'summary_large_image',
+      /* Attributes the card to the brand account, which is what puts "From
+         @zenorix_tv" on a shared link instead of leaving it unsourced. Needs the
+         leading `@`, which `SOCIAL` deliberately does not store — see the note
+         there. */
+      site: `@${SOCIAL.x.handle}`,
       title: fill(dict.meta.ogTitle, values),
       description,
       images: [`${SITE.url}${shareCard(locale)}`],
@@ -189,14 +194,16 @@ export function buildStructuredData({
          one company behind all three markets, so all three graphs must point at
          the same identifier or they describe three separate companies.
          
-         Deliberately NO `sameAs`. That property is for profiles that unambiguously
-         identify this entity, and there are none — the "Zenorix" YouTube channel
-         and the zenorix.in site in the search results belong to other people, and
-         the support Telegram is a personal handle rather than a brand profile.
-         Listing any of them would point Google at somebody else's identity. The
-         registered-entity fields below now carry most of the disambiguation weight
-         `sameAs` would have, but it remains worth filling in the moment real
-         official profiles exist. */
+         `sameAs` is now populated, via `identityProfiles()`. It had been left empty
+         because every "Zenorix" profile then in the search results belonged to
+         somebody else, and pointing Google at one of those would have asserted
+         someone else's identity as this company's.
+         
+         It carries only the brand's own X account. NOT the X community, which is a
+         group the company hosts rather than a statement of who the company is, and
+         NOT the support Telegram, which is a personal handle. See `SOCIAL` in
+         lib/config/site.ts — the allow-list lives there precisely so this stays a
+         list of identity profiles. */
       {
         '@type': 'Organization',
         '@id': organizationId,
@@ -214,6 +221,11 @@ export function buildStructuredData({
            reviewer can independently verify against a public register — which is
            precisely what makes them worth emitting rather than decorative. */
         legalName: ORG.legalName,
+        /* The verifiable cross-reference: a crawler can fetch this profile, see the
+           same name, mark and domain, and tie the two together. Combined with
+           `legalName` and `identifier` below, this is what separates this Zenorix
+           from the six unrelated ones. */
+        sameAs: identityProfiles(),
         identifier: {
           '@type': 'PropertyValue',
           name: 'BVI Business Company number',

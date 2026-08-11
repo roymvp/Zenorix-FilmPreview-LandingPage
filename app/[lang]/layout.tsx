@@ -141,7 +141,7 @@ export default async function LocaleLayout({
             font request cannot reuse. */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        {/* Material Symbols for <md-icon>, SUBSET to the nine glyphs this page
+        {/* Material Symbols for <md-icon>, SUBSET to the ten glyphs this page
             actually renders (`icon_names`, alphabetical as Google requires).
 
             Without that parameter Google serves the entire Material Symbols
@@ -155,14 +155,17 @@ export default async function LocaleLayout({
             users: 4k / high_quality / surround_sound / bolt in the spec grid
             (about-zenorix), arrow_forward (top-chart), chat_bubble
             (contact-link), check (conversion-dialog + language-switcher),
-            expand_more (faq-section + language-switcher), verified_user
-            (download-cta).
+            expand_more (faq-section + language-switcher), group (social-links),
+            verified_user (download-cta).
+
+            The X mark in social-links is deliberately NOT here: Material Symbols
+            carries no brand logos, so that one is an inline SVG in the component.
 
             The axis ranges are kept so the subset stays a variable font — it
             still advertises `font-weight: 100 700`. */}
         <link
           rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=4k,arrow_forward,bolt,chat_bubble,check,expand_more,high_quality,surround_sound,verified_user"
+          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=4k,arrow_forward,bolt,chat_bubble,check,expand_more,group,high_quality,surround_sound,verified_user"
         />
       </head>
       <body>

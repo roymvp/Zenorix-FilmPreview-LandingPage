@@ -88,6 +88,42 @@ export const ORG = {
   email: 'contact@zenorix.space',
 } as const
 
+/**
+ * Official social presence.
+ *
+ * The two entries are NOT interchangeable, and the distinction decides where each
+ * one may be used:
+ *
+ * - `x` is the brand's own account. It identifies the company, so it is the one
+ *   thing eligible for schema.org `sameAs` and for `twitter:site` on share cards.
+ * - `xCommunity` is a discussion group. It is a place the company hosts, not a
+ *   statement of who the company IS, so it is a footer destination only. Feeding a
+ *   community URL to `sameAs` asserts that the org and the group are the same
+ *   entity, which is false and dilutes the very signal `sameAs` exists to give.
+ *
+ * `handle` is stored without the leading `@` so it can be composed either way —
+ * `twitter:site` requires the `@`, display copy usually does not.
+ */
+export const SOCIAL = {
+  x: {
+    handle: 'zenorix_tv',
+    url: 'https://x.com/zenorix_tv',
+  },
+  xCommunity: {
+    url: 'https://x.com/i/communities/1943054511800750575',
+  },
+} as const
+
+/**
+ * Profiles that unambiguously identify this organization, for `sameAs`.
+ *
+ * A deliberate allow-list rather than `Object.values(SOCIAL)`: mapping over the
+ * whole object would silently pull in the community — and any future group,
+ * hashtag or campaign URL added to it — which is exactly the mistake this
+ * function exists to prevent.
+ */
+export const identityProfiles = (): string[] => [SOCIAL.x.url]
+
 /** One-line entity summary for the footer. */
 export const orgLine = () =>
   `${ORG.legalName} · Reg. ${ORG.registrationNumber} · ${ORG.jurisdiction}`

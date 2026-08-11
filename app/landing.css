@@ -2238,6 +2238,94 @@
   font-size: var(--zx-text-meta);
 }
 
+/* The "reach us" group: contact on top, social beneath. Centred to match the
+   footer's mobile stack; the desktop tier re-aligns it left. */
+.zx-footer-connect {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* Tighter than it looks it should be, because `.zx-social-link` carries 12px of
+     block padding for its tap target — the optical gap is that padding plus this,
+     so a full step here would read as a much larger hole than one step. */
+  gap: var(--zx-space-05);
+}
+
+.zx-social {
+  display: flex;
+  align-items: center;
+  gap: var(--zx-space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.zx-social-link {
+  display: inline-flex;
+  align-items: center;
+  /* 6px, the scale's "icon <-> its own label" step, same joint `.zx-contact` uses. */
+  gap: var(--zx-space-15);
+  /* Muted, NOT primary. The contact link directly above is the coloured one, and
+     two primary-coloured links stacked would compete for the same attention. */
+  color: var(--md-sys-color-on-surface-variant);
+  font-size: var(--zx-text-meta);
+  line-height: 1.4;
+  text-decoration: none;
+  /* Grows the tap target without moving the ink: the negative inline margin gives
+     the horizontal padding back to the layout, so the row stays optically flush
+     with the contact link above instead of appearing indented.
+     
+     Measured at 44px tall, which is the AA target size floor — the block padding
+     is what buys it, since the 13px label's own line box is only ~18px. These are
+     NOT covered by the 48px `::after` overlay used for the top bar controls: that
+     technique needs an element with no interactive neighbours, and two adjacent
+     48px squares here would overlap each other. Real padding is the correct fix
+     for a row of sibling links. */
+  padding: var(--zx-space-3) var(--zx-space-15);
+  margin-inline: calc(var(--zx-space-15) * -1);
+  /* The floor, not the height. Padding alone got the labelled link to exactly 44px
+     but left the icon-only one at 38x26 — measured — because a 14px mark is shorter
+     and far narrower than a 13px label, so identical padding cannot produce
+     identical boxes. This guarantees both regardless of content. */
+  min-width: 44px;
+  min-height: 44px;
+  /* With a min-width now in play, an icon-only link would centre its mark in a
+     44px box and sit 6px left of the contact link above (measured). Justifying to
+     the start keeps every item's ink on the group's left edge. */
+  justify-content: flex-start;
+  box-sizing: border-box;
+  transition: color 120ms ease;
+}
+
+.zx-social-link:hover {
+  color: var(--md-sys-color-on-surface);
+}
+
+/* Sized to the label's line box rather than left at the SVG's default, the same
+   correction `.zx-contact md-icon` makes for the icon font. 14px against the 16px
+   `group` glyph beside it because the X mark is a dense square with no interior
+   counters — matched pixel sizes would make it read as the heavier of the two. */
+.zx-social-mark {
+  width: 14px;
+  height: 14px;
+  flex: none;
+}
+
+.zx-social-link md-icon {
+  --md-icon-size: 16px;
+  width: 16px;
+  height: 16px;
+  flex: none;
+  /* Held back from the label it introduces. An icon font glyph at 16px carries
+     more ink than 13px text, so at equal colour it out-weighed the word beside it
+     — the label is the thing being read. Not applied to the X mark, which has no
+     label to defer to and is the whole content of its link. */
+  opacity: 0.75;
+}
+
+.zx-social-link:hover md-icon {
+  opacity: 1;
+}
+
 .zx-footer-links {
   display: flex;
   flex-wrap: wrap;
@@ -2953,6 +3041,13 @@
     flex-wrap: wrap;
     justify-content: space-between;
     gap: var(--zx-space-4);
+  }
+
+  /* Left-aligned as the opening block, mirroring `.zx-footer-meta` at the other
+     end of the row. Centred children inside a left-hand column would leave the
+     contact link and the social row on different optical margins. */
+  .zx-footer-connect {
+    align-items: flex-start;
   }
 
   /* Right-aligned as the closing block, since it is the last thing in the row. */

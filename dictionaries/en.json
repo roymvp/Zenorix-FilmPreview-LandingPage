@@ -142,6 +142,13 @@
     "prompt": "Questions before you install?",
     "aria": "Contact us on Telegram"
   },
+  "social": {
+    "follow": "Zenorix on X",
+    "community": {
+      "label": "Community",
+      "aria": "Join the Zenorix community on X"
+    }
+  },
   "footer": {
     "privacy": "Privacy",
     "terms": "Terms",

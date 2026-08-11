@@ -1,4 +1,5 @@
 import { ContactLink } from '@/components/landing/contact-link'
+import { SocialLinks } from '@/components/landing/social-links'
 import { orgLine } from '@/lib/config/site'
 
 /**
@@ -10,20 +11,22 @@ import { orgLine } from '@/lib/config/site'
  * the install CTA, so the footer carries the legal minimum plus the one thing a
  * footer is genuinely looked in for.
  *
- * Support is its OWN row above the legal list, not a fourth item inside it.
- * Dropping it in beside Privacy/Terms/DMCA would file "talk to a human" under
- * legal boilerplate — the row people skip — and it is the only actionable link
- * down here, so it is also the only one that should read as an offer.
+ * Support (with social beneath it) is its OWN group above the legal list, not a
+ * fourth item inside it. Dropping it in beside Privacy/Terms/DMCA would file "talk
+ * to a human" under legal boilerplate — the row people skip — and it is the most
+ * actionable link down here, so it is also the one that should read as an offer.
  */
 export function SiteFooter({
   links,
   copyright,
   contact,
+  social,
 }: {
   /** Built by `legalLinks` in both callers, so the row is identical everywhere. */
   links: { label: string; href: string }[]
   copyright: string
   contact: { label: string; aria: string }
+  social: { follow: string; community: { label: string; aria: string } }
 }) {
   return (
     <footer className="zx-footer">
@@ -31,13 +34,27 @@ export function SiteFooter({
           already reachable, and a second landmark here would just add noise to
           the screen-reader landmark list. */}
       <div className="zx-shell zx-footer-inner">
-        <ContactLink
-          label={contact.label}
-          ariaLabel={contact.aria}
-          source="footer"
-          className="zx-contact zx-contact--footer"
-          icon="chat_bubble"
-        />
+        {/* Support and social as ONE group — the "reach us" column.
+            
+            Grouped for the same reason the entity line is grouped with the
+            copyright: on desktop `.zx-footer-inner` is a `space-between` row built
+            around THREE items, and adding social as a fourth child would spread the
+            row into something unbalanced and file "follow us" as a peer of the
+            legal links. They also belong together on the merits — both are ways to
+            reach a human, unlike the two rows that follow.
+            
+            Contact stays first and stays the only coloured link: it is the one
+            people come down here looking for. Social sits under it, quieter. */}
+        <div className="zx-footer-connect">
+          <ContactLink
+            label={contact.label}
+            ariaLabel={contact.aria}
+            source="footer"
+            className="zx-contact zx-contact--footer"
+            icon="chat_bubble"
+          />
+          <SocialLinks follow={social.follow} community={social.community} />
+        </div>
 
         <ul className="zx-footer-links">
           {links.map((link) => (
