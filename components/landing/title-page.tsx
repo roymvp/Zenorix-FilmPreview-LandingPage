@@ -8,7 +8,7 @@ import type { ChartEntry } from '@/lib/content/charts'
 import { legalLinks } from '@/lib/content/legal'
 import { referenceLinks, watchLinks } from '@/lib/content/outbound'
 import { streamingName, type TitleRecord } from '@/lib/content/titles'
-import { fill, type Dictionary } from '@/lib/i18n/dictionaries'
+import { fill, pluralize, type Dictionary } from '@/lib/i18n/dictionaries'
 import type { Locale } from '@/lib/i18n/config'
 import { buildTitleStructuredData } from '@/lib/seo'
 
@@ -57,13 +57,13 @@ export function TitlePage({
       ? [{ label: copy.runtime, value: fill(copy.minutes, { count: record.runtime }) }]
       : []),
     ...(record.seasons
-      ? [{ label: copy.seasons, value: fill(copy.seasonCount, { count: record.seasons }) }]
+      ? [{ label: copy.seasons, value: pluralize(record.seasons, copy.seasonCount) }]
       : []),
     ...(record.episodes
       ? [
           {
             label: copy.episodes,
-            value: fill(copy.episodeCount, { count: record.episodes }),
+            value: pluralize(record.episodes, copy.episodeCount),
           },
         ]
       : []),
@@ -203,7 +203,7 @@ export function TitlePage({
                             <span className="zx-title-score-meta">
                               {name}
                               {' · '}
-                              {fill(copy.reviews, { count: score!.reviewCount })}
+                              {pluralize(score!.reviewCount, copy.reviews)}
                               {' · '}
                               {fill(copy.asOf, {
                                 date: formatDate(score!.asOf, locale),

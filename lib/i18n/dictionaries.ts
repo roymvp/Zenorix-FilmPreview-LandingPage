@@ -31,3 +31,24 @@ export function fill(
     key in values ? String(values[key]) : match,
   )
 }
+
+/**
+ * Picks the singular or plural template for `value`, then fills `{count}`.
+ *
+ * The form comes from the dictionary rather than from a rule in the component,
+ * because the markets do not agree on how many forms exist. English and Portuguese
+ * are both "one vs. other"; Thai has no grammatical plural, so `th.json` gives
+ * both keys the same string and the choice is a harmless no-op there instead of an
+ * English assumption hardcoded into shared code.
+ *
+ * Two forms rather than `Intl.PluralRules` because two is all the current locales
+ * distinguish, and this keeps assembly at build time. If a market with more
+ * categories is added (ru, pl, ar) the dictionary keys grow to one/few/many/other
+ * and this becomes an `Intl.PluralRules` lookup — the call sites stay as they are.
+ */
+export function pluralize(
+  value: number,
+  forms: { one: string; other: string },
+): string {
+  return fill(value === 1 ? forms.one : forms.other, { count: value })
+}
