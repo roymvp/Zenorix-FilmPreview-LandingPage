@@ -830,6 +830,23 @@ for (const [key, record] of Object.entries(TITLES)) {
   }
 }
 
+/**
+ * The technical plates every title on Zenorix plays back at.
+ *
+ * ONE SHARED LIST, NOT A PER-RECORD FIELD, and that is the honest shape rather
+ * than a shortcut. These are facts about the STREAM the app serves, not about the
+ * film — the same 2160p/HDR/Atmos ladder applies to everything in the catalogue,
+ * and it is the claim the landing page already makes in `about.viewing` ("4K Ultra
+ * HD", "Dolby Atmos"). A per-title array would invite exactly what the file header
+ * forbids: 29 records of guessed masters, with no source to check any of them
+ * against.
+ *
+ * Deliberately NOT localized. These are the vendors' own registered wordings, the
+ * same strings printed on a disc case in every market, and a translated
+ * certification mark is no longer the mark.
+ */
+export const PLAYBACK_FORMATS = ['4K UHD', 'HDR10', 'Dolby Vision', 'Dolby Atmos'] as const
+
 /** Every record, for the sitemap and the index list. */
 export const allTitles = (): TitleRecord[] =>
   Object.values(TITLES).filter((record): record is TitleRecord => Boolean(record))

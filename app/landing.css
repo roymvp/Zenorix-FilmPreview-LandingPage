@@ -3405,21 +3405,10 @@
   display: flex;
   flex-direction: column;
   /* No gap. Every child below sets its own top margin, because the steps here are
-     deliberately uneven — the eyebrow sits tight to the h1, the synopsis further
-     off, the scores further still. A uniform gap would flatten that. */
+     deliberately uneven — the synopsis sits close to the h1, the scores further
+     off, the format plates closer again. A uniform gap would flatten that. */
   gap: 0;
   min-width: 0;
-}
-
-/* The type eyebrow ("Movie" / "Series"). Caps and letter-spacing so it reads as a
-   category label rather than the first line of the synopsis. */
-.zx-title-kind {
-  margin: 0 0 var(--zx-space-2);
-  font-size: var(--zx-text-micro);
-  font-weight: var(--zx-weight-semibold);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--md-sys-color-primary);
 }
 
 .zx-title-name {
@@ -3454,27 +3443,54 @@
 .zx-title-scores {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--zx-space-3);
+  /* Wider than the old 12px. With the card boxes gone there is no border keeping
+     the two scores apart, so the gap is doing that job on its own. */
+  gap: var(--zx-space-5);
   margin: var(--zx-space-5) 0 0;
   padding: 0;
   list-style: none;
 }
 
+/* NO BOX. The scores used to sit in two bordered, filled cards with a caption
+   line under each number; both are gone. A boxed card is a container gesture, and
+   containing two numbers that are already only two numbers just added weight
+   between the title and the synopsis. What is left is the mark, the figure, and
+   nothing else — which is the form a viewer reads a score in everywhere else. */
 .zx-title-score a {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  padding: var(--zx-space-3) var(--zx-space-4);
-  border: 1px solid var(--md-sys-color-outline-variant);
-  border-radius: var(--zx-radius-md);
-  background: var(--md-sys-color-surface-container-low);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--zx-space-2);
   text-decoration: none;
-  transition: border-color 150ms ease, background-color 150ms ease;
+  /* Underline on hover only. There is no border left to change colour, so the
+     affordance has to come from the text itself. */
+  transition: opacity 150ms ease;
 }
 
 .zx-title-score a:hover {
-  border-color: var(--md-sys-color-outline);
-  background: var(--md-sys-color-surface-container);
+  opacity: 0.75;
+}
+
+.zx-title-score a:hover .zx-title-score-value {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* The aggregator's own mark, at text scale. Sized in `em` rather than px so it
+   tracks the figure beside it if the type scale changes, and never grows into a
+   logo — it is a source stamp, not branding. */
+.zx-title-score-mark {
+  /* 1.25em, not 1.1: the Metacritic mark is a ring with a glyph inside it, and
+     below about 24px the ring closes up into a dot. Sized to the number's own cap
+     height rather than to the line box so both marks read as siblings of the digits
+     rather than as bullets in front of them. */
+  width: 1.25em;
+  height: 1.25em;
+  flex: none;
+  /* The tomato and the Metacritic circle are both square glyphs on a transparent
+     ground, so nothing here should crop or letterbox them. */
+  object-fit: contain;
+  /* Optical: both marks read a touch heavy against the number's cap height. */
+  margin-top: -0.05em;
 }
 
 .zx-title-score-value {
@@ -3486,9 +3502,37 @@
   font-variant-numeric: tabular-nums;
 }
 
-.zx-title-score-meta {
-  font-size: var(--zx-text-caption);
-  line-height: var(--zx-lh-snug);
+/* PLAYBACK PLATES ("4K UHD", "Dolby Vision", "Dolby Atmos").
+   
+   Outlined, uppercase, tight — deliberately the visual language of the plates
+   printed on a disc case rather than of a filled brand chip. They are a spec
+   readout, so they must not compete with the scores directly above them: no fill,
+   caption type, and the outline is the same hairline the rest of the page uses.
+   
+   Tabular-ish letterspacing and `nowrap` because every one of these is a
+   registered wording that must not break mid-mark ("Dolby / Vision"). */
+.zx-title-formats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--zx-space-2);
+  /* 12px, not the 20px the scores get. The plates and the scores are one block —
+     "how good is it, and what does it arrive as" — so they bind to each other
+     tighter than either binds to the synopsis above. */
+  margin: var(--zx-space-3) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.zx-title-format {
+  padding: 4px var(--zx-space-2);
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: var(--zx-radius-sm);
+  font-size: var(--zx-text-label);
+  font-weight: var(--zx-weight-semibold);
+  line-height: 1.4;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
   color: var(--md-sys-color-on-surface-variant);
 }
 
@@ -3658,9 +3702,9 @@
 }
 
 @media (min-width: 720px) {
-  /* Poster beside the text. `flex-start` so the poster's top aligns with the
-     eyebrow rather than stretching down the intro column, and `flex: 0 0 auto` so
-     it keeps its intrinsic width while the text takes the remainder. */
+  /* Poster beside the text. `flex-start` so the poster's top aligns with the h1
+     rather than stretching down the intro column, and `flex: 0 0 auto` so it keeps
+     its intrinsic width while the text takes the remainder. */
   .zx-title-head {
     flex-direction: row;
     align-items: flex-start;

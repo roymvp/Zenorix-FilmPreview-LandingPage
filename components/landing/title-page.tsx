@@ -8,7 +8,7 @@ import { castCredits, castInitials, castPhoto } from '@/lib/content/cast'
 import type { ChartEntry } from '@/lib/content/charts'
 import { legalLinks } from '@/lib/content/legal'
 import { referenceLinks, watchLinks } from '@/lib/content/outbound'
-import { streamingName, type TitleRecord } from '@/lib/content/titles'
+import { PLAYBACK_FORMATS, streamingName, type TitleRecord } from '@/lib/content/titles'
 import { fill, pluralize, type Dictionary } from '@/lib/i18n/dictionaries'
 import type { Locale } from '@/lib/i18n/config'
 import { buildTitleStructuredData } from '@/lib/seo'
@@ -108,9 +108,26 @@ export function TitlePage({
     ...(service ? [{ label: copy.streamingOn, value: service }] : []),
   ]
 
+  /* Each score carries the mark of the aggregator it came from. The source used to
+     be spelled out in a caption under the number; it is an icon now because the
+     tomato and the Metacritic circle ARE the source — a reader who knows what 90%
+     means already recognises them, and a reader who does not was not helped by the
+     word either. The provenance the number is worthless without (review count and
+     read date) is still in the HTML, just visually hidden — see the note at the
+     `Score` type in titles.ts for why it can never be dropped outright. */
   const scores = [
-    { name: 'Rotten Tomatoes', score: record.rottenTomatoes, suffix: '%' },
-    { name: 'Metacritic', score: record.metacritic, suffix: '/100' },
+    {
+      name: 'Rotten Tomatoes',
+      icon: '/scores/rottentomatoes.svg',
+      score: record.rottenTomatoes,
+      suffix: '%',
+    },
+    {
+      name: 'Metacritic',
+      icon: '/scores/metacritic.svg',
+      score: record.metacritic,
+      suffix: '',
+    },
   ].filter((row) => row.score)
 
   /* Photographer credits for whichever of this cast actually has a portrait.
@@ -196,13 +213,12 @@ export function TitlePage({
                 />
 
                 <div className="zx-title-intro">
-                  {/* The type word as an eyebrow. It is the one thing the chart
-                      cards deliberately never say (see top-chart.tsx: the rail is
-                      "pure curiosity bait"), and on a page whose job is to answer
-                      a question it should be the first word. */}
-                  <p className="zx-title-kind">
-                    {record.runtime ? copy.kindMovie : copy.kindSeries}
-                  </p>
+                  {/* NO TYPE EYEBROW ABOVE THE H1. It used to sit here as "Film" /
+                      "Series" and was removed: the fact list below already states a
+                      runtime for a film and a season count for a series, so the
+                      eyebrow spent the most valuable line on the page repeating
+                      something answered twice over — and it pushed the title, which
+                      is what the visitor searched for, down out of first position. */}
                   <h1 className="zx-title-name">{entry.title}</h1>
                   <p className="zx-title-synopsis">{record.synopsis}</p>
 
@@ -218,15 +234,33 @@ export function TitlePage({
                       See the `Score` type in titles.ts. */}
                   {scores.length > 0 ? (
                     <ul className="zx-title-scores">
-                      {scores.map(({ name, score, suffix }) => (
+                      {scores.map(({ name, icon, score, suffix }) => (
                         <li key={name} className="zx-title-score">
                           <a href={score!.url} target="_blank" rel="noopener noreferrer">
+                            {/* The mark carries the source name as its alt text, so a
+                                screen reader still hears "Rotten Tomatoes 90%" and the
+                                source is in the HTML for a crawler that reads no CSS.
+                                eslint-disable: local SVG, nothing to optimise. */}
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                              className="zx-title-score-mark"
+                              src={icon}
+                              alt={name}
+                              width={22}
+                              height={22}
+                              loading="lazy"
+                              decoding="async"
+                            />
                             <span className="zx-title-score-value">
                               {score!.value}
                               {suffix}
                             </span>
-                            <span className="zx-title-score-meta">
-                              {name}
+                            {/* The citation, kept out of the layout but not out of the
+                                document. Leading separator, not decoration: without it
+                                the Metacritic score reads as "7527 reviews" — the value
+                                and the count run together into one number, which is the
+                                one thing this block must never say. */}
+                            <span className="zx-visually-hidden">
                               {' · '}
                               {pluralize(score!.reviewCount, copy.reviews)}
                               {' · '}
@@ -239,6 +273,22 @@ export function TitlePage({
                       ))}
                     </ul>
                   ) : null}
+
+                  {/* PLAYBACK PLATES.
+                      
+                      What this title actually arrives as in the app: resolution, HDR
+                      profile, sound. They are a property of the Zenorix stream rather
+                      than of the film, which is why they come from one shared list in
+                      `titles.ts` instead of being invented per record — see the note
+                      there. Set as plates, in the vendors' own wording, because that
+                      is the form a viewer already reads them in on a disc case. */}
+                  <ul className="zx-title-formats" aria-label={copy.formats}>
+                    {PLAYBACK_FORMATS.map((format) => (
+                      <li key={format} className="zx-title-format">
+                        {format}
+                      </li>
+                    ))}
+                  </ul>
                 </div>
               </header>
 

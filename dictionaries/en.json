@@ -152,8 +152,7 @@
   "title": {
     "metaSuffix": "Cast, Ratings & Details",
     "breadcrumb": "Breadcrumb",
-    "kindMovie": "Film",
-    "kindSeries": "Series",
+    "formats": "Playback formats",
     "details": "Details",
     "cast": "Cast",
     "released": "Released",
