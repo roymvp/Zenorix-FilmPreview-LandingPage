@@ -141,7 +141,7 @@ export default async function LocaleLayout({
             font request cannot reuse. */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        {/* Material Symbols for <md-icon>, SUBSET to the thirteen glyphs this
+        {/* Material Symbols for <md-icon>, SUBSET to the fourteen glyphs this
             site actually renders (`icon_names`, alphabetical as Google requires).
 
             Without that parameter Google serves the entire Material Symbols
@@ -155,15 +155,21 @@ export default async function LocaleLayout({
             users: 4k / high_quality / surround_sound / bolt in the spec grid
             (about-zenorix), 4k / hdr_on / contrast / surround_sound on the
             playback capsules (title-page), arrow_forward (top-chart),
-            chat_bubble (contact-link), check (conversion-dialog +
-            language-switcher), expand_more (faq-section + language-switcher),
-            group (social-links), verified_user (download-cta), download
-            (site-footer's install button).
+            chat_bubble (contact-link + footer-contacts), check
+            (conversion-dialog + language-switcher), expand_more (faq-section +
+            language-switcher), group and mail (footer-contacts), verified_user
+            (download-cta), download (site-footer's install button).
 
             `download` arrived by walking straight into the trap this comment
             warns about: the footer's install button rendered the literal string
             "download" in the browser until the name was added here. The warning
             above is not hypothetical.
+
+            NEITHER IS IT UNREPEATABLE. `mail` arrived the same way and was caught
+            the same way — in a screenshot, not in code review: the footer's email
+            row rendered a notdef box for one build because the glyph was added to
+            the component without being added to this list. Read the paragraph
+            above before touching a component's icons.
 
             AND A MISSPELLED NAME IS WORSE THAN A MISSING ONE. Measured against
             this endpoint: a name Google does not recognise does not 404 and does
@@ -175,7 +181,7 @@ export default async function LocaleLayout({
             icon. There is no console warning. Verify a new name renders as a
             glyph in the browser before trusting it.
 
-            The X mark in social-links is deliberately NOT here: Material Symbols
+            The X mark in footer-contacts is deliberately NOT here: Material Symbols
             carries no brand logos, so that one is an inline SVG in the component.
             For the same reason the playback capsules use `hdr_on` and `contrast`
             rather than the Dolby and HDR10 marks those formats are printed with
@@ -185,7 +191,7 @@ export default async function LocaleLayout({
             still advertises `font-weight: 100 700`. */}
         <link
           rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=4k,arrow_forward,bolt,chat_bubble,check,contrast,download,expand_more,group,hdr_on,high_quality,surround_sound,verified_user"
+          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=4k,arrow_forward,bolt,chat_bubble,check,contrast,download,expand_more,group,hdr_on,high_quality,mail,surround_sound,verified_user"
         />
       </head>
       <body>
