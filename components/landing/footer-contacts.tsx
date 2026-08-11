@@ -62,7 +62,7 @@ export function FooterContacts({
   contact,
   social,
 }: {
-  contact: { aria: string }
+  contact: { channel: string; aria: string }
   social: { follow: string; community: { label: string; aria: string } }
 }) {
   const channels = [
@@ -71,19 +71,22 @@ export function FooterContacts({
       href: SITE.contactUrl,
       icon: 'chat_bubble',
       /**
-       * "Telegram", not `dict.contact.label`.
+       * "Customer service", from the dictionary — NOT `contact.label` and no longer
+       * the literal "Telegram".
        *
-       * The dictionary's label is "Contact us" / "Fale com a gente" — which is the
-       * COLUMN HEADING's job here, and in pt-BR is the identical string, so the row
-       * would have read "Fale com a gente" directly under "Fale com a gente".
-       * Naming the channel instead answers the question the heading raises. A brand
-       * name also needs no translation, so it stays a literal rather than becoming
-       * three identical dictionary entries.
+       * `contact.label` is still wrong for this row: it reads "Contact us" / "Fale com
+       * a gente", which is the COLUMN HEADING's job, and in pt-BR it is the identical
+       * string, so the row would repeat the heading verbatim. "Telegram" avoided that
+       * by naming the transport instead — but the transport is an implementation
+       * detail, and naming it made this row answer a different question than the three
+       * beneath it. What the reader wants to know is what the channel IS.
        *
-       * The spelled-out localized name is not lost — `dict.contact.aria` ("Contact
-       * us on Telegram") is still the accessible name below.
+       * So it is a separate `contact.channel` key rather than a literal: unlike the
+       * brand names beside it this is a common noun and has to translate.
+       * `contact.aria` ("Contact us on Telegram") still names the transport in the
+       * accessible name, so nothing is lost for someone deciding whether to tap it.
        */
-      label: 'Telegram',
+      label: contact.channel,
       aria: contact.aria,
       external: true,
       track: () => trackEvent('contact_click', { source: 'footer' }),
@@ -93,15 +96,16 @@ export function FooterContacts({
       href: SOCIAL.x.url,
       icon: 'x',
       /**
-       * The brand account now carries a visible "X".
+       * The handle, "@zenorix_tv", composed from `SOCIAL.x.handle` rather than
+       * hardcoded — the config stores it bare precisely so it can be written either
+       * way, and deriving it means the label cannot drift from the `href` above it.
        *
-       * It was deliberately icon-only before, reasoning that the X logo needs no
-       * gloss. True in isolation — but it made this the one row in the column with
-       * no name, and the row directly beneath it points at X as well, so a reader
-       * saw a lone mark above a labelled "Community" and had to guess how the two
-       * differed. Naming both is what separates them.
+       * It said "X" before, which named the platform the icon had already shown while
+       * leaving the actual account unstated. The handle is the useful half: it is what
+       * a reader searches for, and it distinguishes this row from the community below
+       * it — both live on X, so "X" was never what told them apart.
        */
-      label: 'X',
+      label: `@${SOCIAL.x.handle}`,
       aria: social.follow,
       external: true,
       track: () => trackEvent('social_click', { network: 'x' }),

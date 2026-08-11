@@ -139,6 +139,7 @@
   },
   "contact": {
     "label": "Fale com a gente",
+    "channel": "Atendimento",
     "prompt": "Dúvidas antes de instalar?",
     "aria": "Fale com a gente no Telegram"
   },

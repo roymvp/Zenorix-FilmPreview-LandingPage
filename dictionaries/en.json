@@ -139,6 +139,7 @@
   },
   "contact": {
     "label": "Contact us",
+    "channel": "Customer service",
     "prompt": "Questions before you install?",
     "aria": "Contact us on Telegram"
   },
