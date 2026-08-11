@@ -101,6 +101,20 @@ export type TitleRecord = {
    * rather than rendering an empty heading.
    */
   cast?: Credit[]
+  /**
+   * The age rating from the body that issues it in the US: the MPA for films, the
+   * TV Parental Guidelines for series. `reason` is that body's OWN descriptor
+   * ("for strong bloody violence and gore, and for language"), quoted rather than
+   * paraphrased, because the descriptor is the part a parent is actually reading
+   * for and rewriting it turns a citation into an opinion.
+   *
+   * Optional, and genuinely absent on several records: a rating exists only once
+   * the film has been submitted, so an unreleased title has none to state. Nothing
+   * is inferred from the franchise — Toy Story 5 is the first main-series entry
+   * rated PG rather than G, and a record that assumed G from the four films before
+   * it would have been confidently wrong.
+   */
+  contentRating?: { value: string; reason?: string }
   /** Genre words used as-is for display and for the `genre` field in JSON-LD. */
   genres: string[]
   productionCompanies: string[]
@@ -144,6 +158,7 @@ const TITLES: Partial<Record<ChartEntryId, TitleRecord>> = {
     directors: ['Destin Daniel Cretton'],
     writers: ['Chris McKenna', 'Erik Sommers'],
     cast: ['Tom Holland', 'Zendaya', 'Sadie Sink', 'Jacob Batalon', 'Jon Bernthal', 'Florence Pugh', 'Tramell Tillman', 'Marisa Tomei', 'Mark Ruffalo'],
+    contentRating: { value: 'PG-13', reason: 'for sequences of action and violence and some language' },
     genres: ['Superhero', 'Action', 'Adventure'],
     productionCompanies: ['Columbia Pictures', 'Marvel Studios', 'Pascal Pictures'],
     distributors: ['Sony Pictures Releasing'],
@@ -161,6 +176,7 @@ const TITLES: Partial<Record<ChartEntryId, TitleRecord>> = {
     directors: ['Christopher Nolan'],
     writers: ['Christopher Nolan'],
     cast: ['Matt Damon', 'Tom Holland', 'Anne Hathaway', 'Robert Pattinson', 'Lupita Nyong\u2019o', 'Zendaya', 'Charlize Theron'],
+    contentRating: { value: 'R', reason: 'for violence and some language' },
     genres: ['Epic', 'Action', 'Fantasy'],
     productionCompanies: ['Universal Pictures', 'Syncopy'],
     distributors: ['Universal Pictures'],
@@ -178,6 +194,8 @@ const TITLES: Partial<Record<ChartEntryId, TitleRecord>> = {
     directors: ['Andrew Stanton'],
     writers: ['Andrew Stanton', 'Kenna Harris'],
     cast: ['Tom Hanks', 'Tim Allen', 'Joan Cusack', 'Conan O\u2019Brien', 'Greta Lee', 'Craig Robinson', 'Mykal-Michelle Harris'],
+    /* PG, not G — the first main-series Toy Story to be rated above G in 31 years. */
+    contentRating: { value: 'PG', reason: 'for some thematic elements and rude humor' },
     genres: ['Animation', 'Comedy', 'Family'],
     productionCompanies: ['Pixar Animation Studios'],
     distributors: ['Walt Disney Studios Motion Pictures'],
@@ -195,6 +213,7 @@ const TITLES: Partial<Record<ChartEntryId, TitleRecord>> = {
     directors: ['James Cameron'],
     writers: ['James Cameron', 'Rick Jaffa', 'Amanda Silver'],
     cast: ['Sam Worthington', 'Zoe Salda\u00f1a', 'Sigourney Weaver', 'Stephen Lang', 'Kate Winslet', 'Oona Chaplin'],
+    contentRating: { value: 'PG-13', reason: 'for intense sequences of violence and action, bloody images, some strong language, thematic elements and suggestive material' },
     genres: ['Science fiction', 'Epic', 'Adventure'],
     productionCompanies: ['Lightstorm Entertainment'],
     distributors: ['20th Century Studios'],
@@ -212,6 +231,7 @@ const TITLES: Partial<Record<ChartEntryId, TitleRecord>> = {
     directors: ['Simon McQuoid'],
     writers: ['Jeremy Slater'],
     cast: ['Karl Urban', 'Adeline Rudolph', 'Jessica McNamee', 'Josh Lawson', 'Tati Gabrielle', 'Hiroyuki Sanada', 'Joe Taslim'],
+    contentRating: { value: 'R', reason: 'for strong bloody violence and gore, and for language' },
     genres: ['Martial arts', 'Fantasy', 'Action'],
     productionCompanies: ['New Line Cinema', 'Atomic Monster', 'Broken Road Productions', 'Fireside Films'],
     distributors: ['Warner Bros. Pictures'],
@@ -229,6 +249,7 @@ const TITLES: Partial<Record<ChartEntryId, TitleRecord>> = {
     directors: ['Phil Lord', 'Christopher Miller'],
     writers: ['Drew Goddard'],
     cast: ['Ryan Gosling', 'Sandra H\u00fcller', 'James Ortiz', 'Lionel Boyce'],
+    contentRating: { value: 'PG-13', reason: 'for some thematic material and suggestive references' },
     genres: ['Science fiction', 'Adventure', 'Drama'],
     productionCompanies: ['Metro-Goldwyn-Mayer', 'Lord Miller Productions', 'Pascal Pictures'],
     distributors: ['Amazon MGM Studios', 'Sony Pictures Releasing International'],
@@ -246,6 +267,7 @@ const TITLES: Partial<Record<ChartEntryId, TitleRecord>> = {
     directors: ['David Frankel'],
     writers: ['Aline Brosh McKenna'],
     cast: ['Meryl Streep', 'Anne Hathaway', 'Emily Blunt', 'Justin Theroux', 'Kenneth Branagh', 'Stanley Tucci', 'Lucy Liu'],
+    contentRating: { value: 'PG-13', reason: 'for strong language and some suggestive references' },
     genres: ['Comedy', 'Drama'],
     productionCompanies: ['Wendy Finerman Productions'],
     distributors: ['20th Century Studios'],
@@ -263,6 +285,7 @@ const TITLES: Partial<Record<ChartEntryId, TitleRecord>> = {
     directors: ['Thomas Kail'],
     writers: ['Jared Bush', 'Dana Ledoux Miller'],
     cast: ['Catherine Laga\u2019aia', 'Dwayne Johnson', 'Rena Owen', 'John Tui', 'Frankie Adams', 'Jemaine Clement'],
+    contentRating: { value: 'PG', reason: 'for action and peril, some scary images, rude humor and brief thematic elements' },
     genres: ['Musical', 'Adventure', 'Family'],
     productionCompanies: ['Walt Disney Pictures', 'Seven Bucks Productions', 'Flynn Picture Co.', '5000 Broadway Productions'],
     distributors: ['Walt Disney Studios Motion Pictures'],
@@ -282,6 +305,7 @@ const TITLES: Partial<Record<ChartEntryId, TitleRecord>> = {
     directors: ['Jay Chandrasekhar'],
     writers: ['Broken Lizard'],
     cast: ['Jay Chandrasekhar', 'Kevin Heffernan', 'Steve Lemme', 'Paul Soter', 'Erik Stolhanske', 'Hannah Simone', 'Nat Faxon', 'Chace Crawford', 'Brian Cox'],
+    contentRating: { value: 'R', reason: 'for sexual content, nudity, language throughout and drug content' },
     genres: ['Comedy'],
     productionCompanies: ['Broken Lizard Industries', 'Cataland Films'],
     distributors: ['Searchlight Pictures'],
@@ -298,6 +322,7 @@ const TITLES: Partial<Record<ChartEntryId, TitleRecord>> = {
     directors: ['Travis Knight'],
     writers: ['Chris Butler', 'Aaron Nee', 'Adam Nee', 'David Callaham'],
     cast: ['Nicholas Galitzine', 'Camila Mendes', 'Alison Brie', 'James Purefoy', 'Morena Baccarin', 'Kristen Wiig', 'Jared Leto', 'Idris Elba'],
+    contentRating: { value: 'PG-13', reason: 'for sequences of violence and action, some suggestive material and language' },
     genres: ['Sword and sorcery', 'Fantasy', 'Action'],
     productionCompanies: ['Metro-Goldwyn-Mayer', 'Mattel Studios', 'Escape Artists'],
     distributors: ['Amazon MGM Studios', 'Sony Pictures Releasing International'],
@@ -321,6 +346,7 @@ const TITLES: Partial<Record<ChartEntryId, TitleRecord>> = {
     network: 'HBO',
     creators: ['Ryan Condal', 'George R. R. Martin'],
     cast: ['Emma D\u2019Arcy', 'Olivia Cooke', 'Matt Smith', 'Rhys Ifans', 'Steve Toussaint', 'Eve Best', 'Fabien Frankel', 'Tom Glynn-Carney', 'Ewan Mitchell'],
+    contentRating: { value: 'TV-MA' },
     genres: ['Fantasy', 'Drama', 'Action'],
     productionCompanies: ['HBO Entertainment', 'Bastard Sword', '1:26 Pictures'],
     distributors: ['HBO'],
@@ -342,6 +368,7 @@ const TITLES: Partial<Record<ChartEntryId, TitleRecord>> = {
     network: 'Paramount+',
     creators: ['Taylor Sheridan'],
     cast: ['Zoe Salda\u00f1a', 'Laysla De Oliveira', 'Nicole Kidman', 'Morgan Freeman', 'Michael Kelly', 'Dave Annable', 'Genesis Rodriguez'],
+    contentRating: { value: 'TV-MA' },
     genres: ['Spy thriller', 'Action', 'Drama'],
     productionCompanies: ['Bosque Ranch Productions', '101 Studios', 'Blossom Films', 'Paramount Television Studios'],
     distributors: ['Paramount+'],
@@ -365,6 +392,7 @@ const TITLES: Partial<Record<ChartEntryId, TitleRecord>> = {
        recast the roles. Billed first because they are who a viewer of the current
        season actually hears; Roiland is deliberately not listed. */
     cast: ['Ian Cardoni', 'Harry Belden', 'Chris Parnell', 'Spencer Grammer', 'Sarah Chalke'],
+    contentRating: { value: 'TV-MA' },
     genres: ['Adult animation', 'Science fiction', 'Black comedy', 'Adventure'],
     productionCompanies: ['Williams Street', 'Harmonious Claptrap', 'Starburns Industries', 'Green Portal Productions'],
     distributors: ['Adult Swim'],
@@ -385,6 +413,7 @@ const TITLES: Partial<Record<ChartEntryId, TitleRecord>> = {
     network: 'Netflix',
     creators: ['Melanie Halsall'],
     cast: ['Nikki Rodriguez', 'Noah LaLonde', 'Ashby Gentry', 'Connor Stanhope', 'Jaylan Evans', 'Sarah Rafferty', 'Marc Blucas'],
+    contentRating: { value: 'TV-14' },
     genres: ['Teen drama', 'Romance'],
     productionCompanies: ['Nomadic Pictures', 'iGeneration Studios', 'Sony Pictures Television'],
     distributors: ['Netflix'],
@@ -408,6 +437,7 @@ const TITLES: Partial<Record<ChartEntryId, TitleRecord>> = {
     network: 'Netflix',
     creators: ['Robert Hull', 'Harlan Coben'],
     cast: ['Sam Worthington', 'Britt Lower', 'Milo Ventimiglia', 'Erin Richards', 'Jonathan Tucker', 'Madeleine Stowe', 'Logan Browning', 'Chi McBride'],
+    contentRating: { value: 'TV-MA' },
     genres: ['Crime drama', 'Thriller'],
     productionCompanies: ['Final Twist Productions', 'I Have an Idea Productions', 'Netflix Worldwide Productions'],
     distributors: ['Netflix'],
@@ -430,6 +460,9 @@ const TITLES: Partial<Record<ChartEntryId, TitleRecord>> = {
     network: 'HBO Max',
     creators: ['Chuck Lorre', 'Zak Penn', 'Bill Prady'],
     cast: ['Kevin Sussman', 'Lauren Lapkus', 'Brian Posehn', 'John Ross Bowie'],
+    /* TV-MA carries no descriptor of its own, so `reason` is omitted rather than
+       filled with a paraphrase of what the rating implies. */
+    contentRating: { value: 'TV-MA' },
     genres: ['Comedy', 'Science fiction', 'Action-adventure'],
     productionCompanies: ['Chuck Lorre Productions', 'Warner Bros. Television'],
     distributors: ['HBO Max'],
@@ -459,6 +492,7 @@ const TITLES: Partial<Record<ChartEntryId, TitleRecord>> = {
        mirrors the credits rather than the reporting. */
     writers: ['Travis Braun'],
     cast: ['Monica Barbaro', 'Callum Turner', 'Molly Ringwald', 'LeVar Burton', 'Maya Hawke', 'Julia Fox', 'Nicholas Braun', 'Pete Davidson'],
+    contentRating: { value: 'R', reason: 'for sexual material, language and brief nudity' },
     genres: ['Romantic comedy'],
     productionCompanies: ['Olive Bridge Entertainment'],
     distributors: ['Universal Pictures'],
@@ -475,6 +509,11 @@ const TITLES: Partial<Record<ChartEntryId, TitleRecord>> = {
     directors: ['Eli Roth'],
     writers: ['Eli Roth', 'Noah Belson'],
     cast: ['Ari Millen', 'Charlie Zeltzer', 'Shiloh O\u2019Reilly', 'Kiori Mirza Waldman', 'Sarah Abbott', 'Benjamin Byron Davis'],
+    /* Unrated is a FACT here, not a missing field: Roth released the film without
+       submitting it to the MPA so the gore would survive, and it carries an 18 from
+       the BBFC in the UK. Stated rather than omitted, because "Unrated" is what a
+       cinema listing shows and it means something different from "no rating yet". */
+    contentRating: { value: 'Unrated', reason: 'released without an MPA rating' },
     genres: ['Slasher', 'Horror'],
     productionCompanies: ['The Horror Section', 'MCT Studios'],
     distributors: ['Iconic Events Releasing'],
@@ -492,6 +531,7 @@ const TITLES: Partial<Record<ChartEntryId, TitleRecord>> = {
     network: 'Prime Video',
     creators: ['Megan Park'],
     cast: ['Ella Rubin', 'Am\u00e9lie Hoeferle', 'Jacob Whiteduck-Lavoie', 'Daniel Quinn-Toye', 'Bo Bragason', 'Keen Ruffalo', 'Missi Pyle', 'Jay Duplass', 'Jeffrey Dean Morgan'],
+    contentRating: { value: 'TV-MA' },
     genres: ['Drama', 'Coming-of-age'],
     productionCompanies: ['LuckyChap', 'Fake Empire', 'Heart Fugue Productions', 'Reunion Pacific Entertainment', 'Amazon MGM Studios'],
     distributors: ['Prime Video'],
@@ -514,6 +554,7 @@ const TITLES: Partial<Record<ChartEntryId, TitleRecord>> = {
     network: 'Adult Swim',
     creators: ['James Siciliano', 'Dan Harmon'],
     cast: ['Keith David', 'Stephanie Beatriz', 'Jim Rash'],
+    contentRating: { value: 'TV-MA' },
     genres: ['Adult animation', 'Science fiction', 'Satire'],
     productionCompanies: ['Pug Party', 'Harmonious Claptrap', 'Williams Street'],
     distributors: ['Adult Swim'],
@@ -540,6 +581,7 @@ const TITLES: Partial<Record<ChartEntryId, TitleRecord>> = {
     network: 'FX',
     creators: ['Ryan Murphy', 'Bret Easton Ellis'],
     cast: ['Igby Rigney', 'Kaia Gerber', 'Homer Gere', 'Hayes Warner', 'Graham Campbell', 'Evan Rachel Wood', 'Wes Bentley'],
+    contentRating: { value: 'TV-MA' },
     genres: ['Teen drama', 'Thriller', 'Coming-of-age'],
     productionCompanies: ['20th Television', 'Ryan Murphy Television', 'Color Force', 'Sodium Fox Productions'],
     distributors: ['FX'],
@@ -560,6 +602,7 @@ const TITLES: Partial<Record<ChartEntryId, TitleRecord>> = {
     network: 'Hulu',
     creators: ['Elizabeth Meriwether'],
     cast: ['Emmy Rossum', 'Lola Petticrew', 'Quincy Tyler Bernstine', 'Scoot McNairy'],
+    contentRating: { value: 'TV-MA' },
     genres: ['Crime drama', 'Thriller'],
     productionCompanies: ['Elizabeth Meriwether Pictures', 'Composition 8', 'Searchlight Television', '20th Television'],
     distributors: ['Hulu'],
@@ -581,6 +624,7 @@ const TITLES: Partial<Record<ChartEntryId, TitleRecord>> = {
     network: 'Prime Video',
     creators: ['Louisa Levy'],
     cast: ['Ella Bright', 'Belmont Cameli', 'Mika Abdalla', 'Stephen Kalyn', 'Jalen Thomas Brooks', 'Antonio Cipriano', 'Josh Heuston'],
+    contentRating: { value: 'TV-MA' },
     genres: ['Romantic drama'],
     productionCompanies: ['28 In Blue', 'Drowning Girl Productions', 'Temple Hill Entertainment', 'Billings Productions', 'Amazon MGM Studios'],
     distributors: ['Prime Video'],
@@ -598,6 +642,9 @@ const TITLES: Partial<Record<ChartEntryId, TitleRecord>> = {
     directors: ['Tim Story'],
     writers: ['Jon Hurwitz', 'Hayden Schlossberg', 'Kevin Burrows', 'Matt Mider'],
     cast: ['Kevin Hart', 'Marcello Hern\u00e1ndez', 'Mason Gooding', 'Kam Patterson', 'Ben Marshall', 'Teyana Taylor'],
+    /* An MPA R, not a TV-MA: it is a film that premiered on Netflix, and Netflix
+       originals carry the film rating rather than the TV Parental Guidelines one. */
+    contentRating: { value: 'R', reason: 'for pervasive language, sexual material, drug use and graphic nudity' },
     genres: ['Comedy'],
     productionCompanies: ['Sony Pictures', 'Davis Entertainment', 'Counterbalance Entertainment', 'Hartbeat Productions', 'Will Packer Productions', 'The Story Company'],
     distributors: ['Netflix'],
@@ -622,6 +669,9 @@ const TITLES: Partial<Record<ChartEntryId, TitleRecord>> = {
        across three age brackets each, which belongs on a cast page rather than in a
        two-line credit on a landing page. */
     cast: ['Greta Lee', 'Wagner Moura'],
+    /* PG-13 with no published descriptor found, so `reason` is left off rather than
+       written from the trailer. */
+    contentRating: { value: 'PG-13' },
     genres: ['Science fiction', 'Thriller'],
     productionCompanies: ['Chernin Entertainment', '3 Arts Entertainment'],
     distributors: ['Netflix'],
@@ -643,6 +693,7 @@ const TITLES: Partial<Record<ChartEntryId, TitleRecord>> = {
     directors: ['Jeff Wadlow'],
     writers: ['Aja Gabel', 'Myung Joh Wesner'],
     cast: ['Kathryn Newton', 'Lana Condor', 'Gavin Casalegno', 'Nico Hiraga', 'Tommi Rose', 'Tayme Thapthimthong'],
+    contentRating: { value: 'PG-13', reason: 'for violent content, bloody images, some language and suggestive material' },
     genres: ['Survival thriller', 'Horror'],
     productionCompanies: ['Lionsgate', 'Thunder Road Films'],
     /* Amazon MGM Studios distributes, via Prime Video. The chart badge said `hulu`,
@@ -666,6 +717,7 @@ const TITLES: Partial<Record<ChartEntryId, TitleRecord>> = {
     directors: ['Pierre Coffin'],
     writers: ['Brian Lynch', 'Pierre Coffin'],
     cast: ['Pierre Coffin', 'Trey Parker', 'Allison Janney', 'Christoph Waltz', 'Jesse Eisenberg', 'Jeff Bridges', 'Zoey Deutch', 'Bobby Moynihan', 'Phil LaMarr'],
+    contentRating: { value: 'PG', reason: 'for action/violence, language and rude/macabre humor' },
     genres: ['Animation', 'Comedy', 'Family'],
     productionCompanies: ['Universal Pictures', 'Illumination'],
     distributors: ['Universal Pictures'],
@@ -697,6 +749,7 @@ const TITLES: Partial<Record<ChartEntryId, TitleRecord>> = {
     creators: ['Skye Borgman'],
     /* No `cast` — see the field's note. The people on screen are the victims'
        families and law enforcement, appearing as themselves. */
+    contentRating: { value: 'TV-MA' },
     genres: ['Documentary', 'True crime'],
     productionCompanies: ['RadicalMedia', 'Third Eye Motion Picture Company'],
     distributors: ['Netflix'],
@@ -724,6 +777,7 @@ const TITLES: Partial<Record<ChartEntryId, TitleRecord>> = {
     directors: ['Olivia Wilde'],
     writers: ['Will McCormack', 'Rashida Jones'],
     cast: ['Seth Rogen', 'Olivia Wilde', 'Pen\u00e9lope Cruz', 'Edward Norton'],
+    contentRating: { value: 'R', reason: 'for sexual material, language throughout and drug use' },
     genres: ['Comedy', 'Drama'],
     productionCompanies: ['Annapurna Pictures', 'FilmNation Entertainment', 'Permut Presentations'],
     distributors: ['A24'],
