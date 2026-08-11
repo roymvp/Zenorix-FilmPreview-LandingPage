@@ -1,4 +1,5 @@
 import { ContactLink } from '@/components/landing/contact-link'
+import { ConversionProvider } from '@/components/landing/conversion-provider'
 import { DownloadCta } from '@/components/landing/download-cta'
 import { SiteFooter } from '@/components/landing/site-footer'
 import { TopBar } from '@/components/landing/top-bar'
@@ -49,14 +50,41 @@ export function TitlePage({
      row: it takes the same vertical space to say nothing. */
   const facts: { label: string; value: string }[] = [
     { label: copy.released, value: formatDate(record.released, locale) },
+    /* A film gets a runtime; a series gets seasons and episodes. Both are driven
+       off which fields the record actually has rather than off `entry.kind`, so a
+       record can only ever produce rows it has data for. */
     ...(record.runtime
       ? [{ label: copy.runtime, value: fill(copy.minutes, { count: record.runtime }) }]
       : []),
-    { label: copy.director, value: record.directors.join(', ') },
+    ...(record.seasons
+      ? [{ label: copy.seasons, value: fill(copy.seasonCount, { count: record.seasons }) }]
+      : []),
+    ...(record.episodes
+      ? [
+          {
+            label: copy.episodes,
+            value: fill(copy.episodeCount, { count: record.episodes }),
+          },
+        ]
+      : []),
+    /* "Director" for a film, "Creator" for a series. The record guarantees exactly
+       one of the two is set (see the assertion in `titles.ts`), so this never
+       renders both and never renders neither. */
+    ...(record.directors
+      ? [{ label: copy.director, value: record.directors.join(', ') }]
+      : []),
+    ...(record.creators
+      ? [{ label: copy.creator, value: record.creators.join(', ') }]
+      : []),
     ...(record.writers ? [{ label: copy.writer, value: record.writers.join(', ') }] : []),
     { label: copy.genre, value: record.genres.join(', ') },
     { label: copy.studio, value: record.productionCompanies.join(', ') },
-    { label: copy.distributor, value: record.distributors.join(', ') },
+    /* A series airs on a network; a film is handled by a distributor. Same row
+       position, different label, because "Distributor: HBO" misstates what HBO is
+       to a show it produces and broadcasts. */
+    ...(record.network
+      ? [{ label: copy.network, value: record.network }]
+      : [{ label: copy.distributor, value: record.distributors.join(', ') }]),
     ...(service ? [{ label: copy.streamingOn, value: service }] : []),
   ]
 
@@ -87,6 +115,14 @@ export function TitlePage({
         {dict.a11y.skipToContent}
       </a>
 
+      {/* `DownloadCta` calls `useConversion`, so it must sit under this provider —
+          without it the whole route 500s. The provider is a client component with
+          no server-rendered output of its own, so everything factual below stays in
+          the server-rendered HTML; only the CTA's click handler needs the context.
+
+          The legal pages deliberately do NOT do this (see the note in
+          `legal-page.tsx`) because they carry no CTA. This page does carry one. */}
+      <ConversionProvider>
       <div className="zx-page zx-page--doc">
         <TopBar
           locale={locale}
@@ -237,6 +273,7 @@ export function TitlePage({
           social={dict.social}
         />
       </div>
+      </ConversionProvider>
     </>
   )
 }

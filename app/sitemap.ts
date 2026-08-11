@@ -1,6 +1,7 @@
 import type { MetadataRoute } from 'next'
 import { SITE } from '@/lib/config/site'
 import { LEGAL_SLUGS } from '@/lib/content/legal'
+import { allTitles } from '@/lib/content/titles'
 import { locales, type Locale } from '@/lib/i18n/config'
 import { buildLocaleAlternates } from '@/lib/seo'
 
@@ -57,7 +58,34 @@ export default function sitemap(): MetadataRoute.Sitemap {
     })),
   )
 
-  return [...markets, ...legal]
+  /* One entry per researched title per market.
+     
+     Priority sits above the legal pages and below the market pages: these are the
+     pages meant to earn long-tail traffic ("the odyssey cast", "mortal kombat ii
+     rotten tomatoes"), but the market page is still the one that should rank for
+     the brand.
+     
+     `weekly`, not `daily`: the facts on these pages are fixed once a title is
+     released, and the only field that moves is the critic score. Claiming daily
+     change on a page that mostly does not would spend crawl budget the market
+     pages should get — the same reasoning as the legal block above. */
+  const titles: MetadataRoute.Sitemap = locales.flatMap((locale) =>
+    allTitles().map((record) => ({
+      url: `${SITE.url}/${locale}/titles/${record.slug}`,
+      /* The most recent date any fact on the page was verified — which in practice
+         is the score `asOf`, the one field that moves. Falls back to the release
+         date for titles with no score, rather than `new Date()`: restamping a page
+         that did not change is what teaches a crawler to ignore the field. */
+      lastModified: new Date(
+        record.rottenTomatoes?.asOf ?? record.metacritic?.asOf ?? record.released,
+      ),
+      changeFrequency: 'weekly' as const,
+      priority: 0.6,
+      alternates: alternates((target) => `/${target}/titles/${record.slug}`),
+    })),
+  )
+
+  return [...markets, ...titles, ...legal]
 }
 
 /** Matches `LAST_UPDATED` in `components/landing/legal-page.tsx`. */

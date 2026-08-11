@@ -270,7 +270,20 @@ export function buildTitleStructuredData({
         /* ISO 8601 duration, films only — a series has no single runtime, which is
            why the field is optional on the record. */
         ...(record.runtime ? { duration: `PT${record.runtime}M` } : {}),
-        director: record.directors.map((name) => ({ '@type': 'Person', name })),
+        /* `numberOfSeasons` / `numberOfEpisodes` are the schema.org properties for
+           a `TVSeries`; there is no equivalent on `Movie`, which is why these ride
+           along with the same optional fields the visible page uses. */
+        ...(record.seasons ? { numberOfSeasons: record.seasons } : {}),
+        ...(record.episodes ? { numberOfEpisodes: record.episodes } : {}),
+        /* `director` for a film, `creator` for a series — the two distinct
+           schema.org properties, not one relabelled. Emitting `director` for a
+           showrunner would assert something the credits do not support. */
+        ...(record.directors
+          ? { director: record.directors.map((name) => ({ '@type': 'Person', name })) }
+          : {}),
+        ...(record.creators
+          ? { creator: record.creators.map((name) => ({ '@type': 'Person', name })) }
+          : {}),
         ...(record.writers
           ? { author: record.writers.map((name) => ({ '@type': 'Person', name })) }
           : {}),

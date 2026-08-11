@@ -1,3 +1,4 @@
+import type { ChartEntryId } from '@/lib/content/charts'
 import { PLATFORMS, type PlatformId } from '@/lib/content/platforms'
 
 /**
@@ -53,7 +54,7 @@ type Score = {
 
 export type TitleRecord = {
   /** Matches the `ChartEntry.id` in `charts.ts`; that file owns title and poster. */
-  id: string
+  id: ChartEntryId
   /** URL segment. Stable — changing one breaks a live, indexed URL. */
   slug: string
   /**
@@ -67,7 +68,27 @@ export type TitleRecord = {
   released: string
   /** Runtime in minutes. Films only — a series has no single runtime. */
   runtime?: number
-  directors: Credit[]
+  /**
+   * Series only: seasons and episodes aired so far, and the network that carries
+   * it. A film leaves all three undefined, which is what the page keys off to
+   * decide between rendering a runtime and rendering a season count — rather than
+   * re-deriving `kind` from `charts.ts`.
+   *
+   * `episodes` counts EPISODES RELEASED, not ordered. Lioness season 3 has an
+   * eight-episode order with two aired at the time of writing, and a page that
+   * claims 24 episodes exist sends a reader looking for eighteen that do not.
+   */
+  seasons?: number
+  episodes?: number
+  network?: string
+  /**
+   * Films are credited to a director; series are credited to a creator. These are
+   * separate fields rather than one relabelled "directed by", because a series
+   * like House of the Dragon has dozens of episode directors and naming Ryan
+   * Condal as its director would simply be false. Exactly one of the two is set.
+   */
+  directors?: Credit[]
+  creators?: Credit[]
   writers?: Credit[]
   /** Billed principal cast, in credit order. Trimmed to the top billing block. */
   cast: Credit[]
@@ -93,8 +114,18 @@ export type TitleRecord = {
    */
 }
 
+/* Keyed by `ChartEntryId`, not `string`.
+   
+   This is load-bearing, not decoration. Two records here were first written as
+   `superTroopers` and `mastersUniverse` while `charts.ts` calls those titles
+   `troopers3` and `masters` — with a `string` key that mismatch compiles
+   perfectly, `getTitle` just never finds the record, and the only symptom is a
+   chart card that quietly stays a button and a page that never exists. Typing the
+   key makes that a build error instead of a silently missing page.
+   
+   `Partial` because coverage is deliberately incomplete: see the file header. */
 /* prettier-ignore */
-const TITLES: Record<string, TitleRecord> = {
+const TITLES: Partial<Record<ChartEntryId, TitleRecord>> = {
   spiderMan: {
     id: 'spiderMan',
     slug: 'spider-man-brand-new-day',
@@ -213,10 +244,137 @@ const TITLES: Record<string, TitleRecord> = {
     rottenTomatoes: { value: 78, reviewCount: 343, asOf: '2026-08-11', url: 'https://www.rottentomatoes.com/m/the_devil_wears_prada_2' },
     metacritic:     { value: 63, reviewCount: 57,  asOf: '2026-08-11', url: 'https://www.metacritic.com/movie/the-devil-wears-prada-2/' },
   },
+
+  moana: {
+    id: 'moana',
+    slug: 'moana-live-action',
+    synopsis: 'A live-action retelling of the 2016 film: the ocean chooses Moana, daughter of Motunui\u2019s chief, to find the demigod Maui and restore the stolen heart of Te Fiti.',
+    released: '2026-07-10',
+    runtime: 115,
+    directors: ['Thomas Kail'],
+    writers: ['Jared Bush', 'Dana Ledoux Miller'],
+    cast: ['Catherine Laga\u2019aia', 'Dwayne Johnson', 'Rena Owen', 'John Tui', 'Frankie Adams', 'Jemaine Clement'],
+    genres: ['Musical', 'Adventure', 'Family'],
+    productionCompanies: ['Walt Disney Pictures', 'Seven Bucks Productions', 'Flynn Picture Co.', '5000 Broadway Productions'],
+    distributors: ['Walt Disney Studios Motion Pictures'],
+    streamingOn: 'disney-plus',
+    /* A genuinely poorly reviewed film. Recorded as found — the point of citing a
+       source is that the number is not ours to choose. */
+    rottenTomatoes: { value: 32, reviewCount: 193, asOf: '2026-08-10', url: 'https://www.rottentomatoes.com/m/moana_2026' },
+    metacritic:     { value: 42, reviewCount: 40,  asOf: '2026-07-14', url: 'https://www.metacritic.com/movie/moana-2026/' },
+  },
+
+  troopers3: {
+    id: 'troopers3',
+    slug: 'super-troopers-3',
+    synopsis: 'The Vermont state troopers reunite for Farva\u2019s wedding to Thorny\u2019s sister, while a new narcotic called Canadian Crystal turns up in their jurisdiction.',
+    released: '2026-08-07',
+    runtime: 104,
+    directors: ['Jay Chandrasekhar'],
+    writers: ['Broken Lizard'],
+    cast: ['Jay Chandrasekhar', 'Kevin Heffernan', 'Steve Lemme', 'Paul Soter', 'Erik Stolhanske', 'Hannah Simone', 'Nat Faxon', 'Chace Crawford', 'Brian Cox'],
+    genres: ['Comedy'],
+    productionCompanies: ['Broken Lizard Industries', 'Cataland Films'],
+    distributors: ['Searchlight Pictures'],
+    rottenTomatoes: { value: 49, reviewCount: 35, asOf: '2026-08-11', url: 'https://www.rottentomatoes.com/m/super_troopers_3' },
+    metacritic:     { value: 37, reviewCount: 9,  asOf: '2026-08-08', url: 'https://www.metacritic.com/movie/super-troopers-3/' },
+  },
+
+  masters: {
+    id: 'masters',
+    slug: 'masters-of-the-universe',
+    synopsis: 'Raised on Earth after fleeing Eternia as a child, Prince Adam recovers the Sword of Power and returns home to face the warlock Skeletor.',
+    released: '2026-06-05',
+    runtime: 140,
+    directors: ['Travis Knight'],
+    writers: ['Chris Butler', 'Aaron Nee', 'Adam Nee', 'David Callaham'],
+    cast: ['Nicholas Galitzine', 'Camila Mendes', 'Alison Brie', 'James Purefoy', 'Morena Baccarin', 'Kristen Wiig', 'Jared Leto', 'Idris Elba'],
+    genres: ['Sword and sorcery', 'Fantasy', 'Action'],
+    productionCompanies: ['Metro-Goldwyn-Mayer', 'Mattel Studios', 'Escape Artists'],
+    distributors: ['Amazon MGM Studios', 'Sony Pictures Releasing International'],
+    streamingOn: 'prime-video',
+    rottenTomatoes: { value: 67, reviewCount: 255, asOf: '2026-08-05', url: 'https://www.rottentomatoes.com/m/masters_of_the_universe' },
+    metacritic:     { value: 52, reviewCount: 44,  asOf: '2026-06-15', url: 'https://www.metacritic.com/movie/masters-of-the-universe/' },
+  },
+
+  /* Series. `released` is the SERIES premiere, not the current season's — the
+     field is documented as first release and a reader comparing two shows needs
+     the same measure on both. The scores below are for the season now airing,
+     which is the one a visitor is looking for; `asOf` carries the date and the
+     review count keeps it honest. */
+  dragon: {
+    id: 'dragon',
+    slug: 'house-of-the-dragon',
+    synopsis: 'Two centuries before Game of Thrones, the Targaryen succession splits the family into rival courts and ignites the civil war known as the Dance of the Dragons.',
+    released: '2022-08-21',
+    seasons: 3,
+    episodes: 26,
+    network: 'HBO',
+    creators: ['Ryan Condal', 'George R. R. Martin'],
+    cast: ['Emma D\u2019Arcy', 'Olivia Cooke', 'Matt Smith', 'Rhys Ifans', 'Steve Toussaint', 'Eve Best', 'Fabien Frankel', 'Tom Glynn-Carney', 'Ewan Mitchell'],
+    genres: ['Fantasy', 'Drama', 'Action'],
+    productionCompanies: ['HBO Entertainment', 'Bastard Sword', '1:26 Pictures'],
+    distributors: ['HBO'],
+    streamingOn: 'hbo-max',
+    /* Season 3, the season airing as of this writing. */
+    rottenTomatoes: { value: 91, reviewCount: 163, asOf: '2026-08-11', url: 'https://www.rottentomatoes.com/tv/house_of_the_dragon/s03' },
+    metacritic:     { value: 75, reviewCount: 27,  asOf: '2026-07-29', url: 'https://www.metacritic.com/tv/house-of-the-dragon/season-3/' },
+  },
+
+  lioness: {
+    id: 'lioness',
+    slug: 'special-ops-lioness',
+    synopsis: 'A CIA officer runs a programme that embeds female operatives inside the inner circles of targets in the war on terror, at mounting cost to the women sent in.',
+    released: '2023-07-23',
+    seasons: 3,
+    /* 18 released of a 24-episode run: season 3 has an eight-episode order with
+       two aired. See the `episodes` note on the type. */
+    episodes: 18,
+    network: 'Paramount+',
+    creators: ['Taylor Sheridan'],
+    cast: ['Zoe Salda\u00f1a', 'Laysla De Oliveira', 'Nicole Kidman', 'Morgan Freeman', 'Michael Kelly', 'Dave Annable', 'Genesis Rodriguez'],
+    genres: ['Spy thriller', 'Action', 'Drama'],
+    productionCompanies: ['Bosque Ranch Productions', '101 Studios', 'Blossom Films', 'Paramount Television Studios'],
+    distributors: ['Paramount+'],
+    streamingOn: 'paramount-plus',
+    /* Season 3. A low review count on purpose — 11 critics is what the season has
+       drawn so far, and printing the count is what keeps an 82% honest. */
+    rottenTomatoes: { value: 82, reviewCount: 11, asOf: '2026-08-04', url: 'https://www.rottentomatoes.com/tv/lioness/s03' },
+    metacritic:     { value: 76, reviewCount: 5,  asOf: '2026-08-04', url: 'https://www.metacritic.com/tv/lioness/season-3/' },
+  },
+}
+
+/* The key and the record's own `id` are two places to write the same string, so
+   assert once that they agree. `Object.entries` on a `Partial` yields possibly-
+   undefined values, hence the guard.
+   
+   Module scope, so it runs at import — a mismatch fails the build rather than
+   waiting for someone to hit the page. */
+for (const [key, record] of Object.entries(TITLES)) {
+  if (!record) continue
+
+  if (record.id !== key) {
+    throw new Error(
+      `titles.ts: record keyed "${key}" has id "${record.id}" — they must match, ` +
+        'because getTitle() looks up by key and the chart card links by id.',
+    )
+  }
+
+  /* `directors` and `creators` are both optional at the type level so a film and a
+     series can each omit the other's field. Nothing in the type stops a record
+     from setting BOTH or NEITHER, though, and either would render a page with a
+     contradictory or empty credit block. Assert the exclusive-or here. */
+  if (!record.directors === !record.creators) {
+    throw new Error(
+      `titles.ts: "${key}" must set exactly one of directors (films) or ` +
+        'creators (series).',
+    )
+  }
 }
 
 /** Every record, for the sitemap and the index list. */
-export const allTitles = (): TitleRecord[] => Object.values(TITLES)
+export const allTitles = (): TitleRecord[] =>
+  Object.values(TITLES).filter((record): record is TitleRecord => Boolean(record))
 
 /**
  * The record for a chart entry, or `undefined` when none has been researched yet.
@@ -224,7 +382,8 @@ export const allTitles = (): TitleRecord[] => Object.values(TITLES)
  * Callers MUST handle `undefined` by leaving the card as it is. See the file
  * header: a title with no verified facts gets no page.
  */
-export const getTitle = (id: string): TitleRecord | undefined => TITLES[id]
+export const getTitle = (id: string): TitleRecord | undefined =>
+  (TITLES as Record<string, TitleRecord | undefined>)[id]
 
 /** Lookup by URL segment, for the route. */
 export const getTitleBySlug = (slug: string): TitleRecord | undefined =>

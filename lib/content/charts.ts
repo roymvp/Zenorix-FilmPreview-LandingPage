@@ -56,8 +56,13 @@ export type ChartEntry = {
  * to invent an entry to satisfy a "Top 10" label — nor trim one to fit it. Adding
  * a title means adding a poster, not renaming a row.
  */
+/* `satisfies`, not a `Record<string, ChartEntry>` annotation, so that
+   `keyof typeof chartPool` stays the literal union of the ids below instead of
+   collapsing to `string`. That union is exported as `ChartEntryId` and used to key
+   the records in `titles.ts` — which is what turns a mistyped id there into a
+   build error rather than a detail page that silently never exists. */
 /* prettier-ignore */
-const chartPool: Record<string, ChartEntry> = {
+const chartPool = {
   /* Films — 2026 theatrical slate, ranked 1-10.
 
      Each `platform` is the service that holds the title's streaming window, not
@@ -99,7 +104,15 @@ const chartPool: Record<string, ChartEntry> = {
   offCampus:  { id: 'offCampus',  title: 'Off Campus',                        kind: 'series', platform: 'prime-video',    poster: '/media/tiles/off-campus.webp' },
   stuart:     { id: 'stuart',     title: 'Stuart Fails to Save the Universe', kind: 'series', platform: 'hbo-max',        poster: '/media/tiles/stuart-fails-to-save-the-universe.webp' },
   curtis:     { id: 'curtis',     title: 'President Curtis',                  kind: 'series', platform: 'hbo-max',        poster: '/media/tiles/president-curtis.webp' },
-}
+} satisfies Record<string, ChartEntry>
+
+/**
+ * Every id in the pool, as a literal union.
+ *
+ * `titles.ts` keys its records by this, so the two files can no longer disagree
+ * about what a title is called.
+ */
+export type ChartEntryId = keyof typeof chartPool
 
 /**
  * Per-market ranking. Each array must be a permutation of its half of the pool,
@@ -117,7 +130,7 @@ const chartPool: Record<string, ChartEntry> = {
  *   back into three permutations — the loop below does not care.
  */
 /* prettier-ignore */
-const filmRanking = [
+const filmRanking: ChartEntryId[] = [
   /* 1-10: the 2026 slate, in supplied order. */
   'spiderMan', 'odyssey', 'oneNight', 'toyStory5', 'troopers3',
   'minions', 'moana', 'iceCream', 'invite', 'catFest',
@@ -125,14 +138,14 @@ const filmRanking = [
   'avatar', 'kombat', 'hailMary', 'prada', 'masters', 'lastHouse', 'devilMouth', 'hours72',
 ]
 
-const movieOrder: Record<Locale, string[]> = {
+const movieOrder: Record<Locale, ChartEntryId[]> = {
   en: filmRanking,
   'pt-br': filmRanking,
   th: filmRanking,
 }
 
 /* prettier-ignore */
-const seriesOrder: Record<Locale, string[]> = {
+const seriesOrder: Record<Locale, ChartEntryId[]> = {
   en:      ['dragon', 'findYou', 'lioness', 'rickMorty', 'walterBoys', 'shards', 'sterling', 'furious', 'idaho', 'offCampus', 'stuart', 'curtis'],
   'pt-br': ['dragon', 'walterBoys', 'findYou', 'rickMorty', 'lioness', 'sterling', 'offCampus', 'shards', 'curtis', 'furious', 'stuart', 'idaho'],
   th:      ['dragon', 'rickMorty', 'findYou', 'sterling', 'shards', 'lioness', 'furious', 'walterBoys', 'stuart', 'offCampus', 'idaho', 'curtis'],
@@ -171,7 +184,11 @@ export function getSeriesChart(locale: Locale): ChartEntry[] {
  * that file deliberately does not duplicate: display title and poster.
  */
 export function getChartEntry(id: string): ChartEntry | undefined {
-  return chartPool[id]
+  /* Takes a plain `string` and returns `| undefined` on purpose: the caller is a
+     route reading a URL segment, so the id is untrusted and may match nothing.
+     The narrow `ChartEntryId` union is for authoring the two files against each
+     other, not for validating request input. */
+  return (chartPool as Record<string, ChartEntry>)[id]
 }
 
 export function getChartTitles(locale: Locale): string[] {
