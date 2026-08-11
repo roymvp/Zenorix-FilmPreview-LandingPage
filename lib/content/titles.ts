@@ -1,5 +1,10 @@
-import type { ChartEntryId } from '@/lib/content/charts'
+import {
+  getMovieChart,
+  getSeriesChart,
+  type ChartEntryId,
+} from '@/lib/content/charts'
 import { PLATFORMS, type PlatformId } from '@/lib/content/platforms'
+import type { Locale } from '@/lib/i18n/config'
 
 /**
  * Per-title factual records behind `/[lang]/titles/[slug]`.
@@ -863,6 +868,41 @@ export const getTitle = (id: string): TitleRecord | undefined =>
 /** Lookup by URL segment, for the route. */
 export const getTitleBySlug = (slug: string): TitleRecord | undefined =>
   allTitles().find((title) => title.slug === slug)
+
+/**
+ * Chart-ordered links to title pages, for the footer's catalogue columns.
+ *
+ * Derived from `getMovieChart`/`getSeriesChart` rather than from `allTitles()`, so
+ * the footer lists the same titles in the same order as the rails above it — and so
+ * a market with its own show ranking gets its own footer order for free.
+ *
+ * THE FILTER IS LOAD-BEARING, not defensive habit. The chart pool holds 30 entries
+ * and only 29 have researched records, because a title with no verified facts
+ * deliberately gets no page (see the file header). Mapping the chart straight to
+ * hrefs would therefore emit one link to a route that 404s — in the footer, on
+ * every page of the site, which is exactly where a crawler finds it first.
+ * `getTitle` returning `undefined` IS the signal that no page exists, and skipping
+ * those entries is the only correct reading of it.
+ */
+export function catalogueLinks(
+  locale: Locale,
+  kind: 'movie' | 'series',
+  limit: number,
+): { label: string; href: string }[] {
+  const chart = kind === 'movie' ? getMovieChart(locale) : getSeriesChart(locale)
+  const links: { label: string; href: string }[] = []
+
+  for (const entry of chart) {
+    const record = getTitle(entry.id)
+    if (!record) continue
+    /* Display name from the CHART entry, not the record: `charts.ts` owns title and
+       poster, and this file deliberately does not duplicate them. */
+    links.push({ label: entry.title, href: `/${locale}/titles/${record.slug}` })
+    if (links.length === limit) break
+  }
+
+  return links
+}
 
 /* `streamingName()` used to live here, returning just the service's display name
    for a text row on the detail page. That row is a chip with the service's mark
