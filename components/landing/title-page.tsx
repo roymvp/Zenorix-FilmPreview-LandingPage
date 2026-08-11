@@ -159,14 +159,20 @@ export function TitlePage({
     },
   ].filter((row) => row.score)
 
-  /* THE TAG LINE, under the h1: year · length · genre · certificate.
+  /* THE PLAIN VALUES OF THE TAG LINE, under the h1: year · length.
+  
+     The line renders as year · length · [certificate] · genre, but only these two
+     kinds of item live in this array. The certificate is a bordered chip and the
+     genre is the one item allowed to wrap, so both are rendered explicitly after the
+     map — see the notes at the markup for why that order is what the browser
+     demanded rather than what reads best on paper.
   
      THE YEAR HERE IS NOT THE RELEASE DATE. It used to be the full "19 December
      2025" and it sat below the synopsis; it is a bare year on the title line now,
      which is where every service the visitor already uses puts it. The exact date
      did NOT evaporate with it — it moved into the `Details` list below, and that
-     split is deliberate: this line is the SCAN layer (four facts the eye takes in
-     without reading) and the <dl> is the REFERENCE layer (the precise value you go
+     split is deliberate: this line is the SCAN layer (a handful of facts the eye
+     takes in without reading) and the <dl> is the REFERENCE layer (the value you go
      looking for). It is the one fact on this page that appears twice, and it is
      allowed to because the two forms answer different questions.
   
@@ -176,7 +182,7 @@ export function TitlePage({
      2568 and the page would contradict itself by two digits in one column.
   
      Each entry keeps its label even though the label is not drawn — the row renders
-     as "2025 · 197 min · Science fiction, Epic", which is unambiguous to anyone
+     as "2025 · 197 min · PG-13 · Science fiction, Epic", which is unambiguous to anyone
      LOOKING at it and completely opaque to a screen reader reading bare values in
      sequence. So the label ships as visually-hidden text in front of each value.
      This is the reason these are objects and not a plain string array.
@@ -195,10 +201,6 @@ export function TitlePage({
     ...(record.episodes
       ? [{ label: copy.episodes, value: pluralize(record.episodes, copy.episodeCount) }]
       : []),
-    /* Genre last of the plain values and first among equals visually — this is the
-       "题材" a browsing visitor sorts by, and it reads as the end of the sentence
-       the year and runtime start. */
-    { label: copy.genre, value: record.genres.join(', ') },
   ]
 
   /* Photographer credits for whichever of this cast actually has a portrait.
@@ -427,12 +429,20 @@ export function TitlePage({
                       
                       Trailing separators fix both by construction: a dot belongs to
                       the value it follows, so a wrap leaves it at the end of a line
-                      where it reads as "continues below", and the item before the
-                      certificate is simply the last one to get one — no specificity
-                      fight to lose. `i < tags.length - 1` rather than a
-                      `:not(:last-child)` selector because whether the last plain value
-                      needs a dot depends on whether the certificate exists, which is
-                      data this component has and CSS does not.
+                      where it reads as "continues below", and nothing renders a dot in
+                      front of the bordered chip — no specificity fight to lose.
+                      
+                      `i < tags.length - 1` covers only this array (year and the
+                      counts). The two items after it, the certificate chip and the
+                      genre, take no separator: the chip's border already separates,
+                      and it separates the genre behind it too.
+                      
+                      `|| !record.contentRating` is what keeps that true when there is
+                      no chip. Every one of the 29 records has a certificate today, so
+                      this branch renders on none of them — but the field is optional
+                      on the type, and without it the first record added without one
+                      would silently print "197 min Adult animation", two facts joined
+                      by nothing but a gap. Cheaper to close now than to notice later.
                       
                       aria-hidden on every one: a screen reader announcing "middle dot"
                       four times through a four-fact line is noise, and the hidden
@@ -442,7 +452,7 @@ export function TitlePage({
                       <li key={tag.label}>
                         <span className="zx-visually-hidden">{tag.label}: </span>
                         {tag.value}
-                        {i < tags.length - 1 ? (
+                        {i < tags.length - 1 || !record.contentRating ? (
                           <span className="zx-title-tag-sep" aria-hidden="true">
                             ·
                           </span>
@@ -456,15 +466,40 @@ export function TitlePage({
                         set as plain text. Just the value; the MPA's descriptor is far
                         too long for a chip and lives in the details list below.
                         
-                        Last rather than first: it is the only one of the four that
-                        many visitors do not need at all, and a box leading the line
-                        would out-shout the three values that everyone reads. */}
+                        NOT FIRST and NOT LAST: it sits between the counts and the
+                        genre, and that position was forced by the browser. It was
+                        last, after the genre, which is fine for the 19 records whose
+                        genre list is short — and wrong for Rick and Morty, the one
+                        record carrying seasons AND episodes AND four genres. Measured
+                        at 390px, that line wrapped to three, the genre list took the
+                        middle one to itself, and the chip ended up marooned alone on
+                        the third looking like a stray control.
+                        
+                        Moving it ahead of the genre fixes that with no data dropped:
+                        the counts and the chip fill the first line, the genre takes
+                        what it needs of the second, and nothing is ever orphaned
+                        because the longest item is now last. It still does not LEAD
+                        the line, which was the original reason for putting it at the
+                        end — a box in first position would out-shout the values
+                        everybody actually reads.
+                        
+                        It also needs no separator on either side: the border is doing
+                        that job, which is why the map above stops emitting dots before
+                        it and the genre below carries none. */}
                     {record.contentRating ? (
                       <li className="zx-title-rating">
                         <span className="zx-visually-hidden">{copy.rated}: </span>
                         {record.contentRating.value}
                       </li>
                     ) : null}
+
+                    {/* Genre last, and deliberately the longest thing on the line —
+                        this is the "题材" a browsing visitor sorts by, so it gets the
+                        room to wrap that the fixed-width items cannot spare. */}
+                    <li>
+                      <span className="zx-visually-hidden">{copy.genre}: </span>
+                      {record.genres.join(', ')}
+                    </li>
                   </ul>
 
                   <p className="zx-title-synopsis">{record.synopsis}</p>
