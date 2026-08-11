@@ -192,11 +192,14 @@
    `manipulation` disables double-tap zoom only, and the viewport in layout.tsx
    deliberately keeps `userScalable`.
 
-   `md-filled-button` is listed explicitly because it is a custom element: it
-   matches none of the native selectors, and it IS the install CTA.
+   `md-filled-button` used to be listed explicitly here, because a custom element
+   matches none of the native selectors and that element WAS the install CTA. The CTA
+   is a native `<button>` now, so it is covered by the `button` selector above — which
+   is the safer arrangement: the one control this page exists to earn a tap on can no
+   longer fall out of this list by being renamed.
 
    The tap highlight is cleared because every control here already has its own
-   `:active` and Material ripple feedback; the platform's grey flash lands on top
+   `:active` feedback; the platform's grey flash lands on top
    of those, a beat later, and reads as a rendering artifact rather than as
    acknowledgement. Removing it is only safe BECAUSE of that existing feedback —
    if a control is ever added without a pressed state, give it one rather than
@@ -208,7 +211,6 @@ select,
 summary,
 textarea,
 input,
-md-filled-button,
 md-menu-item,
 [role='button'] {
   touch-action: manipulation;
@@ -277,16 +279,23 @@ md-icon {
    registration the browser treats each one as a plain inline box that simply
    shows its own children. Without the rules below that window renders as a badly
    broken page: both `md-dialog`s dump their full contents inline at the bottom of
-   the document, `md-filled-button` loses all button chrome and survives as bare
-   text, and the language `md-menu` prints every locale at once. If a definition
-   chunk ever fails to load, the page stays stuck in exactly that state.
+   the document, and the language `md-menu` prints every locale at once. If a
+   definition chunk ever fails to load, the page stays stuck in exactly that state.
 
    `:defined` matches only once an element has been upgraded, so `:not(:defined)`
    targets precisely that pre-registration window and nothing else — these rules
    stop applying by themselves the moment the definitions land. No JS, no class
    toggling, and no hydration involvement.
 
-   Only the five elements this page renders are listed. The selector list used to
+   THE COST OF BEING IN THIS LIST is that the element is INVISIBLE until a
+   dynamically imported chunk resolves, so nothing above the fold belongs here.
+   `md-filled-button` was listed, and it was the install CTA: measured at FCP 988ms
+   against Material chunks landing ~1450ms, every CTA on the page stayed hidden for
+   ~500ms after the content around it had painted. It is a native `<button>` now and
+   is gone from this list. What remains is opened by a deliberate click — a dialog or
+   the language menu — so arriving late costs nothing.
+
+   Only the four elements this page renders are listed. The selector list used to
    name 25, most for components the app does not use; keep it matched to
    MaterialWebLoader's REGISTRATIONS. `md-ripple`/`md-focus-ring` are NOT needed
    here — Material renders those inside its own shadow DOM, never in our markup.
@@ -305,7 +314,6 @@ md-menu:not(:defined) {
    keep `display` so the surrounding layout does not reflow when they upgrade;
    `visibility: hidden` also removes them from the accessibility tree and from
    hit-testing, so nothing can be clicked before it works. */
-md-filled-button:not(:defined),
 md-icon:not(:defined),
 md-menu-item:not(:defined) {
   visibility: hidden;

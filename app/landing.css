@@ -1132,30 +1132,57 @@
    secondary action mattered more. Both are now `body`/semibold, and primacy is
    carried by fill-vs-outline where it belongs. */
 .zx-cta-button {
-  /* `--zx-control-h`, the same token `.zx-chart-more` reads — the one height every
-     install control on the page shares, and the number the dialog rule below
-     documents as "the base". Nothing set it here at all once, so these buttons
-     silently took Material's 40px default and the SECONDARY outlined button ended
-     up 6px taller than the primary filled ones: a size hierarchy inversion,
-     exactly the kind the label-weight note above fixed. */
-  --md-filled-button-container-height: var(--zx-control-h);
-  --md-filled-button-label-text-size: var(--zx-text-body);
-  --md-filled-button-label-text-weight: var(--zx-weight-semibold);
+  /* --- what Material used to supply ---------------------------------------
+     This is a native `<button>` now (see the note in download-cta.tsx: as a custom
+     element the primary CTA stayed invisible for ~500ms after the content around it
+     painted, because it could not render until a dynamically imported definition
+     landed). Material contributed the label's type, its centring, and the reset of
+     the UA button chrome, so those move here as ordinary CSS.
+     
+     The `--md-filled-button-*` custom properties that were here are GONE, not kept as
+     a fallback: nothing reads them once no `md-filled-button` exists in the app, and a
+     dead override that looks live is worse than no override. */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  /* `min-height`, where Material's `container-height` was a fixed height. Same 46px
+     base — `--zx-control-h`, the token `.zx-chart-more` also reads so every install
+     control on the page is one height — but a floor rather than a cap, so a long
+     label in Portuguese or Thai wraps into a taller button instead of overflowing a
+     fixed box. */
+  min-height: var(--zx-control-h);
+  padding-block: var(--zx-space-2);
+  padding-inline: var(--zx-space-6);
+  /* The UA gives buttons its own font, not the document's; `inherit` is what keeps
+     the label in the page's typeface. Size and weight match `.zx-chart-more`, the
+     secondary outlined control, so primacy is carried by fill-vs-outline rather than
+     by weight — the hierarchy inversion the original rule was written to fix. */
+  font-family: inherit;
+  font-size: var(--zx-text-body);
+  font-weight: var(--zx-weight-semibold);
+  line-height: var(--zx-lh-snug);
+  /* Dark ink on the light silver plate. Was Material's `label-text-color` default,
+     resolved from the same token. */
+  color: var(--md-sys-color-on-primary);
+  text-align: center;
+  border: none;
+  cursor: pointer;
+  /* Kills the UA's own background and inner border so the plate below is the only
+     fill, and stops iOS Safari rounding the corners on its own. */
+  appearance: none;
+  -webkit-appearance: none;
 
   /* --- the dimensional silver plate ---------------------------------------
-     A flat `container-color` fill cannot look like brushed metal, and Material paints
-     that fill inside its own shadow DOM where a gradient cannot reach. So the fill is
-     handed to the HOST: the component's container is made transparent and this element
-     paints the plate itself. The label, ripple and state layer still come from
-     Material and simply sit on top.
-
-     `container-shape` and `border-radius` MUST stay the same value — one clips
-     Material's internals, the other clips the gradient painted here, and if they
-     diverge the plate's corners show outside the button's. They reference one custom
-     property so that cannot happen. */
+     A flat fill cannot look like brushed metal, so this element paints the plate
+     itself. It always did: when this was a Material button its `container-color` was
+     set to `transparent` precisely because Material paints its fill inside a shadow
+     root a gradient cannot reach. Dropping the component changed nothing visually
+     here — it removed the workaround.
+     
+     `--zx-cta-shape` is now read by one declaration rather than two (Material's
+     `container-shape` clipped its internals and needed to stay in sync). It stays a
+     custom property because the `:active`/`:focus-visible` states below reference it. */
   --zx-cta-shape: 999px;
-  --md-filled-button-container-color: transparent;
-  --md-filled-button-container-shape: var(--zx-cta-shape);
   border-radius: var(--zx-cta-shape);
 
   /* Top-lit metal: brightest at the top edge, easing to a slightly deeper silver at
@@ -1199,6 +1226,20 @@
     inset 0 1px 0 rgba(255, 255, 255, 0.6),
     inset 0 2px 5px rgba(5, 7, 10, 0.22),
     0 1px 1px rgba(0, 0, 0, 0.5);
+}
+
+/* Material drew its focus ring inside its own shadow root, so dropping the component
+   took the ring with it — and the UA's default outline is nearly invisible sitting on
+   a near-white plate. This restates it explicitly.
+   
+   `outline` with an `outline-offset`, not a `box-shadow` ring: the plate's depth is
+   built from four stacked shadows that the hover and active states rewrite wholesale,
+   so a shadow-based ring would be erased on press. An outline is a separate property
+   and survives all of them. The offset lifts it clear of the pill's edge, and
+   `focus-visible` keeps it off mouse clicks. */
+.zx-cta-button:focus-visible {
+  outline: 2px solid var(--md-sys-color-primary);
+  outline-offset: 3px;
 }
 
 /* Anyone who has asked not to see motion still gets the depth, just no travel. */
