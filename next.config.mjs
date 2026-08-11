@@ -99,10 +99,49 @@ const securityHeaders = [
   { key: 'Content-Security-Policy-Report-Only', value: CSP },
 ]
 
+/* The canonical host, derived from the same env var lib/config/site.ts reads so this
+   redirect can never disagree with the canonical tags. `www.` is stripped
+   defensively: if that var is ever set WITH a www prefix, using its host unchanged
+   as the redirect SOURCE would send www to itself and loop. */
+const CANONICAL_HOST = new URL(
+  process.env.NEXT_PUBLIC_SITE_URL ?? 'https://zenorix.space',
+).host.replace(/^www\./, '')
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   async headers() {
     return [{ source: '/:path*', headers: securityHeaders }]
+  },
+  /**
+   * Collapse `www` onto the bare domain.
+   *
+   * Google is currently indexing the homepage as `http://www.zenorix.space` — the
+   * http, www variant — even though every canonical tag on this site says
+   * `https://zenorix.space/<locale>`. When a site answers on more than one host
+   * variant, Google can treat them as separate sites and split link and ranking
+   * signals between them, which is the last thing a domain competing against six
+   * unrelated companies for its own brand name can afford.
+   *
+   * `permanent` (308) rather than temporary: this states which host is canonical
+   * forever, and only a permanent redirect consolidates signals onto the target.
+   * HTTP→HTTPS is handled by the platform, so this only fixes the host half.
+   *
+   * CAVEAT, so this is not mistaken for the whole fix: this runs INSIDE the app, so
+   * it only fires if `www.<domain>` actually resolves to this deployment. If www is
+   * a DNS record pointing somewhere else, the real fix is in the Vercel project's
+   * domain settings (add both hosts, mark the bare domain primary). If the platform
+   * already redirects www, this rule is simply never reached — harmless either way,
+   * which is what makes it safe to add without being able to test www from here.
+   */
+  async redirects() {
+    return [
+      {
+        source: '/:path*',
+        has: [{ type: 'host', value: `www.${CANONICAL_HOST}` }],
+        destination: `https://${CANONICAL_HOST}/:path*`,
+        permanent: true,
+      },
+    ]
   },
 }
 

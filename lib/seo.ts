@@ -132,15 +132,58 @@ export function buildStructuredData({
   charts: { name: string; titles: string[] }[]
 }) {
   const url = `${SITE.url}${path(locale)}`
+  const organizationId = `${SITE.url}/#organization`
 
   return {
     '@context': 'https://schema.org',
     '@graph': [
+      /* The BRAND as an entity, not just a page.
+         
+         "Zenorix" is a badly contested name: searching it surfaces at least six
+         unrelated Zenorix organizations (design agencies, a Salesforce
+         consultancy, a holding company) that already own the term, plus a YouTube
+         channel belonging to someone else entirely. Every other node in this graph
+         describes a PAGE; none of them told Google that a company by this name
+         exists at this domain, which is the claim a brand query is actually trying
+         to resolve.
+         
+         `@id` is a fragment URI on the origin, NOT on the localized page: there is
+         one company behind all three markets, so all three graphs must point at
+         the same identifier or they describe three separate companies.
+         
+         Deliberately NO `sameAs`. That property is for profiles that unambiguously
+         identify this entity, and there are none — the "Zenorix" YouTube channel
+         and the zenorix.in site in the search results belong to other people, and
+         the support Telegram is a personal handle rather than a brand profile.
+         Listing any of them would point Google at somebody else's identity. This
+         is the one field that would most help disambiguation, so it is worth
+         filling in the moment real official profiles exist. */
+      {
+        '@type': 'Organization',
+        '@id': organizationId,
+        name: SITE.name,
+        url: SITE.url,
+        /* The mark rather than the lockup: Google wants a logo that stays legible
+           when squared off, and it is served from this origin so it is crawlable
+           (robots.txt allows everything). Dimensions are stated because the file is
+           256x196 — above Google's 112px floor, but not square, so letting a
+           consumer guess risks a stretched render. */
+        logo: {
+          '@type': 'ImageObject',
+          url: `${SITE.url}/brand/zenorix-mark.webp`,
+          width: 256,
+          height: 196,
+        },
+      },
       {
         '@type': 'WebSite',
         name: SITE.name,
         url,
         inLanguage: localeMeta[locale].hreflang,
+        /* Ties this market page back to the one company above. Without it the
+           Organization node floats unconnected to anything the crawler is looking
+           at, which is most of the reason a lone Organization node does nothing. */
+        publisher: { '@id': organizationId },
         description: fill(dict.meta.description, {
           country: dict.market.country,
           countryShort: dict.market.countryShort,
@@ -149,6 +192,10 @@ export function buildStructuredData({
       {
         '@type': 'SoftwareApplication',
         name: SITE.name,
+        /* Same link as WebSite.publisher: it says this app is published by that
+           company, so the brand entity is supported by both nodes rather than
+           sitting beside them. */
+        publisher: { '@id': organizationId },
         applicationCategory: 'MultimediaApplication',
         /* Bare "Android" — this is the value crawlers match against, so the
            minimum version moves to `softwareRequirements` rather than being
