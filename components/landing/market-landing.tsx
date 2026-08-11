@@ -120,6 +120,7 @@ export function MarketLanding({
 
           <HeroBillboard
             headline={dict.hero.headline}
+            networksLabel={dict.hero.networksLabel}
             price={fill(dict.hero.price, values)}
             priceNote={dict.hero.priceNote}
             cta={dict.hero.cta}
@@ -148,6 +149,7 @@ export function MarketLanding({
               Headings take no `fill`: they hold no placeholders now. */}
           <TopChart
             id="movies"
+            locale={locale}
             entries={movies}
             heading={dict.chart.headingMovies}
             rankLabel={dict.chart.rank}
@@ -156,6 +158,7 @@ export function MarketLanding({
 
           <TopChart
             id="series"
+            locale={locale}
             entries={series}
             heading={dict.chart.headingSeries}
             rankLabel={dict.chart.rank}
@@ -205,15 +208,10 @@ export function MarketLanding({
           />
         </main>
 
-        <SiteFooter
-          links={[
-            { label: dict.footer.privacy, href: `/${locale}#privacy` },
-            { label: dict.footer.terms, href: `/${locale}#terms` },
-            { label: dict.footer.dmca, href: `/${locale}#dmca` },
-          ]}
-          copyright={fill(dict.footer.copyright, { year: 2026 })}
-          contact={{ label: dict.contact.label, aria: dict.contact.aria }}
-        />
+        {/* Two props. The footer builds its own legal links, directory, catalogue
+            columns and copy from these — see the note on `SiteFooter` for why that
+            assembly moved out of all three callers. */}
+        <SiteFooter locale={locale} dict={dict} />
 
         <ConversionDialog
           copy={{

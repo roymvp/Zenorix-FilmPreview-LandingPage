@@ -1,6 +1,8 @@
 import { SITE } from '@/lib/config/site'
-import { getDictionary } from '@/lib/i18n/dictionaries'
+import { catalogueLinks } from '@/lib/content/titles'
+import { fill, getDictionary } from '@/lib/i18n/dictionaries'
 import { locales, localeMeta } from '@/lib/i18n/config'
+import { marketValues } from '@/lib/seo'
 
 /**
  * `/llms.txt` — the plain-text channel for AI answer engines (ChatGPT, Claude,
@@ -43,6 +45,9 @@ export async function GET() {
   /* English is the reference market for the shared prose below — the product is
      identical everywhere and only pricing and language differ. */
   const en = dicts[0].dict
+  /* The same token map the visible page and the JSON-LD both fill from, so the
+     FAQ block below states the English market's real prices. */
+  const values = marketValues(en)
 
   const lines: string[] = [
     `# ${SITE.name}`,
@@ -102,7 +107,52 @@ export async function GET() {
        restate identical facts in other languages. */
     '## Frequently asked questions',
     '',
-    ...en.faq.items.flatMap((item) => [`### ${item.q}`, '', item.a, '']),
+    /* `fill(...)` on both, and this is a FIX, not decoration. These were emitted as
+       the raw dictionary strings, so the highest-value answer in the file — the one
+       stating what the product costs — reached every answer engine as "The monthly
+       plan is {monthly} after your free trial". Measured: the served file contained
+       a literal `{monthly}` and a literal `{annualPerMonth}`.
+       
+       That is worse here than anywhere else on the site. The whole stated purpose
+       of this file (see the header) is that a model reading it cannot misquote the
+       price — and an unresolved token is not a wrong price, it is no price at all,
+       so a model answering "what does Zenorix cost" from this file had nothing to
+       quote and would fall back to guessing from the pricing table or from prose
+       elsewhere. The same bug existed in the JSON-LD FAQ node and is fixed there
+       too; both had the same cause, which is that the visible page fills its tokens
+       at render and these two machine-facing surfaces each forgot to. */
+    ...en.faq.items.flatMap((item) => [
+      `### ${fill(item.q, values)}`,
+      '',
+      fill(item.a, values),
+      '',
+    ]),
+    '',
+
+    /* THE TITLE PAGES. 29 researched pages exist per market (87 URLs), and this
+       file listed exactly none of them — it described the product and then pointed
+       at three landing pages, so an engine asked "where can I watch Mortal Kombat
+       II" had no way to know this site has a page answering that.
+       
+       English URLs only, and one line per title. The three markets carry the same
+       catalogue with the same slugs, so listing all 87 would triple the section to
+       restate one fact three times — the same reasoning the FAQ block above gives
+       for not localizing itself. The `hreflang` set in the sitemap and in each
+       page's <head> is what tells a crawler the other two exist.
+       
+       Built from `catalogueLinks`, which is the same function the footer's link
+       columns use, so this cannot name a title that has no page: it looks each
+       chart entry up and skips the ones without a record. A hand-kept list here
+       would silently rot into 404s the first time the chart reshuffled. */
+    '## Title pages',
+    '',
+    'Each page states the release year, runtime, genre, certificate, cast, directors and critic scores for one title, and is available in all three market languages at the same path under /en, /pt-br and /th.',
+    '',
+    ...(['movie', 'series'] as const).flatMap((kind) =>
+      catalogueLinks('en', kind, 100).map(
+        ({ label, href }) => `- ${SITE.url}${href} — ${label} (${kind})`,
+      ),
+    ),
   ]
 
   return new Response(lines.join('\n'), {

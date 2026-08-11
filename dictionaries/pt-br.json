@@ -13,9 +13,9 @@
   },
   "meta": {
     "title": "Zenorix — Filmes, séries e TV ao vivo em 4K",
-    "description": "Um app Android com mais de 28.000 filmes, 8.000 séries e 900 canais ao vivo da Netflix, Disney+, HBO Max e mais de 20 outras plataformas, tudo em 4K. 30 dias grátis, depois R$ 9,90/mês.",
+    "description": "A Zenorix é um app Android com mais de 28.000 filmes, 8.000 séries e 900 canais de TV ao vivo em 4K. 30 dias grátis, sem cartão.",
     "ogTitle": "Zenorix — todas as plataformas em um app, R$ 9,90/mês",
-    "keywords": "app de streaming grátis Android, assistir filmes grátis 4K, app de TV ao vivo, todas as plataformas em um app, Zenorix APK",
+    "keywords": "Zenorix app, Zenorix TV, app de streaming para Android TV, filmes e séries em 4K, canais de TV ao vivo no Android",
     "imageAlt": "Zenorix — um app Android para filmes, séries e TV ao vivo em 4K"
   },
   "nav": {
@@ -23,7 +23,9 @@
     "languageMenu": "Escolha seu idioma"
   },
   "hero": {
-    "headline": "Netflix, Disney+, HBO Max e mais de 20 canais. Todo filme e série, em um só app.",
+    "headline": "Todo filme e série, em um só app.",
+    "networksLabel": "Inclui mais de {count} plataformas de streaming",
+    "networksMore": "+{count}",
     "price": "{annualPerMonth}/MÊS",
     "priceNote": "30 dias grátis · sem cartão",
     "cta": "Baixar a Zenorix",
@@ -84,7 +86,7 @@
       },
       {
         "q": "Quanto custa depois dos 30 dias grátis?",
-        "a": "Dois planos simples. O plano mensal custa {monthly} depois do período grátis. O plano anual sai por apenas {annualPerMonth} por mês — o streaming mais barato do mercado, muito abaixo de Netflix, Disney+ ou qualquer outro serviço grande."
+        "a": "Dois planos simples. O plano mensal custa {monthly} depois do período grátis. O plano anual sai por apenas {annualPerMonth} por mês — uma fração do que os grandes serviços cobram separadamente."
       },
       {
         "q": "Preciso cadastrar um cartão para começar os 30 dias grátis?",
@@ -100,7 +102,7 @@
       },
       {
         "q": "Com que rapidez novos filmes e séries entram?",
-        "a": "No mesmo dia — muitas vezes no mesmo minuto. Cada episódio novo e cada estreia entra no ar exatamente na mesma hora que sai nas plataformas originais. Sem espera, sem spoiler."
+        "a": "Episódios e lançamentos novos aparecem assim que são liberados para streaming, normalmente no mesmo dia. Nada fica numa fila esperando um lote semanal."
       },
       {
         "q": "Qual qualidade de vídeo eu recebo?",
@@ -140,14 +142,183 @@
     "prompt": "Dúvidas antes de instalar?",
     "aria": "Fale com a gente no Telegram"
   },
+  "social": {
+    "follow": "Zenorix no X",
+    "community": {
+      "label": "Comunidade",
+      "aria": "Entre na comunidade Zenorix no X"
+    }
+  },
+  "title": {
+    "metaSuffix": "Elenco, Notas e Detalhes",
+    "formats": "Formatos de reprodução",
+    "synopsisMore": "Mais",
+    "synopsisLess": "Menos",
+    "details": "Detalhes",
+    "cast": "Elenco",
+    "released": "Lançamento",
+    "runtime": "Duração",
+    "seasons": "Temporadas",
+    "episodes": "Episódios",
+    "seasonCount": { "one": "{count} temporada", "other": "{count} temporadas" },
+    "episodeCount": { "one": "{count} episódio", "other": "{count} episódios" },
+    "minutes": "{count} min",
+    "director": "Direção",
+    "creator": "Criação",
+    "writer": "Roteiro",
+    "genre": "Gênero",
+    "rated": "Classificação (EUA)",
+    "studio": "Produção",
+    "distributor": "Distribuição",
+    "network": "Emissora",
+    "streamingOn": "Disponível em",
+    "reviews": { "one": "{count} crítica", "other": "{count} críticas" },
+    "asOf": "em {date}",
+    "cta": "Assista no Zenorix",
+    "ctaMeta": "APK Android · {size} · 30 dias grátis",
+    "photoCredits": "Créditos das fotos do elenco",
+    "photoSource": "Os retratos vêm do Wikimedia Commons e são reutilizados sob a licença indicada ao lado de cada fotógrafo. A Zenorix não tem vínculo com eles."
+  },
   "footer": {
     "privacy": "Privacidade",
     "terms": "Termos",
     "dmca": "DMCA",
-    "copyright": "© {year} Zenorix"
+    "copyright": "© {year} Zenorix",
+    "tagline": "Todos os filmes e séries, num só app. {total} títulos e {channels} canais ao vivo, a partir de {annualPerMonth} por mês.",
+    "browseHeading": "Filmes em alta",
+    "seriesHeading": "Séries em alta",
+    "helpHeading": "Fale com a gente",
+    "legalHeading": "Jurídico",
+    "installHeading": "Baixar o app",
+    "installNote": "Android {minAndroid}+ · {size} · v{version}",
+    "directory": {
+      "watchHeading": "Parceiros oficiais de streaming",
+      "watchNote": "O conteúdo desses parceiros é licenciado para distribuição na Zenorix nos territórios em que é oferecido. Cada nome e logo continua sendo marca de seu titular.",
+      "referenceHeading": "Críticas e fichas",
+      "referenceNote": "Fontes independentes de notas e fichas técnicas, listadas para você conferir um título. A Zenorix não é afiliada a esses sites."
+    }
+  },
+  "legal": {
+    "updated": "Última atualização: {date}",
+    "backToHome": "Voltar para a Zenorix",
+    "entity": {
+      "registration": "Número de registro",
+      "office": "Sede registrada",
+      "notices": "Notificações e solicitações"
+    },
+    "privacy": {
+      "title": "Política de Privacidade",
+      "description": "Como o app Zenorix para Android coleta, usa e armazena seus dados, e quais escolhas você tem.",
+      "intro": "Esta política explica o que o app Zenorix para Android coleta, por quê, e o que você pode pedir que a gente exclua. Vale para o app e para este site.",
+      "sections": [
+        {
+          "h": "O que coletamos",
+          "p": "Um identificador de conta (o e-mail ou telefone que você usa no cadastro), o status da sua assinatura e informações básicas do aparelho necessárias para entregar vídeo: modelo, versão do Android, versão do app e região aproximada. Também registramos quais títulos você assiste, para o app poder mostrar sua lista de continuar assistindo e as recomendações."
+        },
+        {
+          "h": "O que não coletamos",
+          "p": "Não coletamos seus contatos, fotos, mensagens, registros de chamadas, localização GPS precisa nem o conteúdo de outros apps. Durante os 30 dias de teste grátis não guardamos nenhum dado de pagamento, porque nenhum é solicitado."
+        },
+        {
+          "h": "Dados de pagamento",
+          "p": "Quando você escolhe um plano pago, o pagamento é processado pelo nosso provedor. Os números do cartão são informados nesse provedor e nunca ficam armazenados nos nossos servidores — guardamos apenas o plano escolhido, seu status e a data de renovação."
+        },
+        {
+          "h": "Como usamos",
+          "p": "Para autenticar você, entregar e retomar a reprodução, selecionar o catálogo e o idioma certos para sua região, evitar compartilhamento de conta acima do número de aparelhos permitido e responder pedidos de suporte. Não vendemos seus dados e não os compartilhamos com redes de publicidade."
+        },
+        {
+          "h": "Retenção e exclusão",
+          "p": "Os dados de conta e de reprodução são mantidos enquanto sua conta estiver ativa. Você pode pedir a exclusão da conta e do histórico a qualquer momento escrevendo para o endereço no fim desta página; a exclusão é concluída em até 30 dias e não pode ser desfeita."
+        },
+        {
+          "h": "Crianças",
+          "p": "A Zenorix não é destinada a crianças menores de 13 anos e não criamos contas para elas de forma consciente. Se você acredita que uma criança se cadastrou, entre em contato e removeremos a conta."
+        },
+        {
+          "h": "Contato",
+          "p": "Para qualquer pedido de privacidade — acesso, correção ou exclusão — escreva para o endereço da empresa no fim desta página. Use o mesmo endereço para dúvidas sobre esta política, para que seu pedido fique registrado."
+        }
+      ]
+    },
+    "terms": {
+      "title": "Termos de Uso",
+      "description": "Os termos que valem quando você instala e usa o app Zenorix para Android, incluindo teste, cobrança e cancelamento.",
+      "intro": "Ao instalar ou usar a Zenorix você concorda com estes termos. Leia especialmente as seções sobre o período de teste e sobre cobrança.",
+      "sections": [
+        {
+          "h": "O serviço",
+          "p": "A Zenorix é um aplicativo Android por assinatura que dá acesso de streaming ao catálogo de filmes, séries e canais ao vivo que licenciamos para a sua região. O conteúdo do catálogo varia por região e muda com o tempo, conforme licenças começam e terminam."
+        },
+        {
+          "h": "Sua conta",
+          "p": "Você é responsável por manter suas credenciais seguras e pela atividade na sua conta. As contas são para uso pessoal e não comercial de um domicílio, em até o número de aparelhos indicado no app. Exibição pública, redistribuição, retransmissão ou revenda dos streams não são permitidas."
+        },
+        {
+          "h": "Teste grátis",
+          "p": "Contas novas recebem 30 dias de acesso completo sem custo. Nenhum cartão ou outro dado de pagamento é pedido para começar, então não existe cobrança automática quando o período termina e não há nada para cancelar se você decidir não continuar. O acesso simplesmente para até você escolher um plano."
+        },
+        {
+          "h": "Cobrança e cancelamento",
+          "p": "Depois do teste você pode escolher um plano mensal ou anual nos preços exibidos para sua região. Os planos renovam automaticamente ao fim de cada período até serem cancelados. Você pode cancelar quando quiser dentro do app; o cancelamento interrompe a próxima renovação e você mantém o acesso até o fim do período já pago. Não cobramos multa de cancelamento."
+        },
+        {
+          "h": "Reembolsos",
+          "p": "Se uma cobrança foi feita por engano, ou o serviço ficou indisponível por um período prolongado, fale com o suporte e revisaremos a cobrança. Como oferecemos 30 dias de teste antes de qualquer pagamento, fora desses casos não reembolsamos períodos já utilizados."
+        },
+        {
+          "h": "Uso aceitável",
+          "p": "Você não pode tentar copiar, baixar, gravar, descriptografar ou burlar a proteção de qualquer stream, revender acesso, nem usar meios automatizados para extrair o catálogo. Podemos suspender contas que fizerem isso."
+        },
+        {
+          "h": "Disponibilidade e mudanças",
+          "p": "Buscamos disponibilidade contínua, mas não garantimos serviço sem interrupções; manutenção, condições de rede e mudanças de licença afetam o serviço. Podemos atualizar estes termos e indicaremos a data da alteração mais recente no topo desta página."
+        },
+        {
+          "h": "Instalação por APK",
+          "p": "A Zenorix é distribuída hoje como um pacote Android instalado direto deste site. O Android exibe um aviso antes de instalar um aplicativo de fora da Play Store; esse aviso é parte normal do processo. Baixe o pacote somente deste site — não podemos garantir cópias hospedadas em outros lugares."
+        }
+      ]
+    },
+    "dmca": {
+      "title": "Direitos Autorais e DMCA",
+      "description": "Como a Zenorix licencia seu catálogo e como titulares de direitos podem enviar uma notificação de direitos autorais.",
+      "intro": "A Zenorix transmite conteúdo que licenciou para distribuição. Levamos direitos autorais a sério, e esta página explica nossa posição e como nos contatar se você acredita que algo está errado.",
+      "sections": [
+        {
+          "h": "Quem opera a Zenorix",
+          "p": "A Zenorix é operada pela Zenorix TV Limited, empresa constituída nas Ilhas Virgens Britânicas sob o número de registro BVI-BC-2024-117892, com sede registrada em Road Town, Tortola. Os dados completos estão no fim desta página. Nós os publicamos porque uma notificação de direitos autorais só vale o quanto for poss��vel identificar a parte a quem ela é dirigida."
+        },
+        {
+          "h": "Nosso catálogo é licenciado",
+          "p": "Todo filme, série e canal disponível no app Zenorix é distribuído sob licença que cobre o território em que é oferecido. Não somos um índice de busca, um agregador de links nem um cliente peer-to-peer, e o app não oferece nenhum recurso para enviar, compartilhar ou publicar conteúdo."
+        },
+        {
+          "h": "Nossos parceiros de streaming",
+          "p": "As plataformas de streaming exibidas neste site são parceiras oficiais de distribuição da Zenorix, e o conteúdo que trazemos de cada uma delas é licenciado para os territórios em que é oferecido. Seus nomes e logos são marcas de seus respectivos titulares e são usados, nos termos desses acordos, para identificar a origem desse conteúdo. Os sites de críticas e fichas para os quais linkamos não são parceiros: são fontes independentes, e não alegamos nenhuma relação com eles."
+        },
+        {
+          "h": "Enviar uma notificação",
+          "p": "Se você é titular de direitos autorais, ou está autorizado a agir pelo titular, e acredita que há material disponível no app sem autorização, envie uma notificação para o endereço da empresa no fim desta página. Ele chega diretamente aos responsáveis pelo catálogo, e tratamos esses relatos como prioridade."
+        },
+        {
+          "h": "O que incluir",
+          "p": "Identifique a obra em questão, identifique o título específico como aparece no app, informe sua relação com o titular dos direitos, forneça um contato para resposta e confirme que você tem convicção de boa-fé de que o uso não está autorizado. Notificações completas nos permitem agir de imediato; incompletas consomem tempo que preferimos usar resolvendo o problema."
+        },
+        {
+          "h": "O que fazemos",
+          "p": "Ao receber uma notificação completa, verificamos a licença que cobre aquele título. Se não conseguirmos comprovar, removemos o título do catálogo prontamente e confirmamos a remoção. Se conseguirmos, responderemos com a base pela qual ele é oferecido, para que a questão seja resolvida com base nos fatos."
+        },
+        {
+          "h": "Contranotificações",
+          "p": "Se um material foi removido e você acredita que a remoção foi equivocada, envie uma contranotificação pelo mesmo canal, identificando o material e explicando a base da sua convicção, e reavaliaremos."
+        }
+      ]
+    }
   },
   "a11y": {
     "skipToContent": "Ir para o conteúdo principal",
-    "posterAlt": "Pôster de {title}"
+    "posterAlt": "Pôster de {title}",
+    "newTab": "(abre em uma nova aba)"
   }
 }

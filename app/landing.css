@@ -34,6 +34,9 @@
   --zx-radius-lg: 28px;
   --zx-radius-md: 20px;
   --zx-radius-sm: 12px;
+  /* For chips small enough that 12px would round them almost to a pill. Only the
+     playback spec chips use it — see `.zx-title-format`. */
+  --zx-radius-xs: 6px;
 
   /* ===================================================================== */
   /* TYPE SCALE — the only font sizes allowed in this file.                 */
@@ -93,6 +96,13 @@
   --zx-space-6: 24px; /* major block separation */
   --zx-space-8: 32px; /* sub-section separation */
   --zx-space-10: 40px; /* section <-> section */
+  /* 56px, the scale's new top step, added for the footer masthead. Nothing else on
+     the site needed a gap wider than section-to-section, but the footer band has to
+     separate itself from the install CTA above it AND hold four columns apart
+     without them reading as one grid — 40px did neither, which is most of why the
+     old footer felt cramped. Kept as a token rather than a one-off so a second
+     oversized band cannot drift to 52px or 60px. */
+  --zx-space-14: 56px;
 
   /* Section rhythm, now a scale step rather than a standalone 44px. */
   --zx-section-y: var(--zx-space-10);
@@ -139,9 +149,206 @@
 
 /* Semantic lists are used throughout; none of them want default list styling. */
 .zx-rail,
-.zx-footer-links,
+.zx-footer-col-list,
 .zx-dialog-bullets {
   list-style: none;
+}
+
+/* THE LEGAL DOCUMENTS — /[lang]/privacy, /terms, /dmca ----------------------
+   
+   Long-form prose, which the landing page contains none of: every block there is
+   a card, a rail or a control. So this is the one place in the stylesheet that
+   sets a reading measure and a paragraph rhythm.
+   
+   `--zx-page-max` is not overridden. The column stays the same width as the
+   landing page's so the top bar and footer keep their exact geometry across a
+   navigation — only the CONTENT inside gets a narrower measure, via
+   `.zx-doc-body` below. */
+.zx-page--doc {
+  /* The bar is `position: fixed`, so without this the <h1> starts underneath it.
+     The hero pays the same debt in `.zx-hero-copy`'s padding; this is the
+     equivalent for a page with no hero. */
+  padding-top: var(--zx-topbar-h);
+
+  /* FOOTER PINNED TO THE BOTTOM ON SHORT PAGES.
+     
+     A title with a small cast, or a short legal page, does not fill a 1100px
+     desktop viewport — and the footer then ended mid-screen with the page's
+     background continuing below it, which reads as a rendering fault rather than
+     as the end of the document.
+     
+     `min-height` + a column with the <main> growing, NOT `position: sticky` and
+     not `position: fixed`: the footer must still scroll away normally on a long
+     page, and this is the layout that does both without a media query or a
+     measurement. `100dvh` rather than `100vh` so a mobile browser's retracting
+     address bar does not leave a gap the height of the toolbar.
+     
+     Deliberately scoped to `--doc` and not to `.zx-page`: the landing page is
+     always far taller than any viewport, so it needs none of this, and giving it a
+     flex column would change how its sections resolve their heights. */
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* The one growing child. `flex: 1` on <main> is what pushes the footer down;
+   `min-height: 0` keeps a long document from being forced to shrink-fit instead of
+   overflowing normally, which is the standard flex-child correction. */
+.zx-page--doc > main {
+  flex: 1 0 auto;
+  min-height: 0;
+}
+
+.zx-doc {
+  /* Generous above, and more below: the footer's own top padding is small, and a
+     document that ends flush against it reads as truncated. */
+  padding: var(--zx-space-10) var(--zx-gutter) var(--zx-space-8);
+}
+
+.zx-doc-body {
+  /* ~68 characters at 14px. The landing page's cards are as wide as the column
+     because they hold labels and numbers; a paragraph at that width on desktop
+     would run past the point where the eye reliably finds the next line. */
+  max-width: 62ch;
+  margin-inline: auto;
+}
+
+.zx-doc-head {
+  /* Owns the space below itself — the exception to the section-rhythm rule above,
+     because this is a document header rather than a page section, and the gap
+     between the title block and the first paragraph belongs to the title block. */
+  margin-bottom: var(--zx-space-6);
+}
+
+.zx-doc-title {
+  margin: 0;
+  font-size: var(--zx-text-h1);
+  font-weight: var(--zx-weight-bold);
+  line-height: 1.25;
+  color: var(--md-sys-color-on-surface);
+  /* These titles are two or three words, so a break can only ever look like an
+     accident. */
+  text-wrap: balance;
+}
+
+.zx-doc-meta {
+  margin: var(--zx-space-2) 0 0;
+  font-size: var(--zx-text-meta);
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+/* The framing sentence under the title. One tier up from the body copy in colour
+   and size, because it is the summary a reader decides from. */
+.zx-doc-intro {
+  margin: 0 0 var(--zx-space-8);
+  font-size: var(--zx-text-lg);
+  line-height: 1.55;
+  color: var(--md-sys-color-on-surface);
+  text-wrap: pretty;
+}
+
+/* Each clause owns the space ABOVE itself only, the same single-owner model as
+   `.zx-section` — so the gap between any two clauses is exactly one step no
+   matter how many a document has or what order they are in. */
+.zx-doc-section + .zx-doc-section {
+  margin-top: var(--zx-space-6);
+}
+
+.zx-doc-heading {
+  margin: 0 0 var(--zx-space-2);
+  font-size: var(--zx-text-body);
+  font-weight: var(--zx-weight-semibold);
+  /* Full-emphasis colour against the variant-toned paragraph below it. At this
+     size that contrast is what separates the heading from its own body text —
+     the two are only one weight apart, since an h2 scaled up to
+     `--zx-text-h2` for eight clauses per page would read as eight sections
+     rather than eight paragraphs of one document. */
+  color: var(--md-sys-color-on-surface);
+}
+
+.zx-doc-text {
+  margin: 0;
+  font-size: var(--zx-text-body);
+  /* 1.6 — the top of the 1.4–1.6 band. These are the longest paragraphs on the
+     site and the only ones anyone reads start to finish. */
+  line-height: 1.6;
+  color: var(--md-sys-color-on-surface-variant);
+  text-wrap: pretty;
+}
+
+/* THE ENTITY BLOCK, closing every legal document.
+   
+   Set apart with a rule and a tinted panel rather than running on as another
+   clause, because it is a different KIND of content: the clauses above are the
+   commitment, this is the identity of whoever is bound by it. A reader looking
+   for "who runs this" should find it by scanning, without reading the prose. */
+.zx-doc-entity {
+  margin-top: var(--zx-space-8);
+  padding-top: var(--zx-space-6);
+  border-top: 1px solid var(--md-sys-color-outline-variant);
+  /* <address> is italic by default in every browser. These are proper nouns and a
+     registration number — italics would read as emphasis that is not intended. */
+  font-style: normal;
+}
+
+.zx-doc-entity-name {
+  margin: 0 0 var(--zx-space-3);
+  font-size: var(--zx-text-body);
+  font-weight: var(--zx-weight-semibold);
+  color: var(--md-sys-color-on-surface);
+}
+
+.zx-doc-entity-rows {
+  display: grid;
+  gap: var(--zx-space-2);
+  margin: 0;
+}
+
+/* Label above value, not beside it. A two-column <dl> would need a fixed label
+   column wide enough for "ที่ตั้งสำนักงานจดทะเบียน" and
+   "Notificações e solicitações", which would leave the English labels swimming and
+   squeeze the registered address into a narrow ragged column on a phone. Stacking
+   is the layout that survives all three languages at every width. */
+.zx-doc-entity-row {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.zx-doc-entity-row dt {
+  font-size: var(--zx-text-caption);
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.zx-doc-entity-row dd {
+  margin: 0;
+  font-size: var(--zx-text-meta);
+  line-height: 1.5;
+  color: var(--md-sys-color-on-surface);
+}
+
+/* The notice address is the one thing in this block anyone acts on, so it is the
+   one thing that looks actionable. */
+.zx-doc-entity-row dd a {
+  color: var(--md-sys-color-primary);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  /* Long address in a narrow column on a phone: break rather than overflow. */
+  overflow-wrap: anywhere;
+}
+
+.zx-doc-back {
+  margin: var(--zx-space-10) 0 0;
+  font-size: var(--zx-text-meta);
+}
+
+/* Underlined, unlike the footer's legal row. This is a lone link at the end of
+   several hundred words of prose, so it has to be identifiable as a link without
+   relying on colour alone. */
+.zx-doc-back a {
+  color: var(--md-sys-color-primary);
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
 /* The page itself is already capped, so the shell only owns the side gutter. */
@@ -619,6 +826,77 @@
   letter-spacing: -0.02em;
   text-wrap: balance;
   color: var(--zx-on-media);
+}
+
+/* The network logo strip, directly under the <h1>.
+
+   Replaces the three trademarks that used to open the headline (see HeroBillboard
+   for why). It has to read as supporting evidence rather than as a competing
+   block, so it paints nothing: no card, no border, no background — just the marks
+   and their caption, inside the headline's own centred column. */
+.zx-hero-networks {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* Tighter than the hero copy's own 20px block gap, because the caption belongs
+     TO the strip: the pair has to group as one unit rather than read as two more
+     siblings in the hero stack. */
+  gap: var(--zx-space-15);
+}
+
+.zx-hero-networks-list {
+  /* The list semantics are load-bearing (six named marks for a screen reader);
+     none of the default list PRESENTATION is. */
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  /* Wraps rather than scrolls. This is six icons in a 420px column, so they fit on
+     one line at every width the page supports — but Thai and Portuguese share this
+     layout, and a wrap is the graceful failure if a future locale widens the
+     caption. Unlike the About card's marquee, nothing here needs to be one
+     predictable repeat width, so there is no reason to forbid the second row. */
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: var(--zx-space-2);
+}
+
+.zx-hero-network {
+  display: flex;
+}
+
+/* Each service's own store icon, unmodified and in full colour — same rule the
+   About card's marquee and the Top 10 badges follow, so a network can never appear
+   with two different marks.
+
+   28px against the marquee's 48px: that card's logos ARE its whole argument, while
+   these are a qualifier under the headline and must stay subordinate to the price
+   and the install button below them. The radius holds the marquee's corner-to-edge
+   proportion at the smaller size (48:14 -> 28:8), so the two sets of icons read as
+   the same object at two sizes. */
+.zx-hero-network-icon {
+  display: block;
+  flex: 0 0 auto;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  object-fit: cover;
+  /* A hairline ring, in WHITE rather than the marquee's `outline-variant`. These
+     icons sit on the scrimmed poster wall, not on a card: the surface token is
+     tuned for flat black and disappears over key art, and each icon carries its
+     own flat background that would otherwise float as a bright tile with no
+     defined edge. */
+  box-shadow: 0 0 0 1px rgb(255 255 255 / 0.14);
+}
+
+.zx-hero-networks-count {
+  margin: 0;
+  font-size: var(--zx-text-meta);
+  font-weight: var(--zx-weight-regular);
+  /* The same variant tone as the price note one tier below: this is the strip's
+     caption, and it must not compete with the number under it. */
+  color: var(--zx-on-media-variant);
 }
 
 /* The hero's one number. Sits a tier below the headline on purpose: the pitch is
@@ -1973,57 +2251,537 @@
 
 /* ------------------------------------------------------------------ footer */
 
+/* THE FOOTER SHELL.
+   
+   The brief was "too crowded, not grand enough", and the single largest cause was
+   here: the whole band opened on 24px of padding, the same step used between two
+   paragraphs. A footer carrying a brand block, four link columns, eleven partner
+   chips and a legal baseline cannot announce itself with a paragraph gap — the
+   content was fine, the container was starving it.
+   
+   The fix is air, and ONLY air: the top inset goes 24px -> 40px, and the column gap
+   inside the band goes to 56px (see the desktop tier). Nothing here paints.
+   
+   I did try a tinted background first, and it was wrong twice over. The file header's
+   "ONE BACKGROUND" rule names the footer explicitly and allows exactly two
+   exceptions, neither of which is this. More concretely: this element lives INSIDE
+   `.zx-page`, which is width-capped, so the tint did not render as a full-bleed
+   closing band at all — it was a floating rectangle with two vertical edges running
+   down a black page, which is precisely the seam `.zx-page` deleted its side borders
+   to get rid of. Grandness here comes from spacing and from the wordmark, not tint. */
 .zx-footer {
   border-block-start: 1px solid var(--md-sys-color-outline-variant);
-  /* 24px `space-6`, was an off-scale 22px. The `max()` keeps the bottom inset at
-     least 24px while still yielding to a larger home-indicator safe area. */
-  padding-block: var(--zx-space-6) max(var(--zx-space-6), env(safe-area-inset-bottom));
+  /* The `max()` keeps the bottom inset at its floor while still yielding to a
+     larger home-indicator safe area. */
+  padding-block: var(--zx-space-10) max(var(--zx-space-8), env(safe-area-inset-bottom));
 }
 
-/* Two centered lines, links then copyright. No internal divider and no split
-   utility row: with the theme toggle gone there is only legal text down here,
-   and a hairline between two centered lines would imply two groups where there
-   is really one. */
-.zx-footer-inner {
+/* The outbound directory, above the meta row.
+   
+   Start-aligned at every width while the meta row below it is centred on mobile.
+   That is not an oversight: this is a dense wrapped list of twenty names, and
+   centring a list whose last row is half full leaves a ragged pyramid — the eye
+   needs one left edge to run down. The meta row is three short centred strings, a
+   different shape with a different rule.
+   
+   It closes with a hairline instead of relying on spacing alone. `.zx-footer-inner`
+   carries a note about NOT dividing the footer, and this does not contradict it:
+   that rule is about splitting the legal text from the copyright, which is one
+   group. The directory genuinely is a second group — external destinations versus
+   this site's own legal identity — and without the rule the note at its end reads
+   as though it modifies the copyright line. */
+.zx-directory {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: var(--zx-space-25);
+  /* A full step wider than before. The two groups now each end in their own note,
+     so they need to read as two blocks rather than four alternating lines. */
+  gap: var(--zx-space-6);
+  padding-block-end: var(--zx-space-6);
+  margin-block-end: var(--zx-space-6);
+  border-block-end: 1px solid var(--md-sys-color-outline-variant);
 }
 
-/* Keeps the base `primary` colour rather than muting to the legal links' grey.
-   That difference is the point: it is the only actionable link in the footer, and
-   the row above the legal list is where a reader looking for help will scan. */
-.zx-contact--footer {
-  font-size: var(--zx-text-meta);
+.zx-directory-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--zx-space-2);
 }
 
-.zx-footer-links {
+/* THE PARTNER GROUP, RAISED OUT OF THE FOOTER'S GREY.
+   
+   A tinted panel with a hairline, where the reference group beside it stays bare
+   text on the page background. That asymmetry is the whole redesign: these eleven
+   names are the strongest claim the site makes — licensed content from Netflix,
+   HBO Max, Prime Video — and in the old footer they were styled identically to a
+   list of links to IMDb. One of those is a distribution agreement and the other is
+   a convenience, so they must not look like the same kind of thing.
+   
+   `surface-container-low`, not `primary`: it has to sit ABOVE the footer's flat
+   background without competing with the install CTA further up the page. This is a
+   BOUNDED, rounded panel rather than a section tint, which is why it does not fall
+   foul of the header's "ONE BACKGROUND" rule the way a full-width footer tint would
+   — it reads as a card, and the page is full of cards. */
+.zx-directory-group--partners {
+  gap: var(--zx-space-3);
+  padding: var(--zx-space-5);
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: var(--zx-radius-md);
+  background: var(--md-sys-color-surface-container-low);
+}
+
+/* Same eyebrow treatment as `.zx-about-label` minus the chip border: 11px, wide
+   tracking, uppercase. These are real <h2>s for the document outline, so they must
+   NOT look like the section titles upstairs — a footer heading at `--zx-text-h2`
+   would announce the link list as a peer of "Trending Movies". */
+.zx-directory-title {
+  margin: 0;
+  color: var(--md-sys-color-on-surface-variant);
+  font-size: var(--zx-text-label);
+  font-weight: var(--zx-weight-semibold);
+  letter-spacing: 0.09em;
+  line-height: var(--zx-lh-snug);
+  text-transform: uppercase;
+}
+
+.zx-directory-list {
   display: flex;
   flex-wrap: wrap;
-  justify-content: center;
-  gap: var(--zx-space-2) var(--zx-space-5);
+  /* Column gap is the wide one: these are independent destinations, and at an even
+     gap a wrapped row reads as a grid of pairs. Row gap stays tight because the
+     links' own block padding adds to it. */
+  gap: var(--zx-space-1) var(--zx-space-4);
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
-.zx-footer-links a {
+/* The partner list gets an even gap instead, because its items are now bounded
+   chips: the chip's own edge separates it from its neighbour, so the asymmetric
+   gap that keeps bare text from reading as a grid is no longer doing anything, and
+   an uneven one would make the wrapped rows sit at different distances. */
+.zx-directory-list--brand {
+  gap: var(--zx-space-2);
+}
+
+.zx-directory-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--zx-space-15);
+  /* Muted like the legal row, not `primary`. Twenty coloured links would turn the
+     footer into the loudest thing on a page that closes on an install button. */
   color: var(--md-sys-color-on-surface-variant);
   font-size: var(--zx-text-meta);
   line-height: 1.4;
   text-decoration: none;
+  /* ~30px tall against the 24px AA floor for target size. Deliberately not 44px:
+     this block is twenty links, and 44px each would stack it taller than the FAQ it
+     sits under. (The 44px comparison used to point at `.zx-social-link`, which was
+     replaced by `.zx-footer-contact` — now ~30px like this rule, so the footer no
+     longer has two target heights for the same kind of link.) */
+  padding-block: var(--zx-space-15);
   transition: color 120ms ease;
 }
 
-.zx-footer-links a:hover {
+/* PARTNER CHIPS. Bounded, on the page surface, with the service's name at full
+   `on-surface` weight — these are the one set of links down here that names
+   somebody else's brand under a licence, and they read as objects rather than as a
+   run of grey words. The hover fills rather than merely brightening, so the whole
+   chip responds and the mark does not appear to float free of its label. */
+.zx-directory-link--brand {
+  gap: var(--zx-space-2);
+  /* Roomier than the 6px/10px it started at. Eleven chips at minimum padding is
+     precisely the "crowded" the brief objected to; at 8px/14px the row still fits
+     three-up on a phone but each chip has an interior. */
+  padding: var(--zx-space-2) var(--zx-space-3);
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: 999px;
+  /* Two rungs ABOVE the `surface-container-low` panel behind it. This is a dark-only
+     theme — one `:root`, no light block — so the elevation ladder runs darkest to
+     lightest, and the chip's original `surface` was the DARKEST token in the whole
+     set: sitting on a lighter panel it read as a hole punched in the box rather than
+     as a raised object. */
+  background: var(--md-sys-color-surface-container-high);
+  color: var(--md-sys-color-on-surface);
+  font-size: var(--zx-text-meta);
+  /* `semibold`, not the `--zx-weight-medium` this rule shipped with: there is no
+     medium step in this stylesheet's weight scale (regular / semibold / bold), so
+     that reference resolved to nothing and the chips were rendering at the
+     inherited regular weight the whole time. */
+  font-weight: var(--zx-weight-semibold);
+  transition:
+    background 120ms ease,
+    border-color 120ms ease;
+}
+
+.zx-directory-link:hover {
   color: var(--md-sys-color-on-surface);
 }
 
-.zx-footer-links a:focus-visible {
+/* AFTER the generic hover, not before it. Both selectors are one class plus one
+   pseudo-class, so they have identical specificity and source order decides —
+   written above, the chip's `background` survived but the generic rule's `color`
+   still applied, which is harmless here only by luck. Ordering it last makes the
+   chip's hover authoritative regardless of what the base rule grows into. */
+.zx-directory-link--brand:hover {
+  border-color: var(--md-sys-color-outline);
+  /* `-highest`, one rung above the chip's new resting `-high`. It was equal to the
+     resting value after the elevation fix, which made hover a no-op on the exact
+     control the redesign is built around. */
+  background: var(--md-sys-color-surface-container-highest);
+  color: var(--md-sys-color-on-surface);
+}
+
+.zx-directory-link:focus-visible {
   outline: 2px solid var(--md-sys-color-primary);
   outline-offset: 3px;
   border-radius: 3px;
+}
+
+/* ONE RULE FOR BOTH GROUPS, which is the CSS half of the icon consolidation: the
+   partners and the reference sites now render the same asset type (favicons, see
+   `scripts/build-footer-icons.mjs`), so styling them apart would re-introduce by
+   stylesheet exactly the mismatch that was just fixed at the source.
+   
+   Rounded to match the marks upstairs (`.zx-logo-set img`, `.zx-chart-badge`) — those
+   are still the App Store icons at larger sizes, and while these are no longer the
+   same asset, a sharp-cornered small tile next to rounded large ones still reads as a
+   different kind of object. The hairline ring earns its place now more than before:
+   favicons come with their own baked backgrounds, several of them near-black or
+   near-white, and the ring is what keeps those from dissolving into the surface. */
+.zx-directory-icon {
+  /* 20px, matching the markup's intrinsic size. */
+  width: 20px;
+  height: 20px;
+  flex: none;
+  border-radius: 5px;
+  /* `contain`, not `cover`. The build already letterboxes every mark onto a square
+     canvas, so for a square source the two are identical — but a favicon that is not
+     square must never be cropped, and `contain` is what guarantees that if the build
+     ever emits a non-square file. Cropping a mark loses the part that identifies it. */
+  object-fit: contain;
+  box-shadow: 0 0 0 1px var(--md-sys-color-outline-variant);
+}
+
+/* Each group's closing note. Sized below the links it qualifies and set at the
+   footer's quietest weight — it has to be present and legible, but it is a
+   statement of relationship, not a thing anyone came here to read.
+   
+   No `opacity` any more. It used to carry 0.75 on top of `on-surface-variant`,
+   which compounds into a contrast ratio the token was never checked at — and this
+   is the licensing sentence, the one line on the page that must survive being read
+   in daylight on a phone. The token alone is the correct quiet. */
+.zx-directory-note {
+  margin: 0;
+  color: var(--md-sys-color-on-surface-variant);
+  font-size: var(--zx-text-caption);
+  line-height: 1.5;
+  text-wrap: pretty;
+  /* Long-ish sentences; keeps them from running the full 1120px on desktop where
+     the eye loses the line return. */
+  max-width: 68ch;
+}
+
+/* ============================================================ column band */
+
+/* THE COLUMN BAND. On mobile this is a plain stack — four groups in a column,
+   start-aligned, generously spaced. The desktop tier turns it into the 4-up grid.
+   
+   Start-aligned at every width, including mobile, and that is a change: the old
+   footer centred everything below 900px. Centring worked when the footer was three
+   short strings; with six-item link lists it left every column a ragged pyramid.
+   A list needs one left edge for the eye to run down. */
+.zx-footer-cols {
+  display: flex;
+  flex-direction: column;
+  gap: var(--zx-space-8);
+  margin-block-end: var(--zx-space-10);
+}
+
+/* The brand column: wordmark, one-line pitch, install CTA. */
+.zx-footer-brand {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--zx-space-3);
+}
+
+.zx-footer-wordmark {
+  margin: 0;
+  color: var(--md-sys-color-on-surface);
+  /* The one place in the footer allowed to be typographically loud. It is the
+     brand, it opens the band, and at the footer's default 13px the masthead had no
+     anchor at all — every column started at the same visual weight.
+     
+     `--zx-text-lg`, which the scale documents as exactly "brand wordmark" and which
+     the top bar's mark already uses. My first pass reached for a `--zx-text-h3`
+     that does not exist in this stylesheet — the scale jumps h2 (21px) straight to
+     `lg` (15px) — and an undefined custom property makes `font-size` invalid,
+     silently inheriting instead of failing loudly. */
+  font-size: var(--zx-text-lg);
+  font-weight: var(--zx-weight-bold);
+  letter-spacing: -0.01em;
+  line-height: var(--zx-lh-snug);
+}
+
+.zx-footer-tagline {
+  margin: 0;
+  color: var(--md-sys-color-on-surface-variant);
+  font-size: var(--zx-text-meta);
+  line-height: var(--zx-lh-body);
+  text-wrap: pretty;
+  /* Holds the sentence to a readable measure in the wide brand column. */
+  max-width: 34ch;
+}
+
+/* The footer's only filled control, and the only coloured thing in the band.
+   Sized off the shared control-height token so it matches the hero and sticky-bar
+   buttons rather than inventing a third footer-specific height. */
+.zx-footer-install {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--zx-space-15);
+  min-height: var(--zx-control-h);
+  padding-inline: var(--zx-space-5);
+  border-radius: 999px;
+  background: var(--md-sys-color-primary);
+  color: var(--md-sys-color-on-primary);
+  font-size: var(--zx-text-meta);
+  font-weight: var(--zx-weight-semibold);
+  text-decoration: none;
+  transition: filter 120ms ease;
+}
+
+.zx-footer-install:hover {
+  filter: brightness(1.08);
+}
+
+.zx-footer-install md-icon {
+  --md-icon-size: 18px;
+  width: 18px;
+  height: 18px;
+  flex: none;
+}
+
+.zx-footer-install-note {
+  margin: 0;
+  color: var(--md-sys-color-on-surface-variant);
+  font-size: var(--zx-text-caption);
+  line-height: 1.5;
+}
+
+/* A link column. `gap` is the title-to-content step, so the heading sits closer to
+   its own list than the columns sit to each other. */
+.zx-footer-col {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--zx-space-4);
+}
+
+/* Column headings. Same eyebrow treatment as `.zx-directory-title` — 11px,
+   uppercase, wide tracking — because they are the same KIND of thing: a real <h2>
+   for the outline that must not look like a page section title. Sharing the
+   treatment is what makes the band read as one system rather than as two. */
+.zx-footer-heading {
+  margin: 0;
+  color: var(--md-sys-color-on-surface-variant);
+  font-size: var(--zx-text-label);
+  font-weight: var(--zx-weight-semibold);
+  letter-spacing: 0.09em;
+  line-height: var(--zx-lh-snug);
+  text-transform: uppercase;
+}
+
+/* The second heading inside the shared support/legal column needs the gap that the
+   column's own `gap` gives its first child, plus a step — otherwise "Legal" sits as
+   close to the social row above it as it does to its own list below. */
+.zx-footer-heading--second {
+  margin-block-start: var(--zx-space-3);
+}
+
+.zx-footer-col-list {
+  display: flex;
+  flex-direction: column;
+  /* Tight: these are rows of one list, not separate groups. The links' own block
+     padding does most of the optical spacing. */
+  gap: var(--zx-space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.zx-footer-col-list a {
+  display: inline-block;
+  color: var(--md-sys-color-on-surface-variant);
+  font-size: var(--zx-text-meta);
+  line-height: 1.4;
+  text-decoration: none;
+  /* ~30px tall, over the 24px AA target-size floor. Same reasoning as
+     `.zx-directory-link`: not the 44px the social row gets, because these columns
+     hold six items each and 44px apiece would make the band taller than the
+     section above it. */
+  padding-block: var(--zx-space-15);
+  transition: color 120ms ease;
+}
+
+.zx-footer-col-list a:hover {
+  color: var(--md-sys-color-on-surface);
+}
+
+.zx-footer-col-list a:focus-visible {
+  outline: 2px solid var(--md-sys-color-primary);
+  outline-offset: 3px;
+  border-radius: 3px;
+}
+
+/* ---------------------------------------------- the contact list
+
+   FOUR RULES REPLACED SEVEN. `.zx-contact--footer`, `.zx-footer-connect`,
+   `.zx-social`, `.zx-social-link` (+ `:hover`), `.zx-social-mark`,
+   `.zx-social-link md-icon` (+ `:hover`) and `.zx-footer-mail` all styled one idea
+   — "a way to reach us" — four different ways, in two different bands of the
+   footer. They are gone rather than left behind; nothing renders those classes now.
+   
+   The collapse also retires the special cases each of them existed to manage: a
+   `primary` colour on exactly one channel, a `min-width` to stop an icon-only link
+   from being narrower than its labelled sibling, a negative inline margin to pull a
+   padded row back onto the column's left edge, and one glyph held at a different
+   pixel size from another. Every one of those was a correction for a difference that
+   no longer exists — which is the practical argument for the uniform format, over
+   and above how it reads. */
+
+.zx-footer-contact-list {
+  display: flex;
+  flex-direction: column;
+  /* Same tight step as `.zx-footer-col-list`: these are rows of ONE list, and the
+     links' own block padding does most of the optical spacing. Matching that list
+     is deliberate — the legal column beside this one is built the same way, so both
+     columns now scan at the same rhythm. */
+  gap: var(--zx-space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.zx-footer-contact {
+  display: inline-flex;
+  align-items: center;
+  /* 6px, the scale's "icon <-> its own label" step. */
+  gap: var(--zx-space-15);
+  /* Muted like every other footer link, including support — which used to be
+     `primary` as "the only actionable link down here". That claim stopped being true
+     when the install button arrived: the footer has exactly one coloured action, and
+     it is the filled CTA in the about column. A second primary-coloured item in a
+     list of four made support look like a different KIND of link than the community
+     beside it, which is the inconsistency this whole change is about. */
+  color: var(--md-sys-color-on-surface-variant);
+  font-size: var(--zx-text-meta);
+  line-height: 1.4;
+  text-decoration: none;
+  /* ~30px, matching `.zx-footer-col-list a` and clearing the 24px AA target-size
+     floor. NOT the 44px the old social row used: that value was chosen when these
+     were two icons in a horizontal strip with room to spare. As a four-row vertical
+     list, 44px apiece would make the contact column taller than the legal column
+     next to it for no gain — and the `min-width: 44px` that came with it exists
+     only to equalise an icon-only link, which no longer occurs. */
+  padding-block: var(--zx-space-15);
+  transition: color 120ms ease;
+}
+
+.zx-footer-contact:hover {
+  color: var(--md-sys-color-on-surface);
+}
+
+.zx-footer-contact:focus-visible {
+  outline: 2px solid var(--md-sys-color-primary);
+  outline-offset: 3px;
+  border-radius: 3px;
+}
+
+/* ONE ICON SLOT, ONE SIZE, for both the icon font and the inline SVG.
+   
+   This is what actually makes the four rows read as a list: identical box widths put
+   all four LABELS on the same left edge. The previous rules sized the X mark at 14px
+   against a 16px `group` glyph — correct in isolation, since the mark is a dense
+   square with no interior counters and matched sizes make it look heavier, but as
+   soon as both carry labels that 2px difference becomes 2px of label misalignment,
+   which is visible in a vertical stack in a way it never was side by side.
+   
+   The density is compensated with `scale` instead, which shrinks the ink inside a box
+   that stays 18px. */
+.zx-footer-contact md-icon,
+.zx-footer-contact-mark {
+  --md-icon-size: 18px;
+  width: 18px;
+  height: 18px;
+  flex: none;
+  /* Held back from the label it introduces: a glyph at 18px carries more ink than
+     13px text, so at equal colour it out-weighs the word beside it, and the label is
+     the thing being read. Now applied to the X mark TOO — it was exempt before
+     precisely because it had no label to defer to, and it has one now. */
+  opacity: 0.75;
+  transition: opacity 120ms ease;
+}
+
+.zx-footer-contact:hover md-icon,
+.zx-footer-contact:hover .zx-footer-contact-mark {
+  opacity: 1;
+}
+
+.zx-footer-contact-mark {
+  /* ~15px of ink in the shared 18px box. See the note above: this is the optical
+     correction for the mark's density, done without changing the box that keeps the
+     labels aligned. */
+  transform: scale(0.85);
+}
+
+/* ============================================================ the baseline */
+
+/* Who operates this, then the correspondence address and copyright.
+   
+   `.zx-footer-links` and `.zx-footer-meta` used to live here — the old centred
+   legal row and the entity/copyright pair. Both are gone rather than left behind:
+   the three legal links moved into the support column where they now sit under a
+   "Legal" heading, and nothing renders those classes any more.
+   
+   NO `border-block-start` here, deliberately. My first pass added one to separate
+   this band from the directory, and the browser showed it rendering as a DOUBLE
+   hairline: `.zx-directory` already closes itself with a `border-block-end`, so the
+   two rules stacked with only this padding between them. The separation was already
+   there — I was drawing it twice. Padding alone now. */
+.zx-footer-base {
+  display: flex;
+  flex-direction: column;
+  gap: var(--zx-space-2);
+  padding-block-start: var(--zx-space-6);
+}
+
+/* `.zx-footer-baseline` and `.zx-footer-mail` (+ `:hover`, `:focus-visible`) were
+   here: the flex row that put the email address on one line with the copyright, and
+   the address link's own styling. The email is a row of `.zx-footer-contact-list`
+   now, so the baseline holds one paragraph and needs no row layout — and the link
+   needs no separate rules, which is the point of the consolidation. */
+
+/* The operating entity. Quieter and smaller than the copyright beside it: this
+   line exists to be FOUND rather than read — nobody scanning a footer wants a
+   registration number, but a reviewer or a rights holder checking who runs this
+   needs it to be there. No margin; the group above owns the gap. */
+.zx-footer-org {
+  margin: 0;
+  color: var(--md-sys-color-on-surface-variant);
+  /* One step below the copyright's caption size, and it is the only place in the
+     stylesheet that goes this small — justified because the string is long, is
+     never the reason anyone came, and must not compete with the legal row above
+     it. Still ~11px, so it stays legible rather than becoming decoration. */
+  font-size: 0.6875rem;
+  line-height: 1.5;
+  /* Was `center`. The baseline is start-aligned with the columns above it now, and a
+     centred entity line between two left-aligned neighbours read as a mistake. */
+  text-align: start;
+  /* Long enough to wrap on a phone; keeps the break sensible when it does. */
+  text-wrap: pretty;
+  opacity: 0.75;
 }
 
 .zx-footer-copy {
@@ -2671,15 +3429,55 @@
     max-width: 360px;
   }
 
-  /* One row instead of a centred stack. With 1120px available, three short items
-     centred on three lines leaves two thirds of the band empty; spread apart they
-     read as what they are — support, legal, copyright. */
-  .zx-footer-inner {
-    flex-direction: row;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    gap: var(--zx-space-4);
+  /* Two columns, wide one first. The partner panel is eleven chips with icons and
+     the reference row is five to seven plain names, so an even split would leave
+     the right column half empty while the left one still wrapped to three lines.
+     
+     `align-items: start` matters now that the left column is a bordered panel:
+     without it the panel stretches to the full row height and gains dead tinted
+     space under its last chip, which makes the box look like it lost content. */
+  .zx-directory {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    align-items: start;
+    column-gap: var(--zx-space-8);
+    row-gap: var(--zx-space-4);
   }
+
+  /* The reference column's note no longer needs to span the grid — each note now
+     lives inside the group it qualifies, which is what makes the two relationships
+     distinguishable. It only needs its own measure, which the base rule gives it.
+     Nudged down so its text baseline lines up with the partner note across the
+     gutter, rather than sitting higher because its column has no panel padding. */
+  .zx-directory-group:not(.zx-directory-group--partners) {
+    padding-block-start: var(--zx-space-1);
+  }
+
+  /* THE MASTHEAD GRID. Brand column plus three link columns.
+     
+     `1.4fr` on the brand column, not `1fr`: it holds a wordmark, a wrapped sentence
+     and a button, where the others hold a heading and six short names. At four equal
+     columns the tagline wrapped to four lines while the link columns ran out of
+     content — the asymmetry is what lets all four bottom out at about the same
+     depth.
+     
+     The `space-14` column gap is the point of the whole redesign. Four columns at a
+     normal 24px gutter is exactly the crowding the brief called out: adjacent lists
+     merge into one field of grey text and the reader cannot tell where "Movies"
+     stops and "Shows" starts. At 56px each column is unmistakably its own object,
+     and the band reads as deliberate structure instead of as leftover links. */
+  .zx-footer-cols {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr 1fr 1fr;
+    column-gap: var(--zx-space-14);
+    row-gap: var(--zx-space-10);
+    margin-block-end: var(--zx-space-14);
+  }
+
+  /* The desktop `.zx-footer-baseline` override — `space-between` to push the
+     copyright to the far edge — went with the rule it modified. The email it was
+     spacing away from now lives in the contact column, leaving nothing to justify
+     against. */
 
   /* ------------------------------------------------------------------ dialogs */
 
@@ -2817,5 +3615,814 @@
        any slack splits evenly above and below instead of pooling under the last
        bullet, where it read as a list missing its final item. */
     justify-content: center;
+  }
+}
+
+/* ==========================================================================
+   TITLE DETAIL PAGE — /[lang]/titles/[slug]
+   ==========================================================================
+
+   Reuses `.zx-page--doc` (which pays the fixed top bar's height) and `.zx-shell`
+   from the legal pages, because the outer geometry is identical: no hero, a top
+   bar, a capped column, a footer.
+
+   It does NOT reuse `.zx-doc-body`'s 62ch measure. That measure exists for
+   paragraphs read start to finish; this page is a poster beside a fact list, and
+   62ch would strand the poster in a narrow column while the credits wrapped every
+   three names. The measure here is applied to the SYNOPSIS only — the one piece of
+   prose on the page — and the rest is free to use the full column.
+
+   Mobile-first: the head is a single stacked column, and the 720px block turns it
+   into poster-beside-text. */
+
+.zx-title {
+  padding: var(--zx-space-8) 0 var(--zx-space-10);
+}
+
+/* `.zx-title-crumbs` and its three children used to sit here, styling the
+   "Zenorix / <title>" trail above the h1. Removed with the markup rather than left
+   behind — see the note in `title-page.tsx` for why the trail went. */
+
+.zx-title-head {
+  display: flex;
+  flex-direction: column;
+  gap: var(--zx-space-6);
+  margin-bottom: var(--zx-space-8);
+}
+
+/* The poster. At its true 2:3 beside the copy on desktop; the HERO BACKGROUND on a
+   phone, where the mobile block near the end of this section takes it over
+   completely — see the long note there.
+   
+   `outline-variant` hairline for the same reason the dialog poster has one: these
+   tiles have dark corners and would otherwise dissolve into the page. */
+.zx-title-poster {
+  width: 100%;
+  max-width: 200px;
+  height: auto;
+  aspect-ratio: 2 / 3;
+  object-fit: cover;
+  border-radius: var(--zx-radius-md);
+  box-shadow: 0 0 0 1px var(--md-sys-color-outline-variant);
+}
+
+.zx-title-intro {
+  display: flex;
+  flex-direction: column;
+  /* No gap. Every child below sets its own top margin, because the steps here are
+     deliberately uneven — the tag line sits tight under the h1, the synopsis
+     further off, the capsules closer again. A uniform gap would flatten that. */
+  gap: 0;
+  min-width: 0;
+}
+
+.zx-title-name {
+  margin: 0;
+  font-size: var(--zx-text-h1);
+  font-weight: var(--zx-weight-bold);
+  line-height: var(--zx-lh-tight);
+  color: var(--md-sys-color-on-surface);
+  /* Film titles are long and break badly — "Stuart Fails to Save the / Universe"
+     is fine, a one-word last line is not. */
+  text-wrap: balance;
+}
+
+/* THE EYEBROW — service · scores, ABOVE the h1.
+   
+   Where it streams and how it scored: the two facts that are not derivable from
+   anything else on this page, in the position Apple TV and Letterboxd use. It was
+   one row UNDER the title carrying four members (service, genre, certificate,
+   scores); genre and certificate moved to the tag line below the h1, because those
+   describe the title and belong with its name, while these two describe the world's
+   response to it.
+   
+   No separator between the members — see the note below this rule for why the dot
+   that used to sit there is gone. `align-items: center` with everything sized in
+   `em` keeps the logo, the text and the score marks on one optical baseline. */
+.zx-title-eyebrow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--zx-space-3);
+  /* Owns the space BELOW itself, not above: it is the first thing in the column, so
+     a top margin here would just push the whole header down. */
+  margin-bottom: var(--zx-space-3);
+  /* `--zx-text-body` (14px). This said `--zx-text-base`, another step that does not
+     exist in this file's scale, so the declaration was dropped and the row inherited
+     its size. One tier ABOVE the tag line's `meta`: the service and the scores are
+     read before the title, the tag line after it. */
+  font-size: var(--zx-text-body);
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+/* NO SEPARATOR DOT IN THIS ROW ANY MORE.
+   
+   `> * + *::before` used to draw one. The selector is right about the DOM and wrong
+   about the content: this row's two children are the service <span> and the scores
+   <ul>, so it printed exactly one dot — floating between "Disney+" and the tomato,
+   at the outer edge of a `space-3` gap on each side, reading as a bullet belonging
+   to neither. The scores inside the <ul> are separated by their own spacing, so the
+   row already had two visual groups and the dot was punctuating a boundary the eye
+   could see without it.
+   
+   The mark-plus-name of a service and a pair of logo-led numbers are different
+   enough in shape that whitespace separates them adequately; the tag line under the
+   h1 keeps its dots because there every item is undifferentiated plain text. */
+
+.zx-title-platform {
+  display: inline-flex;
+  align-items: center;
+}
+
+/* THE TAG LINE — year · length · genre · certificate, under the h1.
+   
+   Everything measurable about the title itself, on the line that reads as a
+   continuation of its name. Quieter than the eyebrow above the title on purpose:
+   this is the line a reader consults after the name has registered, not one that
+   competes with it.
+   
+   This is the one row on the page that DOES carry dots — every item in it is
+   undifferentiated plain text, so without them "2025 197 min Science fiction" is
+   one run-on string. They are emitted as spans by the markup, trailing their own
+   value; see `.zx-title-tag-sep` below and the note in `title-page.tsx`. */
+.zx-title-tags {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--zx-space-2);
+  margin: var(--zx-space-3) 0 0;
+  padding: 0;
+  list-style: none;
+  /* `--zx-text-meta` (13px). This said `--zx-text-sm`, which does not exist in this
+     file's scale — the tiers are h1/h2/amount/lg/body/meta/caption/label/micro — so
+     the declaration was invalid and the row silently inherited its size from the
+     header instead of picking a tier. It happened to look close to right, which is
+     why it survived; found by grepping for the token after making the same mistake
+     on the synopsis toggle below. `meta` is the caption tier this row belongs to. */
+  font-size: var(--zx-text-meta);
+  color: var(--md-sys-color-on-surface-variant);
+  /* Year and runtime are digits read side by side. */
+  font-variant-numeric: tabular-nums;
+}
+
+/* THE SEPARATOR. A real <span> the markup emits after each value that has another
+   plain value behind it — NOT `li + li::before`, which is what this was and which
+   failed two ways at once. See the long note in `title-page.tsx`; in short, a
+   `::before` wraps as part of its own item (so a wrapped line opened with a
+   dangling "·"), and `li + li::before` outranked the `content: none` that was
+   supposed to keep a dot off the bordered certificate.
+   
+   `margin-left` only. The dot trails its value, so the tight side is the side
+   facing the word it belongs to — the flex `gap` supplies the space on the other. */
+.zx-title-tag-sep {
+  margin-left: var(--zx-space-2);
+  color: var(--md-sys-color-outline);
+}
+
+/* The service, mark first. Weight bumped over the rest of the row because "where
+   can I watch this" is the question this page exists to answer. */
+.zx-title-platform {
+  gap: var(--zx-space-2);
+  font-weight: var(--zx-weight-semibold);
+  color: var(--md-sys-color-on-surface);
+}
+
+/* The store app icon, squared off by the same radius the chart badges use so the
+   same mark never appears with two different silhouettes on one site. */
+.zx-title-platform-mark {
+  width: 1.5em;
+  height: 1.5em;
+  flex: none;
+  border-radius: 5px;
+  object-fit: cover;
+}
+
+/* THE CERTIFICATE. The only boxed thing in this row, and boxed on purpose: a
+   rating certificate is printed inside a rule everywhere it appears — a disc case,
+   a poster, a cinema listing — and set as plain text it stops reading as a
+   certificate at all. Solid outline rather than the hairline the format plates
+   use, because this one is a statement about who may watch. */
+/* THE CERTIFICATE, the one member of the tag line that is a box — a rating is
+   printed inside a rule everywhere it appears and stops reading as a certificate
+   set as plain text. It gets no separator in front of it, which is now a property
+   of the markup rather than of a `content: none` override: the outline already does
+   the separating, which is why Apple TV's rating box has no dot before it either.
+   
+   `inline-flex` so the chip centres its own label vertically against the taller
+   text beside it; `align-items: center` on the parent handles the rest. */
+.zx-title-rating {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px var(--zx-space-2);
+  border: 1px solid var(--md-sys-color-outline);
+  border-radius: var(--zx-radius-sm);
+  font-size: var(--zx-text-label);
+  font-weight: var(--zx-weight-semibold);
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  color: var(--md-sys-color-on-surface);
+}
+
+/* THE SYNOPSIS — one line until asked, then all of it.
+   
+   The wrapper exists to carry the reading measure so that the paragraph AND the
+   toggle under it share one column. Without it the button would be a sibling
+   measured against the full header width and would drift right of the text it
+   belongs to on a wide screen. */
+.zx-title-synopsis-wrap {
+  /* The one reading measure on the page. See the section note: this is the only
+     prose here, so it gets the paragraph treatment and nothing else does. */
+  max-width: 58ch;
+  margin-top: var(--zx-space-5);
+}
+
+.zx-title-synopsis {
+  margin: 0;
+  font-size: var(--zx-text-lg);
+  line-height: var(--zx-lh-body);
+  color: var(--md-sys-color-on-surface-variant);
+  text-wrap: pretty;
+
+  /* THE COLLAPSE. `-webkit-line-clamp` and not `height` + `overflow: hidden`,
+     because a fixed height has to be guessed from the line-height and is wrong the
+     moment the font falls back or the user bumps their text size; the clamp counts
+     actual laid-out lines. All three properties are required together — the prefixed
+     `box` display and `vertical: box` are what the clamp reads, and it silently does
+     nothing without them. It is prefixed and non-standard and also supported in
+     every engine, including Firefox and Safari, for over a decade.
+     
+     One line is the default state, per the brief. That is enough to establish the
+     paragraph exists and to show its opening clause; the shortest synopsis in
+     `titles.ts` is 123 characters, so every record genuinely has something to
+     reveal and the button is never a no-op.
+     
+     `overflow: hidden` is the clamp's own requirement, and it is also why there is
+     no fade-out gradient over the cut: a mask would have to paint the page
+     background over the last few characters, which means hardcoding a colour that
+     the mobile hero (where this text sits over key art) does not have. The button
+     says what the gradient would only imply. */
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+  overflow: hidden;
+}
+
+/* Expanded. Set on the paragraph as a data attribute by the component rather than
+   as a second class, so one selector describes the whole state change.
+   
+   `-webkit-line-clamp: unset` is not enough on its own — the element is still a
+   `-webkit-box`, which does not honour `text-wrap: pretty` and mishandles the last
+   line's spacing. Returning `display` to `block` puts the paragraph back to being
+   an ordinary paragraph, which is what it is once nothing is hidden. */
+.zx-title-synopsis[data-open] {
+  display: block;
+  -webkit-line-clamp: unset;
+  overflow: visible;
+}
+
+/* THE TOGGLE. A quiet text control, deliberately not a third button style: the page
+   already has a filled CTA and an outlined secondary, and a third bordered shape
+   here would compete with both.
+   
+   THE CHEVRON IS WHAT MARKS IT AS A CONTROL, NOT THE COLOUR. I first built this as
+   a "link-like affordance — brand colour, semibold" and screenshotted it: `primary`
+   in this theme is #fbfcfe, i.e. near-white, so that produced bold white text that
+   read as an emphasised word under the paragraph and not as something to press. On
+   a palette whose brand colour IS white, colour cannot signal interactivity. The
+   rotating chevron can, and it is the same disclosure vocabulary as the FAQ rows.
+   
+   `--zx-text-meta` against the paragraph's `--zx-text-lg`: subordinate to the prose
+   it controls. Same reason the label is one word.
+   
+   PADDING, NOT A HEIGHT. `min-height` on an inline-level control fights the text
+   baseline; the vertical padding gives it a ~30px target, which is the same
+   compromise `.zx-directory-link` documents — not the 44px the social row gets,
+   because this sits inside a paragraph flow where a 44px box would open a visible
+   gap under every synopsis. */
+.zx-title-synopsis-toggle {
+  /* `appearance: none` + explicit background/border: a <button> inherits the UA's
+     grey plate and 2px bevel otherwise, which on a dark page renders as a light-grey
+     lozenge. */
+  appearance: none;
+  background: none;
+  border: 0;
+  /* Label and chevron on one line, hence inline-flex — a plain `display: block`
+     button would leave the glyph on its own baseline below the word. */
+  display: inline-flex;
+  align-items: center;
+  gap: var(--zx-space-05);
+  /* -4px on the inline start pulls the label back to the paragraph's left edge, so
+     the padding that makes the target tappable does not visibly indent it. */
+  margin: var(--zx-space-1) 0 0 -4px;
+  padding: 4px;
+  font: inherit;
+  /* `--zx-text-meta`, not the `--zx-text-sm` I first wrote — there IS no `sm` step
+     in this file's scale (h1/h2/amount/lg/body/meta/caption/label/micro), so that
+     resolved to nothing and the button silently inherited the 15px paragraph size,
+     making the control the same weight as the prose it controls. Picking a TIER
+     rather than a number is the rule at the top of this file; `meta` (13px) is the
+     caption tier, which is what this is. */
+  font-size: var(--zx-text-meta);
+  font-weight: var(--zx-weight-semibold);
+  line-height: 1.4;
+  color: var(--md-sys-color-on-surface);
+  cursor: pointer;
+}
+
+.zx-title-synopsis-toggle:hover {
+  color: var(--md-sys-color-primary);
+}
+
+/* The chevron. Sized to the label rather than left at `md-icon`'s own 24px box —
+   and `width`/`height` alongside `font-size`, because `md-icon` is a custom element
+   carrying its own box and `font-size` alone leaves it 24px wide (measured; the
+   playback chips hit the same thing). */
+.zx-title-synopsis-toggle md-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  line-height: 1;
+  /* Points down when collapsed, up when open. The rotation is the state indicator,
+     so it gets a transition — but only this, not the paragraph's height: animating
+     the clamp release means animating `height`, which cannot be done from `auto`
+     without measuring, and a janky reflow is worse than an instant one. */
+  transition: transform 160ms ease;
+}
+
+.zx-title-synopsis-toggle[aria-expanded='true'] md-icon {
+  transform: rotate(180deg);
+}
+
+/* No transition for anyone who has asked for less motion. The rotation still
+   happens — it is state, not decoration — it just arrives instantly. */
+@media (prefers-reduced-motion: reduce) {
+  .zx-title-synopsis-toggle md-icon {
+    transition: none;
+  }
+}
+
+/* Matches `.zx-chart-more` and `.zx-logo-marquee` — 2px in `primary` at 2px offset
+   is this file's one focus ring, and a control that invented its own would read as
+   a different kind of thing to a keyboard user. `border-radius` so the ring traces
+   the padding box rather than boxing the glyph corners squarely. */
+.zx-title-synopsis-toggle:focus-visible {
+  outline: 2px solid var(--md-sys-color-primary);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* CRITIC SCORES — the last member of the key row.
+   
+   At most two, each a link to its source with its review count and read date as
+   hidden text (see the markup comment and the `Score` type for why the number can
+   never appear alone). They used to be a row of their own with a big display-size
+   figure; inside the key row they take the row's own type size, because a 32px
+   number sitting next to 15px text would make the row read as a headline with
+   footnotes rather than as one line of facts. */
+.zx-title-scores {
+  display: flex;
+  flex-wrap: wrap;
+  /* Tighter than the row's own gap: two scores are one group within the row, so
+     they must bind to each other more closely than to the certificate before them. */
+  gap: var(--zx-space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* NO BOX. The scores used to sit in two bordered, filled cards with a caption
+   line under each number; both are gone. A boxed card is a container gesture, and
+   containing two numbers that are already only two numbers just added weight
+   between the title and the synopsis. What is left is the mark, the figure, and
+   nothing else — which is the form a viewer reads a score in everywhere else. */
+.zx-title-score a {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--zx-space-2);
+  text-decoration: none;
+  /* Underline on hover only. There is no border left to change colour, so the
+     affordance has to come from the text itself. */
+  transition: opacity 150ms ease;
+}
+
+.zx-title-score a:hover {
+  opacity: 0.75;
+}
+
+.zx-title-score a:hover .zx-title-score-value {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* The aggregator's own mark, at text scale. Sized in `em` rather than px so it
+   tracks the figure beside it if the type scale changes, and never grows into a
+   logo — it is a source stamp, not branding. */
+.zx-title-score-mark {
+  /* 1.25em, not 1.1: the Metacritic mark is a ring with a glyph inside it, and
+     below about 24px the ring closes up into a dot. Sized to the number's own cap
+     height rather than to the line box so both marks read as siblings of the digits
+     rather than as bullets in front of them. */
+  width: 1.25em;
+  height: 1.25em;
+  flex: none;
+  /* The tomato and the Metacritic circle are both square glyphs on a transparent
+     ground, so nothing here should crop or letterbox them. */
+  object-fit: contain;
+  /* Optical: both marks read a touch heavy against the number's cap height. */
+  margin-top: -0.05em;
+}
+
+.zx-title-score-value {
+  /* Inherits the key row's size. Bold rather than big is what separates it from
+     the genre text beside it now. */
+  font-weight: var(--zx-weight-bold);
+  line-height: var(--zx-lh-tight);
+  color: var(--md-sys-color-on-surface);
+  /* Two scores side by side are compared digit to digit. */
+  font-variant-numeric: tabular-nums;
+}
+
+/* PLAYBACK CAPSULES — "4K UHD", "HDR10", "Dolby Vision", "Dolby Atmos".
+   
+   These were 1px outlined plates, styled after the marks printed on a disc case.
+   That reference is right for print and wrong for a black page: an
+   `outline-variant` hairline (#2c323a) on #08090b is a 1.2:1 edge, so the site's
+   strongest technical claim rendered as its faintest element — four grey words the
+   eye slid straight past on the way to the CTA. Filled chips now, each with a glyph,
+   which is also the form every service the visitor already uses puts them in.
+   
+   ABOVE THE SYNOPSIS. They sat below it while the synopsis was a full paragraph;
+   the synopsis now collapses to one line with a "More" button after it, and a
+   one-line paragraph followed by a button followed by four chips is three bands of
+   chrome where there should be one. Directly under the tag line they extend the band
+   of facts that starts at the h1, and the prose closes the header instead of being
+   buried in the middle of it.
+   
+   NO WRAPPER. `.zx-title-meta` used to hold this list plus a spec list; the year
+   and runtime moved to the tag line under the h1, so this list owns its own top
+   margin and the wrapper is deleted rather than left holding one child.
+   
+   FILLED IN STEEL (`secondary-container`), NOT IN THE BRAND'S PRIMARY. `primary`
+   here is #fbfcfe — near-white — which is the CTA button's fill. Four white chips
+   directly above a white button would read as five buttons and make the one thing
+   on the page that is actually clickable ambiguous. `secondary-container` is the
+   same brand family one step down: unmistakably a solid chip, clearly not an
+   action. `on-secondary-container` (#e8edf4) on it is 8.9:1. */
+.zx-title-formats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--zx-space-2);
+  /* ABOVE the synopsis now, so this margin separates it from the tag line rather
+     than from a paragraph. `space-4` and not the `space-5` it carried below the
+     prose: the tag line and these chips are both facts about the same stream, and
+     the tighter gap groups them as one band before the prose starts. */
+  margin: var(--zx-space-4) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.zx-title-format {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--zx-space-1);
+  /* SQUARE-ISH, NOT A PILL. These were `999px` capsules, on the argument that a
+     round end reads as "badge, not button" — which is true of ONE pill and false of
+     four in a row directly above an actual button, where the repeated capsule shape
+     starts reading as a row of controls. 6px is a spec plate: clearly a solid chip,
+     clearly not tappable. It needed a new token (`--zx-radius-xs`) because the
+     smallest existing one, 12px, is half the height of this chip and would round it
+     back to nearly a pill.
+     
+     Symmetric horizontal padding now that the icon sits inside a square corner —
+     the pill needed 12px on the text side and 8px on the icon side to look
+     optically even against the curve; a flat edge does not. */
+  padding: 5px var(--zx-space-2);
+  border-radius: var(--zx-radius-xs);
+  background: var(--md-sys-color-secondary-container);
+  color: var(--md-sys-color-on-secondary-container);
+  font-size: var(--zx-text-label);
+  font-weight: var(--zx-weight-semibold);
+  line-height: 1.4;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  /* Every one of these is a registered wording that must not break mid-mark
+     ("Dolby / Vision"). */
+  white-space: nowrap;
+}
+
+/* The glyph, optically matched to the 11px label rather than left at the 24px
+   `md-icon` defaults to.
+   
+   `font-size` AND `width`/`height`, which is what every other `md-icon` in this
+   file does (`.zx-cta-sub md-icon`, `.zx-chart-more md-icon`). I first set only
+   `font-size`, on the theory that an icon font scales with type — measured in the
+   browser, the box stayed 24x24 and blew the capsule open. `md-icon` is a custom
+   element carrying its own `24px` box, so the box needs setting explicitly and
+   `font-size` alone silently does half the job. */
+.zx-title-format md-icon {
+  font-size: 15px;
+  width: 15px;
+  height: 15px;
+  /* Kills the line-box leading the icon font would otherwise add, which is what
+     pushes a glyph a pixel or two below the text baseline beside it. */
+  line-height: 1;
+}
+
+/* The single CTA, last item of the header column — after the title, the service,
+   the certificate and the synopsis, which is the order that keeps this page an
+   answer rather than the doorway page the old route was.
+   
+   NO RULE ABOVE IT ANY MORE. It used to be a full-width band below the header,
+   separated by a hairline, and the rule was doing the work of saying "the document
+   breaks here". Inside the column it is simply the next thing after the facts, in
+   the position every service the visitor already uses puts its play button. */
+.zx-title-cta {
+  /* 32px — the largest step inside the header column, so the ask is clearly the
+     end of the sequence and not a fifth row of facts. (There is no
+     `--zx-space-7`; the scale skips from 6 to 8.) */
+  margin-top: var(--zx-space-8);
+}
+
+/* `.zx-cta` is `align-items: stretch`, which is right where it was written — the
+   landing hero and both dialogs put it in a column around 360px wide. Cap it here
+   too, but left-aligned rather than centred: it now sits at the foot of a
+   left-aligned column of text, and a centred button under left-aligned facts reads
+   as belonging to neither. */
+.zx-title-cta .zx-cta {
+  max-width: 320px;
+  margin: 0;
+}
+
+.zx-title-section-heading {
+  margin: var(--zx-space-8) 0 var(--zx-space-4);
+  font-size: var(--zx-text-h2);
+  font-weight: var(--zx-weight-semibold);
+  line-height: var(--zx-lh-snug);
+  color: var(--md-sys-color-on-surface);
+}
+
+/* THE FACT LIST.
+   
+   Auto-fit grid rather than a fixed two columns: the number of facts varies by
+   title (a film has a runtime, a series has seasons and episodes), and `auto-fit`
+   with a min track means one column on a phone and two or three on a wide screen
+   without a media query per breakpoint.
+   
+   Label ABOVE value, like `.zx-doc-entity-row` and for the same reason documented
+   there — a fixed label column cannot hold "ผู้กำกับ", "Distribuidora" and
+   "Production companies" without one of the three looking broken. */
+.zx-title-facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+  gap: var(--zx-space-5) var(--zx-space-6);
+  margin: 0;
+}
+
+.zx-title-fact {
+  display: flex;
+  flex-direction: column;
+  gap: var(--zx-space-1);
+  /* Long studio lists in a narrow track: wrap inside the value rather than push
+     the grid wider. */
+  min-width: 0;
+}
+
+.zx-title-fact dt {
+  font-size: var(--zx-text-caption);
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.zx-title-fact dd {
+  margin: 0;
+  font-size: var(--zx-text-meta);
+  line-height: var(--zx-lh-snug);
+  color: var(--md-sys-color-on-surface);
+  text-wrap: pretty;
+}
+
+/* CAST. A face and a name per row, in an auto-fit grid.
+   
+   This was a wrapped row of text chips, and a chip row is the right answer for a
+   list of bare names — but it is the wrong answer once each name has a portrait,
+   because chips of unequal width put every face at a different x and the row stops
+   scanning as a set of people. The grid gives every entry the same box, which is
+   what makes eight faces readable at a glance.
+   
+   `auto-fit` with a 150px min track rather than a column count per breakpoint: the
+   cast length varies from three to twelve, and a fixed `grid-cols-4` leaves a
+   half-empty final row on the short lists. */
+.zx-title-cast {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr));
+  gap: var(--zx-space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.zx-title-cast li {
+  display: flex;
+  align-items: center;
+  gap: var(--zx-space-3);
+  padding: var(--zx-space-2);
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: var(--zx-radius-sm);
+  background: var(--md-sys-color-surface-container-low);
+  /* A two-word name in a 150px track wraps to two lines; without this the tiles
+     in a row have different heights and the grid looks ragged. */
+  min-width: 0;
+}
+
+/* Circular, and sized in a variable because the initials fallback must land on
+   exactly the same footprint — a square photo next to a round placeholder is the
+   kind of mismatch that reads as a bug. */
+.zx-title-cast li > :first-child {
+  --zx-cast-size: 44px;
+  flex: 0 0 auto;
+  width: var(--zx-cast-size);
+  height: var(--zx-cast-size);
+  border-radius: 999px;
+  /* Commons portraits are arbitrary crops of arbitrary photos, so several are
+     lighter than the tile behind them. A hairline keeps the circle a circle. */
+  border: 1px solid var(--md-sys-color-outline-variant);
+  background: var(--md-sys-color-surface-container-high);
+  object-fit: cover;
+}
+
+.zx-title-cast-initials {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--zx-text-caption);
+  font-weight: var(--zx-weight-semibold);
+  letter-spacing: 0.02em;
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.zx-title-cast-name {
+  min-width: 0;
+  font-size: var(--zx-text-meta);
+  line-height: var(--zx-lh-snug);
+  color: var(--md-sys-color-on-surface);
+  text-wrap: balance;
+}
+
+/* PHOTO CREDITS. The licences oblige this block to exist; nothing obliges it to
+   compete with the cast for attention, hence a closed <details> at caption size. */
+.zx-title-credits {
+  margin-top: var(--zx-space-4);
+  font-size: var(--zx-text-caption);
+  /* `--zx-lh-body`. Was `--zx-lh-relaxed`, which is not one of this file's three
+     leading tokens (tight/snug/body), so the declaration was invalid and these lines
+     fell back to the browser's `normal`. */
+  line-height: var(--zx-lh-body);
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.zx-title-credits summary {
+  cursor: pointer;
+  /* 44px of hit area on a phone without a visible button: the row is caption-sized
+     text, and an 18px tap target next to nothing else tappable is a miss. */
+  padding: var(--zx-space-3) 0;
+}
+
+.zx-title-credits ul {
+  margin: 0;
+  padding: 0 0 0 var(--zx-space-4);
+}
+
+.zx-title-credits li {
+  margin-bottom: var(--zx-space-1);
+}
+
+.zx-title-credits p {
+  margin: var(--zx-space-2) 0 0;
+  max-width: 60ch;
+  text-wrap: pretty;
+}
+
+/* THE POSTER AS HERO ART — phones only ---------------------------------------
+   
+   Below 720px the poster stops being a 200px thumbnail above the copy and becomes
+   the background the header sits on. The thumbnail was showing the visitor key art
+   they had just tapped in the chart rail, at a third of the size, and then asking
+   them to scroll past it to reach the facts — a phone's whole first screen spent
+   re-showing the thing they had already chosen.
+   
+   ONE BREAKPOINT, MAX-WIDTH, PAIRED WITH THE MIN-WIDTH BLOCK BELOW. 719.98px
+   rather than 719px: the two must not both apply and must not leave a gap, and
+   fractional viewport widths are real (a 1.5 DPR phone at 1079 CSS px, a zoomed
+   desktop). 719.5px would match neither rule if these were 719/720.
+   
+   THE BLEED IS `--zx-gutter`, NOT the `calc(50% - 50vw)` idiom the desktop hero
+   uses. That idiom escapes to the VIEWPORT, and this element lives inside
+   `#zx-main`, which sets `overflow-x: clip` to contain the rails — so a viewport
+   bleed would be silently clipped straight back off at the sheet edge. The gutter
+   is also the honest target: `.zx-shell` is the only thing insetting this header,
+   the sheet caps at `--zx-page-max`, and cancelling exactly `--zx-gutter` reaches
+   the sheet edge at every width with no `vw`/scrollbar discrepancy to absorb. */
+@media (max-width: 719.98px) {
+  .zx-title-head {
+    position: relative;
+    /* Out to the sheet edge, then the content box back in. The pair cancels, so
+       the copy keeps the same measure it had before the art arrived. */
+    margin-inline: calc(var(--zx-gutter) * -1);
+    padding-inline: var(--zx-gutter);
+    /* Art above the copy, copy over the bottom of the art. 34vh leaves the poster
+       a readable band of its own — enough to recognise a face on it — without
+       pushing the h1 off the first screen, which is the fault the thumbnail had. */
+    padding-block: 34vh var(--zx-space-6);
+    /* `gap` is dead here: the poster is out of flow, so `.zx-title-intro` is the
+       only child left in it. Zeroed rather than left at 24px, which would have
+       been silent but is exactly the kind of value that later reads as intentional. */
+    gap: 0;
+    /* Contains the z-indexes below so the art cannot slide behind the page
+       background or in front of the fixed top bar. */
+    isolation: isolate;
+  }
+
+  .zx-title-poster {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    /* Overrides the flow geometry: the 200px cap, the 2:3 ratio and the rounded
+       hairline all belong to the thumbnail this stops being. `max-width: none` is
+       required — `width: 100%` alone would still be capped at 200px. */
+    width: 100%;
+    max-width: none;
+    height: 100%;
+    aspect-ratio: auto;
+    border-radius: 0;
+    box-shadow: none;
+    /* `top` and not `center`: a 2:3 poster cropped into a landscape band loses
+       most of its height, and on key art the face is at the top. Centring cropped
+       it to torsos. */
+    object-position: top center;
+  }
+
+  /* The scrim. Two jobs: guarantee a contrast floor for the copy over art this
+     stylesheet cannot see, and hand off to the page surface at the bottom edge so
+     the art ends without a seam.
+     
+     ITS OWN RAMP, NOT `--zx-hero-scrim-vertical`. Reusing the desktop hero's
+     variable was the first attempt and it failed in the browser: that ramp is built
+     for a hero whose copy sits in its bottom quarter, so it only reaches 0.92 alpha
+     at 26% from the bottom and is at ~0.5 above that. Measured here, the tag line
+     and synopsis sit at 54% and 64% of the header — straight through the weakest
+     part of it — and over Avatar's bright key art they were close to unreadable.
+     
+     So this holds near-opaque across the whole lower two-thirds where every line of
+     copy actually is, and spends its entire transition in the top third that is
+     deliberately art-only. The first stop is `surface` and not the media black for
+     the same reason the desktop ramp's is — it is the pixel that has to match the
+     section below, and the two blacks differ by enough to draw a visible line.
+     
+     `::after` rather than a wrapper element: nothing about this is content, and a
+     phone-only scrim div would sit in the DOM on desktop doing nothing. */
+  .zx-title-head::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background: linear-gradient(
+      to top,
+      var(--md-sys-color-surface) 0%,
+      rgb(var(--zx-media-black-rgb) / 0.94) 30%,
+      rgb(var(--zx-media-black-rgb) / 0.88) 52%,
+      rgb(var(--zx-media-black-rgb) / 0.62) 74%,
+      rgb(var(--zx-media-black-rgb) / 0.32) 100%
+    );
+    pointer-events: none;
+  }
+
+  /* Above both. Needs `position` for `z-index` to apply at all — without it the
+     copy paints under the scrim and the whole header greys out. */
+  .zx-title-intro {
+    position: relative;
+    z-index: 2;
+  }
+}
+
+@media (min-width: 720px) {
+  /* Poster beside the text. `flex-start` so the poster's top aligns with the h1
+     rather than stretching down the intro column, and `flex: 0 0 auto` so it keeps
+     its intrinsic width while the text takes the remainder. */
+  .zx-title-head {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: var(--zx-space-8);
+  }
+
+  .zx-title-poster {
+    flex: 0 0 auto;
+    /* Wider here than the 200px mobile cap: at this width it is sitting next to a
+       column of text rather than above it, and the two need comparable visual
+       weight for the header to read as one unit. */
+    width: 240px;
+    max-width: none;
+  }
+
+  .zx-title-intro {
+    flex: 1 1 auto;
   }
 }

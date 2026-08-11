@@ -37,6 +37,24 @@ const HEIGHT = 630
 const SOURCE_DIR = 'assets/posters'
 const OUT_DIR = 'public/media/tiles'
 
+/**
+ * Crop anchor for the few sources that are TALLER than 2:3 (the 2026 theatrical
+ * one-sheets run 0.60 rather than 0.667). Cover has to lose ~10% of their height,
+ * and the default centre anchor takes half off each end — which on a one-sheet
+ * lands mid-glyph on the release-date line and leaves a row of sliced letters.
+ *
+ * Losing a whole line reads as a crop; half a line reads as a broken image. So
+ * anchor these to whichever end carries the title lettering and let the crop take
+ * the other end cleanly:
+ *   - `top` for posters logotyped at the top (the date block below is expendable)
+ *   - `bottom` for posters logotyped at the bottom (the cast row above is)
+ * Everything not listed is within a percent of 2:3 and crops invisibly.
+ */
+const CROP_ANCHOR = {
+  'minions-and-monsters': 'top',
+  'the-invite': 'bottom',
+}
+
 await mkdir(OUT_DIR, { recursive: true })
 
 /* Directory-driven rather than a hardcoded list: the source folder holds nothing
@@ -53,7 +71,7 @@ for (const file of files) {
        because the border is near-black rather than pure black after
        quantization. */
     .trim({ threshold: 20 })
-    .resize(WIDTH, HEIGHT, { fit: 'cover', position: 'centre' })
+    .resize(WIDTH, HEIGHT, { fit: 'cover', position: CROP_ANCHOR[name] ?? 'centre' })
     .webp({ quality: 78 })
     .toFile(out)
 

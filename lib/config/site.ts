@@ -8,8 +8,15 @@
  */
 export const SITE = {
   name: 'Zenorix',
-  /** Canonical origin. Set NEXT_PUBLIC_SITE_URL at build time in production. */
-  url: process.env.NEXT_PUBLIC_SITE_URL ?? 'https://zenorix.app',
+  /**
+   * Canonical origin. Set NEXT_PUBLIC_SITE_URL at build time in production.
+   *
+   * The fallback is `zenorix.space` — the registered domain of the operating
+   * company below. It read `zenorix.app` until now, a domain this project does not
+   * own, so any build missing the env var would have emitted canonical tags and
+   * an og:url pointing at someone else's host.
+   */
+  url: process.env.NEXT_PUBLIC_SITE_URL ?? 'https://zenorix.space',
   /**
    * The APK endpoint. ABSOLUTE, and on its own host: it is an update channel
    * that always resolves to the newest build, not a file under this site.
@@ -18,7 +25,14 @@ export const SITE = {
    */
   apkUrl:
     process.env.NEXT_PUBLIC_APK_URL ?? 'https://update.vinextv.co/zenorix/latest',
-  /** Support channel behind every "contact us" entry point. */
+  /**
+   * Support channel behind every "contact us" CTA — instant, low-friction, and the
+   * right destination for a prospective user with a question.
+   *
+   * Deliberately NOT the channel the legal pages point at: see `ORG.email`. A
+   * rights holder or a reviewer needs an address that belongs to the company
+   * rather than a person's messaging handle.
+   */
   contactUrl: 'https://t.me/roykay_mvp',
   apkVersion: '3.4.1',
   apkSize: '14MB',
@@ -34,3 +48,88 @@ export const SITE = {
 } as const
 
 export type SiteConfig = typeof SITE
+
+/**
+ * The operating company.
+ *
+ * Separate from `SITE` because these are facts about a legal entity rather than
+ * product copy: they are the same in every market, they are never translated, and
+ * unlike the values above they must not be swapped out by a CMS.
+ *
+ * This exists for a specific reason beyond completeness. The site is currently
+ * flagged by SafeSearch, and anonymous operation is one of the signals a
+ * classifier weighs when deciding whether a streaming site is a piracy
+ * operation — a $1.25 price next to Netflix and Disney+ branding with no
+ * identifiable company behind it fits that profile precisely. A named entity with
+ * a registration number, a registered office and a domain-matched contact address
+ * is the cheapest available counter-signal, and it is verifiable, which is what
+ * makes it worth anything.
+ */
+export const ORG = {
+  /** Full registered name. Used verbatim; never abbreviated to `SITE.name`. */
+  legalName: 'Zenorix TV Limited',
+  jurisdiction: 'British Virgin Islands',
+  /** BVI Business Company number, as issued on incorporation. */
+  registrationNumber: 'BVI-BC-2024-117892',
+  address: {
+    street: 'Suite 308, Orion House',
+    locality: 'Road Town',
+    region: 'Tortola',
+    postalCode: 'VG1110',
+    country: 'British Virgin Islands',
+    /** ISO 3166-1 alpha-2, required by schema.org's PostalAddress. */
+    countryCode: 'VG',
+  },
+  /**
+   * The company's address of record: DMCA notices, privacy requests, and anything
+   * else that needs a paper trail. On the site's own domain, which is part of the
+   * point — it ties the entity to the property.
+   */
+  email: 'contact@zenorix.space',
+} as const
+
+/**
+ * Official social presence.
+ *
+ * The two entries are NOT interchangeable, and the distinction decides where each
+ * one may be used:
+ *
+ * - `x` is the brand's own account. It identifies the company, so it is the one
+ *   thing eligible for schema.org `sameAs` and for `twitter:site` on share cards.
+ * - `xCommunity` is a discussion group. It is a place the company hosts, not a
+ *   statement of who the company IS, so it is a footer destination only. Feeding a
+ *   community URL to `sameAs` asserts that the org and the group are the same
+ *   entity, which is false and dilutes the very signal `sameAs` exists to give.
+ *
+ * `handle` is stored without the leading `@` so it can be composed either way —
+ * `twitter:site` requires the `@`, display copy usually does not.
+ */
+export const SOCIAL = {
+  x: {
+    handle: 'zenorix_tv',
+    url: 'https://x.com/zenorix_tv',
+  },
+  xCommunity: {
+    url: 'https://x.com/i/communities/1943054511800750575',
+  },
+} as const
+
+/**
+ * Profiles that unambiguously identify this organization, for `sameAs`.
+ *
+ * A deliberate allow-list rather than `Object.values(SOCIAL)`: mapping over the
+ * whole object would silently pull in the community — and any future group,
+ * hashtag or campaign URL added to it — which is exactly the mistake this
+ * function exists to prevent.
+ */
+export const identityProfiles = (): string[] => [SOCIAL.x.url]
+
+/** One-line entity summary for the footer. */
+export const orgLine = () =>
+  `${ORG.legalName} · Reg. ${ORG.registrationNumber} · ${ORG.jurisdiction}`
+
+/** Registered office on one line, for prose and JSON-LD-adjacent display. */
+export const orgAddressLine = () => {
+  const a = ORG.address
+  return `${a.street}, ${a.locality}, ${a.region}, ${a.postalCode}, ${a.country}`
+}
