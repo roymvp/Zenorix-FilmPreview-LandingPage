@@ -3664,13 +3664,12 @@
   margin-bottom: var(--zx-space-8);
 }
 
-/* The poster, at its true 2:3.
+/* The poster. At its true 2:3 beside the copy on desktop; the HERO BACKGROUND on a
+   phone, where the mobile block near the end of this section takes it over
+   completely — see the long note there.
    
-   Capped at 200px on mobile and centred rather than run full-bleed: this is key
-   art the visitor has usually just seen on the chart rail, so it needs to be
-   recognisable, not dominant — the fold below it belongs to the facts they came
-   for. `outline-variant` hairline for the same reason the dialog poster has one:
-   these tiles have dark corners and would otherwise dissolve into the page. */
+   `outline-variant` hairline for the same reason the dialog poster has one: these
+   tiles have dark corners and would otherwise dissolve into the page. */
 .zx-title-poster {
   width: 100%;
   max-width: 200px;
@@ -3685,8 +3684,8 @@
   display: flex;
   flex-direction: column;
   /* No gap. Every child below sets its own top margin, because the steps here are
-     deliberately uneven — the synopsis sits close to the h1, the scores further
-     off, the format plates closer again. A uniform gap would flatten that. */
+     deliberately uneven — the tag line sits tight under the h1, the synopsis
+     further off, the capsules closer again. A uniform gap would flatten that. */
   gap: 0;
   min-width: 0;
 }
@@ -3702,30 +3701,70 @@
   text-wrap: balance;
 }
 
-/* THE KEY ROW — service · genre · certificate · scores.
+/* THE EYEBROW — service · scores, ABOVE the h1.
    
-   One line directly under the h1, in the order Apple TV and Disney+ use. Dots
-   between the members, drawn as `::before` on every child after the first so that
-   a member the record does not have (an unreleased title has no service and no
-   certificate) takes its separator with it instead of leaving "· Drama ·".
+   Where it streams and how it scored: the two facts that are not derivable from
+   anything else on this page, in the position Apple TV and Letterboxd use. It was
+   one row UNDER the title carrying four members (service, genre, certificate,
+   scores); genre and certificate moved to the tag line below the h1, because those
+   describe the title and belong with its name, while these two describe the world's
+   response to it.
    
-   `align-items: center` with everything sized in `em` keeps the logo, the text and
-   the boxed certificate on one optical baseline despite three different heights. */
-.zx-title-key {
+   Dots between the members, drawn as `::before` on every child after the first so
+   that a member the record does not have takes its separator with it instead of
+   leaving "· 90%". `align-items: center` with everything sized in `em` keeps the
+   logo, the text and the score marks on one optical baseline. */
+.zx-title-eyebrow {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: var(--zx-space-3);
-  margin-top: var(--zx-space-4);
+  /* Owns the space BELOW itself, not above: it is the first thing in the column, so
+     a top margin here would just push the whole header down. */
+  margin-bottom: var(--zx-space-3);
   font-size: var(--zx-text-base);
   color: var(--md-sys-color-on-surface-variant);
 }
 
-.zx-title-key > * + *::before {
+.zx-title-eyebrow > * + *::before {
   content: '·';
   /* Sits in the flex gap rather than adding to it, so the dot reads as a
      separator between two items and not as a third item. */
   margin-right: var(--zx-space-3);
+  color: var(--md-sys-color-outline);
+}
+
+.zx-title-platform {
+  display: inline-flex;
+  align-items: center;
+}
+
+/* THE TAG LINE — year · length · genre · certificate, under the h1.
+   
+   Everything measurable about the title itself, on the line that reads as a
+   continuation of its name. Quieter than the eyebrow above the title on purpose:
+   this is the line a reader consults after the name has registered, not one that
+   competes with it.
+   
+   Same dot mechanism as the eyebrow, and same reason — a film has no season count
+   and must not render a dangling separator where one would have gone. */
+.zx-title-tags {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--zx-space-2);
+  margin: var(--zx-space-3) 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--zx-text-sm);
+  color: var(--md-sys-color-on-surface-variant);
+  /* Year and runtime are digits read side by side. */
+  font-variant-numeric: tabular-nums;
+}
+
+.zx-title-tags li + li::before {
+  content: '·';
+  margin-right: var(--zx-space-2);
   color: var(--md-sys-color-outline);
 }
 
@@ -3738,8 +3777,6 @@
   content: none;
 }
 
-.zx-title-platform,
-.zx-title-genres,
 .zx-title-rating {
   display: inline-flex;
   align-items: center;
