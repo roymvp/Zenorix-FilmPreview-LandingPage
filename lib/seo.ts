@@ -461,6 +461,10 @@ export function buildStructuredData({
 }) {
   const url = `${SITE.url}${path(locale)}`
   const organizationId = `${SITE.url}/#organization`
+  /* The SAME token map the visible page fills its copy with — `marketValues` is
+     the single source, so any dictionary string rendered into this graph resolves
+     exactly as it does on screen. This is what the FAQ node below was missing. */
+  const values = marketValues(dict)
 
   return {
     '@context': 'https://schema.org',
@@ -612,7 +616,16 @@ export function buildStructuredData({
               name: dict.about.trial.value,
               price: '0',
               priceCurrency: dict.market.currency,
-              description: dict.faq.items[0].q,
+              /* The trial's own note ("No card needed to start."), which is the line
+                 the page prints directly under "30 DAYS FREE".
+                 
+                 This was `dict.faq.items[0].q` — the FAQ's first QUESTION. So the
+                 free tier described itself to crawlers as "Do I get full access to
+                 everything during the 30 free days?", a question mark and all, in
+                 all three markets. A `description` is a statement about the offer;
+                 pointing it at the question rather than at its answer inverted the
+                 meaning of the field. */
+              description: dict.about.trial.note,
             },
             {
               '@type': 'Offer',
@@ -644,12 +657,32 @@ export function buildStructuredData({
           ],
         },
       },
+      /* THE FAQ, WITH ITS TOKENS RESOLVED.
+         
+         `fill(..., values)` on BOTH the question and the answer, and that is the
+         whole point of this node's shape. It used to pass `item.q` / `item.a`
+         straight through, which shipped the raw dictionary strings — so the pricing
+         answer reached Google as "The monthly plan is {monthly} after your free
+         trial" while the visible <details> on the same page said "$2". Verified in
+         all three markets before the fix: en had `{monthly}`, pt-BR had `{monthly}`,
+         th had `{monthly}` and `{annualPerMonth}`.
+         
+         That is the one structured-data failure mode with real downside. Google's
+         guidelines require the markup to match the visible content, and a literal
+         `{monthly}` is not a price at all — it is either ignored, or read as the
+         page making an unresolvable claim about cost. Either way the FAQ rich result
+         was carrying a broken string in the one answer that states what the product
+         costs.
+         
+         It survived because it is invisible twice over: the page renders correctly
+         (the visible FAQ has always filled its tokens), and JSON-LD is not something
+         you see. Only diffing the graph against the DOM surfaced it. */
       {
         '@type': 'FAQPage',
         mainEntity: dict.faq.items.map((item) => ({
           '@type': 'Question',
-          name: item.q,
-          acceptedAnswer: { '@type': 'Answer', text: item.a },
+          name: fill(item.q, values),
+          acceptedAnswer: { '@type': 'Answer', text: fill(item.a, values) },
         })),
       },
       /* The two chart rails, as ranked lists of names.
