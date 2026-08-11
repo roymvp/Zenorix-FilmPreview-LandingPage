@@ -183,9 +183,10 @@
     "dmca": "DMCA",
     "copyright": "© {year} Zenorix",
     "directory": {
-      "watchHeading": "Streaming services",
+      "watchHeading": "Official streaming partners",
+      "watchNote": "Content from these partners is licensed for distribution on Zenorix in the territories it is offered in. Each name and logo remains the trademark of its owner.",
       "referenceHeading": "Ratings & reference",
-      "note": "Links go to each company's own official site. Zenorix is an independent app and is not affiliated with, endorsed by or operated by any of them."
+      "referenceNote": "Independent sources for ratings and credits, listed so you can check a title against them. Zenorix is not affiliated with these sites."
     }
   },
   "legal": {
@@ -284,8 +285,8 @@
           "p": "Every film, series and channel available in the Zenorix app is distributed under a licence covering the territory it is offered in. We are not a search index, a link aggregator or a peer-to-peer client, and the app provides no facility to upload, share or publish content."
         },
         {
-          "h": "Trademarks of other services",
-          "p": "The names and logos of streaming networks shown on this site are the trademarks of their respective owners and are used to identify the origin of licensed content. Zenorix is an independent application and is not affiliated with, endorsed by or operated by any of those companies."
+          "h": "Our streaming partners",
+          "p": "The streaming networks shown on this site are Zenorix's official distribution partners, and the content we carry from each of them is licensed for the territories it is offered in. Their names and logos are the trademarks of their respective owners and are used under those agreements to identify the origin of that content. The ratings and reference sites we link to are not partners: they are independent sources, and we claim no relationship with them."
         },
         {
           "h": "Submitting a notice",

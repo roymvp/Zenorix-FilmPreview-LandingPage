@@ -15,10 +15,9 @@ import type { OutboundLink } from '@/lib/content/outbound'
  * looked in for.
  *
  * The one exception to that minimalism is the directory, which is genuinely new
- * weight rather than the old brand slab creeping back: it is the only place on
- * the site that says where these services and ratings actually live, and it is
- * why the independence line the footer used to carry is back — see
- * `OutboundDirectory`.
+ * weight rather than the old brand slab creeping back: it names the streaming
+ * partners whose content the catalogue carries, and states the licensing
+ * relationship for each of its two groups — see `OutboundDirectory`.
  *
  * Support (with social beneath it) is its OWN group above the legal list, not a
  * fourth item inside it. Dropping it in beside Privacy/Terms/DMCA would file "talk
@@ -40,8 +39,12 @@ export function SiteFooter({
     reference: OutboundLink[]
     copy: {
       watchHeading: string
+      /* Two notes, one per group — see `OutboundDirectory`. Spread from
+         `dict.footer.directory` in both callers, so adding a third would not need
+         a change here. */
+      watchNote: string
       referenceHeading: string
-      note: string
+      referenceNote: string
       newTab: string
     }
   }

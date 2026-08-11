@@ -1,14 +1,20 @@
 import type { OutboundLink } from '@/lib/content/outbound'
 
 /**
- * The footer's outbound directory: where to watch, then where to look a film up.
+ * The footer's outbound directory: the official streaming partners, then the
+ * reference sites a visitor checks a title against.
  *
- * Two groups, deliberately styled differently rather than as one long link soup.
- * The services carry their app icons because those exact marks already appear
- * twice on the page (trust strip, poster badges) and a reader recognises them
- * faster than their names; the reference sites are plain text because IMDb and
- * Metacritic have no icon in this project and inventing favicon chips for them
- * would add eleven more requests to buy nothing.
+ * Two groups that are NOT peers, and the styling says so. The partners are chips
+ * with their app icons — the marks already appear twice higher up the page (trust
+ * strip, poster badges) and a reader recognises them faster than their names — and
+ * they come first, because whose content is in the catalogue is the strongest
+ * claim this footer makes. The reference sites stay plain muted text: they are an
+ * unpaid convenience, IMDb and Metacritic have no icon in this project, and
+ * inventing favicon chips for them would add requests to buy nothing.
+ *
+ * Each group carries its OWN closing note rather than sharing one, because the two
+ * relationships are now genuinely different — see the `watchNote`/`referenceNote`
+ * comment on the props below.
  *
  * A server component with no click tracking. Every other outbound link here
  * (`SocialLinks`, `ContactLink`) is `'use client'` for its `trackEvent` call, and
@@ -28,17 +34,24 @@ export function OutboundDirectory({
   watch: OutboundLink[]
   reference: OutboundLink[]
   copy: {
-    /** Group headings. Neutral by design — see the note in `lib/content/outbound.ts`. */
     watchHeading: string
     referenceHeading: string
     /**
-     * The independence line. Re-added to the footer on purpose, having once been
-     * deleted from it: with no brand links down here a blanket trademark
-     * disclaimer was boilerplate nobody read, but a row of eleven studio marks is
-     * exactly the context where "these are their sites, we are not them" is the
-     * one sentence that keeps the block honest.
+     * ONE NOTE PER GROUP, not one blanket note for both.
+     *
+     * There used to be a single sentence under the whole block saying Zenorix was
+     * "not affiliated with any of them". That is now false of the first group and
+     * still true of the second, so a shared line cannot be written without lying
+     * about one of them: the services are licensed distribution partners, while
+     * IMDb and Letterboxd are unpaid reference sites we simply link to. Splitting
+     * the sentence is what lets each group state its own actual relationship —
+     * which is also the part a trademark complaint would quote.
+     *
+     * Both strings must stay in step with `dict.legal.dmca`'s partner clause; see
+     * the header note in `lib/content/outbound.ts`.
      */
-    note: string
+    watchNote: string
+    referenceNote: string
     /** Appended to every link for screen readers, since all of them leave. */
     newTab: string
   }
@@ -50,7 +63,13 @@ export function OutboundDirectory({
        landmark list. The two <h2>s give the same jump-to targets without the
        false claim. */
     <div className="zx-directory">
-      <section className="zx-directory-group" aria-labelledby="zx-directory-watch">
+      {/* THE PARTNERS. Given the weight of the block and listed first, because
+          "whose content is actually in here" is the strongest thing this footer
+          has to say — it used to be one muted line of text among two. */}
+      <section
+        className="zx-directory-group zx-directory-group--partners"
+        aria-labelledby="zx-directory-watch"
+      >
         <h2 className="zx-directory-title" id="zx-directory-watch">
           {copy.watchHeading}
         </h2>
@@ -58,7 +77,7 @@ export function OutboundDirectory({
           {watch.map((link) => (
             <li key={link.href}>
               <a
-                className="zx-directory-link"
+                className="zx-directory-link zx-directory-link--brand"
                 href={link.href}
                 target="_blank"
                 rel="noopener noreferrer"
@@ -73,8 +92,8 @@ export function OutboundDirectory({
                     className="zx-directory-icon"
                     src={link.icon}
                     alt=""
-                    width={16}
-                    height={16}
+                    width={20}
+                    height={20}
                     loading="lazy"
                     decoding="async"
                   />
@@ -88,6 +107,7 @@ export function OutboundDirectory({
             </li>
           ))}
         </ul>
+        <p className="zx-directory-note">{copy.watchNote}</p>
       </section>
 
       <section className="zx-directory-group" aria-labelledby="zx-directory-reference">
@@ -109,9 +129,8 @@ export function OutboundDirectory({
             </li>
           ))}
         </ul>
+        <p className="zx-directory-note">{copy.referenceNote}</p>
       </section>
-
-      <p className="zx-directory-note">{copy.note}</p>
     </div>
   )
 }

@@ -5,16 +5,20 @@ import type { Locale } from '@/lib/i18n/config'
  * Outbound directory — the streaming services shown on this page, plus the
  * ratings and reference sites, as one registry.
  *
- * WHAT THIS IS NOT: a partner list. The footer heading over these links reads
- * "where to watch", never "partners" or "friends of Zenorix", and that wording is
- * load-bearing rather than modest. `dict.legal.terms` states that Zenorix "is an
- * independent application and is not affiliated with, endorsed by or operated by
- * any of those companies" — so a block on the same site announcing a partnership
- * with Netflix would contradict its own Terms, on an aggregator, in the one place
- * a trademark complaint would quote first. Linking to a company's official site
- * and naming it accurately is ordinary reference; claiming a relationship with it
- * is not. If the labels here ever change, that clause in all three dictionaries
- * has to change with them, in the same commit.
+ * TWO GROUPS, TWO DIFFERENT RELATIONSHIPS — and the wording must keep them apart.
+ *
+ * The services are Zenorix's official distribution partners, so the footer heading
+ * over them reads "Official streaming partners" and `dict.legal.dmca` states the
+ * licensing relationship in full. The reference sites are NOT partners: they are
+ * unpaid, editorially chosen destinations we link to, and both the footer note and
+ * that same DMCA clause say so explicitly.
+ *
+ * This is the site's single most legally load-bearing pair of sentences, and the
+ * two halves are kept in separate strings precisely so neither can be quietly
+ * broadened to cover the other. If a heading or note here changes, the partner
+ * clause in `legal.dmca` in ALL THREE dictionaries changes in the same commit —
+ * a footer that claims a partnership the Terms deny (or vice versa) is exactly
+ * what a trademark complaint would quote first.
  *
  * Names and icons are NOT repeated here. They are read from `PLATFORMS`, the same
  * registry the trust strip and the Top 10 badges read, so a service cannot appear

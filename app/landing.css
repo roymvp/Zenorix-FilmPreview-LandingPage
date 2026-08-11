@@ -159,6 +159,34 @@
      The hero pays the same debt in `.zx-hero-copy`'s padding; this is the
      equivalent for a page with no hero. */
   padding-top: var(--zx-topbar-h);
+
+  /* FOOTER PINNED TO THE BOTTOM ON SHORT PAGES.
+     
+     A title with a small cast, or a short legal page, does not fill a 1100px
+     desktop viewport — and the footer then ended mid-screen with the page's
+     background continuing below it, which reads as a rendering fault rather than
+     as the end of the document.
+     
+     `min-height` + a column with the <main> growing, NOT `position: sticky` and
+     not `position: fixed`: the footer must still scroll away normally on a long
+     page, and this is the layout that does both without a media query or a
+     measurement. `100dvh` rather than `100vh` so a mobile browser's retracting
+     address bar does not leave a gap the height of the toolbar.
+     
+     Deliberately scoped to `--doc` and not to `.zx-page`: the landing page is
+     always far taller than any viewport, so it needs none of this, and giving it a
+     flex column would change how its sections resolve their heights. */
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* The one growing child. `flex: 1` on <main> is what pushes the footer down;
+   `min-height: 0` keeps a long document from being forced to shrink-fit instead of
+   overflowing normally, which is the standard flex-child correction. */
+.zx-page--doc > main {
+  flex: 1 0 auto;
+  min-height: 0;
 }
 
 .zx-doc {
@@ -2237,9 +2265,11 @@
 .zx-directory {
   display: flex;
   flex-direction: column;
-  gap: var(--zx-space-5);
-  padding-block-end: var(--zx-space-5);
-  margin-block-end: var(--zx-space-5);
+  /* A full step wider than before. The two groups now each end in their own note,
+     so they need to read as two blocks rather than four alternating lines. */
+  gap: var(--zx-space-6);
+  padding-block-end: var(--zx-space-6);
+  margin-block-end: var(--zx-space-6);
   border-block-end: 1px solid var(--md-sys-color-outline-variant);
 }
 
@@ -2247,6 +2277,25 @@
   display: flex;
   flex-direction: column;
   gap: var(--zx-space-2);
+}
+
+/* THE PARTNER GROUP, RAISED OUT OF THE FOOTER'S GREY.
+   
+   A tinted panel with a hairline, where the reference group beside it stays bare
+   text on the page background. That asymmetry is the whole redesign: these eleven
+   names are the strongest claim the site makes — licensed content from Netflix,
+   HBO Max, Prime Video — and in the old footer they were styled identically to a
+   list of links to IMDb. One of those is a distribution agreement and the other is
+   a convenience, so they must not look like the same kind of thing.
+   
+   `surface-container-low`, not `primary`: it has to sit ABOVE the footer's flat
+   background without competing with the install CTA further up the page. */
+.zx-directory-group--partners {
+  gap: var(--zx-space-3);
+  padding: var(--zx-space-4);
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: var(--zx-radius-md);
+  background: var(--md-sys-color-surface-container-low);
 }
 
 /* Same eyebrow treatment as `.zx-about-label` minus the chip border: 11px, wide
@@ -2275,6 +2324,14 @@
   list-style: none;
 }
 
+/* The partner list gets an even gap instead, because its items are now bounded
+   chips: the chip's own edge separates it from its neighbour, so the asymmetric
+   gap that keeps bare text from reading as a grid is no longer doing anything, and
+   an uneven one would make the wrapped rows sit at different distances. */
+.zx-directory-list--brand {
+  gap: var(--zx-space-2);
+}
+
 .zx-directory-link {
   display: inline-flex;
   align-items: center;
@@ -2292,7 +2349,37 @@
   transition: color 120ms ease;
 }
 
+/* PARTNER CHIPS. Bounded, on the page surface, with the service's name at full
+   `on-surface` weight — these are the one set of links down here that names
+   somebody else's brand under a licence, and they read as objects rather than as a
+   run of grey words. The hover fills rather than merely brightening, so the whole
+   chip responds and the mark does not appear to float free of its label. */
+.zx-directory-link--brand {
+  gap: var(--zx-space-2);
+  padding: var(--zx-space-15) var(--zx-space-25);
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: 999px;
+  background: var(--md-sys-color-surface);
+  color: var(--md-sys-color-on-surface);
+  font-size: var(--zx-text-meta);
+  font-weight: var(--zx-weight-medium);
+  transition:
+    background 120ms ease,
+    border-color 120ms ease;
+}
+
 .zx-directory-link:hover {
+  color: var(--md-sys-color-on-surface);
+}
+
+/* AFTER the generic hover, not before it. Both selectors are one class plus one
+   pseudo-class, so they have identical specificity and source order decides —
+   written above, the chip's `background` survived but the generic rule's `color`
+   still applied, which is harmless here only by luck. Ordering it last makes the
+   chip's hover authoritative regardless of what the base rule grows into. */
+.zx-directory-link--brand:hover {
+  border-color: var(--md-sys-color-outline);
+  background: var(--md-sys-color-surface-container-high);
   color: var(--md-sys-color-on-surface);
 }
 
@@ -2308,24 +2395,34 @@
    The hairline ring does the work `box-shadow` does there: several of these icons
    are pure black or pure white and would otherwise dissolve into the surface. */
 .zx-directory-icon {
-  width: 16px;
-  height: 16px;
+  /* 20px, up from 16px, matching the markup's intrinsic size. The marks are the
+     reason this group reads as partners rather than as text links, and inside a
+     bounded chip 16px left them looking like favicons. */
+  width: 20px;
+  height: 20px;
   flex: none;
-  border-radius: 4px;
+  border-radius: 5px;
   object-fit: cover;
   box-shadow: 0 0 0 1px var(--md-sys-color-outline-variant);
 }
 
-/* The independence line. Sized below the links it qualifies (12px against 13px)
-   and set at the footer's quietest weight — it has to be present and legible, but
-   it is a disclaimer, not a thing anyone came here to read. */
+/* Each group's closing note. Sized below the links it qualifies and set at the
+   footer's quietest weight — it has to be present and legible, but it is a
+   statement of relationship, not a thing anyone came here to read.
+   
+   No `opacity` any more. It used to carry 0.75 on top of `on-surface-variant`,
+   which compounds into a contrast ratio the token was never checked at — and this
+   is the licensing sentence, the one line on the page that must survive being read
+   in daylight on a phone. The token alone is the correct quiet. */
 .zx-directory-note {
   margin: 0;
   color: var(--md-sys-color-on-surface-variant);
   font-size: var(--zx-text-caption);
   line-height: 1.5;
   text-wrap: pretty;
-  opacity: 0.75;
+  /* Long-ish sentences; keeps them from running the full 1120px on desktop where
+     the eye loses the line return. */
+  max-width: 68ch;
 }
 
 /* Two centered lines, links then copyright. No internal divider and no split
@@ -3136,23 +3233,28 @@
     max-width: 360px;
   }
 
-  /* Two columns, wide one first. The services row is eleven items with icons and
+  /* Two columns, wide one first. The partner panel is eleven chips with icons and
      the reference row is five to seven plain names, so an even split would leave
      the right column half empty while the left one still wrapped to three lines.
-     `2fr 1fr` lets each list wrap to about the same depth.
      
-     The note spans both columns and stays on its own line: it qualifies every link
-     above it, and tucked into a column it would read as a footnote to that column
-     alone. */
+     `align-items: start` matters now that the left column is a bordered panel:
+     without it the panel stretches to the full row height and gains dead tinted
+     space under its last chip, which makes the box look like it lost content. */
   .zx-directory {
     display: grid;
     grid-template-columns: 2fr 1fr;
-    column-gap: var(--zx-space-10);
+    align-items: start;
+    column-gap: var(--zx-space-8);
     row-gap: var(--zx-space-4);
   }
 
-  .zx-directory-note {
-    grid-column: 1 / -1;
+  /* The reference column's note no longer needs to span the grid — each note now
+     lives inside the group it qualifies, which is what makes the two relationships
+     distinguishable. It only needs its own measure, which the base rule gives it.
+     Nudged down so its text baseline lines up with the partner note across the
+     gutter, rather than sitting higher because its column has no panel padding. */
+  .zx-directory-group:not(.zx-directory-group--partners) {
+    padding-block-start: var(--zx-space-1);
   }
 
   /* One row instead of a centred stack. With 1120px available, three short items

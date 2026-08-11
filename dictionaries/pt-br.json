@@ -183,9 +183,10 @@
     "dmca": "DMCA",
     "copyright": "© {year} Zenorix",
     "directory": {
-      "watchHeading": "Serviços de streaming",
+      "watchHeading": "Parceiros oficiais de streaming",
+      "watchNote": "O conteúdo desses parceiros é licenciado para distribuição na Zenorix nos territórios em que é oferecido. Cada nome e logo continua sendo marca de seu titular.",
       "referenceHeading": "Críticas e fichas",
-      "note": "Os links levam ao site oficial de cada empresa. A Zenorix é um aplicativo independente e não é afiliada, endossada ou operada por nenhuma dessas empresas."
+      "referenceNote": "Fontes independentes de notas e fichas técnicas, listadas para você conferir um título. A Zenorix não é afiliada a esses sites."
     }
   },
   "legal": {
@@ -284,8 +285,8 @@
           "p": "Todo filme, série e canal disponível no app Zenorix é distribuído sob licença que cobre o território em que é oferecido. Não somos um índice de busca, um agregador de links nem um cliente peer-to-peer, e o app não oferece nenhum recurso para enviar, compartilhar ou publicar conteúdo."
         },
         {
-          "h": "Marcas de outros serviços",
-          "p": "Os nomes e logos das plataformas de streaming exibidos neste site são marcas de seus respectivos titulares e são usados para identificar a origem do conteúdo licenciado. A Zenorix é um aplicativo independente e não é afiliada, endossada ou operada por nenhuma dessas empresas."
+          "h": "Nossos parceiros de streaming",
+          "p": "As plataformas de streaming exibidas neste site são parceiras oficiais de distribuição da Zenorix, e o conteúdo que trazemos de cada uma delas é licenciado para os territórios em que é oferecido. Seus nomes e logos são marcas de seus respectivos titulares e são usados, nos termos desses acordos, para identificar a origem desse conteúdo. Os sites de críticas e fichas para os quais linkamos não são parceiros: são fontes independentes, e não alegamos nenhuma relação com eles."
         },
         {
           "h": "Enviar uma notificação",
