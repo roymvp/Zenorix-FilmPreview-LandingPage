@@ -146,7 +146,7 @@
 
 /* Semantic lists are used throughout; none of them want default list styling. */
 .zx-rail,
-.zx-footer-links,
+.zx-footer-col-list,
 .zx-dialog-bullets {
   list-style: none;
 }
@@ -2728,15 +2728,16 @@
    the three legal links moved into the support column where they now sit under a
    "Legal" heading, and nothing renders those classes any more.
    
-   Separated from the directory above it by a hairline. This is the third and last
-   band, and it is a genuinely different kind of content from the two above — not
-   navigation and not partners, but the site's own legal identity. */
+   NO `border-block-start` here, deliberately. My first pass added one to separate
+   this band from the directory, and the browser showed it rendering as a DOUBLE
+   hairline: `.zx-directory` already closes itself with a `border-block-end`, so the
+   two rules stacked with only this padding between them. The separation was already
+   there — I was drawing it twice. Padding alone now. */
 .zx-footer-base {
   display: flex;
   flex-direction: column;
   gap: var(--zx-space-2);
   padding-block-start: var(--zx-space-6);
-  border-block-start: 1px solid var(--md-sys-color-outline-variant);
 }
 
 /* Address and copyright on one line where there is room, stacked where there is
@@ -2751,6 +2752,11 @@
 }
 
 .zx-footer-mail {
+  /* `inline-block` + block padding takes the box from 18px to 26px, clearing the
+     24px AA target-size floor. Measured in the browser at 18px before this — the
+     only target in the footer I introduced below the floor. */
+  display: inline-block;
+  padding-block: var(--zx-space-1);
   color: var(--md-sys-color-on-surface-variant);
   font-size: var(--zx-text-caption);
   line-height: 1.5;

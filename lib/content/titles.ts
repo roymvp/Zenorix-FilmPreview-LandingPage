@@ -876,13 +876,19 @@ export const getTitleBySlug = (slug: string): TitleRecord | undefined =>
  * the footer lists the same titles in the same order as the rails above it — and so
  * a market with its own show ranking gets its own footer order for free.
  *
- * THE FILTER IS LOAD-BEARING, not defensive habit. The chart pool holds 30 entries
- * and only 29 have researched records, because a title with no verified facts
- * deliberately gets no page (see the file header). Mapping the chart straight to
- * hrefs would therefore emit one link to a route that 404s — in the footer, on
- * every page of the site, which is exactly where a crawler finds it first.
- * `getTitle` returning `undefined` IS the signal that no page exists, and skipping
- * those entries is the only correct reading of it.
+ * WHY THE `getTitle` FILTER EXISTS. Not every chart entry has a page: a title with
+ * no researched facts deliberately gets no record (see the file header), and
+ * `getTitle` returning `undefined` is precisely that signal. Mapping the chart
+ * straight to hrefs would emit a link to a route that 404s, in the footer, on every
+ * page of the site — where a crawler finds it first.
+ *
+ * Measured honestly, at today's data and `limit: 6` the filter changes nothing: the
+ * movie chart's one page-less entry ('CatVideoFest 2026') sits at index 9, past the
+ * cut. So this is a GUARD, not an active fix — it earns its place because the two
+ * things that would break it are both routine (raising the limit, or a chart
+ * reshuffle that promotes an unresearched title), and the failure would be silent
+ * and site-wide. Do not "simplify" it away on the grounds that the output is
+ * currently identical without it.
  */
 export function catalogueLinks(
   locale: Locale,
