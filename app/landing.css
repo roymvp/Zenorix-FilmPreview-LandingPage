@@ -2671,8 +2671,14 @@
   color: var(--md-sys-color-on-surface);
 }
 
-.zx-footer-app .zx-store-eyebrow,
-.zx-footer-app .zx-store-badge {
+/* `.zx-store-eyebrow` is what these tiles actually render — the "Coming soon to the"
+   line above the store name, which is how `StoreRow` composes an `eyebrow` prop.
+   `.zx-store-badge` is the same status in the component's other layout, a "COMING SOON"
+   tag on its own row. Both read `--zx-on-media-variant` from the shared rules, so both
+   are restated: whichever branch renders, the tile cannot half-convert to footer
+   colours. */
+.zx-footer-app .zx-store-badge,
+.zx-footer-app .zx-store-eyebrow {
   color: var(--md-sys-color-on-surface-variant);
 }
 
@@ -2896,12 +2902,15 @@
      ugly and harder to read. The element is here for its semantics, not its styling. */
   font-style: normal;
   line-height: 1.5;
-  /* Long enough to wrap in the column; keeps the break sensible when it does. */
+  /* `pretty` rather than the default: these two strings wrap to 2-3 lines each in a
+     ~290px column, and it keeps a single word off the last line. */
   text-wrap: pretty;
-  /* No `max-width`, for the reason given on `.zx-footer-tagline`: at 11px a `42ch` cap
-     is far narrower than the column, and it forced both strings to wrap mid-phrase
-     ("... British Virgin / Islands") while the space to their right sat empty. The
-     column bounds them. */
+  /* Still no `max-width` — the column is the measure. Both strings end in "British
+     Virgin Islands", which at 11px in a ~290px track breaks after "British" on both
+     lines. `pretty` cannot fix that (the phrase genuinely does not fit) and a `ch` cap
+     would only narrow the track further. The territory is repeated because the two
+     facts are independent — a registration jurisdiction and a street address — so
+     neither can drop it. */
   opacity: 0.75;
 }
 
@@ -3604,9 +3613,15 @@
        a track at its longest unbreakable content, and this row contains an email
        address and a registration number that must not be allowed to push the track
        wider than its share. */
+    /* Measured at the 1280px shell: brand 294px, install 314px, contact and legal
+       196px each. The two link columns were the ones with slack — their longest rows
+       are "contact@zenorix.space" (~145px) and "Privacy" — while brand was fitting a
+       two-line tagline and a four-line address into 294px. Moving 0.25fr from each
+       link column to brand spends that slack where it is short, and legal at ~155px
+       still clears its widest link. */
     grid-template-columns:
-      minmax(0, 1.5fr) minmax(0, 1.6fr)
-      minmax(0, 1fr) minmax(0, 1fr);
+      minmax(0, 2fr) minmax(0, 1.6fr)
+      minmax(0, 0.75fr) minmax(0, 0.75fr);
     column-gap: var(--zx-space-10);
     row-gap: var(--zx-space-10);
     margin-block-end: var(--zx-space-14);
