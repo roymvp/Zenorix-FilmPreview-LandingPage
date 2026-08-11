@@ -5,6 +5,7 @@ import { legalLinks, type LegalSlug } from '@/lib/content/legal'
 import { referenceLinks, watchLinks } from '@/lib/content/outbound'
 import { fill, type Dictionary } from '@/lib/i18n/dictionaries'
 import type { Locale } from '@/lib/i18n/config'
+import { buildLegalStructuredData } from '@/lib/seo'
 
 /**
  * The shell all three legal documents render in.
@@ -37,8 +38,23 @@ export function LegalPage({
   const copy = dict.legal[doc]
   const path = (target: Locale) => `/${target}/${doc}`
 
+  const structuredData = buildLegalStructuredData({
+    locale,
+    dict,
+    doc,
+    /* The same constant the "Last updated" line below renders, so the visible date
+       and the graph's `dateModified` cannot disagree. */
+    lastUpdated: LAST_UPDATED,
+  })
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        // Emitted server-side; the object is built from typed content, not input.
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
+
       <a className="zx-visually-hidden" href="#zx-main">
         {dict.a11y.skipToContent}
       </a>

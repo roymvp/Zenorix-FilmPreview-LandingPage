@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { identityProfiles, ORG, SITE, SOCIAL } from '@/lib/config/site'
+import type { LegalSlug } from '@/lib/content/legal'
 import { fill, type Dictionary } from '@/lib/i18n/dictionaries'
 import { locales, localeMeta, type Locale } from '@/lib/i18n/config'
 
@@ -147,6 +148,111 @@ export function buildLegalMetadata({
        are what a reviewer looks for to decide the site is a real operation, and
        `follow` passes their link back to the market page. */
     robots: { index: true, follow: true },
+  }
+}
+
+/**
+ * JSON-LD for a legal document: where it sits, and who it binds.
+ *
+ * These nine URLs were the only pages on the site emitting NO structured data at
+ * all, so a crawler saw `/en/dmca` as a flat document with no relationship to the
+ * market page above it or the company that wrote it.
+ *
+ * Deliberately two nodes, not the eight the landing page emits. There is no
+ * `SoftwareApplication` and no `AggregateOffer` here: this page sells nothing, and
+ * attaching the app's price to a privacy policy is the kind of graph that
+ * describes the site instead of the page — the same mistake as the `Movie` node
+ * removed from `buildStructuredData`.
+ */
+export function buildLegalStructuredData({
+  locale,
+  dict,
+  doc,
+  lastUpdated,
+}: {
+  locale: Locale
+  dict: Dictionary
+  doc: LegalSlug
+  /**
+   * ISO date the copy last changed. Passed in rather than read from the dictionary
+   * because it is not copy — it lives as one constant in `LegalPage`, beside the
+   * "Last updated" line it also renders, so the visible date and `dateModified`
+   * are the same value by construction.
+   */
+  lastUpdated: string
+}) {
+  const copy = dict.legal[doc]
+  const url = `${SITE.url}/${locale}/${doc}`
+
+  return {
+    '@context': 'https://schema.org',
+    '@graph': [
+      /* The trail: market page -> this document.
+         
+         Two levels because that is the real depth — these documents hang directly
+         off the market page, and there is no intermediate "legal" index to name.
+         Inventing one would put a URL in the trail that 404s.
+         
+         The last item carries a `name` and NO `item`, which is the documented
+         pattern for the page you are already on: a self-referential URL in the
+         final position is redundant, and Google treats the trailing `item` as
+         optional precisely for this case.
+         
+         Note there is no VISIBLE breadcrumb trail on these pages — the way back up
+         is the top bar's home link and the "back to home" line at the end of the
+         article, which is the same one-level-up relationship this markup states.
+         Worth knowing if a visible trail is ever added: it has to agree with this,
+         and this is the side that is already correct. */
+      {
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          {
+            '@type': 'ListItem',
+            position: 1,
+            /* The bare brand, which is the conventional root crumb and needs no
+               translation.
+               
+               NOT `dict.nav.home` or `dict.legal.backToHome`, the two strings that
+               label the actual links up to this page: both are written as link
+               names and embed the brand already ("Zenorix home", "Back to
+               Zenorix"), so either would render as "Zenorix home > Privacy
+               Policy". A crumb is a place, not an instruction to go there. */
+            name: SITE.name,
+            item: `${SITE.url}/${locale}`,
+          },
+          {
+            '@type': 'ListItem',
+            position: 2,
+            /* The bare document title, NOT the brand-suffixed `<title>` that
+               `buildLegalMetadata` builds. A crumb is a position in a hierarchy,
+               so "Privacy Policy — Zenorix" would read as the site's name nested
+               inside its own trail. */
+            name: copy.title,
+          },
+        ],
+      },
+      /* The document as a page, tied to the company that is bound by it.
+         
+         This is the node that makes the visible `<address>` block at the foot of
+         the article machine-readable: the page names Zenorix TV Limited, its BVI
+         registration number and a notices address, and `publisher` is what states
+         that the policy is a commitment BY that entity rather than prose that
+         happens to mention it.
+         
+         `@id` is the same origin-level fragment the landing page's Organization
+         node declares, so all twelve pages point at one company. It is a reference
+         only — the full Organization is defined once, on the market page, and
+         restating its fields here would be a second copy to keep in sync. */
+      {
+        '@type': 'WebPage',
+        url,
+        name: copy.title,
+        description: copy.description,
+        inLanguage: localeMeta[locale].hreflang,
+        publisher: { '@id': `${SITE.url}/#organization` },
+        dateModified: lastUpdated,
+      },
+    ],
   }
 }
 
