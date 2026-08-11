@@ -3325,3 +3325,271 @@
     justify-content: center;
   }
 }
+
+/* ==========================================================================
+   TITLE DETAIL PAGE — /[lang]/titles/[slug]
+   ==========================================================================
+
+   Reuses `.zx-page--doc` (which pays the fixed top bar's height) and `.zx-shell`
+   from the legal pages, because the outer geometry is identical: no hero, a top
+   bar, a capped column, a footer.
+
+   It does NOT reuse `.zx-doc-body`'s 62ch measure. That measure exists for
+   paragraphs read start to finish; this page is a poster beside a fact list, and
+   62ch would strand the poster in a narrow column while the credits wrapped every
+   three names. The measure here is applied to the SYNOPSIS only — the one piece of
+   prose on the page — and the rest is free to use the full column.
+
+   Mobile-first: the head is a single stacked column, and the 720px block turns it
+   into poster-beside-text. */
+
+.zx-title {
+  padding: var(--zx-space-8) 0 var(--zx-space-10);
+}
+
+/* Breadcrumb. Small, quiet, and above the fold — it mirrors the BreadcrumbList in
+   the JSON-LD, and its job is orientation for someone who landed here from search
+   with no idea what the site is. */
+.zx-title-crumbs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--zx-space-2);
+  margin-bottom: var(--zx-space-6);
+  font-size: var(--zx-text-meta);
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.zx-title-crumbs a {
+  color: var(--md-sys-color-on-surface-variant);
+  text-decoration: none;
+}
+
+.zx-title-crumbs a:hover {
+  color: var(--md-sys-color-on-surface);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* The current page in the trail. Not a link, and dimmer than the parent it sits
+   next to, so the only thing that looks clickable is the way out. */
+.zx-title-crumbs [aria-current='page'] {
+  color: var(--md-sys-color-on-surface);
+}
+
+.zx-title-head {
+  display: flex;
+  flex-direction: column;
+  gap: var(--zx-space-6);
+  margin-bottom: var(--zx-space-8);
+}
+
+/* The poster, at its true 2:3.
+   
+   Capped at 200px on mobile and centred rather than run full-bleed: this is key
+   art the visitor has usually just seen on the chart rail, so it needs to be
+   recognisable, not dominant — the fold below it belongs to the facts they came
+   for. `outline-variant` hairline for the same reason the dialog poster has one:
+   these tiles have dark corners and would otherwise dissolve into the page. */
+.zx-title-poster {
+  width: 100%;
+  max-width: 200px;
+  height: auto;
+  aspect-ratio: 2 / 3;
+  object-fit: cover;
+  border-radius: var(--zx-radius-md);
+  box-shadow: 0 0 0 1px var(--md-sys-color-outline-variant);
+}
+
+.zx-title-intro {
+  display: flex;
+  flex-direction: column;
+  /* No gap. Every child below sets its own top margin, because the steps here are
+     deliberately uneven — the eyebrow sits tight to the h1, the synopsis further
+     off, the scores further still. A uniform gap would flatten that. */
+  gap: 0;
+  min-width: 0;
+}
+
+/* The type eyebrow ("Movie" / "Series"). Caps and letter-spacing so it reads as a
+   category label rather than the first line of the synopsis. */
+.zx-title-kind {
+  margin: 0 0 var(--zx-space-2);
+  font-size: var(--zx-text-micro);
+  font-weight: var(--zx-weight-semibold);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--md-sys-color-primary);
+}
+
+.zx-title-name {
+  margin: 0;
+  font-size: var(--zx-text-h1);
+  font-weight: var(--zx-weight-bold);
+  line-height: var(--zx-lh-tight);
+  color: var(--md-sys-color-on-surface);
+  /* Film titles are long and break badly — "Stuart Fails to Save the / Universe"
+     is fine, a one-word last line is not. */
+  text-wrap: balance;
+}
+
+.zx-title-synopsis {
+  /* The one reading measure on the page. See the section note: this is the only
+     prose here, so it gets the paragraph treatment and nothing else does. */
+  max-width: 58ch;
+  margin: var(--zx-space-3) 0 0;
+  font-size: var(--zx-text-lg);
+  line-height: var(--zx-lh-body);
+  color: var(--md-sys-color-on-surface-variant);
+  text-wrap: pretty;
+}
+
+/* CRITIC SCORES.
+   
+   A horizontal row of at most two. Each one is a link to the source, and each
+   prints its review count and read date underneath — the markup comments in
+   `title-page.tsx` and the `Score` type both explain why the number never appears
+   without them. Visually that means the value can be big and confident while the
+   provenance stays legible directly beneath it. */
+.zx-title-scores {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--zx-space-3);
+  margin: var(--zx-space-5) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.zx-title-score a {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--zx-space-3) var(--zx-space-4);
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: var(--zx-radius-md);
+  background: var(--md-sys-color-surface-container-low);
+  text-decoration: none;
+  transition: border-color 150ms ease, background-color 150ms ease;
+}
+
+.zx-title-score a:hover {
+  border-color: var(--md-sys-color-outline);
+  background: var(--md-sys-color-surface-container);
+}
+
+.zx-title-score-value {
+  font-size: var(--zx-text-h2);
+  font-weight: var(--zx-weight-bold);
+  line-height: var(--zx-lh-tight);
+  color: var(--md-sys-color-on-surface);
+  /* Two scores side by side are compared digit to digit. */
+  font-variant-numeric: tabular-nums;
+}
+
+.zx-title-score-meta {
+  font-size: var(--zx-text-caption);
+  line-height: var(--zx-lh-snug);
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+/* The single CTA, sitting after the facts rather than above them — see the note in
+   `title-page.tsx` about why leading with an install prompt is what got the old
+   route removed. Rule above it so it reads as a deliberate break in the document
+   rather than another row of the fact list. */
+.zx-title-cta {
+  margin: var(--zx-space-8) 0;
+  padding-top: var(--zx-space-8);
+  border-top: 1px solid var(--md-sys-color-outline-variant);
+}
+
+.zx-title-section-heading {
+  margin: var(--zx-space-8) 0 var(--zx-space-4);
+  font-size: var(--zx-text-h2);
+  font-weight: var(--zx-weight-semibold);
+  line-height: var(--zx-lh-snug);
+  color: var(--md-sys-color-on-surface);
+}
+
+/* THE FACT LIST.
+   
+   Auto-fit grid rather than a fixed two columns: the number of facts varies by
+   title (a film has a runtime, a series has seasons and episodes), and `auto-fit`
+   with a min track means one column on a phone and two or three on a wide screen
+   without a media query per breakpoint.
+   
+   Label ABOVE value, like `.zx-doc-entity-row` and for the same reason documented
+   there — a fixed label column cannot hold "ผู้กำกับ", "Distribuidora" and
+   "Production companies" without one of the three looking broken. */
+.zx-title-facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+  gap: var(--zx-space-5) var(--zx-space-6);
+  margin: 0;
+}
+
+.zx-title-fact {
+  display: flex;
+  flex-direction: column;
+  gap: var(--zx-space-1);
+  /* Long studio lists in a narrow track: wrap inside the value rather than push
+     the grid wider. */
+  min-width: 0;
+}
+
+.zx-title-fact dt {
+  font-size: var(--zx-text-caption);
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.zx-title-fact dd {
+  margin: 0;
+  font-size: var(--zx-text-meta);
+  line-height: var(--zx-lh-snug);
+  color: var(--md-sys-color-on-surface);
+  text-wrap: pretty;
+}
+
+/* CAST. Chips, not a bulleted column: these are eight or nine short proper nouns,
+   and a vertical list of them would take a full screen to say very little. */
+.zx-title-cast {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--zx-space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.zx-title-cast li {
+  padding: var(--zx-space-2) var(--zx-space-3);
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: var(--zx-radius-sm);
+  background: var(--md-sys-color-surface-container-low);
+  font-size: var(--zx-text-meta);
+  line-height: var(--zx-lh-snug);
+  color: var(--md-sys-color-on-surface);
+}
+
+@media (min-width: 720px) {
+  /* Poster beside the text. `flex-start` so the poster's top aligns with the
+     eyebrow rather than stretching down the intro column, and `flex: 0 0 auto` so
+     it keeps its intrinsic width while the text takes the remainder. */
+  .zx-title-head {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: var(--zx-space-8);
+  }
+
+  .zx-title-poster {
+    flex: 0 0 auto;
+    /* Wider here than the 200px mobile cap: at this width it is sitting next to a
+       column of text rather than above it, and the two need comparable visual
+       weight for the header to read as one unit. */
+    width: 240px;
+    max-width: none;
+  }
+
+  .zx-title-intro {
+    flex: 1 1 auto;
+  }
+}

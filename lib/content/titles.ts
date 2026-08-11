@@ -342,6 +342,92 @@ const TITLES: Partial<Record<ChartEntryId, TitleRecord>> = {
     rottenTomatoes: { value: 82, reviewCount: 11, asOf: '2026-08-04', url: 'https://www.rottentomatoes.com/tv/lioness/s03' },
     metacritic:     { value: 76, reviewCount: 5,  asOf: '2026-08-04', url: 'https://www.metacritic.com/tv/lioness/season-3/' },
   },
+
+  rickMorty: {
+    id: 'rickMorty',
+    slug: 'rick-and-morty',
+    synopsis: 'An alcoholic mad scientist drags his anxious grandson through an infinite number of realities, splitting their time between interdimensional catastrophe and suburban family life.',
+    released: '2013-12-02',
+    seasons: 9,
+    episodes: 91,
+    network: 'Adult Swim',
+    creators: ['Justin Roiland', 'Dan Harmon'],
+    /* Cardoni and Belden voice Rick and Morty from season 7 on, after Adult Swim
+       recast the roles. Billed first because they are who a viewer of the current
+       season actually hears; Roiland is deliberately not listed. */
+    cast: ['Ian Cardoni', 'Harry Belden', 'Chris Parnell', 'Spencer Grammer', 'Sarah Chalke'],
+    genres: ['Adult animation', 'Science fiction', 'Black comedy', 'Adventure'],
+    productionCompanies: ['Williams Street', 'Harmonious Claptrap', 'Starburns Industries', 'Green Portal Productions'],
+    distributors: ['Adult Swim'],
+    streamingOn: 'hbo-max',
+    /* Season 9, which finished airing 2026-07-26. Nine critics is a small sample,
+       and printing the count is what stops a bare "100%" from reading as a bigger
+       claim than it is. Metacritic has no score for this season, so none is set. */
+    rottenTomatoes: { value: 100, reviewCount: 9, asOf: '2026-08-12', url: 'https://www.rottentomatoes.com/tv/rick_and_morty/s09' },
+  },
+
+  walterBoys: {
+    id: 'walterBoys',
+    slug: 'my-life-with-the-walter-boys',
+    synopsis: 'Orphaned at fifteen, a Manhattan teenager is taken in by family friends on a rural Colorado ranch and has to find her footing in a house of ten siblings.',
+    released: '2023-12-07',
+    seasons: 3,
+    episodes: 30,
+    network: 'Netflix',
+    creators: ['Melanie Halsall'],
+    cast: ['Nikki Rodriguez', 'Noah LaLonde', 'Ashby Gentry', 'Connor Stanhope', 'Jaylan Evans', 'Sarah Rafferty', 'Marc Blucas'],
+    genres: ['Teen drama', 'Romance'],
+    productionCompanies: ['Nomadic Pictures', 'iGeneration Studios', 'Sony Pictures Television'],
+    distributors: ['Netflix'],
+    streamingOn: 'netflix',
+    /* Season 3, released 2026-08-06, on five reviews. The series' own history is
+       the reason the season is labelled rather than the show: season 1 scored 45%
+       and season 2 67%, so an unqualified "100%" here would be misleading. */
+    rottenTomatoes: { value: 100, reviewCount: 5, asOf: '2026-08-12', url: 'https://www.rottentomatoes.com/tv/my_life_with_the_walter_boys/s03' },
+  },
+
+  findYou: {
+    id: 'findYou',
+    slug: 'i-will-find-you',
+    synopsis: 'Wrongly imprisoned for murdering his three-year-old son, a former law professor breaks out after his ex-sister-in-law brings him a recent photograph in which the boy appears to be alive.',
+    released: '2026-06-18',
+    /* A closed-ended limited series: one season, eight episodes, all released the
+       same day. `seasons: 1` is the true figure rather than an omission — the page
+       reads it to label the title a series at all. */
+    seasons: 1,
+    episodes: 8,
+    network: 'Netflix',
+    creators: ['Robert Hull', 'Harlan Coben'],
+    cast: ['Sam Worthington', 'Britt Lower', 'Milo Ventimiglia', 'Erin Richards', 'Jonathan Tucker', 'Madeleine Stowe', 'Logan Browning', 'Chi McBride'],
+    genres: ['Crime drama', 'Thriller'],
+    productionCompanies: ['Final Twist Productions', 'I Have an Idea Productions', 'Netflix Worldwide Productions'],
+    distributors: ['Netflix'],
+    streamingOn: 'netflix',
+    rottenTomatoes: { value: 64, reviewCount: 38, asOf: '2026-07-28', url: 'https://www.rottentomatoes.com/tv/i_will_find_you/s01' },
+    metacritic:     { value: 56, reviewCount: 19, asOf: '2026-06-19', url: 'https://www.metacritic.com/tv/i-will-find-you/season-1/' },
+  },
+
+  stuart: {
+    id: 'stuart',
+    slug: 'stuart-fails-to-save-the-universe',
+    synopsis: 'After breaking a quantum device built by his physicist friends, a comic shop owner is left hopping between collapsing parallel universes trying to undo the damage.',
+    released: '2026-07-23',
+    seasons: 1,
+    /* 3 of a 10-episode order, airing weekly. This is the `episodes` rule in the
+       type doing real work: the season is announced through 2026-09-24, and
+       recording 10 would send a reader looking for seven episodes that do not
+       exist yet. */
+    episodes: 3,
+    network: 'HBO Max',
+    creators: ['Chuck Lorre', 'Zak Penn', 'Bill Prady'],
+    cast: ['Kevin Sussman', 'Lauren Lapkus', 'Brian Posehn', 'John Ross Bowie'],
+    genres: ['Comedy', 'Science fiction', 'Action-adventure'],
+    productionCompanies: ['Chuck Lorre Productions', 'Warner Bros. Television'],
+    distributors: ['HBO Max'],
+    streamingOn: 'hbo-max',
+    rottenTomatoes: { value: 76, reviewCount: 41, asOf: '2026-08-06', url: 'https://www.rottentomatoes.com/tv/stuart_fails_to_save_the_universe/s01' },
+    metacritic:     { value: 62, reviewCount: 19, asOf: '2026-07-29', url: 'https://www.metacritic.com/tv/stuart-fails-to-save-the-universe/season-1/' },
+  },
 }
 
 /* The key and the record's own `id` are two places to write the same string, so
