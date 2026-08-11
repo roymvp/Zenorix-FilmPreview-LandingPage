@@ -1,9 +1,8 @@
 import { FooterContacts } from '@/components/landing/footer-contacts'
 import { OutboundDirectory } from '@/components/landing/outbound-directory'
-import { SITE, orgLine } from '@/lib/config/site'
+import { SITE, orgAddressLine, orgLine } from '@/lib/config/site'
 import { legalLinks } from '@/lib/content/legal'
 import { referenceLinks, watchLinks } from '@/lib/content/outbound'
-import { catalogueLinks } from '@/lib/content/titles'
 import type { Locale } from '@/lib/i18n/config'
 import { fill, type Dictionary } from '@/lib/i18n/dictionaries'
 import { marketValues } from '@/lib/seo'
@@ -24,16 +23,27 @@ import { marketValues } from '@/lib/seo'
  *
  * WHAT EACH COLUMN IS FOR, since the grouping is the whole design:
  *
- * - Brand. Wordmark, one line on what the product is, install CTA. It is the only
- *   column with a coloured action, because "get the app" is the one thing the
- *   footer is allowed to still be selling.
- * - Movies / Shows. Real internal links to title pages, drawn from the SAME chart
- *   the rails render (see `catalogueLinks`). These are new and they matter for a
- *   reason beyond navigation: every other footer link on this site pointed
- *   OUTWARD, at Netflix or IMDb, which for a crawler made the footer a pure
- *   outbound hub. Linking the catalogue gives the title pages a site-wide internal
- *   path they previously only had from the rails on one page.
- * - Support + legal. Contact, social, and the three legal pages.
+ * - Brand. Wordmark, one line on what the product is, install CTA, and the
+ *   operating entity. It is the only column with a coloured action, because "get
+ *   the app" is the one thing the footer is allowed to still be selling.
+ * - Get in touch. The four contact channels.
+ * - Legal. The three legal pages.
+ *
+ * TWO COLUMNS WERE REMOVED: "Trending movies" and "Trending shows", six title-page
+ * links each. The note here used to defend them on crawl grounds — every other
+ * footer link points OUTWARD, at Netflix or IMDb, so the catalogue links were
+ * described as the title pages' only site-wide internal path. That was overstated.
+ * `app/sitemap.ts` enumerates all of them via `allTitles()`, `llms.txt` lists them
+ * with descriptions, and `top-chart.tsx` links them from the rails; twelve of
+ * eighty-seven titles in a footer added a fourth, partial path, not the only one.
+ * What it cost was concrete: two columns of film names no reader came here for,
+ * padding the band to twice the width it needed.
+ *
+ * Support and legal, which shared one column while the band was four wide, are two
+ * columns now. That is not a new idea so much as the removal reversing the old
+ * one's premise: they were merged because a fifth column holding three short links
+ * "would leave most of its width empty", and with two columns gone the opposite is
+ * true — the band has width to fill, and the two groups are not the same thing.
  *
  * The partner directory stays BELOW the columns rather than becoming a fifth one.
  * It has its own two headings and two licensing notes, and squeezed into a
@@ -63,10 +73,6 @@ export function SiteFooter({ locale, dict }: { locale: Locale; dict: Dictionary 
 
   const copy = dict.footer
   const values = marketValues(dict)
-  /* Six per column: enough that the band reads as a real index, few enough that
-     the two columns stay the same height as the brand block beside them. */
-  const movies = catalogueLinks(locale, 'movie', 6)
-  const series = catalogueLinks(locale, 'series', 6)
 
   return (
     <footer className="zx-footer">
@@ -95,37 +101,36 @@ export function SiteFooter({ locale, dict }: { locale: Locale; dict: Dictionary 
               {copy.installHeading}
             </a>
             <p className="zx-footer-install-note">{fill(copy.installNote, values)}</p>
+
+            {/* THE OPERATING ENTITY, moved up out of the baseline band — and the
+                address is new here, having previously appeared only on the legal
+                pages.
+                
+                The old placement had it alone above the copyright, on the reasoning
+                that this line "exists to be FOUND rather than read". True, and the
+                brand column is where someone looks: it already names the product, so
+                naming the company that runs it belongs to the same thought. In the
+                baseline it read as fine print attached to the copyright, which is a
+                different claim than "here is who we are".
+                
+                `<address>` rather than a second `<p>`. This is the contact/provenance
+                block for the whole document, which is exactly the element's meaning,
+                and it turns two loose lines into one labelled group for a screen
+                reader. Browsers italicise it by default, undone in the stylesheet.
+                
+                The registration line and the street address stay SEPARATE strings
+                from `orgLine()` and `orgAddressLine()` rather than being concatenated:
+                the legal pages render the same two facts from the same two helpers, so
+                a footer that composed its own version would be a second source of
+                truth for a detail that must not disagree. */}
+            <address className="zx-footer-org">
+              {/* Bare spans, no class. `.zx-footer-org` is a flex column, so these
+                  stack as its items — a per-line class would have no rule to carry. */}
+              <span>{orgLine()}</span>
+              <span>{orgAddressLine()}</span>
+            </address>
           </div>
 
-          <nav className="zx-footer-col" aria-labelledby="zx-footer-movies">
-            <h2 className="zx-footer-heading" id="zx-footer-movies">
-              {copy.browseHeading}
-            </h2>
-            <ul className="zx-footer-col-list">
-              {movies.map((link) => (
-                <li key={link.href}>
-                  <a href={link.href}>{link.label}</a>
-                </li>
-              ))}
-            </ul>
-          </nav>
-
-          <nav className="zx-footer-col" aria-labelledby="zx-footer-series">
-            <h2 className="zx-footer-heading" id="zx-footer-series">
-              {copy.seriesHeading}
-            </h2>
-            <ul className="zx-footer-col-list">
-              {series.map((link) => (
-                <li key={link.href}>
-                  <a href={link.href}>{link.label}</a>
-                </li>
-              ))}
-            </ul>
-          </nav>
-
-          {/* Support and legal share a column. They are both "the site itself"
-              rather than content, and on desktop a fifth column of three short
-              legal links would leave most of its width empty. */}
           <div className="zx-footer-col">
             <h2 className="zx-footer-heading">{copy.helpHeading}</h2>
             {/* All four channels — support, X, community, email — in one uniform
@@ -133,8 +138,13 @@ export function SiteFooter({ locale, dict }: { locale: Locale; dict: Dictionary 
                 link stranded in the baseline band, each with its own format; see the
                 note in `FooterContacts` for why that was worth collapsing. */}
             <FooterContacts contact={dict.contact} social={dict.social} />
+          </div>
 
-            <h2 className="zx-footer-heading zx-footer-heading--second">
+          {/* Legal, on its own again. `zx-footer-heading--second` and the wrapper it
+              needed are gone with the merge — this heading is its column's first
+              child, so the column's own `gap` spaces it correctly. */}
+          <nav className="zx-footer-col" aria-labelledby="zx-footer-legal">
+            <h2 className="zx-footer-heading" id="zx-footer-legal">
               {copy.legalHeading}
             </h2>
             <ul className="zx-footer-col-list">
@@ -144,7 +154,7 @@ export function SiteFooter({ locale, dict }: { locale: Locale; dict: Dictionary 
                 </li>
               ))}
             </ul>
-          </div>
+          </nav>
         </div>
 
         {/* `referenceLinks` is market-specific by design — a Brazilian reader wants
@@ -156,24 +166,19 @@ export function SiteFooter({ locale, dict }: { locale: Locale; dict: Dictionary 
           copy={{ ...copy.directory, newTab: dict.a11y.newTab }}
         />
 
-        {/* The baseline: who operates this, and the copyright.
+        {/* The baseline, now the copyright alone.
             
-            One line each, not a block. The registered address and the notice
-            address live on the legal pages, and reproducing them on every screen
-            is what turned the old footer into a brand slab. What stays is the pair
-            a reader — or a reviewer — checks first: who runs this, and under what
-            registration.
+            It has had two things taken off it. `ORG.email` went to the contact list,
+            because an address of record hidden in a copyright band is not found by the
+            rights holders who need it. The entity line went to the brand column, for
+            the reason given there. Both were being kept down here to avoid crowding
+            the columns, which stopped being a real constraint once the band lost two
+            of them.
             
-            `ORG.email` USED TO BE HERE, deliberately kept out of the support column
-            so the address of record would not read as a support alternative. It has
-            moved up into the contact list, because that separation was being enforced
-            in the wrong place: a reader looking for how to reach anyone scans the
-            column headed "Get in touch", and an email hidden in the copyright band is
-            not found by the people who need it — rights holders included. The
-            distinction it was protecting survives inside the list, as ordering and as
-            an accessible name (see `FooterContacts`), rather than as exile. */}
+            What is left is the one line that genuinely belongs last, so the band is a
+            single paragraph rather than a stack — see the stylesheet note on
+            `.zx-footer-base`. */}
         <div className="zx-footer-base">
-          <p className="zx-footer-org">{orgLine()}</p>
           {/* The year was hardcoded as `2026` in all three callers. It is derived
               now: this is a server component with no `use client` anywhere up its
               tree, so the call runs at build time only — no hydration mismatch is
