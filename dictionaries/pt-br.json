@@ -139,6 +139,7 @@
   },
   "contact": {
     "label": "Fale com a gente",
+    "channel": "Atendimento",
     "prompt": "Dúvidas antes de instalar?",
     "aria": "Fale com a gente no Telegram"
   },
@@ -185,11 +186,10 @@
     "dmca": "DMCA",
     "copyright": "© {year} Zenorix",
     "tagline": "Todos os filmes e séries, num só app. {total} títulos e {channels} canais ao vivo, a partir de {annualPerMonth} por mês.",
-    "browseHeading": "Filmes em alta",
-    "seriesHeading": "Séries em alta",
     "helpHeading": "Fale com a gente",
     "legalHeading": "Jurídico",
     "installHeading": "Baixar o app",
+    "installCta": "Baixar para Android",
     "installNote": "Android {minAndroid}+ · {size} · v{version}",
     "directory": {
       "watchHeading": "Parceiros oficiais de streaming",

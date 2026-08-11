@@ -139,6 +139,7 @@
   },
   "contact": {
     "label": "Contact us",
+    "channel": "Customer service",
     "prompt": "Questions before you install?",
     "aria": "Contact us on Telegram"
   },
@@ -185,11 +186,10 @@
     "dmca": "DMCA",
     "copyright": "© {year} Zenorix",
     "tagline": "Every movie and series, one app. {total} titles and {channels} live channels, from {annualPerMonth} a month.",
-    "browseHeading": "Trending movies",
-    "seriesHeading": "Trending shows",
     "helpHeading": "Get in touch",
     "legalHeading": "Legal",
     "installHeading": "Get the app",
+    "installCta": "Download for Android",
     "installNote": "Android {minAndroid}+ · {size} · v{version}",
     "directory": {
       "watchHeading": "Official streaming partners",

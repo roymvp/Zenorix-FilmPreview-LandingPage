@@ -33,12 +33,17 @@ import { useEffect } from 'react'
  * Each entry is a thunk so a retry re-invokes the import from scratch.
  *
  * This list must match the `md-*` tags actually present in the markup — grep for
- * `<md-` to confirm. It is currently exactly five:
- *   md-filled-button  download CTA + dialog action
+ * `<md-` to confirm. It is currently exactly four:
  *   md-dialog         the one conversion dialog (x2 instances)
- *   md-icon           8 icons across the page
+ *   md-icon           icons across the page
  *   md-menu           language switcher
  *   md-menu-item      language switcher options
+ *
+ * `md-filled-button` was dropped from this list when the download CTA became a native
+ * `<button>`. It was the one entry on it that gated FIRST PAINT rather than an
+ * interaction: dialogs and the language menu are opened by a deliberate click, so
+ * arriving late costs nothing, but the CTA is above the fold and stayed invisible until
+ * this fetch resolved. See the note in download-cta.tsx.
  *
  * This used to be `all.js` plus four labs imports. `all.js` pulls in EVERY
  * non-labs component, so the bundle carried sliders, checkboxes, switches,
@@ -47,7 +52,6 @@ import { useEffect } from 'react'
  * all. Registering only what exists dropped the definitions chunk from 443 KB.
  */
 const REGISTRATIONS: Array<() => Promise<unknown>> = [
-  () => import('@material/web/button/filled-button.js'),
   () => import('@material/web/dialog/dialog.js'),
   () => import('@material/web/icon/icon.js'),
   () => import('@material/web/menu/menu.js'),
