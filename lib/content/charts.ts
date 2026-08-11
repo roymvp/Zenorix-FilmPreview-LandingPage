@@ -51,14 +51,32 @@ export type ChartEntry = {
  * The catalogue behind both rails.
  *
  * Deliberately NOT padded to a round number. The real split of the licensed art
- * is eight films to twelve shows, and the headings are written without a count
+ * is eighteen films to twelve shows, and the headings are written without a count
  * (`chart.headingMovies` / `chart.headingSeries`) precisely so neither rail has
- * to invent an entry to satisfy a "Top 10" label. Adding a title means adding a
- * poster, not renaming a row.
+ * to invent an entry to satisfy a "Top 10" label — nor trim one to fit it. Adding
+ * a title means adding a poster, not renaming a row.
  */
 /* prettier-ignore */
 const chartPool: Record<string, ChartEntry> = {
-  /* Films */
+  /* Films — 2026 theatrical slate, ranked 1-10.
+
+     Each `platform` is the service that holds the title's streaming window, not
+     a guess from the genre: Universal/Illumination -> Peacock (odyssey,
+     oneNight, minions), Disney/Pixar -> Disney+ (toyStory5, moana), Searchlight
+     -> Hulu (superTroopers3), A24 -> HBO Max (invite), Sony's Spider-Man ->
+     Netflix. Several of these one-sheets print the studio logo in the art, so a
+     badge naming a different service would contradict the poster it sits on. */
+  spiderMan:  { id: 'spiderMan',  title: 'Spider-Man: Brand New Day',          kind: 'movie',  platform: 'netflix',        poster: '/media/tiles/spider-man-brand-new-day.webp' },
+  odyssey:    { id: 'odyssey',    title: 'The Odyssey',                        kind: 'movie',  platform: 'peacock',        poster: '/media/tiles/the-odyssey.webp' },
+  oneNight:   { id: 'oneNight',   title: 'One Night Only',                     kind: 'movie',  platform: 'peacock',        poster: '/media/tiles/one-night-only.webp' },
+  toyStory5:  { id: 'toyStory5',  title: 'Toy Story 5',                        kind: 'movie',  platform: 'disney-plus',    poster: '/media/tiles/toy-story-5.webp' },
+  troopers3:  { id: 'troopers3',  title: 'Super Troopers 3',                   kind: 'movie',  platform: 'hulu',           poster: '/media/tiles/super-troopers-3.webp' },
+  minions:    { id: 'minions',    title: 'Minions & Monsters',                 kind: 'movie',  platform: 'peacock',        poster: '/media/tiles/minions-and-monsters.webp' },
+  moana:      { id: 'moana',      title: 'Moana',                              kind: 'movie',  platform: 'disney-plus',    poster: '/media/tiles/moana.webp' },
+  iceCream:   { id: 'iceCream',   title: "Eli Roth's Ice Cream Man",           kind: 'movie',  platform: 'hbo-max',        poster: '/media/tiles/ice-cream-man.webp' },
+  invite:     { id: 'invite',     title: 'The Invite',                         kind: 'movie',  platform: 'hbo-max',        poster: '/media/tiles/the-invite.webp' },
+  catFest:    { id: 'catFest',    title: 'CatVideoFest 2026',                  kind: 'movie',  platform: 'prime-video',    poster: '/media/tiles/cat-video-fest.webp' },
+
   avatar:     { id: 'avatar',     title: 'Avatar: Fire and Ash',               kind: 'movie',  platform: 'disney-plus',    poster: '/media/tiles/avatar-fire-and-ash.webp' },
   kombat:     { id: 'kombat',     title: 'Mortal Kombat II',                  kind: 'movie',  platform: 'hbo-max',        poster: '/media/tiles/mortal-kombat-2.webp' },
   hailMary:   { id: 'hailMary',   title: 'Project Hail Mary',                 kind: 'movie',  platform: 'prime-video',    poster: '/media/tiles/project-hail-mary.webp' },
@@ -84,15 +102,33 @@ const chartPool: Record<string, ChartEntry> = {
 }
 
 /**
- * Per-market ranking. Every market lists the same catalogue in a DIFFERENT order
- * — that is what makes the rails read as a chart rather than as a static shelf —
- * so each array must be a permutation of the pool, never a subset.
+ * Per-market ranking. Each array must be a permutation of its half of the pool,
+ * never a subset — a market that drops a title silently shrinks its rail.
+ *
+ * The two rails handle market variation differently, on purpose:
+ *
+ * - SHOWS vary per market. Same twelve titles, three different orders, which is
+ *   what makes the rail read as a chart rather than a static shelf.
+ * - FILMS are ranked identically in all three markets, by explicit request: the
+ *   ten 2026 releases are numbered 1-10 in the order they were supplied, and the
+ *   eight carry-overs follow. Keeping one canonical film order means a change to
+ *   the slate is one edit instead of three, at the cost of the rail no longer
+ *   looking regional. If a market ever needs its own film ranking, split this
+ *   back into three permutations — the loop below does not care.
  */
 /* prettier-ignore */
+const filmRanking = [
+  /* 1-10: the 2026 slate, in supplied order. */
+  'spiderMan', 'odyssey', 'oneNight', 'toyStory5', 'troopers3',
+  'minions', 'moana', 'iceCream', 'invite', 'catFest',
+  /* 11-18: carry-overs. */
+  'avatar', 'kombat', 'hailMary', 'prada', 'masters', 'lastHouse', 'devilMouth', 'hours72',
+]
+
 const movieOrder: Record<Locale, string[]> = {
-  en:      ['avatar', 'kombat', 'hailMary', 'prada', 'masters', 'lastHouse', 'devilMouth', 'hours72'],
-  'pt-br': ['avatar', 'prada', 'kombat', 'lastHouse', 'hailMary', 'hours72', 'masters', 'devilMouth'],
-  th:      ['avatar', 'masters', 'kombat', 'devilMouth', 'hailMary', 'hours72', 'prada', 'lastHouse'],
+  en: filmRanking,
+  'pt-br': filmRanking,
+  th: filmRanking,
 }
 
 /* prettier-ignore */
@@ -120,7 +156,7 @@ export function getSeriesChart(locale: Locale): ChartEntry[] {
  * the `ItemList` in the JSON-LD, and derives them from HERE rather than keeping a
  * second hand-written list. The posters carry their own title lettering and the
  * cards render no title text, so this function is the only machine-readable form
- * these twenty names have — if it drifts from the pool, the head starts naming
+ * these thirty names have — if it drifts from the pool, the head starts naming
  * films the page does not show, which is the one thing keyword metadata must
  * never do.
  */

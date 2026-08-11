@@ -63,7 +63,7 @@ export function buildMarketMetadata({
   return {
     title: fill(dict.meta.title, values),
     description,
-    /* The market's own generic terms FIRST, then the twenty titles the rails
+    /* The market's own generic terms FIRST, then the thirty titles the rails
        render this week.
 
        An ARRAY, not `${dict.meta.keywords}, ${titles.join(', ')}`: Next joins it
@@ -73,7 +73,7 @@ export function buildMarketMetadata({
        Worth doing even though Google has ignored this tag for years — Baidu still
        reads it, and it is the cheapest place the film names become machine-
        readable at all. The cards render NO title text (the posters carry their own
-       lettering), so without this the only copies of these twenty names in the
+       lettering), so without this the only copies of these thirty names in the
        document are `aria-label` attributes, which crawlers do not index as
        content. The titles come from the same function that builds the rails, so
        this list cannot name a film the page does not show — the line between
@@ -156,7 +156,7 @@ export function buildLegalMetadata({
  *
  * There is deliberately NO `Movie` node. One used to be emitted for a featured
  * film, which told crawlers this URL was a page about that film — a claim the
- * page never backed up, since it shows a chart of twenty titles and an install
+ * page never backed up, since it shows a chart of thirty titles and an install
  * pitch. Structured data has to describe what is actually on the page.
  */
 export function buildStructuredData({
@@ -371,7 +371,7 @@ export function buildStructuredData({
          
          This is the honest way to get the film titles into structured data, and it
          is specifically NOT the `Movie` node this file removed: an `ItemList` says
-         "this page ranks these twenty titles", which is exactly what the rails do,
+         "this page ranks these thirty titles", which is exactly what the rails do,
          while a top-level `Movie` said "this URL is about one film", which was never
          true. So an answer engine asked what is trending on Zenorix can name them,
          and none of them is presented as this page's subject.
