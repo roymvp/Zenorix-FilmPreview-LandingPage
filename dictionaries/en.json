@@ -152,6 +152,8 @@
   "title": {
     "metaSuffix": "Cast, Ratings & Details",
     "formats": "Playback formats",
+    "synopsisMore": "More",
+    "synopsisLess": "Less",
     "details": "Details",
     "cast": "Cast",
     "released": "Released",

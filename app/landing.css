@@ -34,6 +34,9 @@
   --zx-radius-lg: 28px;
   --zx-radius-md: 20px;
   --zx-radius-sm: 12px;
+  /* For chips small enough that 12px would round them almost to a pill. Only the
+     playback spec chips use it — see `.zx-title-format`. */
+  --zx-radius-xs: 6px;
 
   /* ===================================================================== */
   /* TYPE SCALE — the only font sizes allowed in this file.                 */
@@ -3828,15 +3831,109 @@
   color: var(--md-sys-color-on-surface);
 }
 
-.zx-title-synopsis {
+/* THE SYNOPSIS — one line until asked, then all of it.
+   
+   The wrapper exists to carry the reading measure so that the paragraph AND the
+   toggle under it share one column. Without it the button would be a sibling
+   measured against the full header width and would drift right of the text it
+   belongs to on a wide screen. */
+.zx-title-synopsis-wrap {
   /* The one reading measure on the page. See the section note: this is the only
      prose here, so it gets the paragraph treatment and nothing else does. */
   max-width: 58ch;
-  margin: var(--zx-space-4) 0 0;
+  margin-top: var(--zx-space-5);
+}
+
+.zx-title-synopsis {
+  margin: 0;
   font-size: var(--zx-text-lg);
   line-height: var(--zx-lh-body);
   color: var(--md-sys-color-on-surface-variant);
   text-wrap: pretty;
+
+  /* THE COLLAPSE. `-webkit-line-clamp` and not `height` + `overflow: hidden`,
+     because a fixed height has to be guessed from the line-height and is wrong the
+     moment the font falls back or the user bumps their text size; the clamp counts
+     actual laid-out lines. All three properties are required together — the prefixed
+     `box` display and `vertical: box` are what the clamp reads, and it silently does
+     nothing without them. It is prefixed and non-standard and also supported in
+     every engine, including Firefox and Safari, for over a decade.
+     
+     One line is the default state, per the brief. That is enough to establish the
+     paragraph exists and to show its opening clause; the shortest synopsis in
+     `titles.ts` is 123 characters, so every record genuinely has something to
+     reveal and the button is never a no-op.
+     
+     `overflow: hidden` is the clamp's own requirement, and it is also why there is
+     no fade-out gradient over the cut: a mask would have to paint the page
+     background over the last few characters, which means hardcoding a colour that
+     the mobile hero (where this text sits over key art) does not have. The button
+     says what the gradient would only imply. */
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+  overflow: hidden;
+}
+
+/* Expanded. Set on the paragraph as a data attribute by the component rather than
+   as a second class, so one selector describes the whole state change.
+   
+   `-webkit-line-clamp: unset` is not enough on its own — the element is still a
+   `-webkit-box`, which does not honour `text-wrap: pretty` and mishandles the last
+   line's spacing. Returning `display` to `block` puts the paragraph back to being
+   an ordinary paragraph, which is what it is once nothing is hidden. */
+.zx-title-synopsis[data-open] {
+  display: block;
+  -webkit-line-clamp: unset;
+  overflow: visible;
+}
+
+/* THE TOGGLE. A quiet text control, deliberately not a third button style: the page
+   already has a filled CTA and an outlined secondary, and a third bordered shape
+   here would compete with both. So it is set as a link-like affordance — brand
+   colour, semibold, underlined on hover — which is the vocabulary for "reveals more
+   of this text" rather than "performs an action".
+   
+   `--zx-text-sm` against the paragraph's `--zx-text-lg`: subordinate to the prose it
+   controls. Same reason the label is one word.
+   
+   PADDING, NOT A HEIGHT. `min-height` on an inline-level control fights the text
+   baseline; the vertical padding gives it a ~30px target, which is the same
+   compromise `.zx-directory-link` documents — not the 44px the social row gets,
+   because this sits inside a paragraph flow where a 44px box would open a visible
+   gap under every synopsis. */
+.zx-title-synopsis-toggle {
+  /* `appearance: none` + explicit background/border: a <button> inherits the UA's
+     grey plate and 2px bevel otherwise, which on a dark page renders as a light-grey
+     lozenge. */
+  appearance: none;
+  background: none;
+  border: 0;
+  /* -4px on the inline start pulls the label back to the paragraph's left edge, so
+     the padding that makes the target tappable does not visibly indent it. */
+  margin: var(--zx-space-1) 0 0 -4px;
+  padding: 4px;
+  font: inherit;
+  font-size: var(--zx-text-sm);
+  font-weight: var(--zx-weight-semibold);
+  line-height: 1.4;
+  color: var(--md-sys-color-primary);
+  cursor: pointer;
+}
+
+.zx-title-synopsis-toggle:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* Matches `.zx-chart-more` and `.zx-logo-marquee` — 2px in `primary` at 2px offset
+   is this file's one focus ring, and a control that invented its own would read as
+   a different kind of thing to a keyboard user. `border-radius` so the ring traces
+   the padding box rather than boxing the glyph corners squarely. */
+.zx-title-synopsis-toggle:focus-visible {
+  outline: 2px solid var(--md-sys-color-primary);
+  outline-offset: 2px;
+  border-radius: 4px;
 }
 
 /* CRITIC SCORES — the last member of the key row.
@@ -3916,15 +4013,22 @@
    That reference is right for print and wrong for a black page: an
    `outline-variant` hairline (#2c323a) on #08090b is a 1.2:1 edge, so the site's
    strongest technical claim rendered as its faintest element — four grey words the
-   eye slid straight past on the way to the CTA. Filled capsules now, each with a
-   glyph, which is also the form every service the visitor already uses puts them in.
+   eye slid straight past on the way to the CTA. Filled chips now, each with a glyph,
+   which is also the form every service the visitor already uses puts them in.
+   
+   ABOVE THE SYNOPSIS. They sat below it while the synopsis was a full paragraph;
+   the synopsis now collapses to one line with a "More" button after it, and a
+   one-line paragraph followed by a button followed by four chips is three bands of
+   chrome where there should be one. Directly under the tag line they extend the band
+   of facts that starts at the h1, and the prose closes the header instead of being
+   buried in the middle of it.
    
    NO WRAPPER. `.zx-title-meta` used to hold this list plus a spec list; the year
    and runtime moved to the tag line under the h1, so this list owns its own top
    margin and the wrapper is deleted rather than left holding one child.
    
    FILLED IN STEEL (`secondary-container`), NOT IN THE BRAND'S PRIMARY. `primary`
-   here is #fbfcfe — near-white — which is the CTA button's fill. Four white pills
+   here is #fbfcfe — near-white — which is the CTA button's fill. Four white chips
    directly above a white button would read as five buttons and make the one thing
    on the page that is actually clickable ambiguous. `secondary-container` is the
    same brand family one step down: unmistakably a solid chip, clearly not an
@@ -3933,7 +4037,11 @@
   display: flex;
   flex-wrap: wrap;
   gap: var(--zx-space-2);
-  margin: var(--zx-space-5) 0 0;
+  /* ABOVE the synopsis now, so this margin separates it from the tag line rather
+     than from a paragraph. `space-4` and not the `space-5` it carried below the
+     prose: the tag line and these chips are both facts about the same stream, and
+     the tighter gap groups them as one band before the prose starts. */
+  margin: var(--zx-space-4) 0 0;
   padding: 0;
   list-style: none;
 }
@@ -3942,11 +4050,19 @@
   display: inline-flex;
   align-items: center;
   gap: var(--zx-space-1);
-  /* 999px, matching the other pills in this stylesheet. A capsule and not the
-     12px `radius-sm` the plates used: the softer corner is what separates a
-     "badge" from a "button" at this size. */
-  padding: 5px var(--zx-space-3) 5px var(--zx-space-2);
-  border-radius: 999px;
+  /* SQUARE-ISH, NOT A PILL. These were `999px` capsules, on the argument that a
+     round end reads as "badge, not button" — which is true of ONE pill and false of
+     four in a row directly above an actual button, where the repeated capsule shape
+     starts reading as a row of controls. 6px is a spec plate: clearly a solid chip,
+     clearly not tappable. It needed a new token (`--zx-radius-xs`) because the
+     smallest existing one, 12px, is half the height of this chip and would round it
+     back to nearly a pill.
+     
+     Symmetric horizontal padding now that the icon sits inside a square corner —
+     the pill needed 12px on the text side and 8px on the icon side to look
+     optically even against the curve; a flat edge does not. */
+  padding: 5px var(--zx-space-2);
+  border-radius: var(--zx-radius-xs);
   background: var(--md-sys-color-secondary-container);
   color: var(--md-sys-color-on-secondary-container);
   font-size: var(--zx-text-label);

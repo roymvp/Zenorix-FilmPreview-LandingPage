@@ -152,6 +152,8 @@
   "title": {
     "metaSuffix": "Elenco, Notas e Detalhes",
     "formats": "Formatos de reprodução",
+    "synopsisMore": "Mais",
+    "synopsisLess": "Menos",
     "details": "Detalhes",
     "cast": "Elenco",
     "released": "Lançamento",

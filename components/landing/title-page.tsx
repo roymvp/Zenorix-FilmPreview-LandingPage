@@ -2,6 +2,7 @@ import { ContactLink } from '@/components/landing/contact-link'
 import { ConversionProvider } from '@/components/landing/conversion-provider'
 import { DownloadCta } from '@/components/landing/download-cta'
 import { SiteFooter } from '@/components/landing/site-footer'
+import { TitleSynopsis } from '@/components/landing/title-synopsis'
 import { TopBar } from '@/components/landing/top-bar'
 import { SITE } from '@/lib/config/site'
 import { castCredits, castInitials, castPhoto } from '@/lib/content/cast'
@@ -159,13 +160,13 @@ export function TitlePage({
     },
   ].filter((row) => row.score)
 
-  /* THE PLAIN VALUES OF THE TAG LINE, under the h1: year · length.
+  /* THE PLAIN VALUES OF THE TAG LINE, under the h1: year · length · genre · genre.
   
-     The line renders as year · length · [certificate] · genre, but only these two
-     kinds of item live in this array. The certificate is a bordered chip and the
-     genre is the one item allowed to wrap, so both are rendered explicitly after the
-     map — see the notes at the markup for why that order is what the browser
-     demanded rather than what reads best on paper.
+     Every item in this array is one short value in the same shape — that uniformity
+     is the point, and it is new. The genres used to be a single item holding
+     `join(', ')`, which mixed dots and commas on one line; they are individual items
+     now, capped at two. The only thing NOT in here is the certificate, which is a
+     bordered chip rather than plain text and is rendered explicitly after the map.
   
      THE YEAR HERE IS NOT THE RELEASE DATE. It used to be the full "19 December
      2025" and it sat below the synopsis; it is a bare year on the title line now,
@@ -182,7 +183,7 @@ export function TitlePage({
      2568 and the page would contradict itself by two digits in one column.
   
      Each entry keeps its label even though the label is not drawn — the row renders
-     as "2025 · 197 min · PG-13 · Science fiction, Epic", which is unambiguous to anyone
+     as "2025 · 197 min · Science fiction · Epic · PG-13", which is unambiguous to anyone
      LOOKING at it and completely opaque to a screen reader reading bare values in
      sequence. So the label ships as visually-hidden text in front of each value.
      This is the reason these are objects and not a plain string array.
@@ -201,6 +202,28 @@ export function TitlePage({
     ...(record.episodes
       ? [{ label: copy.episodes, value: pluralize(record.episodes, copy.episodeCount) }]
       : []),
+    /* GENRES, AT MOST TWO, EACH AS ITS OWN DOT-SEPARATED ITEM.
+    
+       These were one item holding `record.genres.join(', ')` — the whole list glued
+       into a single value with internal commas. That made the line mix two
+       punctuation systems: dots between facts, commas inside one of them, so
+       "2025 · 197 min · PG-13 · Science fiction, Epic, Adventure" reads as four
+       items where the last one is somehow three. Now each genre is a sibling of the
+       year and the runtime and the line has exactly one separator.
+    
+       `slice(0, 2)` because the tail was never load-bearing: no visitor picks a film
+       on its third genre, and on Rick and Morty the fourth pushed the line to a
+       third row on a phone. Nothing is lost — `Genre` in the `Details` <dl> below
+       still lists every one of them, which is the reference layer's job. This is the
+       one fact besides the release date that appears in both layers, for the same
+       reason: the scan form and the complete form answer different questions.
+    
+       Spread rather than pushed so a record with a single genre produces a single
+       item and no empty slot, and `.map` keeps each value carrying the same `Genre`
+       label for the hidden text — a screen reader hears "Genre: Science fiction,
+       Genre: Epic", which is repetitive but unambiguous, and the alternative (one
+       label for the pair) would need the two to be one item again. */
+    ...record.genres.slice(0, 2).map((genre) => ({ label: copy.genre, value: genre })),
   ]
 
   /* Photographer credits for whichever of this cast actually has a portrait.
@@ -400,16 +423,22 @@ export function TitlePage({
 
                   <h1 className="zx-title-name">{entry.title}</h1>
 
-                  {/* THE TAG LINE: year · length · genre · certificate.
+                  {/* THE TAG LINE: year · length · genre · genre · certificate.
                   
                       Everything measurable about the title itself, on one line
                       directly under its name — the position it occupies on Netflix,
                       Disney+ and IMDb, because it is read as a continuation of the
-                      title rather than as a section of its own. These four used to be
+                      title rather than as a section of its own. These used to be
                       split across two places (genre and certificate above the
                       synopsis, year and runtime below it), which asked the reader to
                       assemble one sentence out of two rows on opposite sides of a
                       paragraph.
+                      
+                      EVERY ITEM IS ONE SHORT VALUE OF THE SAME SHAPE. That is the
+                      rule the line follows now: uniform plain-text items, one dot
+                      between each, one bordered chip at the end. It is why the genre
+                      list was split into individual items and capped at two — see the
+                      note on `tags` above.
                   
                       One <ul>, not a row of <span>s: this is a list of facts about one
                       subject and a screen reader should be able to count them.
@@ -432,10 +461,9 @@ export function TitlePage({
                       where it reads as "continues below", and nothing renders a dot in
                       front of the bordered chip — no specificity fight to lose.
                       
-                      `i < tags.length - 1` covers only this array (year and the
-                      counts). The two items after it, the certificate chip and the
-                      genre, take no separator: the chip's border already separates,
-                      and it separates the genre behind it too.
+                      `i < tags.length - 1` covers only this array (year, counts and
+                      the two genres). The certificate after it takes no separator:
+                      its border already does that job.
                       
                       `|| !record.contentRating` is what keeps that true when there is
                       no chip. Every one of the 29 records has a certificate today, so
@@ -448,8 +476,15 @@ export function TitlePage({
                       four times through a four-fact line is noise, and the hidden
                       labels beside each value already carry the structure. */}
                   <ul className="zx-title-tags">
+                    {/* Keyed on label + value, not on `label` alone. `label` was
+                        unique while every item was a different KIND of fact; the two
+                        genres now share the `Genre` label, and React logged
+                        "Encountered two children with the same key" — a duplicate key
+                        it is free to resolve by dropping one of the pair. Nothing was
+                        visibly wrong in a screenshot, which is exactly why this came
+                        off the console rather than out of the render. */}
                     {tags.map((tag, i) => (
-                      <li key={tag.label}>
+                      <li key={`${tag.label}:${tag.value}`}>
                         <span className="zx-visually-hidden">{tag.label}: </span>
                         {tag.value}
                         {i < tags.length - 1 || !record.contentRating ? (
@@ -466,65 +501,54 @@ export function TitlePage({
                         set as plain text. Just the value; the MPA's descriptor is far
                         too long for a chip and lives in the details list below.
                         
-                        NOT FIRST and NOT LAST: it sits between the counts and the
-                        genre, and that position was forced by the browser. It was
-                        last, after the genre, which is fine for the 19 records whose
-                        genre list is short — and wrong for Rick and Morty, the one
-                        record carrying seasons AND episodes AND four genres. Measured
-                        at 390px, that line wrapped to three, the genre list took the
-                        middle one to itself, and the chip ended up marooned alone on
-                        the third looking like a stray control.
+                        LAST, and it can be again. It was moved ahead of the genre at
+                        one point because Rick and Morty — seasons AND episodes AND
+                        four genres — wrapped to three lines at 390px and left the
+                        chip marooned alone on the third looking like a stray control.
+                        Capping the genres at two removed the cause, so the chip goes
+                        back to the end, which is where it belongs: it is the one item
+                        on this line that many visitors do not need at all, and a box
+                        in first position would out-shout the values everybody reads.
                         
-                        Moving it ahead of the genre fixes that with no data dropped:
-                        the counts and the chip fill the first line, the genre takes
-                        what it needs of the second, and nothing is ever orphaned
-                        because the longest item is now last. It still does not LEAD
-                        the line, which was the original reason for putting it at the
-                        end — a box in first position would out-shout the values
-                        everybody actually reads.
-                        
-                        It also needs no separator on either side: the border is doing
-                        that job, which is why the map above stops emitting dots before
-                        it and the genre below carries none. */}
+                        It needs no separator in front of it: the border is doing that
+                        job, which is why the map above stops emitting dots before it. */}
                     {record.contentRating ? (
                       <li className="zx-title-rating">
                         <span className="zx-visually-hidden">{copy.rated}: </span>
                         {record.contentRating.value}
                       </li>
                     ) : null}
-
-                    {/* Genre last, and deliberately the longest thing on the line —
-                        this is the "题材" a browsing visitor sorts by, so it gets the
-                        room to wrap that the fixed-width items cannot spare. */}
-                    <li>
-                      <span className="zx-visually-hidden">{copy.genre}: </span>
-                      {record.genres.join(', ')}
-                    </li>
                   </ul>
-
-                  <p className="zx-title-synopsis">{record.synopsis}</p>
 
                   {/* THE PLAYBACK CAPSULES: what the stream arrives as.
                       
-                      Below the synopsis on purpose. Nobody decides whether to watch
-                      something because it carries Dolby Atmos — that is a detail you
-                      check AFTER the premise has sold you, which is exactly where
-                      Apple TV and Disney+ put it too. The measurable facts that used
-                      to share this row (year, runtime) have moved up to the tag line
-                      under the h1 where they belong, so this is now one list and the
-                      `.zx-title-meta` wrapper that held two is gone with them.
+                      ABOVE the synopsis. They sat below it until now, on the argument
+                      that nobody picks a film because it carries Dolby Atmos — true,
+                      and it stopped mattering once the synopsis collapsed to one
+                      line. A one-line paragraph with a "More" button after it and
+                      four capsules under that reads as three separate strata of
+                      chrome between the title and the CTA; the specs sitting directly
+                      under the tag line instead makes one continuous band of facts,
+                      and the prose then closes the header in one block with its own
+                      control attached.
+                      
+                      This also puts them above the fold on a phone, which the old
+                      order did not guarantee: the fully-expanded synopsis (up to 234
+                      characters in `titles.ts`) could push them off the first screen
+                      entirely, so the strongest technical claim on the page depended
+                      on how wordy that record's blurb happened to be.
                       
                       A property of the Zenorix stream rather than of the film, which
                       is why they come from one shared list in `titles.ts` instead of
                       being invented per record — see the note there.
                       
-                      Filled capsules with a glyph each, no longer hairline plates.
-                      The plate styling was imitating a disc case, which is a fair
-                      reference for print and the wrong one here: on a black page a
-                      1px outline in `outline-variant` made the site's strongest
-                      technical claim its faintest element. See `FORMAT_ICONS` above
-                      for why the glyphs are generic rather than the vendors' marks,
-                      and the CSS for why the fill is steel and not silver. */}
+                      Square-ish filled chips now, not pills. `--zx-radius-xs` (6px)
+                      rather than the 999px capsule they had: at four-in-a-row the
+                      fully round ends read as tappable, and these are not buttons.
+                      A tighter corner is the shape of a spec plate, which is what
+                      they are. See `FORMAT_ICONS` above for why the glyphs are
+                      generic rather than the vendors' marks, and the CSS for why the
+                      fill is steel and not silver. */}
                   <ul className="zx-title-formats" aria-label={copy.formats}>
                     {PLAYBACK_FORMATS.map((format) => (
                       <li key={format} className="zx-title-format">
@@ -536,6 +560,18 @@ export function TitlePage({
                       </li>
                     ))}
                   </ul>
+
+                  {/* The premise, collapsed to one line until asked for.
+                      
+                      A client island purely so the rest of this page can stay a
+                      server component — see the long note in the component itself,
+                      including why the collapse is a CSS clamp and never a
+                      `.slice()` on the string. */}
+                  <TitleSynopsis
+                    text={record.synopsis}
+                    moreLabel={copy.synopsisMore}
+                    lessLabel={copy.synopsisLess}
+                  />
 
                   {/* The one CTA — inside the header column now, directly under the
                       facts that justify it.
