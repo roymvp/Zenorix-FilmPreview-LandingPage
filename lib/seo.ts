@@ -108,6 +108,44 @@ export function buildMarketMetadata({
 }
 
 /**
+ * Metadata for one of the three legal documents.
+ *
+ * Deliberately much thinner than `buildMarketMetadata`: no share card, no
+ * keywords, no OpenGraph block. A privacy policy shared into a chat should show a
+ * plain link, not the product's price billboard — and these pages are here to be
+ * read and crawled, not to convert. What they DO get is the same reciprocal
+ * hreflang treatment as the market pages, because each document exists in all
+ * three languages and Google has to know the nine are three sets of three rather
+ * than nine unrelated URLs.
+ */
+export function buildLegalMetadata({
+  locale,
+  dict,
+  doc,
+}: {
+  locale: Locale
+  dict: Dictionary
+  doc: 'privacy' | 'terms' | 'dmca'
+}): Metadata {
+  const copy = dict.legal[doc]
+  const path = (target: Locale) => `/${target}/${doc}`
+  const canonical = `${SITE.url}${path(locale)}`
+
+  return {
+    /* Suffixed with the brand because these titles are generic by nature — every
+       site has a "Privacy Policy", and the market pages get their brand from
+       `dict.meta.title` instead. */
+    title: `${copy.title} — ${SITE.name}`,
+    description: copy.description,
+    alternates: { canonical, ...buildLocaleAlternates(path) },
+    /* Indexable. A legal page carries little ranking value of its own, but these
+       are what a reviewer looks for to decide the site is a real operation, and
+       `follow` passes their link back to the market page. */
+    robots: { index: true, follow: true },
+  }
+}
+
+/**
  * JSON-LD for the two things this page actually is: an installable Android app,
  * and an FAQ. Emitted as one graph so crawlers get both.
  *

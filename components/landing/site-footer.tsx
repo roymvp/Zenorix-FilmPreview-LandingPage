@@ -19,7 +19,7 @@ export function SiteFooter({
   copyright,
   contact,
 }: {
-  /** RESERVED: point these at the real legal pages once they exist. */
+  /** Built by `legalLinks` in both callers, so the row is identical everywhere. */
   links: { label: string; href: string }[]
   copyright: string
   contact: { label: string; aria: string }

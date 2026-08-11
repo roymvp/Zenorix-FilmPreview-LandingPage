@@ -17,3 +17,21 @@ export type LegalSlug = (typeof LEGAL_SLUGS)[number]
 export function isLegalSlug(value: string): value is LegalSlug {
   return (LEGAL_SLUGS as readonly string[]).includes(value)
 }
+
+/**
+ * The footer's legal row, for any page in any market.
+ *
+ * Built here rather than inline in the footer's two callers so the landing page
+ * and the legal pages cannot end up with different link sets — and so the label
+ * for each document is read from the same `dict.footer` key that names it
+ * everywhere else.
+ */
+export function legalLinks(
+  locale: string,
+  labels: Record<LegalSlug, string>,
+): { label: string; href: string }[] {
+  return LEGAL_SLUGS.map((slug) => ({
+    label: labels[slug],
+    href: `/${locale}/${slug}`,
+  }))
+}

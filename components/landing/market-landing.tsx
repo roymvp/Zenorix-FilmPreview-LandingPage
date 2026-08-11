@@ -9,6 +9,7 @@ import { TopBar } from '@/components/landing/top-bar'
 import { TopChart } from '@/components/landing/top-chart'
 import { SITE } from '@/lib/config/site'
 import { getMovieChart, getSeriesChart } from '@/lib/content/charts'
+import { legalLinks } from '@/lib/content/legal'
 import { fill, type Dictionary } from '@/lib/i18n/dictionaries'
 import { locales, type Locale } from '@/lib/i18n/config'
 import { buildStructuredData, marketValues } from '@/lib/seo'
@@ -207,11 +208,14 @@ export function MarketLanding({
         </main>
 
         <SiteFooter
-          links={[
-            { label: dict.footer.privacy, href: `/${locale}#privacy` },
-            { label: dict.footer.terms, href: `/${locale}#terms` },
-            { label: dict.footer.dmca, href: `/${locale}#dmca` },
-          ]}
+          /* Real pages now. These were `#privacy`/`#terms`/`#dmca` — fragments
+             pointing at ids that existed nowhere, so all three scrolled to the top
+             of this page instead of going anywhere. */
+          links={legalLinks(locale, {
+            privacy: dict.footer.privacy,
+            terms: dict.footer.terms,
+            dmca: dict.footer.dmca,
+          })}
           copyright={fill(dict.footer.copyright, { year: 2026 })}
           contact={{ label: dict.contact.label, aria: dict.contact.aria }}
         />

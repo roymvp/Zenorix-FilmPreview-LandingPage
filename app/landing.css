@@ -144,6 +144,114 @@
   list-style: none;
 }
 
+/* THE LEGAL DOCUMENTS — /[lang]/privacy, /terms, /dmca ----------------------
+   
+   Long-form prose, which the landing page contains none of: every block there is
+   a card, a rail or a control. So this is the one place in the stylesheet that
+   sets a reading measure and a paragraph rhythm.
+   
+   `--zx-page-max` is not overridden. The column stays the same width as the
+   landing page's so the top bar and footer keep their exact geometry across a
+   navigation — only the CONTENT inside gets a narrower measure, via
+   `.zx-doc-body` below. */
+.zx-page--doc {
+  /* The bar is `position: fixed`, so without this the <h1> starts underneath it.
+     The hero pays the same debt in `.zx-hero-copy`'s padding; this is the
+     equivalent for a page with no hero. */
+  padding-top: var(--zx-topbar-h);
+}
+
+.zx-doc {
+  /* Generous above, and more below: the footer's own top padding is small, and a
+     document that ends flush against it reads as truncated. */
+  padding: var(--zx-space-10) var(--zx-gutter) var(--zx-space-8);
+}
+
+.zx-doc-body {
+  /* ~68 characters at 14px. The landing page's cards are as wide as the column
+     because they hold labels and numbers; a paragraph at that width on desktop
+     would run past the point where the eye reliably finds the next line. */
+  max-width: 62ch;
+  margin-inline: auto;
+}
+
+.zx-doc-head {
+  /* Owns the space below itself — the exception to the section-rhythm rule above,
+     because this is a document header rather than a page section, and the gap
+     between the title block and the first paragraph belongs to the title block. */
+  margin-bottom: var(--zx-space-6);
+}
+
+.zx-doc-title {
+  margin: 0;
+  font-size: var(--zx-text-h1);
+  font-weight: var(--zx-weight-bold);
+  line-height: 1.25;
+  color: var(--md-sys-color-on-surface);
+  /* These titles are two or three words, so a break can only ever look like an
+     accident. */
+  text-wrap: balance;
+}
+
+.zx-doc-meta {
+  margin: var(--zx-space-2) 0 0;
+  font-size: var(--zx-text-meta);
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+/* The framing sentence under the title. One tier up from the body copy in colour
+   and size, because it is the summary a reader decides from. */
+.zx-doc-intro {
+  margin: 0 0 var(--zx-space-8);
+  font-size: var(--zx-text-lg);
+  line-height: 1.55;
+  color: var(--md-sys-color-on-surface);
+  text-wrap: pretty;
+}
+
+/* Each clause owns the space ABOVE itself only, the same single-owner model as
+   `.zx-section` — so the gap between any two clauses is exactly one step no
+   matter how many a document has or what order they are in. */
+.zx-doc-section + .zx-doc-section {
+  margin-top: var(--zx-space-6);
+}
+
+.zx-doc-heading {
+  margin: 0 0 var(--zx-space-2);
+  font-size: var(--zx-text-body);
+  font-weight: var(--zx-weight-semibold);
+  /* Full-emphasis colour against the variant-toned paragraph below it. At this
+     size that contrast is what separates the heading from its own body text —
+     the two are only one weight apart, since an h2 scaled up to
+     `--zx-text-h2` for eight clauses per page would read as eight sections
+     rather than eight paragraphs of one document. */
+  color: var(--md-sys-color-on-surface);
+}
+
+.zx-doc-text {
+  margin: 0;
+  font-size: var(--zx-text-body);
+  /* 1.6 — the top of the 1.4–1.6 band. These are the longest paragraphs on the
+     site and the only ones anyone reads start to finish. */
+  line-height: 1.6;
+  color: var(--md-sys-color-on-surface-variant);
+  text-wrap: pretty;
+}
+
+.zx-doc-back {
+  margin: var(--zx-space-10) 0 0;
+  font-size: var(--zx-text-meta);
+}
+
+/* Underlined, unlike the footer's legal row. This is a lone link at the end of
+   several hundred words of prose, so it has to be identifiable as a link without
+   relying on colour alone. */
+.zx-doc-back a {
+  color: var(--md-sys-color-primary);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
 /* The page itself is already capped, so the shell only owns the side gutter. */
 .zx-shell {
   width: 100%;
