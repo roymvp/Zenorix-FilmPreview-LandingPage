@@ -2220,6 +2220,114 @@
   padding-block: var(--zx-space-6) max(var(--zx-space-6), env(safe-area-inset-bottom));
 }
 
+/* The outbound directory, above the meta row.
+   
+   Start-aligned at every width while the meta row below it is centred on mobile.
+   That is not an oversight: this is a dense wrapped list of twenty names, and
+   centring a list whose last row is half full leaves a ragged pyramid — the eye
+   needs one left edge to run down. The meta row is three short centred strings, a
+   different shape with a different rule.
+   
+   It closes with a hairline instead of relying on spacing alone. `.zx-footer-inner`
+   carries a note about NOT dividing the footer, and this does not contradict it:
+   that rule is about splitting the legal text from the copyright, which is one
+   group. The directory genuinely is a second group — external destinations versus
+   this site's own legal identity — and without the rule the note at its end reads
+   as though it modifies the copyright line. */
+.zx-directory {
+  display: flex;
+  flex-direction: column;
+  gap: var(--zx-space-5);
+  padding-block-end: var(--zx-space-5);
+  margin-block-end: var(--zx-space-5);
+  border-block-end: 1px solid var(--md-sys-color-outline-variant);
+}
+
+.zx-directory-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--zx-space-2);
+}
+
+/* Same eyebrow treatment as `.zx-about-label` minus the chip border: 11px, wide
+   tracking, uppercase. These are real <h2>s for the document outline, so they must
+   NOT look like the section titles upstairs — a footer heading at `--zx-text-h2`
+   would announce the link list as a peer of "Trending Movies". */
+.zx-directory-title {
+  margin: 0;
+  color: var(--md-sys-color-on-surface-variant);
+  font-size: var(--zx-text-label);
+  font-weight: var(--zx-weight-semibold);
+  letter-spacing: 0.09em;
+  line-height: var(--zx-lh-snug);
+  text-transform: uppercase;
+}
+
+.zx-directory-list {
+  display: flex;
+  flex-wrap: wrap;
+  /* Column gap is the wide one: these are independent destinations, and at an even
+     gap a wrapped row reads as a grid of pairs. Row gap stays tight because the
+     links' own block padding adds to it. */
+  gap: var(--zx-space-1) var(--zx-space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.zx-directory-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--zx-space-15);
+  /* Muted like the legal row, not `primary`. Twenty coloured links would turn the
+     footer into the loudest thing on a page that closes on an install button. */
+  color: var(--md-sys-color-on-surface-variant);
+  font-size: var(--zx-text-meta);
+  line-height: 1.4;
+  text-decoration: none;
+  /* ~30px tall against the 24px AA floor for target size. Deliberately not the 44px
+     `.zx-social-link` gets: that row is three links, this one is twenty, and 44px
+     each would stack the block taller than the FAQ it sits under. */
+  padding-block: var(--zx-space-15);
+  transition: color 120ms ease;
+}
+
+.zx-directory-link:hover {
+  color: var(--md-sys-color-on-surface);
+}
+
+.zx-directory-link:focus-visible {
+  outline: 2px solid var(--md-sys-color-primary);
+  outline-offset: 3px;
+  border-radius: 3px;
+}
+
+/* Rounded to match the marks upstairs (`.zx-logo-set img`, `.zx-chart-badge`),
+   which are the same square store icons at larger sizes — a sharp-cornered 16px
+   copy of an icon the page has already shown rounded reads as a different asset.
+   The hairline ring does the work `box-shadow` does there: several of these icons
+   are pure black or pure white and would otherwise dissolve into the surface. */
+.zx-directory-icon {
+  width: 16px;
+  height: 16px;
+  flex: none;
+  border-radius: 4px;
+  object-fit: cover;
+  box-shadow: 0 0 0 1px var(--md-sys-color-outline-variant);
+}
+
+/* The independence line. Sized below the links it qualifies (12px against 13px)
+   and set at the footer's quietest weight — it has to be present and legible, but
+   it is a disclaimer, not a thing anyone came here to read. */
+.zx-directory-note {
+  margin: 0;
+  color: var(--md-sys-color-on-surface-variant);
+  font-size: var(--zx-text-caption);
+  line-height: 1.5;
+  text-wrap: pretty;
+  opacity: 0.75;
+}
+
 /* Two centered lines, links then copyright. No internal divider and no split
    utility row: with the theme toggle gone there is only legal text down here,
    and a hairline between two centered lines would imply two groups where there
@@ -3026,6 +3134,25 @@
   .zx-final .zx-cta {
     width: 100%;
     max-width: 360px;
+  }
+
+  /* Two columns, wide one first. The services row is eleven items with icons and
+     the reference row is five to seven plain names, so an even split would leave
+     the right column half empty while the left one still wrapped to three lines.
+     `2fr 1fr` lets each list wrap to about the same depth.
+     
+     The note spans both columns and stays on its own line: it qualifies every link
+     above it, and tucked into a column it would read as a footnote to that column
+     alone. */
+  .zx-directory {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    column-gap: var(--zx-space-10);
+    row-gap: var(--zx-space-4);
+  }
+
+  .zx-directory-note {
+    grid-column: 1 / -1;
   }
 
   /* One row instead of a centred stack. With 1120px available, three short items

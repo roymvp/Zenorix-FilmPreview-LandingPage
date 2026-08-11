@@ -153,7 +153,12 @@
     "privacy": "Privacidade",
     "terms": "Termos",
     "dmca": "DMCA",
-    "copyright": "© {year} Zenorix"
+    "copyright": "© {year} Zenorix",
+    "directory": {
+      "watchHeading": "Serviços de streaming",
+      "referenceHeading": "Críticas e fichas",
+      "note": "Os links levam ao site oficial de cada empresa. A Zenorix é um aplicativo independente e não é afiliada, endossada ou operada por nenhuma dessas empresas."
+    }
   },
   "legal": {
     "updated": "Última atualização: {date}",
@@ -275,6 +280,7 @@
   },
   "a11y": {
     "skipToContent": "Ir para o conteúdo principal",
-    "posterAlt": "Pôster de {title}"
+    "posterAlt": "Pôster de {title}",
+    "newTab": "(abre em uma nova aba)"
   }
 }

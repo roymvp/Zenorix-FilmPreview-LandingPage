@@ -10,6 +10,7 @@ import { TopChart } from '@/components/landing/top-chart'
 import { SITE } from '@/lib/config/site'
 import { getMovieChart, getSeriesChart } from '@/lib/content/charts'
 import { legalLinks } from '@/lib/content/legal'
+import { referenceLinks, watchLinks } from '@/lib/content/outbound'
 import { fill, type Dictionary } from '@/lib/i18n/dictionaries'
 import { locales, type Locale } from '@/lib/i18n/config'
 import { buildStructuredData, marketValues } from '@/lib/seo'
@@ -216,6 +217,14 @@ export function MarketLanding({
             terms: dict.footer.terms,
             dmca: dict.footer.dmca,
           })}
+          /* The services this page shows, plus the sites a film gets checked
+             against. The reference half varies by market because a Brazilian
+             reader wants AdoroCinema, not only IMDb. */
+          directory={{
+            watch: watchLinks(),
+            reference: referenceLinks(locale),
+            copy: { ...dict.footer.directory, newTab: dict.a11y.newTab },
+          }}
           copyright={fill(dict.footer.copyright, { year: 2026 })}
           contact={{ label: dict.contact.label, aria: dict.contact.aria }}
           social={dict.social}

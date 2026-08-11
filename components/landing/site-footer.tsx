@@ -1,15 +1,24 @@
 import { ContactLink } from '@/components/landing/contact-link'
+import { OutboundDirectory } from '@/components/landing/outbound-directory'
 import { SocialLinks } from '@/components/landing/social-links'
 import { orgLine } from '@/lib/config/site'
+import type { OutboundLink } from '@/lib/content/outbound'
 
 /**
- * Minimal footer: support, then legal links, then the entity and copyright lines.
+ * Minimal footer: the outbound directory, then support, legal links, and the
+ * entity and copyright lines.
  *
  * Everything else that used to live here has been removed on purpose — brand
- * block, tagline, trademark disclaimer, language selector (it already exists in
- * the top bar) and the theme toggle (the app is dark-only). The page closes on
- * the install CTA, so the footer carries the legal minimum plus the one thing a
- * footer is genuinely looked in for.
+ * block, tagline, language selector (it already exists in the top bar) and the
+ * theme toggle (the app is dark-only). The page closes on the install CTA, so the
+ * footer carries the legal minimum plus the one thing a footer is genuinely
+ * looked in for.
+ *
+ * The one exception to that minimalism is the directory, which is genuinely new
+ * weight rather than the old brand slab creeping back: it is the only place on
+ * the site that says where these services and ratings actually live, and it is
+ * why the independence line the footer used to carry is back — see
+ * `OutboundDirectory`.
  *
  * Support (with social beneath it) is its OWN group above the legal list, not a
  * fourth item inside it. Dropping it in beside Privacy/Terms/DMCA would file "talk
@@ -18,12 +27,24 @@ import { orgLine } from '@/lib/config/site'
  */
 export function SiteFooter({
   links,
+  directory,
   copyright,
   contact,
   social,
 }: {
   /** Built by `legalLinks` in both callers, so the row is identical everywhere. */
   links: { label: string; href: string }[]
+  /** Built by `watchLinks`/`referenceLinks` in both callers, for the same reason. */
+  directory: {
+    watch: OutboundLink[]
+    reference: OutboundLink[]
+    copy: {
+      watchHeading: string
+      referenceHeading: string
+      note: string
+      newTab: string
+    }
+  }
   copyright: string
   contact: { label: string; aria: string }
   social: { follow: string; community: { label: string; aria: string } }
@@ -33,6 +54,17 @@ export function SiteFooter({
       {/* No <nav> landmark: three legal links inside the footer element are
           already reachable, and a second landmark here would just add noise to
           the screen-reader landmark list. */}
+      {/* Its own shell above the meta row, not a fourth child of it. That row is a
+          three-item `space-between` layout on desktop, and twenty links dropped
+          into it would collapse the balance it is built on. */}
+      <div className="zx-shell">
+        <OutboundDirectory
+          watch={directory.watch}
+          reference={directory.reference}
+          copy={directory.copy}
+        />
+      </div>
+
       <div className="zx-shell zx-footer-inner">
         {/* Support and social as ONE group — the "reach us" column.
             
