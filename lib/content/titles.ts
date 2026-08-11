@@ -514,6 +514,136 @@ const TITLES: Partial<Record<ChartEntryId, TitleRecord>> = {
        episodes into its run is why the count is printed beside the 100%. */
     rottenTomatoes: { value: 100, reviewCount: 12, asOf: '2026-07-24', url: 'https://www.rottentomatoes.com/tv/president_curtis/s01' },
   },
+
+  shards: {
+    id: 'shards',
+    slug: 'the-shards',
+    synopsis: 'Los Angeles, 1981. A 17-year-old Bret Easton Ellis is in his last year at an elite prep school when a magnetic new student arrives, just as a serial killer known as the Trawler begins working the city.',
+    released: '2026-08-05',
+    seasons: 1,
+    /* 4 released, of a 9-episode season running to 2026-09-09. Episodes 3 and 4
+       both dropped today (2026-08-12) — Wikipedia's infobox still says 2, which is
+       a reminder that the infobox lags the episode table. Counted from the table. */
+    episodes: 4,
+    /* FX is the network, Hulu is where it streams — the FX-on-Hulu arrangement. The
+       chart badge said `disney-plus`; corrected to `hulu` in `charts.ts`, since that
+       badge sits next to poster art and has to name the actual service. */
+    network: 'FX',
+    creators: ['Ryan Murphy', 'Bret Easton Ellis'],
+    cast: ['Igby Rigney', 'Kaia Gerber', 'Homer Gere', 'Hayes Warner', 'Graham Campbell', 'Evan Rachel Wood', 'Wes Bentley'],
+    genres: ['Teen drama', 'Thriller', 'Coming-of-age'],
+    productionCompanies: ['20th Television', 'Ryan Murphy Television', 'Color Force', 'Sodium Fox Productions'],
+    distributors: ['FX'],
+    streamingOn: 'hulu',
+    rottenTomatoes: { value: 53, reviewCount: 43, asOf: '2026-08-07', url: 'https://www.rottentomatoes.com/tv/the_shards/s01' },
+    metacritic:     { value: 56, reviewCount: 23, asOf: '2026-08-06', url: 'https://www.metacritic.com/tv/the-shards/season-1/' },
+  },
+
+  furious: {
+    id: 'furious',
+    slug: 'furious',
+    synopsis: 'An FBI agent hunts a methodical female serial killer who targets wealthy men. As the two women\u2019s lives begin to intersect, each walking her own road to justice, the line between right and wrong stops holding.',
+    released: '2026-07-27',
+    seasons: 1,
+    /* 5 released, of an 8-episode season running to 2026-08-31. Premiered with
+       three episodes at once, then weekly — episode 5 landed 2026-08-10. */
+    episodes: 5,
+    network: 'Hulu',
+    creators: ['Elizabeth Meriwether'],
+    cast: ['Emmy Rossum', 'Lola Petticrew', 'Quincy Tyler Bernstine', 'Scoot McNairy'],
+    genres: ['Crime drama', 'Thriller'],
+    productionCompanies: ['Elizabeth Meriwether Pictures', 'Composition 8', 'Searchlight Television', '20th Television'],
+    distributors: ['Hulu'],
+    streamingOn: 'hulu',
+    rottenTomatoes: { value: 98, reviewCount: 42, asOf: '2026-08-05', url: 'https://www.rottentomatoes.com/tv/furious/s01' },
+    metacritic:     { value: 81, reviewCount: 21, asOf: '2026-07-26', url: 'https://www.metacritic.com/tv/furious/season-1/' },
+  },
+
+  offCampus: {
+    id: 'offCampus',
+    slug: 'off-campus',
+    synopsis: 'A music major agrees to tutor the captain of the Briar University hockey team, and the pair strike a deal to fake a relationship. Adapted from Elle Kennedy\u2019s Off-Campus novels.',
+    released: '2026-05-13',
+    /* A complete season, all eight episodes released at once, so this figure is
+       stable — unlike the mid-run records above. Season 2 is ordered but unaired,
+       so `seasons` stays 1: the field counts what exists, not what is greenlit. */
+    seasons: 1,
+    episodes: 8,
+    network: 'Prime Video',
+    creators: ['Louisa Levy'],
+    cast: ['Ella Bright', 'Belmont Cameli', 'Mika Abdalla', 'Stephen Kalyn', 'Jalen Thomas Brooks', 'Antonio Cipriano', 'Josh Heuston'],
+    genres: ['Romantic drama'],
+    productionCompanies: ['28 In Blue', 'Drowning Girl Productions', 'Temple Hill Entertainment', 'Billings Productions', 'Amazon MGM Studios'],
+    distributors: ['Prime Video'],
+    streamingOn: 'prime-video',
+    rottenTomatoes: { value: 91, reviewCount: 33, asOf: '2026-05-21', url: 'https://www.rottentomatoes.com/tv/off_campus/s01' },
+    metacritic:     { value: 71, reviewCount: 11, asOf: '2026-05-12', url: 'https://www.metacritic.com/tv/off-campus/season-1/' },
+  },
+
+  hours72: {
+    id: 'hours72',
+    slug: '72-hours',
+    synopsis: 'Passed over for a promotion for being too old, a 40-year-old ad man accepts a bachelor-party invitation he was added to by mistake and spends a weekend in Miami trying to keep up with strangers half his age.',
+    released: '2026-07-24',
+    runtime: 105,
+    directors: ['Tim Story'],
+    writers: ['Jon Hurwitz', 'Hayden Schlossberg', 'Kevin Burrows', 'Matt Mider'],
+    cast: ['Kevin Hart', 'Marcello Hern\u00e1ndez', 'Mason Gooding', 'Kam Patterson', 'Ben Marshall', 'Teyana Taylor'],
+    genres: ['Comedy'],
+    productionCompanies: ['Sony Pictures', 'Davis Entertainment', 'Counterbalance Entertainment', 'Hartbeat Productions', 'Will Packer Productions', 'The Story Company'],
+    distributors: ['Netflix'],
+    /* A Netflix original: it premiered on the service rather than in cinemas, so
+       unlike the 2026-08-07 theatrical pair above this one genuinely is streaming
+       and the field is safe to state. The 2026-07-20 Paris Theater screening was a
+       premiere event, not a theatrical run, so `released` is the Netflix date. */
+    streamingOn: 'netflix',
+    rottenTomatoes: { value: 14, reviewCount: 35, asOf: '2026-08-05', url: 'https://www.rottentomatoes.com/m/72_hours_2026' },
+    metacritic:     { value: 41, reviewCount: 15, asOf: '2026-07-31', url: 'https://www.metacritic.com/movie/72-hours-2026/' },
+  },
+
+  lastHouse: {
+    id: 'lastHouse',
+    slug: 'the-last-house',
+    synopsis: 'A suburban Seattle family wakes to find every door and window in their house sealed shut and the world outside drowning. Survival becomes a years-long project, and the rain brings something with it.',
+    released: '2026-08-07',
+    runtime: 112,
+    directors: ['Louis Leterrier'],
+    writers: ['Matthew Robinson'],
+    /* Just the two credited leads. The article's cast section lists the child roles
+       across three age brackets each, which belongs on a cast page rather than in a
+       two-line credit on a landing page. */
+    cast: ['Greta Lee', 'Wagner Moura'],
+    genres: ['Science fiction', 'Thriller'],
+    productionCompanies: ['Chernin Entertainment', '3 Arts Entertainment'],
+    distributors: ['Netflix'],
+    /* Released straight to Netflix, so this is stated. Same 2026-08-07 date as the
+       two theatrical films above, which is exactly why the distinction matters:
+       release date alone does not tell you whether something is streaming. */
+    streamingOn: 'netflix',
+    /* No Metacritic score published, so the field is omitted rather than guessed
+       from the 4.6/10 critic average. */
+    rottenTomatoes: { value: 28, reviewCount: 47, asOf: '2026-08-11', url: 'https://www.rottentomatoes.com/m/the_last_house' },
+  },
+
+  devilMouth: {
+    id: 'devilMouth',
+    slug: 'the-devils-mouth',
+    synopsis: 'Five friends on a graduation trip to Thailand talk their guide into the dangerous route through a flooded cave system, where a storm surge has trapped a bull shark in the freshwater passages with them.',
+    released: '2026-07-29',
+    runtime: 104,
+    directors: ['Jeff Wadlow'],
+    writers: ['Aja Gabel', 'Myung Joh Wesner'],
+    cast: ['Kathryn Newton', 'Lana Condor', 'Gavin Casalegno', 'Nico Hiraga', 'Tommi Rose', 'Tayme Thapthimthong'],
+    genres: ['Survival thriller', 'Horror'],
+    productionCompanies: ['Lionsgate', 'Thunder Road Films'],
+    /* Amazon MGM Studios distributes, via Prime Video. The chart badge said `hulu`,
+       which was simply wrong; corrected to `prime-video` in `charts.ts` per the rule
+       that the badge must name the service that actually streams the title. */
+    distributors: ['Amazon MGM Studios'],
+    streamingOn: 'prime-video',
+    rottenTomatoes: { value: 33, reviewCount: 39, asOf: '2026-08-09', url: 'https://www.rottentomatoes.com/m/the_devils_mouth' },
+    metacritic:     { value: 46, reviewCount: 8,  asOf: '2026-07-31', url: 'https://www.metacritic.com/movie/the-devils-mouth/' },
+  },
 }
 
 /* The key and the record's own `id` are two places to write the same string, so

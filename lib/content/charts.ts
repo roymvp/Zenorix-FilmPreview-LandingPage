@@ -88,7 +88,7 @@ const chartPool = {
   prada:      { id: 'prada',      title: 'The Devil Wears Prada 2',           kind: 'movie',  platform: 'disney-plus',    poster: '/media/tiles/devil-wears-prada-2.webp' },
   masters:    { id: 'masters',    title: 'Masters of the Universe',           kind: 'movie',  platform: 'prime-video',    poster: '/media/tiles/masters-of-the-universe.webp' },
   lastHouse:  { id: 'lastHouse',  title: 'The Last House',                    kind: 'movie',  platform: 'netflix',        poster: '/media/tiles/the-last-house.webp' },
-  devilMouth: { id: 'devilMouth', title: "The Devil's Mouth",                 kind: 'movie',  platform: 'hulu',           poster: '/media/tiles/the-devils-mouth.webp' },
+  devilMouth: { id: 'devilMouth', title: "The Devil's Mouth",                 kind: 'movie',  platform: 'prime-video',    poster: '/media/tiles/the-devils-mouth.webp' },
   hours72:    { id: 'hours72',    title: '72 Hours',                          kind: 'movie',  platform: 'netflix',        poster: '/media/tiles/72-hours.webp' },
 
   /* Shows */
@@ -97,7 +97,7 @@ const chartPool = {
   lioness:    { id: 'lioness',    title: 'Special Ops: Lioness',              kind: 'series', platform: 'paramount-plus', poster: '/media/tiles/lioness.webp' },
   rickMorty:  { id: 'rickMorty',  title: 'Rick and Morty',                    kind: 'series', platform: 'hbo-max',        poster: '/media/tiles/rick-and-morty.webp' },
   walterBoys: { id: 'walterBoys', title: 'My Life with the Walter Boys',      kind: 'series', platform: 'netflix',        poster: '/media/tiles/walter-boys.webp' },
-  shards:     { id: 'shards',     title: 'The Shards',                        kind: 'series', platform: 'disney-plus',    poster: '/media/tiles/the-shards.webp' },
+  shards:     { id: 'shards',     title: 'The Shards',                        kind: 'series', platform: 'hulu',           poster: '/media/tiles/the-shards.webp' },
   sterling:   { id: 'sterling',   title: 'Sterling Point',                    kind: 'series', platform: 'prime-video',    poster: '/media/tiles/sterling-point.webp' },
   furious:    { id: 'furious',    title: 'Furious',                           kind: 'series', platform: 'hulu',           poster: '/media/tiles/furious.webp' },
   idaho:      { id: 'idaho',      title: 'The Idaho Murders: College Nightmare', kind: 'series', platform: 'netflix',     poster: '/media/tiles/idaho-murders.webp' },
