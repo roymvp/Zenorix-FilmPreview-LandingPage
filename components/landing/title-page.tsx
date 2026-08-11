@@ -339,6 +339,12 @@ export function TitlePage({
                         and splitting them over two lines makes the reader travel
                         twice for one answer.
                         
+                        No separator between the two groups. A CSS dot used to sit
+                        there and it is gone — see the note on `.zx-title-eyebrow`:
+                        with only two children it drew a single dot marooned in the
+                        middle of the row, punctuating a boundary that a logo-led name
+                        and a pair of logo-led numbers already make obvious.
+                        
                         Each links to its source and carries its review count and read
                         date as hidden text: these numbers move weekly, so a bare
                         figure would quietly become false. Rendered only when the
@@ -404,15 +410,43 @@ export function TitlePage({
                       paragraph.
                   
                       One <ul>, not a row of <span>s: this is a list of facts about one
-                      subject and a screen reader should be able to count them. Dots
-                      between the plain values, drawn as `::before` on every item after
-                      the first, so an absent value (a film has no season count) takes
-                      its separator with it instead of leaving "· 2025 ·". */}
+                      subject and a screen reader should be able to count them.
+                      
+                      THE DOTS ARE REAL ELEMENTS, TRAILING their own value, and both
+                      halves of that are load-bearing. They began as CSS
+                      `li + li::before` and that broke twice in the browser:
+                      
+                      - A `::before` renders INSIDE its item, so an item and its
+                        leading dot wrap as one box. At 390px this line wraps, and the
+                        second line opened with "· Science fiction" — an orphaned
+                        separator pointing at nothing above it.
+                      - `.zx-title-tags li + li::before` (specificity 0,2,2) outranks
+                        `.zx-title-rating::before` (0,1,1), so the `content: none` that
+                        was meant to keep a dot off the boxed certificate lost the
+                        cascade and the chip rendered "· PG-13" inside its own border.
+                      
+                      Trailing separators fix both by construction: a dot belongs to
+                      the value it follows, so a wrap leaves it at the end of a line
+                      where it reads as "continues below", and the item before the
+                      certificate is simply the last one to get one — no specificity
+                      fight to lose. `i < tags.length - 1` rather than a
+                      `:not(:last-child)` selector because whether the last plain value
+                      needs a dot depends on whether the certificate exists, which is
+                      data this component has and CSS does not.
+                      
+                      aria-hidden on every one: a screen reader announcing "middle dot"
+                      four times through a four-fact line is noise, and the hidden
+                      labels beside each value already carry the structure. */}
                   <ul className="zx-title-tags">
-                    {tags.map((tag) => (
+                    {tags.map((tag, i) => (
                       <li key={tag.label}>
                         <span className="zx-visually-hidden">{tag.label}: </span>
                         {tag.value}
+                        {i < tags.length - 1 ? (
+                          <span className="zx-title-tag-sep" aria-hidden="true">
+                            ·
+                          </span>
+                        ) : null}
                       </li>
                     ))}
 

@@ -3726,13 +3726,19 @@
   color: var(--md-sys-color-on-surface-variant);
 }
 
-.zx-title-eyebrow > * + *::before {
-  content: '·';
-  /* Sits in the flex gap rather than adding to it, so the dot reads as a
-     separator between two items and not as a third item. */
-  margin-right: var(--zx-space-3);
-  color: var(--md-sys-color-outline);
-}
+/* NO SEPARATOR DOT IN THIS ROW ANY MORE.
+   
+   `> * + *::before` used to draw one. The selector is right about the DOM and wrong
+   about the content: this row's two children are the service <span> and the scores
+   <ul>, so it printed exactly one dot — floating between "Disney+" and the tomato,
+   at the outer edge of a `space-3` gap on each side, reading as a bullet belonging
+   to neither. The scores inside the <ul> are separated by their own spacing, so the
+   row already had two visual groups and the dot was punctuating a boundary the eye
+   could see without it.
+   
+   The mark-plus-name of a service and a pair of logo-led numbers are different
+   enough in shape that whitespace separates them adequately; the tag line under the
+   h1 keeps its dots because there every item is undifferentiated plain text. */
 
 .zx-title-platform {
   display: inline-flex;
@@ -3746,8 +3752,10 @@
    this is the line a reader consults after the name has registered, not one that
    competes with it.
    
-   Same dot mechanism as the eyebrow, and same reason — a film has no season count
-   and must not render a dangling separator where one would have gone. */
+   This is the one row on the page that DOES carry dots — every item in it is
+   undifferentiated plain text, so without them "2025 197 min Science fiction" is
+   one run-on string. They are emitted as spans by the markup, trailing their own
+   value; see `.zx-title-tag-sep` below and the note in `title-page.tsx`. */
 .zx-title-tags {
   display: flex;
   flex-wrap: wrap;
@@ -3762,24 +3770,18 @@
   font-variant-numeric: tabular-nums;
 }
 
-.zx-title-tags li + li::before {
-  content: '·';
-  margin-right: var(--zx-space-2);
+/* THE SEPARATOR. A real <span> the markup emits after each value that has another
+   plain value behind it — NOT `li + li::before`, which is what this was and which
+   failed two ways at once. See the long note in `title-page.tsx`; in short, a
+   `::before` wraps as part of its own item (so a wrapped line opened with a
+   dangling "·"), and `li + li::before` outranked the `content: none` that was
+   supposed to keep a dot off the bordered certificate.
+   
+   `margin-left` only. The dot trails its value, so the tight side is the side
+   facing the word it belongs to — the flex `gap` supplies the space on the other. */
+.zx-title-tag-sep {
+  margin-left: var(--zx-space-2);
   color: var(--md-sys-color-outline);
-}
-
-/* ...except before the certificate, which gets no dot. `::before` renders INSIDE
-   the element, so on a bordered chip the separator lands within the box and reads
-   as "· PG-13" — a dot that looks like part of the certificate. A box needs no
-   separator anyway: the outline is already doing that job, which is why Apple TV's
-   rating box has no dot in front of it either. */
-.zx-title-rating::before {
-  content: none;
-}
-
-.zx-title-rating {
-  display: inline-flex;
-  align-items: center;
 }
 
 /* The service, mark first. Weight bumped over the rest of the row because "where
@@ -3805,7 +3807,17 @@
    a poster, a cinema listing — and set as plain text it stops reading as a
    certificate at all. Solid outline rather than the hairline the format plates
    use, because this one is a statement about who may watch. */
+/* THE CERTIFICATE, the one member of the tag line that is a box — a rating is
+   printed inside a rule everywhere it appears and stops reading as a certificate
+   set as plain text. It gets no separator in front of it, which is now a property
+   of the markup rather than of a `content: none` override: the outline already does
+   the separating, which is why Apple TV's rating box has no dot before it either.
+   
+   `inline-flex` so the chip centres its own label vertically against the taller
+   text beside it; `align-items: center` on the parent handles the rest. */
 .zx-title-rating {
+  display: inline-flex;
+  align-items: center;
   padding: 1px var(--zx-space-2);
   border: 1px solid var(--md-sys-color-outline);
   border-radius: var(--zx-radius-sm);
@@ -3898,72 +3910,71 @@
   font-variant-numeric: tabular-nums;
 }
 
-/* THE SPEC LINE — release date · runtime, then the format plates.
+/* PLAYBACK CAPSULES — "4K UHD", "HDR10", "Dolby Vision", "Dolby Atmos".
    
-   Two lists sharing one wrapper (see the markup note for why they stay separate in
-   the DOM). `row-gap` larger than `column-gap` because on a narrow column this
-   wraps into two lines, and the plates need to clear the text above them without
-   the text needing to clear itself. */
-.zx-title-meta {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--zx-space-3) var(--zx-space-4);
-  margin-top: var(--zx-space-5);
-}
-
-/* Plain values, dot-separated, caption-sized. Quieter than the key row on purpose:
-   this is the line a reader consults, not the one that sells them. */
-.zx-title-specs {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--zx-space-2);
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  font-size: var(--zx-text-sm);
-  color: var(--md-sys-color-on-surface-variant);
-  font-variant-numeric: tabular-nums;
-}
-
-.zx-title-specs li + li::before {
-  content: '·';
-  margin-right: var(--zx-space-2);
-  color: var(--md-sys-color-outline);
-}
-
-/* PLAYBACK PLATES ("4K UHD", "Dolby Vision", "Dolby Atmos").
+   These were 1px outlined plates, styled after the marks printed on a disc case.
+   That reference is right for print and wrong for a black page: an
+   `outline-variant` hairline (#2c323a) on #08090b is a 1.2:1 edge, so the site's
+   strongest technical claim rendered as its faintest element — four grey words the
+   eye slid straight past on the way to the CTA. Filled capsules now, each with a
+   glyph, which is also the form every service the visitor already uses puts them in.
    
-   Outlined, uppercase, tight — deliberately the visual language of the plates
-   printed on a disc case rather than of a filled brand chip. They are a spec
-   readout, so they must not compete with the scores directly above them: no fill,
-   caption type, and the outline is the same hairline the rest of the page uses.
+   NO WRAPPER. `.zx-title-meta` used to hold this list plus a spec list; the year
+   and runtime moved to the tag line under the h1, so this list owns its own top
+   margin and the wrapper is deleted rather than left holding one child.
    
-   Tabular-ish letterspacing and `nowrap` because every one of these is a
-   registered wording that must not break mid-mark ("Dolby / Vision"). */
+   FILLED IN STEEL (`secondary-container`), NOT IN THE BRAND'S PRIMARY. `primary`
+   here is #fbfcfe — near-white — which is the CTA button's fill. Four white pills
+   directly above a white button would read as five buttons and make the one thing
+   on the page that is actually clickable ambiguous. `secondary-container` is the
+   same brand family one step down: unmistakably a solid chip, clearly not an
+   action. `on-secondary-container` (#e8edf4) on it is 8.9:1. */
 .zx-title-formats {
   display: flex;
   flex-wrap: wrap;
   gap: var(--zx-space-2);
-  /* No margin: `.zx-title-meta` owns the spacing between the two lists now that
-     they share a row. */
-  margin: 0;
+  margin: var(--zx-space-5) 0 0;
   padding: 0;
   list-style: none;
 }
 
 .zx-title-format {
-  padding: 4px var(--zx-space-2);
-  border: 1px solid var(--md-sys-color-outline-variant);
-  border-radius: var(--zx-radius-sm);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--zx-space-1);
+  /* 999px, matching the other pills in this stylesheet. A capsule and not the
+     12px `radius-sm` the plates used: the softer corner is what separates a
+     "badge" from a "button" at this size. */
+  padding: 5px var(--zx-space-3) 5px var(--zx-space-2);
+  border-radius: 999px;
+  background: var(--md-sys-color-secondary-container);
+  color: var(--md-sys-color-on-secondary-container);
   font-size: var(--zx-text-label);
   font-weight: var(--zx-weight-semibold);
   line-height: 1.4;
   letter-spacing: 0.06em;
   text-transform: uppercase;
+  /* Every one of these is a registered wording that must not break mid-mark
+     ("Dolby / Vision"). */
   white-space: nowrap;
-  color: var(--md-sys-color-on-surface-variant);
+}
+
+/* The glyph, optically matched to the 11px label rather than left at the 24px
+   `md-icon` defaults to.
+   
+   `font-size` AND `width`/`height`, which is what every other `md-icon` in this
+   file does (`.zx-cta-sub md-icon`, `.zx-chart-more md-icon`). I first set only
+   `font-size`, on the theory that an icon font scales with type — measured in the
+   browser, the box stayed 24x24 and blew the capsule open. `md-icon` is a custom
+   element carrying its own `24px` box, so the box needs setting explicitly and
+   `font-size` alone silently does half the job. */
+.zx-title-format md-icon {
+  font-size: 15px;
+  width: 15px;
+  height: 15px;
+  /* Kills the line-box leading the icon font would otherwise add, which is what
+     pushes a glyph a pixel or two below the text baseline beside it. */
+  line-height: 1;
 }
 
 /* The single CTA, last item of the header column — after the title, the service,
@@ -4134,6 +4145,108 @@
   margin: var(--zx-space-2) 0 0;
   max-width: 60ch;
   text-wrap: pretty;
+}
+
+/* THE POSTER AS HERO ART — phones only ---------------------------------------
+   
+   Below 720px the poster stops being a 200px thumbnail above the copy and becomes
+   the background the header sits on. The thumbnail was showing the visitor key art
+   they had just tapped in the chart rail, at a third of the size, and then asking
+   them to scroll past it to reach the facts — a phone's whole first screen spent
+   re-showing the thing they had already chosen.
+   
+   ONE BREAKPOINT, MAX-WIDTH, PAIRED WITH THE MIN-WIDTH BLOCK BELOW. 719.98px
+   rather than 719px: the two must not both apply and must not leave a gap, and
+   fractional viewport widths are real (a 1.5 DPR phone at 1079 CSS px, a zoomed
+   desktop). 719.5px would match neither rule if these were 719/720.
+   
+   THE BLEED IS `--zx-gutter`, NOT the `calc(50% - 50vw)` idiom the desktop hero
+   uses. That idiom escapes to the VIEWPORT, and this element lives inside
+   `#zx-main`, which sets `overflow-x: clip` to contain the rails — so a viewport
+   bleed would be silently clipped straight back off at the sheet edge. The gutter
+   is also the honest target: `.zx-shell` is the only thing insetting this header,
+   the sheet caps at `--zx-page-max`, and cancelling exactly `--zx-gutter` reaches
+   the sheet edge at every width with no `vw`/scrollbar discrepancy to absorb. */
+@media (max-width: 719.98px) {
+  .zx-title-head {
+    position: relative;
+    /* Out to the sheet edge, then the content box back in. The pair cancels, so
+       the copy keeps the same measure it had before the art arrived. */
+    margin-inline: calc(var(--zx-gutter) * -1);
+    padding-inline: var(--zx-gutter);
+    /* Art above the copy, copy over the bottom of the art. 34vh leaves the poster
+       a readable band of its own — enough to recognise a face on it — without
+       pushing the h1 off the first screen, which is the fault the thumbnail had. */
+    padding-block: 34vh var(--zx-space-6);
+    /* `gap` is dead here: the poster is out of flow, so `.zx-title-intro` is the
+       only child left in it. Zeroed rather than left at 24px, which would have
+       been silent but is exactly the kind of value that later reads as intentional. */
+    gap: 0;
+    /* Contains the z-indexes below so the art cannot slide behind the page
+       background or in front of the fixed top bar. */
+    isolation: isolate;
+  }
+
+  .zx-title-poster {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    /* Overrides the flow geometry: the 200px cap, the 2:3 ratio and the rounded
+       hairline all belong to the thumbnail this stops being. `max-width: none` is
+       required — `width: 100%` alone would still be capped at 200px. */
+    width: 100%;
+    max-width: none;
+    height: 100%;
+    aspect-ratio: auto;
+    border-radius: 0;
+    box-shadow: none;
+    /* `top` and not `center`: a 2:3 poster cropped into a landscape band loses
+       most of its height, and on key art the face is at the top. Centring cropped
+       it to torsos. */
+    object-position: top center;
+  }
+
+  /* The scrim. Two jobs: guarantee a contrast floor for the copy over art this
+     stylesheet cannot see, and hand off to the page surface at the bottom edge so
+     the art ends without a seam.
+     
+     ITS OWN RAMP, NOT `--zx-hero-scrim-vertical`. Reusing the desktop hero's
+     variable was the first attempt and it failed in the browser: that ramp is built
+     for a hero whose copy sits in its bottom quarter, so it only reaches 0.92 alpha
+     at 26% from the bottom and is at ~0.5 above that. Measured here, the tag line
+     and synopsis sit at 54% and 64% of the header — straight through the weakest
+     part of it — and over Avatar's bright key art they were close to unreadable.
+     
+     So this holds near-opaque across the whole lower two-thirds where every line of
+     copy actually is, and spends its entire transition in the top third that is
+     deliberately art-only. The first stop is `surface` and not the media black for
+     the same reason the desktop ramp's is — it is the pixel that has to match the
+     section below, and the two blacks differ by enough to draw a visible line.
+     
+     `::after` rather than a wrapper element: nothing about this is content, and a
+     phone-only scrim div would sit in the DOM on desktop doing nothing. */
+  .zx-title-head::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background: linear-gradient(
+      to top,
+      var(--md-sys-color-surface) 0%,
+      rgb(var(--zx-media-black-rgb) / 0.94) 30%,
+      rgb(var(--zx-media-black-rgb) / 0.88) 52%,
+      rgb(var(--zx-media-black-rgb) / 0.62) 74%,
+      rgb(var(--zx-media-black-rgb) / 0.32) 100%
+    );
+    pointer-events: none;
+  }
+
+  /* Above both. Needs `position` for `z-index` to apply at all — without it the
+     copy paints under the scrim and the whole header greys out. */
+  .zx-title-intro {
+    position: relative;
+    z-index: 2;
+  }
 }
 
 @media (min-width: 720px) {
