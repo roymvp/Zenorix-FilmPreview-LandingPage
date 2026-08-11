@@ -864,6 +864,9 @@ export const getTitle = (id: string): TitleRecord | undefined =>
 export const getTitleBySlug = (slug: string): TitleRecord | undefined =>
   allTitles().find((title) => title.slug === slug)
 
-/** Display name of the service a title streams on. */
-export const streamingName = (record: TitleRecord): string | undefined =>
-  record.streamingOn ? PLATFORMS[record.streamingOn].name : undefined
+/* `streamingName()` used to live here, returning just the service's display name
+   for a text row on the detail page. That row is a chip with the service's mark
+   beside its name now, so the caller needs the whole registry entry and reads
+   `PLATFORMS[record.streamingOn]` directly. A helper that hands back one field of
+   an object the caller already has to look up is a step backwards, so it is gone
+   rather than kept "in case". */

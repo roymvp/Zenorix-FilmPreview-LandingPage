@@ -3422,31 +3422,109 @@
   text-wrap: balance;
 }
 
+/* THE KEY ROW — service · genre · certificate · scores.
+   
+   One line directly under the h1, in the order Apple TV and Disney+ use. Dots
+   between the members, drawn as `::before` on every child after the first so that
+   a member the record does not have (an unreleased title has no service and no
+   certificate) takes its separator with it instead of leaving "· Drama ·".
+   
+   `align-items: center` with everything sized in `em` keeps the logo, the text and
+   the boxed certificate on one optical baseline despite three different heights. */
+.zx-title-key {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--zx-space-3);
+  margin-top: var(--zx-space-4);
+  font-size: var(--zx-text-base);
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.zx-title-key > * + *::before {
+  content: '·';
+  /* Sits in the flex gap rather than adding to it, so the dot reads as a
+     separator between two items and not as a third item. */
+  margin-right: var(--zx-space-3);
+  color: var(--md-sys-color-outline);
+}
+
+/* ...except before the certificate, which gets no dot. `::before` renders INSIDE
+   the element, so on a bordered chip the separator lands within the box and reads
+   as "· PG-13" — a dot that looks like part of the certificate. A box needs no
+   separator anyway: the outline is already doing that job, which is why Apple TV's
+   rating box has no dot in front of it either. */
+.zx-title-rating::before {
+  content: none;
+}
+
+.zx-title-platform,
+.zx-title-genres,
+.zx-title-rating {
+  display: inline-flex;
+  align-items: center;
+}
+
+/* The service, mark first. Weight bumped over the rest of the row because "where
+   can I watch this" is the question this page exists to answer. */
+.zx-title-platform {
+  gap: var(--zx-space-2);
+  font-weight: var(--zx-weight-semibold);
+  color: var(--md-sys-color-on-surface);
+}
+
+/* The store app icon, squared off by the same radius the chart badges use so the
+   same mark never appears with two different silhouettes on one site. */
+.zx-title-platform-mark {
+  width: 1.5em;
+  height: 1.5em;
+  flex: none;
+  border-radius: 5px;
+  object-fit: cover;
+}
+
+/* THE CERTIFICATE. The only boxed thing in this row, and boxed on purpose: a
+   rating certificate is printed inside a rule everywhere it appears — a disc case,
+   a poster, a cinema listing — and set as plain text it stops reading as a
+   certificate at all. Solid outline rather than the hairline the format plates
+   use, because this one is a statement about who may watch. */
+.zx-title-rating {
+  padding: 1px var(--zx-space-2);
+  border: 1px solid var(--md-sys-color-outline);
+  border-radius: var(--zx-radius-sm);
+  font-size: var(--zx-text-label);
+  font-weight: var(--zx-weight-semibold);
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  color: var(--md-sys-color-on-surface);
+}
+
 .zx-title-synopsis {
   /* The one reading measure on the page. See the section note: this is the only
      prose here, so it gets the paragraph treatment and nothing else does. */
   max-width: 58ch;
-  margin: var(--zx-space-3) 0 0;
+  margin: var(--zx-space-4) 0 0;
   font-size: var(--zx-text-lg);
   line-height: var(--zx-lh-body);
   color: var(--md-sys-color-on-surface-variant);
   text-wrap: pretty;
 }
 
-/* CRITIC SCORES.
+/* CRITIC SCORES — the last member of the key row.
    
-   A horizontal row of at most two. Each one is a link to the source, and each
-   prints its review count and read date underneath — the markup comments in
-   `title-page.tsx` and the `Score` type both explain why the number never appears
-   without them. Visually that means the value can be big and confident while the
-   provenance stays legible directly beneath it. */
+   At most two, each a link to its source with its review count and read date as
+   hidden text (see the markup comment and the `Score` type for why the number can
+   never appear alone). They used to be a row of their own with a big display-size
+   figure; inside the key row they take the row's own type size, because a 32px
+   number sitting next to 15px text would make the row read as a headline with
+   footnotes rather than as one line of facts. */
 .zx-title-scores {
   display: flex;
   flex-wrap: wrap;
-  /* Wider than the old 12px. With the card boxes gone there is no border keeping
-     the two scores apart, so the gap is doing that job on its own. */
-  gap: var(--zx-space-5);
-  margin: var(--zx-space-5) 0 0;
+  /* Tighter than the row's own gap: two scores are one group within the row, so
+     they must bind to each other more closely than to the certificate before them. */
+  gap: var(--zx-space-3);
+  margin: 0;
   padding: 0;
   list-style: none;
 }
@@ -3494,12 +3572,48 @@
 }
 
 .zx-title-score-value {
-  font-size: var(--zx-text-h2);
+  /* Inherits the key row's size. Bold rather than big is what separates it from
+     the genre text beside it now. */
   font-weight: var(--zx-weight-bold);
   line-height: var(--zx-lh-tight);
   color: var(--md-sys-color-on-surface);
   /* Two scores side by side are compared digit to digit. */
   font-variant-numeric: tabular-nums;
+}
+
+/* THE SPEC LINE — release date · runtime, then the format plates.
+   
+   Two lists sharing one wrapper (see the markup note for why they stay separate in
+   the DOM). `row-gap` larger than `column-gap` because on a narrow column this
+   wraps into two lines, and the plates need to clear the text above them without
+   the text needing to clear itself. */
+.zx-title-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--zx-space-3) var(--zx-space-4);
+  margin-top: var(--zx-space-5);
+}
+
+/* Plain values, dot-separated, caption-sized. Quieter than the key row on purpose:
+   this is the line a reader consults, not the one that sells them. */
+.zx-title-specs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--zx-space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--zx-text-sm);
+  color: var(--md-sys-color-on-surface-variant);
+  font-variant-numeric: tabular-nums;
+}
+
+.zx-title-specs li + li::before {
+  content: '·';
+  margin-right: var(--zx-space-2);
+  color: var(--md-sys-color-outline);
 }
 
 /* PLAYBACK PLATES ("4K UHD", "Dolby Vision", "Dolby Atmos").
@@ -3515,10 +3629,9 @@
   display: flex;
   flex-wrap: wrap;
   gap: var(--zx-space-2);
-  /* 12px, not the 20px the scores get. The plates and the scores are one block —
-     "how good is it, and what does it arrive as" — so they bind to each other
-     tighter than either binds to the synopsis above. */
-  margin: var(--zx-space-3) 0 0;
+  /* No margin: `.zx-title-meta` owns the spacing between the two lists now that
+     they share a row. */
+  margin: 0;
   padding: 0;
   list-style: none;
 }
@@ -3536,24 +3649,29 @@
   color: var(--md-sys-color-on-surface-variant);
 }
 
-/* The single CTA, sitting after the facts rather than above them — see the note in
-   `title-page.tsx` about why leading with an install prompt is what got the old
-   route removed. Rule above it so it reads as a deliberate break in the document
-   rather than another row of the fact list. */
+/* The single CTA, last item of the header column — after the title, the service,
+   the certificate and the synopsis, which is the order that keeps this page an
+   answer rather than the doorway page the old route was.
+   
+   NO RULE ABOVE IT ANY MORE. It used to be a full-width band below the header,
+   separated by a hairline, and the rule was doing the work of saying "the document
+   breaks here". Inside the column it is simply the next thing after the facts, in
+   the position every service the visitor already uses puts its play button. */
 .zx-title-cta {
-  margin: var(--zx-space-8) 0;
-  padding-top: var(--zx-space-8);
-  border-top: 1px solid var(--md-sys-color-outline-variant);
+  /* 32px — the largest step inside the header column, so the ask is clearly the
+     end of the sequence and not a fifth row of facts. (There is no
+     `--zx-space-7`; the scale skips from 6 to 8.) */
+  margin-top: var(--zx-space-8);
 }
 
 /* `.zx-cta` is `align-items: stretch`, which is right where it was written — the
-   landing hero and both dialogs put it in a column around 360px wide. This page's
-   column is 1120px, and a pill button stretched that far stops reading as a button
-   at all. Cap it and centre it instead of changing the shared rule, which would
-   affect the hero, the sticky bar and the dialogs. */
+   landing hero and both dialogs put it in a column around 360px wide. Cap it here
+   too, but left-aligned rather than centred: it now sits at the foot of a
+   left-aligned column of text, and a centred button under left-aligned facts reads
+   as belonging to neither. */
 .zx-title-cta .zx-cta {
-  max-width: 360px;
-  margin: 0 auto;
+  max-width: 320px;
+  margin: 0;
 }
 
 .zx-title-section-heading {
