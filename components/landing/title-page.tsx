@@ -6,8 +6,6 @@ import { TopBar } from '@/components/landing/top-bar'
 import { SITE } from '@/lib/config/site'
 import { castCredits, castInitials, castPhoto } from '@/lib/content/cast'
 import type { ChartEntry } from '@/lib/content/charts'
-import { legalLinks } from '@/lib/content/legal'
-import { referenceLinks, watchLinks } from '@/lib/content/outbound'
 import { PLATFORMS } from '@/lib/content/platforms'
 import { PLAYBACK_FORMATS, type TitleRecord } from '@/lib/content/titles'
 import { fill, pluralize, type Dictionary } from '@/lib/i18n/dictionaries'
@@ -509,21 +507,7 @@ export function TitlePage({
           </div>
         </main>
 
-        <SiteFooter
-          links={legalLinks(locale, {
-            privacy: dict.footer.privacy,
-            terms: dict.footer.terms,
-            dmca: dict.footer.dmca,
-          })}
-          directory={{
-            watch: watchLinks(),
-            reference: referenceLinks(locale),
-            copy: { ...dict.footer.directory, newTab: dict.a11y.newTab },
-          }}
-          copyright={fill(dict.footer.copyright, { year: 2026 })}
-          contact={{ label: dict.contact.label, aria: dict.contact.aria }}
-          social={dict.social}
-        />
+        <SiteFooter locale={locale} dict={dict} />
       </div>
       </ConversionProvider>
     </>

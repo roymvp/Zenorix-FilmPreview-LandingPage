@@ -9,8 +9,6 @@ import { TopBar } from '@/components/landing/top-bar'
 import { TopChart } from '@/components/landing/top-chart'
 import { SITE } from '@/lib/config/site'
 import { getMovieChart, getSeriesChart } from '@/lib/content/charts'
-import { legalLinks } from '@/lib/content/legal'
-import { referenceLinks, watchLinks } from '@/lib/content/outbound'
 import { fill, type Dictionary } from '@/lib/i18n/dictionaries'
 import { locales, type Locale } from '@/lib/i18n/config'
 import { buildStructuredData, marketValues } from '@/lib/seo'
@@ -210,27 +208,10 @@ export function MarketLanding({
           />
         </main>
 
-        <SiteFooter
-          /* Real pages now. These were `#privacy`/`#terms`/`#dmca` — fragments
-             pointing at ids that existed nowhere, so all three scrolled to the top
-             of this page instead of going anywhere. */
-          links={legalLinks(locale, {
-            privacy: dict.footer.privacy,
-            terms: dict.footer.terms,
-            dmca: dict.footer.dmca,
-          })}
-          /* The services this page shows, plus the sites a film gets checked
-             against. The reference half varies by market because a Brazilian
-             reader wants AdoroCinema, not only IMDb. */
-          directory={{
-            watch: watchLinks(),
-            reference: referenceLinks(locale),
-            copy: { ...dict.footer.directory, newTab: dict.a11y.newTab },
-          }}
-          copyright={fill(dict.footer.copyright, { year: 2026 })}
-          contact={{ label: dict.contact.label, aria: dict.contact.aria }}
-          social={dict.social}
-        />
+        {/* Two props. The footer builds its own legal links, directory, catalogue
+            columns and copy from these — see the note on `SiteFooter` for why that
+            assembly moved out of all three callers. */}
+        <SiteFooter locale={locale} dict={dict} />
 
         <ConversionDialog
           copy={{

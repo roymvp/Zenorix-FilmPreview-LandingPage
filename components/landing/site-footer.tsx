@@ -156,10 +156,13 @@ export function SiteFooter({ locale, dict }: { locale: Locale; dict: Dictionary 
           </div>
         </div>
 
+        {/* `referenceLinks` is market-specific by design — a Brazilian reader wants
+            AdoroCinema, not only IMDb — whereas the partner list is the same in
+            every market, so only one of the two takes a locale. */}
         <OutboundDirectory
-          watch={directory.watch}
-          reference={directory.reference}
-          copy={directory.copy}
+          watch={watchLinks()}
+          reference={referenceLinks(locale)}
+          copy={{ ...copy.directory, newTab: dict.a11y.newTab }}
         />
 
         {/* The baseline: who operates this, and the copyright.
@@ -178,7 +181,14 @@ export function SiteFooter({ locale, dict }: { locale: Locale; dict: Dictionary 
             <a className="zx-footer-mail" href={`mailto:${ORG.email}`}>
               {ORG.email}
             </a>
-            <span className="zx-footer-copy">{copyright}</span>
+            {/* The year was hardcoded as `2026` in all three callers. It is derived
+                now: this is a server component with no `use client` anywhere up its
+                tree, so the call runs at build time only — no hydration mismatch is
+                possible, and the difference is simply that a rebuild refreshes the
+                year instead of it silently going stale in January. */}
+            <span className="zx-footer-copy">
+              {fill(copy.copyright, { year: String(new Date().getFullYear()) })}
+            </span>
           </p>
         </div>
       </div>

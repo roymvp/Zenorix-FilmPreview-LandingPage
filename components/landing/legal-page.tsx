@@ -1,8 +1,7 @@
 import { SiteFooter } from '@/components/landing/site-footer'
 import { TopBar } from '@/components/landing/top-bar'
 import { ORG, orgAddressLine } from '@/lib/config/site'
-import { legalLinks, type LegalSlug } from '@/lib/content/legal'
-import { referenceLinks, watchLinks } from '@/lib/content/outbound'
+import type { LegalSlug } from '@/lib/content/legal'
 import { fill, type Dictionary } from '@/lib/i18n/dictionaries'
 import type { Locale } from '@/lib/i18n/config'
 import { buildLegalStructuredData } from '@/lib/seo'
@@ -153,26 +152,11 @@ export function LegalPage({
           </article>
         </main>
 
-        <SiteFooter
-          links={legalLinks(locale, {
-            privacy: dict.footer.privacy,
-            terms: dict.footer.terms,
-            dmca: dict.footer.dmca,
-          })}
-          /* Same directory as the landing page. Worth keeping here rather than
-             stripping it: the DMCA page's own trademark clause is the text this
-             block's independence line echoes, so a reader who arrives on that
-             page from a search result sees the links and the disclaimer that
-             governs them in one place. */
-          directory={{
-            watch: watchLinks(),
-            reference: referenceLinks(locale),
-            copy: { ...dict.footer.directory, newTab: dict.a11y.newTab },
-          }}
-          copyright={fill(dict.footer.copyright, { year: 2026 })}
-          contact={{ label: dict.contact.label, aria: dict.contact.aria }}
-          social={dict.social}
-        />
+        {/* The full footer here, not a stripped one: the DMCA page's own partner
+            clause is the text the directory's licensing notes echo, so a reader who
+            arrives on that page from a search result sees the partner links and the
+            clause governing them in one place. */}
+        <SiteFooter locale={locale} dict={dict} />
       </div>
     </>
   )

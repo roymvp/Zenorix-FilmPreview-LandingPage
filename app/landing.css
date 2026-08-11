@@ -93,6 +93,13 @@
   --zx-space-6: 24px; /* major block separation */
   --zx-space-8: 32px; /* sub-section separation */
   --zx-space-10: 40px; /* section <-> section */
+  /* 56px, the scale's new top step, added for the footer masthead. Nothing else on
+     the site needed a gap wider than section-to-section, but the footer band has to
+     separate itself from the install CTA above it AND hold four columns apart
+     without them reading as one grid — 40px did neither, which is most of why the
+     old footer felt cramped. Kept as a token rather than a one-off so a second
+     oversized band cannot drift to 52px or 60px. */
+  --zx-space-14: 56px;
 
   /* Section rhythm, now a scale step rather than a standalone 44px. */
   --zx-section-y: var(--zx-space-10);
@@ -2241,11 +2248,29 @@
 
 /* ------------------------------------------------------------------ footer */
 
+/* THE FOOTER SHELL.
+   
+   The brief was "too crowded, not grand enough", and the single largest cause was
+   here: the whole band opened on 24px of padding, the same step used between two
+   paragraphs. A footer carrying a brand block, four link columns, eleven partner
+   chips and a legal baseline cannot announce itself with a paragraph gap — the
+   content was fine, the container was starving it.
+   
+   The fix is air, and ONLY air: the top inset goes 24px -> 40px, and the column gap
+   inside the band goes to 56px (see the desktop tier). Nothing here paints.
+   
+   I did try a tinted background first, and it was wrong twice over. The file header's
+   "ONE BACKGROUND" rule names the footer explicitly and allows exactly two
+   exceptions, neither of which is this. More concretely: this element lives INSIDE
+   `.zx-page`, which is width-capped, so the tint did not render as a full-bleed
+   closing band at all — it was a floating rectangle with two vertical edges running
+   down a black page, which is precisely the seam `.zx-page` deleted its side borders
+   to get rid of. Grandness here comes from spacing and from the wordmark, not tint. */
 .zx-footer {
   border-block-start: 1px solid var(--md-sys-color-outline-variant);
-  /* 24px `space-6`, was an off-scale 22px. The `max()` keeps the bottom inset at
-     least 24px while still yielding to a larger home-indicator safe area. */
-  padding-block: var(--zx-space-6) max(var(--zx-space-6), env(safe-area-inset-bottom));
+  /* The `max()` keeps the bottom inset at its floor while still yielding to a
+     larger home-indicator safe area. */
+  padding-block: var(--zx-space-10) max(var(--zx-space-8), env(safe-area-inset-bottom));
 }
 
 /* The outbound directory, above the meta row.
@@ -2289,10 +2314,13 @@
    a convenience, so they must not look like the same kind of thing.
    
    `surface-container-low`, not `primary`: it has to sit ABOVE the footer's flat
-   background without competing with the install CTA further up the page. */
+   background without competing with the install CTA further up the page. This is a
+   BOUNDED, rounded panel rather than a section tint, which is why it does not fall
+   foul of the header's "ONE BACKGROUND" rule the way a full-width footer tint would
+   — it reads as a card, and the page is full of cards. */
 .zx-directory-group--partners {
   gap: var(--zx-space-3);
-  padding: var(--zx-space-4);
+  padding: var(--zx-space-5);
   border: 1px solid var(--md-sys-color-outline-variant);
   border-radius: var(--zx-radius-md);
   background: var(--md-sys-color-surface-container-low);
@@ -2356,13 +2384,25 @@
    chip responds and the mark does not appear to float free of its label. */
 .zx-directory-link--brand {
   gap: var(--zx-space-2);
-  padding: var(--zx-space-15) var(--zx-space-25);
+  /* Roomier than the 6px/10px it started at. Eleven chips at minimum padding is
+     precisely the "crowded" the brief objected to; at 8px/14px the row still fits
+     three-up on a phone but each chip has an interior. */
+  padding: var(--zx-space-2) var(--zx-space-3);
   border: 1px solid var(--md-sys-color-outline-variant);
   border-radius: 999px;
-  background: var(--md-sys-color-surface);
+  /* Two rungs ABOVE the `surface-container-low` panel behind it. This is a dark-only
+     theme — one `:root`, no light block — so the elevation ladder runs darkest to
+     lightest, and the chip's original `surface` was the DARKEST token in the whole
+     set: sitting on a lighter panel it read as a hole punched in the box rather than
+     as a raised object. */
+  background: var(--md-sys-color-surface-container-high);
   color: var(--md-sys-color-on-surface);
   font-size: var(--zx-text-meta);
-  font-weight: var(--zx-weight-medium);
+  /* `semibold`, not the `--zx-weight-medium` this rule shipped with: there is no
+     medium step in this stylesheet's weight scale (regular / semibold / bold), so
+     that reference resolved to nothing and the chips were rendering at the
+     inherited regular weight the whole time. */
+  font-weight: var(--zx-weight-semibold);
   transition:
     background 120ms ease,
     border-color 120ms ease;
@@ -2379,7 +2419,10 @@
    chip's hover authoritative regardless of what the base rule grows into. */
 .zx-directory-link--brand:hover {
   border-color: var(--md-sys-color-outline);
-  background: var(--md-sys-color-surface-container-high);
+  /* `-highest`, one rung above the chip's new resting `-high`. It was equal to the
+     resting value after the elevation fix, which made hover a no-op on the exact
+     control the redesign is built around. */
+  background: var(--md-sys-color-surface-container-highest);
   color: var(--md-sys-color-on-surface);
 }
 
@@ -2425,15 +2468,158 @@
   max-width: 68ch;
 }
 
-/* Two centered lines, links then copyright. No internal divider and no split
-   utility row: with the theme toggle gone there is only legal text down here,
-   and a hairline between two centered lines would imply two groups where there
-   is really one. */
-.zx-footer-inner {
+/* ============================================================ column band */
+
+/* THE COLUMN BAND. On mobile this is a plain stack — four groups in a column,
+   start-aligned, generously spaced. The desktop tier turns it into the 4-up grid.
+   
+   Start-aligned at every width, including mobile, and that is a change: the old
+   footer centred everything below 900px. Centring worked when the footer was three
+   short strings; with six-item link lists it left every column a ragged pyramid.
+   A list needs one left edge for the eye to run down. */
+.zx-footer-cols {
   display: flex;
   flex-direction: column;
+  gap: var(--zx-space-8);
+  margin-block-end: var(--zx-space-10);
+}
+
+/* The brand column: wordmark, one-line pitch, install CTA. */
+.zx-footer-brand {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--zx-space-3);
+}
+
+.zx-footer-wordmark {
+  margin: 0;
+  color: var(--md-sys-color-on-surface);
+  /* The one place in the footer allowed to be typographically loud. It is the
+     brand, it opens the band, and at the footer's default 13px the masthead had no
+     anchor at all — every column started at the same visual weight.
+     
+     `--zx-text-lg`, which the scale documents as exactly "brand wordmark" and which
+     the top bar's mark already uses. My first pass reached for a `--zx-text-h3`
+     that does not exist in this stylesheet — the scale jumps h2 (21px) straight to
+     `lg` (15px) — and an undefined custom property makes `font-size` invalid,
+     silently inheriting instead of failing loudly. */
+  font-size: var(--zx-text-lg);
+  font-weight: var(--zx-weight-bold);
+  letter-spacing: -0.01em;
+  line-height: var(--zx-lh-snug);
+}
+
+.zx-footer-tagline {
+  margin: 0;
+  color: var(--md-sys-color-on-surface-variant);
+  font-size: var(--zx-text-meta);
+  line-height: var(--zx-lh-body);
+  text-wrap: pretty;
+  /* Holds the sentence to a readable measure in the wide brand column. */
+  max-width: 34ch;
+}
+
+/* The footer's only filled control, and the only coloured thing in the band.
+   Sized off the shared control-height token so it matches the hero and sticky-bar
+   buttons rather than inventing a third footer-specific height. */
+.zx-footer-install {
+  display: inline-flex;
   align-items: center;
-  gap: var(--zx-space-25);
+  justify-content: center;
+  gap: var(--zx-space-15);
+  min-height: var(--zx-control-h);
+  padding-inline: var(--zx-space-5);
+  border-radius: 999px;
+  background: var(--md-sys-color-primary);
+  color: var(--md-sys-color-on-primary);
+  font-size: var(--zx-text-meta);
+  font-weight: var(--zx-weight-semibold);
+  text-decoration: none;
+  transition: filter 120ms ease;
+}
+
+.zx-footer-install:hover {
+  filter: brightness(1.08);
+}
+
+.zx-footer-install md-icon {
+  --md-icon-size: 18px;
+  width: 18px;
+  height: 18px;
+  flex: none;
+}
+
+.zx-footer-install-note {
+  margin: 0;
+  color: var(--md-sys-color-on-surface-variant);
+  font-size: var(--zx-text-caption);
+  line-height: 1.5;
+}
+
+/* A link column. `gap` is the title-to-content step, so the heading sits closer to
+   its own list than the columns sit to each other. */
+.zx-footer-col {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--zx-space-4);
+}
+
+/* Column headings. Same eyebrow treatment as `.zx-directory-title` — 11px,
+   uppercase, wide tracking — because they are the same KIND of thing: a real <h2>
+   for the outline that must not look like a page section title. Sharing the
+   treatment is what makes the band read as one system rather than as two. */
+.zx-footer-heading {
+  margin: 0;
+  color: var(--md-sys-color-on-surface-variant);
+  font-size: var(--zx-text-label);
+  font-weight: var(--zx-weight-semibold);
+  letter-spacing: 0.09em;
+  line-height: var(--zx-lh-snug);
+  text-transform: uppercase;
+}
+
+/* The second heading inside the shared support/legal column needs the gap that the
+   column's own `gap` gives its first child, plus a step — otherwise "Legal" sits as
+   close to the social row above it as it does to its own list below. */
+.zx-footer-heading--second {
+  margin-block-start: var(--zx-space-3);
+}
+
+.zx-footer-col-list {
+  display: flex;
+  flex-direction: column;
+  /* Tight: these are rows of one list, not separate groups. The links' own block
+     padding does most of the optical spacing. */
+  gap: var(--zx-space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.zx-footer-col-list a {
+  display: inline-block;
+  color: var(--md-sys-color-on-surface-variant);
+  font-size: var(--zx-text-meta);
+  line-height: 1.4;
+  text-decoration: none;
+  /* ~30px tall, over the 24px AA target-size floor. Same reasoning as
+     `.zx-directory-link`: not the 44px the social row gets, because these columns
+     hold six items each and 44px apiece would make the band taller than the
+     section above it. */
+  padding-block: var(--zx-space-15);
+  transition: color 120ms ease;
+}
+
+.zx-footer-col-list a:hover {
+  color: var(--md-sys-color-on-surface);
+}
+
+.zx-footer-col-list a:focus-visible {
+  outline: 2px solid var(--md-sys-color-primary);
+  outline-offset: 3px;
+  border-radius: 3px;
 }
 
 /* Keeps the base `primary` colour rather than muting to the legal links' grey.
@@ -2443,12 +2629,14 @@
   font-size: var(--zx-text-meta);
 }
 
-/* The "reach us" group: contact on top, social beneath. Centred to match the
-   footer's mobile stack; the desktop tier re-aligns it left. */
+/* The "reach us" group: contact on top, social beneath. Start-aligned at EVERY
+   width now — it lives inside a footer column whose heading and link list are both
+   left-aligned, so the old centring (plus a desktop override to undo it) would have
+   left this one group off-axis from the column it belongs to. */
 .zx-footer-connect {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-start;
   /* Tighter than it looks it should be, because `.zx-social-link` carries 12px of
      block padding for its tap target — the optical gap is that padding plus this,
      so a full step here would read as a much larger hole than one step. */
@@ -2531,42 +2719,53 @@
   opacity: 1;
 }
 
-.zx-footer-links {
+/* ============================================================ the baseline */
+
+/* Who operates this, then the correspondence address and copyright.
+   
+   `.zx-footer-links` and `.zx-footer-meta` used to live here — the old centred
+   legal row and the entity/copyright pair. Both are gone rather than left behind:
+   the three legal links moved into the support column where they now sit under a
+   "Legal" heading, and nothing renders those classes any more.
+   
+   Separated from the directory above it by a hairline. This is the third and last
+   band, and it is a genuinely different kind of content from the two above — not
+   navigation and not partners, but the site's own legal identity. */
+.zx-footer-base {
   display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: var(--zx-space-2) var(--zx-space-5);
-  margin: 0;
-  padding: 0;
-  list-style: none;
+  flex-direction: column;
+  gap: var(--zx-space-2);
+  padding-block-start: var(--zx-space-6);
+  border-block-start: 1px solid var(--md-sys-color-outline-variant);
 }
 
-.zx-footer-links a {
+/* Address and copyright on one line where there is room, stacked where there is
+   not. `space-between` on desktop pushes the copyright to the far edge, which is
+   what makes the band read as a closing rule rather than as another list. */
+.zx-footer-baseline {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--zx-space-2) var(--zx-space-5);
+  margin: 0;
+}
+
+.zx-footer-mail {
   color: var(--md-sys-color-on-surface-variant);
-  font-size: var(--zx-text-meta);
-  line-height: 1.4;
+  font-size: var(--zx-text-caption);
+  line-height: 1.5;
   text-decoration: none;
   transition: color 120ms ease;
 }
 
-.zx-footer-links a:hover {
+.zx-footer-mail:hover {
   color: var(--md-sys-color-on-surface);
 }
 
-.zx-footer-links a:focus-visible {
+.zx-footer-mail:focus-visible {
   outline: 2px solid var(--md-sys-color-primary);
   outline-offset: 3px;
   border-radius: 3px;
-}
-
-/* Entity + copyright as ONE group. They are the same kind of thing — a statement
-   of who is behind the site — and keeping them together is what stops the entity
-   line becoming a fourth column in the desktop row below. */
-.zx-footer-meta {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
 }
 
 /* The operating entity. Quieter and smaller than the copyright beside it: this
@@ -2582,7 +2781,9 @@
      it. Still ~11px, so it stays legible rather than becoming decoration. */
   font-size: 0.6875rem;
   line-height: 1.5;
-  text-align: center;
+  /* Was `center`. The baseline is start-aligned with the columns above it now, and a
+     centred entity line between two left-aligned neighbours read as a mistake. */
+  text-align: start;
   /* Long enough to wrap on a phone; keeps the break sensible when it does. */
   text-wrap: pretty;
   opacity: 0.75;
@@ -3257,36 +3458,33 @@
     padding-block-start: var(--zx-space-1);
   }
 
-  /* One row instead of a centred stack. With 1120px available, three short items
-     centred on three lines leaves two thirds of the band empty; spread apart they
-     read as what they are — support, legal, and the identity block.
+  /* THE MASTHEAD GRID. Brand column plus three link columns.
      
-     Still THREE items, not four: the entity line and the copyright are one group
-     (`.zx-footer-meta`) rather than two flex children. Spread as peers of the
-     legal row they read as a fourth navigational column, and `space-between` on
-     four items of very different widths pulls the whole band out of balance. */
-  .zx-footer-inner {
-    flex-direction: row;
-    flex-wrap: wrap;
+     `1.4fr` on the brand column, not `1fr`: it holds a wordmark, a wrapped sentence
+     and a button, where the others hold a heading and six short names. At four equal
+     columns the tagline wrapped to four lines while the link columns ran out of
+     content — the asymmetry is what lets all four bottom out at about the same
+     depth.
+     
+     The `space-14` column gap is the point of the whole redesign. Four columns at a
+     normal 24px gutter is exactly the crowding the brief called out: adjacent lists
+     merge into one field of grey text and the reader cannot tell where "Movies"
+     stops and "Shows" starts. At 56px each column is unmistakably its own object,
+     and the band reads as deliberate structure instead of as leftover links. */
+  .zx-footer-cols {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr 1fr 1fr;
+    column-gap: var(--zx-space-14);
+    row-gap: var(--zx-space-10);
+    margin-block-end: var(--zx-space-14);
+  }
+
+  /* Address left, copyright hard right — the classic closing rule. Only applied at
+     this tier because on a phone the two stack, and `space-between` on a wrapped
+     flex line would strand the copyright alone on the second row. */
+  .zx-footer-baseline {
     justify-content: space-between;
-    gap: var(--zx-space-4);
-  }
-
-  /* Left-aligned as the opening block, mirroring `.zx-footer-meta` at the other
-     end of the row. Centred children inside a left-hand column would leave the
-     contact link and the social row on different optical margins. */
-  .zx-footer-connect {
-    align-items: flex-start;
-  }
-
-  /* Right-aligned as the closing block, since it is the last thing in the row. */
-  .zx-footer-meta {
-    align-items: flex-end;
-  }
-
-  .zx-footer-org,
-  .zx-footer-copy {
-    text-align: right;
+    width: 100%;
   }
 
   /* ------------------------------------------------------------------ dialogs */
