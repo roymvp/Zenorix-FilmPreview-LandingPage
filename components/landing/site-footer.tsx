@@ -124,8 +124,8 @@ export function SiteFooter({ locale, dict }: { locale: Locale; dict: Dictionary 
                 src="/brand/zenorix-mark.webp"
                 alt=""
                 aria-hidden="true"
-                width={256}
-                height={196}
+                width={128}
+                height={98}
                 loading="lazy"
                 decoding="async"
               />

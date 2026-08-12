@@ -39,15 +39,21 @@ export function TopBar({
         {/* The mark alone, not the full lockup: the wordmark is set in live text
             beside it, so shipping the lockup here would print "ZENORIX" twice.
             alt="" + aria-hidden because the link is already named by homeLabel.
-            eslint-disable — a 256px transparent WebP needs no image loader. */}
+            eslint-disable — a 128px transparent WebP needs no image loader.
+            
+            width/height MUST match the file's real intrinsic size (128x98 after
+            build-brand-assets.mjs halved it from 256). CSS sets `height: 26px;
+            width: auto`, so these attributes are what reserve the correct box
+            before the image lands; a stale 256x196 would describe the right aspect
+            but is a claim about the file that is no longer true. */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           className="zx-brand-mark"
           src="/brand/zenorix-mark.webp"
           alt=""
           aria-hidden="true"
-          width={256}
-          height={196}
+          width={128}
+          height={98}
         />
         {/* aria-hidden: the link already announces itself via homeLabel, so
             reading the wordmark too would just duplicate it. */}
