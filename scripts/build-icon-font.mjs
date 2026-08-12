@@ -47,13 +47,20 @@ import { mkdir, writeFile } from 'node:fs/promises'
  * notdef box for one build because the glyph was added to the component and not to
  * this list. Read this paragraph before touching a component's icons.
  *
- * AND A MISSPELLED NAME IS WORSE THAN A MISSING ONE. Measured against this
- * endpoint: a name Google does not recognise does not 404 and does not drop that one
- * glyph — it silently disables subsetting altogether and returns the FULL font
- * (1809144 bytes for `dolby_atmos`, which is not a Material Symbols name, against
- * ~2KB per real glyph). Before self-hosting that cost a megabyte of blocking font on
- * a 3G phone; now it would silently commit a megabyte into the repo instead. The
- * size assertion at the bottom of this script is what catches it either way.
+ * AND A MISSPELLED NAME FAILS SILENTLY. Measured against this endpoint, twice,
+ * because the first conclusion was wrong and worth recording:
+ *
+ *   - a bad name ALONE (`icon_names=dolby_atmos`) returns HTTP 200 and the FULL
+ *     3964532-byte font, subsetting disabled entirely;
+ *   - a bad name MIXED IN with valid ones returns HTTP 200 and a normal-looking
+ *     subset with that glyph simply ABSENT — swapping `bolt` for `dolby_atmos` in
+ *     the list below produced 13.2KB against the correct 13.9KB. No error, no 404,
+ *     nothing a size check can see.
+ *
+ * The second case is the one that actually happens, so a size assertion alone was
+ * useless here — it was written first, and it passed the typo. `assertNames` below
+ * is the replacement: it prices each name on its own, where a bad one is unmissable
+ * at 3.9MB, and reports WHICH name is wrong.
  *
  * The X mark in footer-contacts is deliberately NOT here: Material Symbols carries
  * no brand logos, so that one is an inline SVG in the component. For the same reason
@@ -115,14 +122,38 @@ const font = Buffer.from(
   }),
 )
 
-/* THE TYPO GUARD described above. A correct subset of 14 glyphs measures ~14KB; a
-   silently-unsubsetted full font is ~1.8MB. Anything past 200KB means a name in
-   ICONS is not a real Material Symbols name, so fail instead of committing it. */
-if (font.length > 200_000) {
-  throw new Error(
-    `subset is ${font.length} bytes — subsetting was silently disabled, so one of ` +
-      `the names in ICONS is misspelled. Check the newest entry first.`,
+/* THE TYPO GUARD described above, and the reason it is shaped this way. Checking the
+   combined subset's size cannot detect a misspelling, because Google drops the bad
+   name and returns a perfectly plausible file. Asking for each name ON ITS OWN can:
+   a real glyph comes back as ~1-3KB, an unrecognised one disables subsetting and
+   comes back as the whole 3.9MB font.
+
+   Sequential on purpose, and worth the ~15 requests: this runs by hand, only when the
+   icon list changes, and the payoff is an error that names the offending glyph
+   instead of a silently missing icon discovered later in a screenshot. */
+const FULL_FONT_FLOOR = 200_000
+
+for (const icon of ICONS) {
+  const probe = await fetch(
+    `https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:${AXES}` +
+      `&icon_names=${icon}`,
+    { headers: { 'User-Agent': UA } },
+  ).then((response) => response.text())
+
+  const probeUrl = probe.match(/src:\s*url\(([^)]+)\)/)?.[1]
+  if (!probeUrl) throw new Error(`no font URL when probing "${icon}"`)
+
+  const size = Number(
+    (await fetch(probeUrl, { method: 'HEAD' })).headers.get('content-length') ?? 0,
   )
+
+  if (size >= FULL_FONT_FLOOR) {
+    throw new Error(
+      `"${icon}" is not a Material Symbols icon name — probing it alone returned ` +
+        `${size} bytes (the entire unsubsetted font). Fix the spelling in ICONS; ` +
+        `check https://fonts.google.com/icons for the exact name.`,
+    )
+  }
 }
 
 /* woff2 files begin with the magic string `wOF2`. Cheap insurance that we wrote a

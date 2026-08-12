@@ -62,11 +62,22 @@ export async function GET() {
     `- Distribution: direct APK download (not on Google Play or the Apple App Store)`,
     `- APK version: ${SITE.apkVersion}`,
     `- APK size: ${SITE.apkSize}`,
-    `- Download URL: ${SITE.apkUrl}`,
+    /* MARKDOWN LINK SYNTAX, not a bare URL, and the same applies to every URL in
+       the sections below.
+       
+       Lighthouse's Agentic Browsing audit failed this file with "File does not
+       appear to contain any links" — while it carried ~60 of them. They were all
+       written as bare text (`- https://... — label`), and both that audit and the
+       llms.txt spec look for `[name](url)`: the format is Markdown, so a link means
+       a Markdown link. A bare URL is prose that happens to look like a URL, and
+       nothing is obliged to treat it as navigable.
+       
+       This was the entire 2/3 on that category. */
+    `- Download: [${SITE.name} APK ${SITE.apkVersion}](${SITE.apkUrl})`,
     `- Free trial: 30 days, no payment card required`,
     `- Catalogue: ${SITE.library.movies} movies, ${SITE.library.series} series, ${SITE.library.channels} live TV channels (${SITE.library.total} titles total)`,
     `- Maximum video quality: 4K`,
-    `- Support channel: ${SITE.contactUrl}`,
+    `- Support channel: [Telegram](${SITE.contactUrl})`,
     `- iOS and Google Play builds: not available yet`,
     '',
 
@@ -85,7 +96,7 @@ export async function GET() {
        rendered "no Brasil" and "ในไทย" before. See the note in lib/i18n/config.ts. */
     ...dicts.map(
       ({ locale, dict }) =>
-        `| ${localeMeta[locale].marketEn} | ${localeMeta[locale].languageEn} (${localeMeta[locale].hreflang}) | ${dict.market.monthly} | ${dict.market.annualTotal} | ${dict.market.annualPerMonth} | ${SITE.url}/${locale} |`,
+        `| ${localeMeta[locale].marketEn} | ${localeMeta[locale].languageEn} (${localeMeta[locale].hreflang}) | ${dict.market.monthly} | ${dict.market.annualTotal} | ${dict.market.annualPerMonth} | [/${locale}](${SITE.url}/${locale}) |`,
     ),
     '',
     'All markets include the same 30-day free trial and the same catalogue; only the price and the interface language differ.',
@@ -95,7 +106,7 @@ export async function GET() {
     '',
     ...locales.map(
       (locale) =>
-        `- ${SITE.url}/${locale} — landing page for the ${localeMeta[locale].marketEn} market, written in ${localeMeta[locale].languageEn}. States that market's pricing, the catalogue, device support and the FAQ.`,
+        `- [${SITE.name} — ${localeMeta[locale].marketEn}](${SITE.url}/${locale}): landing page for the ${localeMeta[locale].marketEn} market, written in ${localeMeta[locale].languageEn}. States that market's pricing, the catalogue, device support and the FAQ.`,
     ),
     '',
 
@@ -150,7 +161,7 @@ export async function GET() {
     '',
     ...(['movie', 'series'] as const).flatMap((kind) =>
       catalogueLinks('en', kind, 100).map(
-        ({ label, href }) => `- ${SITE.url}${href} — ${label} (${kind})`,
+        ({ label, href }) => `- [${label}](${SITE.url}${href}): ${kind}`,
       ),
     ),
   ]

@@ -148,58 +148,6 @@ export default async function LocaleLayout({
             This <head> is now otherwise empty of manual tags — Next injects the
             metadata, and the three text faces come from `next/font`, which
             self-hosts and preloads them automatically. */}
-        {/* Material Symbols for <md-icon>, SUBSET to the fourteen glyphs this
-            site actually renders (`icon_names`, alphabetical as Google requires).
-
-            Without that parameter Google serves the entire Material Symbols
-            library: measured at 3871 KB versus 8 KB for this subset. That full
-            download blocked first paint on exactly the mobile connections these
-            markets are on, to deliver ~1900 glyphs the page never shows.
-
-            KEEP THIS LIST IN SYNC. An <md-icon> whose name is missing here
-            renders as its literal text ("expand_more") rather than a glyph, so
-            adding an icon to a component means adding it here too. Current
-            users: 4k / high_quality / surround_sound / bolt in the spec grid
-            (about-zenorix), 4k / hdr_on / contrast / surround_sound on the
-            playback capsules (title-page), arrow_forward (top-chart),
-            chat_bubble (contact-link + footer-contacts), check
-            (conversion-dialog + language-switcher), expand_more (faq-section +
-            language-switcher), group and mail (footer-contacts), verified_user
-            (download-cta), download (site-footer's install button).
-
-            `download` arrived by walking straight into the trap this comment
-            warns about: the footer's install button rendered the literal string
-            "download" in the browser until the name was added here. The warning
-            above is not hypothetical.
-
-            NEITHER IS IT UNREPEATABLE. `mail` arrived the same way and was caught
-            the same way — in a screenshot, not in code review: the footer's email
-            row rendered a notdef box for one build because the glyph was added to
-            the component without being added to this list. Read the paragraph
-            above before touching a component's icons.
-
-            AND A MISSPELLED NAME IS WORSE THAN A MISSING ONE. Measured against
-            this endpoint: a name Google does not recognise does not 404 and does
-            not drop that one glyph — it silently disables subsetting altogether
-            and serves the FULL 1809 KB font (verified by fetching the woff2 the
-            returned CSS points at: ~2 KB per real glyph, 1809144 bytes for
-            `dolby_atmos`, which is not a Material Symbols name). So a typo here
-            costs a megabyte of blocking font on a 3G phone and still renders the
-            icon. There is no console warning. Verify a new name renders as a
-            glyph in the browser before trusting it.
-
-            The X mark in footer-contacts is deliberately NOT here: Material Symbols
-            carries no brand logos, so that one is an inline SVG in the component.
-            For the same reason the playback capsules use `hdr_on` and `contrast`
-            rather than the Dolby and HDR10 marks those formats are printed with
-            on a disc case — those are registered logos, not icon-font glyphs.
-
-            The axis ranges are kept so the subset stays a variable font — it
-            still advertises `font-weight: 100 700`. */}
-        <link
-          rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=4k,arrow_forward,bolt,chat_bubble,check,contrast,download,expand_more,group,hdr_on,high_quality,mail,surround_sound,verified_user"
-        />
       </head>
       <body>
         <MaterialWebLoader />
