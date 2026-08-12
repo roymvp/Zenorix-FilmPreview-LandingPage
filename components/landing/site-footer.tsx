@@ -124,8 +124,8 @@ export function SiteFooter({ locale, dict }: { locale: Locale; dict: Dictionary 
                 src="/brand/zenorix-mark.webp"
                 alt=""
                 aria-hidden="true"
-                width={256}
-                height={196}
+                width={128}
+                height={98}
                 loading="lazy"
                 decoding="async"
               />
@@ -183,7 +183,7 @@ export function SiteFooter({ locale, dict }: { locale: Locale; dict: Dictionary 
                 control from the two badges under it, which say the other two
                 platforms are not ready. */}
             <a className="zx-footer-install" href={SITE.apkUrl}>
-              <md-icon aria-hidden="true">download</md-icon>
+              <span className="zx-icon" aria-hidden="true">download</span>
               {copy.installCta}
             </a>
             <p className="zx-footer-install-note">{fill(copy.installNote, values)}</p>

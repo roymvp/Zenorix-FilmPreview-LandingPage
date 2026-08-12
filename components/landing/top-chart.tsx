@@ -219,7 +219,7 @@ export function TopChart({
             onClick={() => download('chart_more')}
           >
             {more.label}
-            <md-icon aria-hidden="true">arrow_forward</md-icon>
+            <span className="zx-icon" aria-hidden="true">arrow_forward</span>
           </button>
           <p className="zx-chart-more-hint">{more.hint}</p>
         </div>

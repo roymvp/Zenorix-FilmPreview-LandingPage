@@ -266,7 +266,7 @@ body {
    to extend: outside the column there is no wall to see through the glass, and a
    band of tinted black either side of the phone would just be the canvas. */
 
-/* Material Symbols icon font for <md-icon>, SELF-HOSTED.
+/* Material Symbols icon font for `.zx-icon`, SELF-HOSTED.
    
    This used to be a <link rel="stylesheet"> to fonts.googleapis.com in
    `[lang]/layout.tsx`, subset via `icon_names`. The subsetting was right; the
@@ -299,17 +299,79 @@ body {
      advertises `wght 100..700`, which is what lets Material Web's own icon
      styles ask for a weight without triggering synthetic bolding. */
   font-weight: 100 700;
-  /* `swap`, and it is the safe choice here specifically BECAUSE of the
-     `:not(:defined)` guard further down: every md-icon that sits above the fold
-     renders text-shaped glyph names for a moment either way, and swap at least
-     guarantees the icon appears rather than being held invisible on a slow
-     connection. */
-  font-display: swap;
+  /* `block`, NOT `swap` — and the two are not interchangeable for an ICON font.
+     
+     This was `swap`, which was correct only while the `:not(:defined)` guard below
+     covered md-icon: the element was `visibility: hidden` until Material upgraded
+     it, so no fallback rendering was ever visible and swap cost nothing.
+     
+     Icons are plain `<span class="zx-icon">` now (see `.zx-icon` above) and paint
+     immediately, which changes what swap means: the element's text content is a
+     LIGATURE NAME, so a fallback face renders the literal words "expand_more" and
+     "verified_user" in the layout until the subset arrives. Swap would trade one
+     visible defect for a worse one.
+     
+     `block` holds the glyph invisible instead, and its ~3s window is covered by the
+     `rel="preload"` in app/[lang]/layout.tsx: the font is same-origin, immutably
+     cached, 15KB, and no longer waits for the stylesheet to be parsed before it is
+     even requested. Removing that preload would make this a bad trade — the two
+     changes belong together. */
+  font-display: block;
   src: url('/fonts/material-symbols-subset.woff2') format('woff2');
 }
 
-md-icon {
+/* THE ICON ELEMENT ITSELF — a plain `<span>`, not Material's `<md-icon>`.
+   
+   These declarations are a deliberate reimplementation of md-icon's shadow-root
+   host styles, and owning them is what let `@material/web/icon/icon.js` come out
+   of MaterialWebLoader's REGISTRATIONS.
+   
+   WHY: md-icon rendered nothing but a font-family and a 24px box, yet it made the
+   ONE part of the page that is pure CSS — a glyph from an already-loaded webfont —
+   wait on a JS chunk to be upgraded before it could appear. It was also in the
+   `:not(:defined)` guard below, so every icon on the page was `visibility: hidden`
+   from first paint until the Material chunks landed (measured at ~1450ms against
+   FCP ~1000ms). A span has no such window: the glyph paints with the text around it.
+   This is the same trade the install CTA made when it became a native <button>.
+   
+   Every property here has a job; this is not a copy for the sake of parity:
+     inline-flex + center     centres the glyph in the box, which is what keeps it
+                              on the label's baseline rather than sitting low
+     font-size/width/height   md-icon's own 24px default. EVERY call site in
+                              landing.css already overrode all three together (they
+                              had to — see the notes there), so those rules needed
+                              no change when the tag did
+     line-height: 1           removes the leading that otherwise pushes a glyph
+                              below the baseline of text beside it
+     font-weight: normal      the subset is a VARIABLE font advertising wght
+                              100..700; inheriting a bold heading's weight would
+                              otherwise thicken the glyph
+     white-space/word-wrap    the element's text content is a LIGATURE NAME
+                              ("expand_more"); if it ever wraps or breaks, the
+                              ligature fails and the raw words render instead
+     letter-spacing: normal   ditto — tracking inherited from a spaced-out heading
+                              breaks ligature matching
+     text-transform: none     "EXPAND_MORE" is not a glyph
+     user-select: none        stops a text selection from picking up "expand_more"
+     antialiased              matches Material's own rendering of the same font */
+.zx-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   font-family: 'Material Symbols Outlined';
+  font-size: 24px;
+  width: 24px;
+  height: 24px;
+  line-height: 1;
+  font-weight: normal;
+  font-style: normal;
+  letter-spacing: normal;
+  text-transform: none;
+  white-space: nowrap;
+  word-wrap: normal;
+  overflow: hidden;
+  user-select: none;
+  -webkit-font-smoothing: antialiased;
 }
 
 /* ---------------------------------------------------------------------------
@@ -354,8 +416,12 @@ md-menu:not(:defined) {
 /* Non-overlay elements only need their unstyled intermediate state hidden. They
    keep `display` so the surrounding layout does not reflow when they upgrade;
    `visibility: hidden` also removes them from the accessibility tree and from
-   hit-testing, so nothing can be clicked before it works. */
-md-icon:not(:defined),
+   hit-testing, so nothing can be clicked before it works.
+   
+   `md-icon` was the other entry here and is gone from the page entirely — icons are
+   `<span class="zx-icon">` now, precisely so they stop being hidden by this rule.
+   `md-menu-item` stays because it only ever renders inside the language `md-menu`,
+   which is `display: none` until upgrade anyway. */
 md-menu-item:not(:defined) {
   visibility: hidden;
 }

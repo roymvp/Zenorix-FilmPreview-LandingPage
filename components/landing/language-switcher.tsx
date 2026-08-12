@@ -39,7 +39,7 @@ export function LanguageSwitcher({
         onClick={() => setOpen((value) => !value)}
       >
         {localeMeta[current].short}
-        <md-icon aria-hidden="true">expand_more</md-icon>
+        <span className="zx-icon" aria-hidden="true">expand_more</span>
       </button>
 
       <md-menu
@@ -60,10 +60,13 @@ export function LanguageSwitcher({
             <span slot="headline" lang={localeMeta[locale].htmlLang}>
               {localeMeta[locale].name}
             </span>
+            {/* `slot="end"` still works on a plain span: md-menu-item matches its
+                slots by ATTRIBUTE, not by tag name, so the check lands in the same
+                trailing position Material's own icon did. */}
             {locale === current ? (
-              <md-icon slot="end" aria-hidden="true">
+              <span className="zx-icon" slot="end" aria-hidden="true">
                 check
-              </md-icon>
+              </span>
             ) : null}
           </md-menu-item>
         ))}

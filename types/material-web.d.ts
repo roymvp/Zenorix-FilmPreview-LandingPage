@@ -23,76 +23,26 @@ type MdElement<Extra = Record<string, unknown>> = DetailedHTMLProps<
     onclosed?: (event: Event) => void
   }
 
-type ButtonLike = {
-  disabled?: boolean
-  href?: string
-  target?: string
-  type?: string
-  value?: string
-  name?: string
-  /** Associates the button with a <form> by id, used to close md-dialog. */
-  form?: string
-  /**
-   * Marks this button as md-dialog's initial focus target. Typed as a string so
-   * React writes a real `autofocus` ATTRIBUTE on the custom element — md-dialog
-   * locates its focus target with `querySelector('[autofocus]')`, which only
-   * sees attributes, not React props. Pass `""`.
-   */
-  autofocus?: string
-  'trailing-icon'?: boolean
-}
-
+/**
+ * EXACTLY THE THREE ELEMENTS THE APP RENDERS, matched one-to-one with
+ * MaterialWebLoader's REGISTRATIONS. Nothing speculative.
+ *
+ * This declared 25 elements — buttons, fabs, chips, cards, lists, sliders,
+ * progress indicators, `md-icon`, `md-ripple` — for components that appear nowhere
+ * in the app. That is not free: a declared type makes the tag compile, so the ONLY
+ * thing standing between `<md-icon>` and being silently reintroduced was a comment.
+ * With the type gone, an unregistered element is a typecheck failure instead of an
+ * element that renders as an invisible unknown tag at runtime.
+ *
+ * `md-icon` in particular is deliberately absent: icons are `<span class="zx-icon">`
+ * (see globals.css), and reintroducing the tag would restore the render-blocking
+ * behaviour that was removed. Add a type here only alongside its registration in
+ * MaterialWebLoader.
+ */
 declare global {
   namespace React {
     namespace JSX {
       interface IntrinsicElements {
-        'md-filled-button': MdElement<ButtonLike>
-        'md-filled-tonal-button': MdElement<ButtonLike>
-        'md-outlined-button': MdElement<ButtonLike>
-        'md-text-button': MdElement<ButtonLike>
-        'md-elevated-button': MdElement<ButtonLike>
-        'md-icon-button': MdElement<
-          ButtonLike & { toggle?: boolean; selected?: boolean }
-        >
-        'md-fab': MdElement<{
-          variant?: 'surface' | 'primary' | 'secondary' | 'tertiary'
-          size?: 'small' | 'medium' | 'large'
-          label?: string
-          lowered?: boolean
-        }>
-        'md-icon': MdElement<{ filled?: boolean }>
-        'md-ripple': MdElement<{ disabled?: boolean }>
-        'md-divider': MdElement<{ inset?: boolean }>
-        'md-elevated-card': MdElement
-        'md-filled-card': MdElement
-        'md-outlined-card': MdElement
-        'md-list': MdElement
-        'md-list-item': MdElement<{
-          type?: string
-          href?: string
-          target?: string
-          disabled?: boolean
-        }>
-        'md-linear-progress': MdElement<{
-          value?: number
-          max?: number
-          indeterminate?: boolean
-          buffer?: number
-          'four-color'?: boolean
-        }>
-        'md-circular-progress': MdElement<{
-          value?: number
-          indeterminate?: boolean
-        }>
-        'md-slider': MdElement<{
-          min?: number
-          max?: number
-          step?: number
-          value?: number
-          labeled?: boolean
-          disabled?: boolean
-          name?: string
-        }>
         'md-dialog': MdElement<{ open?: boolean; type?: 'alert' | undefined }>
         'md-menu': MdElement<{
           open?: boolean
@@ -109,25 +59,6 @@ declare global {
           target?: string
           'keep-open'?: boolean
         }>
-        'md-assist-chip': MdElement<{
-          label?: string
-          disabled?: boolean
-          elevated?: boolean
-          href?: string
-        }>
-        'md-filter-chip': MdElement<{
-          label?: string
-          selected?: boolean
-          disabled?: boolean
-          elevated?: boolean
-        }>
-        'md-suggestion-chip': MdElement<{
-          label?: string
-          elevated?: boolean
-          href?: string
-        }>
-        'md-chip-set': MdElement
-        'md-badge': MdElement<{ value?: string }>
       }
     }
   }

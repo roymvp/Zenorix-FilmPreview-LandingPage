@@ -225,7 +225,9 @@ export function ConversionDialog({ copy }: { copy: DialogCopy }) {
             <ul className="zx-dialog-bullets">
               {copy.bullets.map((bullet) => (
                 <li key={bullet}>
-                  <md-icon aria-hidden="true">check</md-icon>
+                  <span className="zx-icon" aria-hidden="true">
+                    check
+                  </span>
                   {bullet}
                 </li>
               ))}

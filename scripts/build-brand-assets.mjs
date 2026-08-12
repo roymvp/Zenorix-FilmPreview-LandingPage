@@ -106,7 +106,17 @@ async function crop(top, bottom, out, resizeWidth) {
   console.log('[v0] wrote', out, `${Math.round(info.size / 1024)}KB`, info.width, info.height)
 }
 
-// The mark alone: top of the artwork down to the gap.
-await crop(firstInk, splitY, 'public/brand/zenorix-mark.webp', 256)
+/* The mark alone: top of the artwork down to the gap.
+   
+   128px, down from 256. The mark is only ever rendered small — 26px tall in the top
+   bar (`.zx-brand-mark`), 22px in the footer masthead, 18px on the footer contact
+   row — and `height` + `width: auto` means the widest it is ever painted is about
+   34 CSS px. At 128 that still covers a 3x display with room to spare; 256 was
+   sending roughly 7x the pixels of the largest box that displays it.
+   
+   Kept a power-of-two multiple of the display size rather than trimming to an exact
+   2x fit, because the browser's downscale is cleaner from a clean ratio and the
+   saving past this point is a few hundred bytes on an already-tiny file. */
+await crop(firstInk, splitY, 'public/brand/zenorix-mark.webp', 128)
 // The full lockup: mark + wordmark, for the hero.
 await crop(firstInk, lastInk + 1, 'public/brand/zenorix-lockup.webp', 640)

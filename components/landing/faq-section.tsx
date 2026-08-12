@@ -29,7 +29,7 @@ export function FaqSection({
             >
               <summary className="md-typescale-title-small">
                 {item.q}
-                <md-icon aria-hidden="true">expand_more</md-icon>
+                <span className="zx-icon" aria-hidden="true">expand_more</span>
               </summary>
               <p className="zx-faq-answer md-typescale-body-medium">{item.a}</p>
             </details>

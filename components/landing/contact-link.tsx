@@ -55,7 +55,11 @@ export function ContactLink({
       title={label ? undefined : ariaLabel}
       onClick={() => trackEvent('contact_click', { source })}
     >
-      {icon ? <md-icon aria-hidden="true">{icon}</md-icon> : null}
+      {icon ? (
+        <span className="zx-icon" aria-hidden="true">
+          {icon}
+        </span>
+      ) : null}
       {label}
     </a>
   )
