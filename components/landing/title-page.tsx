@@ -555,7 +555,7 @@ export function TitlePage({
                         {/* aria-hidden: the capsule's own text says "Dolby Atmos"
                             right beside it, so an announced glyph would only make a
                             screen reader read the format twice. */}
-                        <md-icon aria-hidden="true">{FORMAT_ICONS[format]}</md-icon>
+                        <span className="zx-icon" aria-hidden="true">{FORMAT_ICONS[format]}</span>
                         {format}
                       </li>
                     ))}

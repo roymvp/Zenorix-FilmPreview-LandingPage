@@ -90,7 +90,7 @@ export function TitleSynopsis({
             aria-hidden because `aria-expanded` on the button already conveys the
             state to a screen reader; the glyph is the visual half of that same
             fact, and announcing it would duplicate it. */}
-        <md-icon aria-hidden="true">expand_more</md-icon>
+        <span className="zx-icon" aria-hidden="true">expand_more</span>
       </button>
     </div>
   )

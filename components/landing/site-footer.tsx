@@ -183,7 +183,7 @@ export function SiteFooter({ locale, dict }: { locale: Locale; dict: Dictionary 
                 control from the two badges under it, which say the other two
                 platforms are not ready. */}
             <a className="zx-footer-install" href={SITE.apkUrl}>
-              <md-icon aria-hidden="true">download</md-icon>
+              <span className="zx-icon" aria-hidden="true">download</span>
               {copy.installCta}
             </a>
             <p className="zx-footer-install-note">{fill(copy.installNote, values)}</p>

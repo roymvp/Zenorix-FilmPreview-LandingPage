@@ -287,7 +287,9 @@ export function AboutZenorix({
             <ul className="zx-about-specs">
               {VIEWING_SPECS.map((spec) => (
                 <li key={spec.id} className="zx-spec">
-                  <md-icon aria-hidden="true">{spec.icon}</md-icon>
+                  <span className="zx-icon" aria-hidden="true">
+                    {spec.icon}
+                  </span>
                   <span className="zx-spec-label">{viewing.specs[spec.id]}</span>
                 </li>
               ))}

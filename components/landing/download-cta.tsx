@@ -82,7 +82,9 @@ export function DownloadCta({
       {button}
       {sub ? (
         <p className="zx-cta-sub">
-          <md-icon aria-hidden="true">verified_user</md-icon>
+          <span className="zx-icon" aria-hidden="true">
+            verified_user
+          </span>
           {sub}
         </p>
       ) : null}

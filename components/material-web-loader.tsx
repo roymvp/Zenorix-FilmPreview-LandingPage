@@ -16,10 +16,16 @@ import { useEffect } from 'react'
  * that has no other use for it.
  *
  * WHY THIS IS RETRIED AND AWAITED
- * Until these imports resolve, every `md-*` tag on the page is an unknown
- * element (see the `:not(:defined)` guard in globals.css) — the entire UI is
- * unusable: no buttons, no dialogs, no menus. That makes this the single most
- * load-bearing fetch in the app, so it cannot be fire-and-forget.
+ * Until these imports resolve, every `md-*` tag on the page is an unknown element
+ * (see the `:not(:defined)` guard in globals.css), so a failure leaves the upsell
+ * dialog and the language menu permanently inert.
+ *
+ * That is no longer the whole page, and the comment here used to claim it was
+ * ("the entire UI is unusable... the single most load-bearing fetch in the app").
+ * The install CTA is a native `<button>` and the icons are plain spans, so first
+ * paint and the primary conversion path now survive this fetch failing outright.
+ * The retry stays because a dead dialog is still a real defect and a silent one —
+ * it is simply no longer a white screen.
  *
  * These were previously five unawaited `import()` calls with no error handling.
  * A dynamic import returns a promise, so a failed chunk — a dropped connection,
@@ -33,17 +39,28 @@ import { useEffect } from 'react'
  * Each entry is a thunk so a retry re-invokes the import from scratch.
  *
  * This list must match the `md-*` tags actually present in the markup — grep for
- * `<md-` to confirm. It is currently exactly four:
+ * `<md-` to confirm. It is currently exactly three:
  *   md-dialog         the one conversion dialog (x2 instances)
- *   md-icon           icons across the page
  *   md-menu           language switcher
  *   md-menu-item      language switcher options
  *
- * `md-filled-button` was dropped from this list when the download CTA became a native
- * `<button>`. It was the one entry on it that gated FIRST PAINT rather than an
- * interaction: dialogs and the language menu are opened by a deliberate click, so
- * arriving late costs nothing, but the CTA is above the fold and stayed invisible until
- * this fetch resolved. See the note in download-cta.tsx.
+ * EVERYTHING LEFT ON THIS LIST IS CLICK-GATED, and that is now the rule for being
+ * here. Two entries have been removed for failing it, both for the same reason:
+ *
+ *   md-filled-button  the download CTA, removed when it became a native `<button>`.
+ *                     It was above the fold and stayed invisible until this fetch
+ *                     resolved. See the note in download-cta.tsx.
+ *   md-icon           all 12 icons on the page, removed in favour of
+ *                     `<span class="zx-icon">`. Same defect at larger scale: the
+ *                     glyphs come from a webfont that is preloaded and needs no JS
+ *                     at all, yet the `:not(:defined)` guard held every one of them
+ *                     hidden until these chunks landed (~1450ms vs ~1000ms FCP).
+ *                     Material contributed a font-family and a 24px box, both of
+ *                     which are now four lines of CSS in globals.css.
+ *
+ * So before adding an entry, check whether the element is reached by a deliberate
+ * click. A dialog and the language menu are, so arriving late costs nothing. Anything
+ * that renders as part of first paint does not belong here.
  *
  * This used to be `all.js` plus four labs imports. `all.js` pulls in EVERY
  * non-labs component, so the bundle carried sliders, checkboxes, switches,
@@ -53,7 +70,6 @@ import { useEffect } from 'react'
  */
 const REGISTRATIONS: Array<() => Promise<unknown>> = [
   () => import('@material/web/dialog/dialog.js'),
-  () => import('@material/web/icon/icon.js'),
   () => import('@material/web/menu/menu.js'),
   () => import('@material/web/menu/menu-item.js'),
 ]

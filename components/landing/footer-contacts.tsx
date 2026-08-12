@@ -159,7 +159,7 @@ export function FooterContacts({
             {channel.icon === 'x' ? (
               <XMark />
             ) : (
-              <md-icon aria-hidden="true">{channel.icon}</md-icon>
+              <span className="zx-icon" aria-hidden="true">{channel.icon}</span>
             )}
             {channel.label}
           </a>

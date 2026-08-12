@@ -1274,7 +1274,7 @@
   line-height: var(--zx-lh-body);
 }
 
-.zx-cta-sub md-icon {
+.zx-cta-sub .zx-icon {
   /* Matched to the `lg` step so the shield reads as one line with the 12px text
      beside it without dictating the line box. */
   font-size: var(--zx-text-lg);
@@ -1469,7 +1469,7 @@
     color 180ms ease;
 }
 
-.zx-chart-more md-icon {
+.zx-chart-more .zx-icon {
   flex: 0 0 auto;
   font-size: 18px;
   width: 18px;
@@ -1506,7 +1506,7 @@
 
 /* This section used to run a "density pass": `padding-block` overridden down to 16px
    and its title pulled to 10px, chasing the goal of fitting all four claims plus the
-   button on one screen. That is what made the page read as unevenly spaced — `About`
+   button on one screen. That is what made the page read as unevenly spaced ��� `About`
    sat 16px from its neighbours while every other boundary was 40-100px, so the
    densest part of the page also had the least air around it, and the cards ran
    together into one grey mass.
@@ -1940,12 +1940,12 @@
   text-align: start;
 }
 
-.zx-about-specs md-icon {
+.zx-about-specs .zx-icon {
   /* 24px, was 26px. Together with the tile's tighter gap and padding this takes the
      card from 163px to roughly 153px, close to its neighbours, without touching the
      label size — the badges are supporting marks here, not the card's argument. */
   font-size: 24px;
-  /* md-icon sizes its own box from these, so all three must move together or
+  /* `.zx-icon` sizes its own box from these, so all three must move together or
      the glyphs crop. */
   width: 24px;
   height: 24px;
@@ -2147,7 +2147,7 @@
 
 /* Muted rather than accent-colored: the chevron is an affordance, not something
    that should pull the eye away from the question text itself. */
-.zx-faq-item summary md-icon {
+.zx-faq-item summary .zx-icon {
   flex: 0 0 auto;
   font-size: 20px;
   width: 20px;
@@ -2156,12 +2156,12 @@
   transition: transform 200ms cubic-bezier(0.2, 0, 0, 1);
 }
 
-.zx-faq-item[open] summary md-icon {
+.zx-faq-item[open] summary .zx-icon {
   transform: rotate(180deg);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .zx-faq-item summary md-icon {
+  .zx-faq-item summary .zx-icon {
     transition: none;
   }
 }
@@ -2231,10 +2231,10 @@
   transition: color 120ms ease;
 }
 
-.zx-contact md-icon {
-  /* Same treatment as `.zx-cta-sub md-icon`: pinned to the `lg` step and given
+.zx-contact .zx-icon {
+  /* Same treatment as `.zx-cta-sub .zx-icon`: pinned to the `lg` step and given
      an explicit box so the glyph rides the label's line box instead of dictating
-     it. Without the width/height an md-icon defaults to 24px and pushes the row
+     it. Without the width/height a `.zx-icon` defaults to 24px and pushes the row
      taller than the 12px text beside it. */
   font-size: var(--zx-text-lg);
   width: 15px;
@@ -2648,8 +2648,11 @@
   filter: brightness(1.08);
 }
 
-.zx-footer-install md-icon {
-  --md-icon-size: 18px;
+.zx-footer-install .zx-icon {
+  /* `font-size`, where this used to set Material's `--md-icon-size` custom
+     property. A plain span has no such hook — the glyph IS text, so its size is
+     `font-size` and nothing else reads that variable. */
+  font-size: 18px;
   width: 18px;
   height: 18px;
   flex: none;
@@ -2789,7 +2792,7 @@
 
    FOUR RULES REPLACED SEVEN. `.zx-contact--footer`, `.zx-footer-connect`,
    `.zx-social`, `.zx-social-link` (+ `:hover`), `.zx-social-mark`,
-   `.zx-social-link md-icon` (+ `:hover`) and `.zx-footer-mail` all styled one idea
+   `.zx-social-link .zx-icon` (+ `:hover`) and `.zx-footer-mail` all styled one idea
    — "a way to reach us" — four different ways, in two different bands of the
    footer. They are gone rather than left behind; nothing renders those classes now.
    
@@ -2860,9 +2863,12 @@
    
    The density is compensated with `scale` instead, which shrinks the ink inside a box
    that stays 18px. */
-.zx-footer-contact md-icon,
+.zx-footer-contact .zx-icon,
 .zx-footer-contact-mark {
-  --md-icon-size: 18px;
+  /* `font-size` instead of the old `--md-icon-size` — see the note on
+     `.zx-footer-install .zx-icon`. Harmless on `.zx-footer-contact-mark`, which is
+     an <img> and takes its size from the box below. */
+  font-size: 18px;
   width: 18px;
   height: 18px;
   flex: none;
@@ -2874,7 +2880,7 @@
   transition: opacity 120ms ease;
 }
 
-.zx-footer-contact:hover md-icon,
+.zx-footer-contact:hover .zx-icon,
 .zx-footer-contact:hover .zx-footer-contact-mark {
   opacity: 1;
 }
@@ -2986,7 +2992,7 @@
   appearance: none;
 }
 
-.zx-lang-trigger md-icon {
+.zx-lang-trigger .zx-icon {
   font-size: 16px;
   width: 16px;
   height: 16px;
@@ -3244,7 +3250,7 @@
   line-height: var(--zx-lh-body);
 }
 
-.zx-dialog-bullets md-icon {
+.zx-dialog-bullets .zx-icon {
   /* 18px and nudged down 1px so the check's optical center lands on the first
      line's x-height rather than its ascender. `flex-shrink: 0` stops a wrapping
      bullet from squashing the glyph. */
@@ -3324,7 +3330,7 @@
     --zx-text-amount: 23px;
   }
 
-  /* Wider column, so more of the rail is visible at once — the cards grow with it
+  /* Wider column, so more of the rail is visible at once ��� the cards grow with it
      rather than leaving a 680px row showing the same 124px thumbnails. */
   .zx-rail {
     grid-auto-columns: 148px;
@@ -4142,11 +4148,11 @@
   color: var(--md-sys-color-primary);
 }
 
-/* The chevron. Sized to the label rather than left at `md-icon`'s own 24px box —
-   and `width`/`height` alongside `font-size`, because `md-icon` is a custom element
-   carrying its own box and `font-size` alone leaves it 24px wide (measured; the
+/* The chevron. Sized to the label rather than left at `.zx-icon`'s own 24px box —
+   and `width`/`height` alongside `font-size`, because `.zx-icon` carries an explicit
+   24px box of its own and `font-size` alone leaves it 24px wide (measured; the
    playback chips hit the same thing). */
-.zx-title-synopsis-toggle md-icon {
+.zx-title-synopsis-toggle .zx-icon {
   font-size: 18px;
   width: 18px;
   height: 18px;
@@ -4158,14 +4164,14 @@
   transition: transform 160ms ease;
 }
 
-.zx-title-synopsis-toggle[aria-expanded='true'] md-icon {
+.zx-title-synopsis-toggle[aria-expanded='true'] .zx-icon {
   transform: rotate(180deg);
 }
 
 /* No transition for anyone who has asked for less motion. The rotation still
    happens — it is state, not decoration — it just arrives instantly. */
 @media (prefers-reduced-motion: reduce) {
-  .zx-title-synopsis-toggle md-icon {
+  .zx-title-synopsis-toggle .zx-icon {
     transition: none;
   }
 }
@@ -4320,15 +4326,15 @@
 }
 
 /* The glyph, optically matched to the 11px label rather than left at the 24px
-   `md-icon` defaults to.
+   `.zx-icon` defaults to.
    
-   `font-size` AND `width`/`height`, which is what every other `md-icon` in this
-   file does (`.zx-cta-sub md-icon`, `.zx-chart-more md-icon`). I first set only
-   `font-size`, on the theory that an icon font scales with type — measured in the
-   browser, the box stayed 24x24 and blew the capsule open. `md-icon` is a custom
-   element carrying its own `24px` box, so the box needs setting explicitly and
-   `font-size` alone silently does half the job. */
-.zx-title-format md-icon {
+   `font-size` AND `width`/`height`, which is what every other `.zx-icon` rule in
+   this file does (`.zx-cta-sub .zx-icon`, `.zx-chart-more .zx-icon`). I first set
+   only `font-size`, on the theory that an icon font scales with type — measured in
+   the browser, the box stayed 24x24 and blew the capsule open. `.zx-icon` declares
+   an explicit `24px` box, so the box needs setting explicitly and `font-size` alone
+   silently does half the job. */
+.zx-title-format .zx-icon {
   font-size: 15px;
   width: 15px;
   height: 15px;

@@ -145,9 +145,40 @@ export default async function LocaleLayout({
             a hint to open a connection to one is pure overhead. Do not re-add
             either without reading that script's header first.
 
-            This <head> is now otherwise empty of manual tags — Next injects the
-            metadata, and the three text faces come from `next/font`, which
-            self-hosts and preloads them automatically. */}
+            Next injects the metadata, and the three TEXT faces come from
+            `next/font`, which self-hosts and preloads them automatically. The one
+            manual tag below is the icon font, which `next/font` does not manage
+            because it is declared as a raw `@font-face` in globals.css. */}
+
+        {/* THE ONE MANUAL PRELOAD, and it shortens the page's longest request chain.
+            
+            PageSpeed measured a 3-deep critical path: the HTML (408ms) blocked the
+            stylesheet (1187ms), which blocked THIS FONT (1595ms). A font referenced
+            only from a CSS `url()` cannot be discovered until that CSS has been
+            downloaded and parsed, so the browser learned about a 15KB same-origin
+            file it could have started immediately about a second late.
+            
+            `preload` moves the request up to the HTML, in parallel with the CSS
+            instead of behind it — the chain becomes 2 deep and the font stops being
+            the last thing to arrive.
+            
+            This is also what makes `font-display: block` on that @font-face a safe
+            choice: icons are plain spans now, so a fallback face would render the
+            literal ligature names ("expand_more") mid-layout. `block` hides the
+            glyph instead, and the preload keeps that window short. The two changes
+            are a pair — removing this preload makes `block` the wrong trade.
+            
+            `crossOrigin` is REQUIRED even though this is same-origin: fonts are
+            always fetched in CORS mode, so without it the preload lands in a
+            separate cache partition and the file is downloaded TWICE — the classic
+            "preloaded resource was not used" warning. */}
+        <link
+          rel="preload"
+          href="/fonts/material-symbols-subset.woff2"
+          as="font"
+          type="font/woff2"
+          crossOrigin="anonymous"
+        />
       </head>
       <body>
         <MaterialWebLoader />
