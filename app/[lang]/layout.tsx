@@ -134,13 +134,20 @@ export default async function LocaleLayout({
       className={`${roboto.variable} ${notoSansThai.variable} ${orbitron.variable}`}
     >
       <head>
-        {/* The icon font is served from a second origin, so the connection is
-            opened in parallel with this document instead of after the CSS
-            arrives. `crossOrigin` is required on the gstatic hint — fonts are
-            fetched in CORS mode, and a hint without it opens a connection the
-            font request cannot reuse. */}
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        {/* NOTE: two `preconnect` hints and a Google Fonts `<link rel="stylesheet">`
+            for Material Symbols lived here. They are gone, and the icon font is now
+            self-hosted — see the `@font-face` in globals.css for the measurements
+            (750ms render-blocking, a 1-day cache TTL we did not control, and no
+            `font-display`), and `scripts/build-icon-font.mjs` for the glyph list and
+            the hard-won warnings about keeping it in sync.
+
+            The preconnects went with it: with no third-party origin left to reach,
+            a hint to open a connection to one is pure overhead. Do not re-add
+            either without reading that script's header first.
+
+            This <head> is now otherwise empty of manual tags — Next injects the
+            metadata, and the three text faces come from `next/font`, which
+            self-hosts and preloads them automatically. */}
         {/* Material Symbols for <md-icon>, SUBSET to the fourteen glyphs this
             site actually renders (`icon_names`, alphabetical as Google requires).
 

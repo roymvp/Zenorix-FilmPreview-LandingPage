@@ -30,8 +30,22 @@ import { mkdir, readdir } from 'node:fs/promises'
 import sharp from 'sharp'
 
 /* Tile geometry. 2:3 is the standard key-art ratio; 420x630 is ~2x the largest
-   size a tile is ever painted at in the 420px-wide phone column. */
-const WIDTH = 420
+   size a tile is ever painted at in the 420px-wide phone column.
+
+   TWO WIDTHS. 420 stays the retina ceiling for the widest rail card (172px at
+   >=1024, so DPR 2 wants 344px and DPR 2.5 wants 430). 280 is the floor for the
+   PHONE rail, whose card is 124px: PageSpeed measured a 420px file painted at
+   217px on a Moto G Power, 28.7KB of it wasted — the single largest per-image
+   saving it found. 280 covers 124px at DPR 2 exactly and a 148px tablet card at
+   DPR 1.9.
+
+   Unlike the hero wall, QUALITY IS UNCHANGED at 78 for both. These tiles are the
+   subject of a click and get looked at directly; the wall's q54 is affordable
+   only because a scrim sits over it. PageSpeed asked for no compression saving on
+   these — only for the smaller dimension, which is what this adds.
+
+   KEEP IN SYNC with the `srcset` in top-chart.tsx. */
+const WIDTHS = [420, 280]
 const HEIGHT = 630
 
 const SOURCE_DIR = 'assets/posters'
@@ -63,17 +77,38 @@ const files = (await readdir(SOURCE_DIR)).filter((file) => /\.(png|jpe?g|webp)$/
 
 for (const file of files) {
   const name = file.replace(/\.\w+$/, '')
-  const out = `${OUT_DIR}/${name}.webp`
 
-  const info = await sharp(`${SOURCE_DIR}/${file}`)
+  /* Decoded and trimmed ONCE, then cloned per width — see the same note in
+     build-hero-wall.mjs. It matters more here: `trim` is content-dependent, and
+     two independent trims of the same source could anchor the CROP_ANCHOR crop
+     a row apart, which on a one-sheet is the difference between losing the date
+     line cleanly and slicing it. */
+  const source = sharp(`${SOURCE_DIR}/${file}`)
     /* The small Netflix posters ship with a thin flat border; trim removes it so
        the cover crop below does not keep a rim on one edge. Generous threshold
        because the border is near-black rather than pure black after
        quantization. */
     .trim({ threshold: 20 })
-    .resize(WIDTH, HEIGHT, { fit: 'cover', position: CROP_ANCHOR[name] ?? 'centre' })
-    .webp({ quality: 78 })
-    .toFile(out)
 
-  console.log('[v0] wrote', out, `${Math.round(info.size / 1024)}KB`)
+  const sizes = []
+
+  for (const width of WIDTHS) {
+    /* Widest keeps the bare name so every existing `charts.ts` reference and the
+       `src` fallback stay valid; narrower gets a `-<width>w` suffix. */
+    const out =
+      width === WIDTHS[0] ? `${OUT_DIR}/${name}.webp` : `${OUT_DIR}/${name}-${width}w.webp`
+
+    const info = await source
+      .clone()
+      .resize(width, Math.round((HEIGHT / WIDTHS[0]) * width), {
+        fit: 'cover',
+        position: CROP_ANCHOR[name] ?? 'centre',
+      })
+      .webp({ quality: 78 })
+      .toFile(out)
+
+    sizes.push(`${width}w ${Math.round(info.size / 1024)}KB`)
+  }
+
+  console.log('[v0]', name.padEnd(34), sizes.join('  '))
 }
