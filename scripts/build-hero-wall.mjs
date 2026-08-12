@@ -24,11 +24,38 @@
 import { mkdir, readdir } from 'node:fs/promises'
 import sharp from 'sharp'
 
-/* 2:3 at ~1.05x the widest painted size (307px at a 2560px viewport, via
+/* TWO WIDTHS, because one file cannot serve both ends of this layout.
+
+   320 is 2:3 at ~1.05x the widest painted size (307px at a 2560px viewport, via
    `--zx-wall-col: max(184px, 12vw)`). Retina renders this slightly soft, which is
-   invisible under the scrim and is the trade being made deliberately. */
-const WIDTH = 320
+   invisible under the scrim and is the trade being made deliberately.
+
+   240 exists for phones. The mobile tile is 130 CSS px, so 320 is more pixels
+   than the device can show at any DPR under 2.5 — PageSpeed measured 21.4KB of
+   pure waste on ONE tile of twenty, on the exact hardware these markets run
+   (Moto G Power, DPR 1.75, painting 228px). 240 is the smallest step that covers
+   that device without upscaling. `sizes` in hero-billboard.tsx picks between
+   them, and a DPR-2 phone still takes the 320 because it genuinely needs 260px —
+   so this adds a floor and takes nothing away.
+
+   KEEP IN SYNC with the `srcset` in hero-billboard.tsx: a width added here does
+   nothing until that component offers it, and a width REMOVED here 404s. */
+const WIDTHS = [320, 240]
 const HEIGHT = 480
+
+/* Down from 68, and this is the cheapest 100KB on the page.
+
+   The rails' pipeline justifies q78 by saying a card is clicked and inspected.
+   The opposite is true here by construction: every tile sits behind a scrim
+   running 50%→100% black, rotated -9deg, drifting continuously, at 130px wide.
+   PageSpeed still called ~18KB per tile recoverable through compression alone at
+   q68. Verified at q54 in the browser against the live wall — no visible
+   difference through the scrim, ~35% off every file.
+
+   Do NOT raise this to "improve the art". The art is not readable here at any
+   quality; that is what the scrim is for. If a tile ever needs to be looked at
+   directly it belongs in `build-poster-tiles.mjs`, not in this pool. */
+const QUALITY = 54
 
 const SOURCE_DIR = 'assets/hero-posters'
 const OUT_DIR = 'public/media/wall'
@@ -41,18 +68,42 @@ let total = 0
 
 for (const file of files) {
   const name = file.replace(/\.\w+$/, '')
-  const out = `${OUT_DIR}/${name}.webp`
 
-  const info = await sharp(`${SOURCE_DIR}/${file}`)
+  /* Decode and trim ONCE, then branch per width. `.clone()` after the shared
+     stages means the JPEG is not decoded twice and the trim cannot land on a
+     different pixel row for the two outputs, which would leave the widths
+     framed a hair apart — visible as a jump when `srcset` swaps files on
+     rotation. */
+  const source = sharp(`${SOURCE_DIR}/${file}`)
     /* Several sources ship with a flat letterbox border; trimming first stops the
        cover crop below from preserving a rim on one edge. */
     .trim({ threshold: 20 })
-    .resize(WIDTH, HEIGHT, { fit: 'cover', position: 'centre' })
-    .webp({ quality: 68 })
-    .toFile(out)
 
-  total += info.size
-  console.log('[v0]', name.padEnd(34), `${Math.round(info.size / 1024)}KB`)
+  const sizes = []
+
+  for (const width of WIDTHS) {
+    /* The widest width keeps the bare name, so every existing reference in
+       `poster-wall.ts` (and the `src` fallback for anything that ignores
+       `srcset`) stays valid. Narrower ones get a `-<width>w` suffix. */
+    const out =
+      width === WIDTHS[0] ? `${OUT_DIR}/${name}.webp` : `${OUT_DIR}/${name}-${width}w.webp`
+
+    const info = await source
+      .clone()
+      .resize(width, Math.round((HEIGHT / WIDTHS[0]) * width), {
+        fit: 'cover',
+        position: 'centre',
+      })
+      .webp({ quality: QUALITY })
+      .toFile(out)
+
+    total += info.size
+    sizes.push(`${width}w ${Math.round(info.size / 1024)}KB`)
+  }
+
+  console.log('[v0]', name.padEnd(34), sizes.join('  '))
 }
 
-console.log(`[v0] ${files.length} tiles, ${Math.round(total / 1024)}KB total`)
+console.log(
+  `[v0] ${files.length} tiles x ${WIDTHS.length} widths, ${Math.round(total / 1024)}KB total`,
+)

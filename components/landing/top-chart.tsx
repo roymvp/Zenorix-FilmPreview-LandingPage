@@ -128,6 +128,25 @@ export function TopChart({
               <img
                 className="zx-chart-img"
                 src={entry.poster}
+                /* Both widths come from scripts/build-poster-tiles.mjs. The rail
+                   card is 124px on a phone, 148 from 720 and 172 from 1024
+                   (`grid-auto-columns` in landing.css), so a lone 420px file is
+                   about twice the pixels a phone can paint: PageSpeed measured one
+                   painted at 217px and called 28.7KB of it waste — the largest
+                   single-image saving in the whole report.
+
+                   `sizes` mirrors those three `grid-auto-columns` values and has
+                   to be updated alongside them. The preload scanner reads it
+                   before any CSS exists, so an UNDERSTATED value here ships a
+                   blurry poster and the browser will not re-fetch a better one
+                   once it has committed.
+
+                   Quality is deliberately untouched (q78, same as before) — unlike
+                   the hero wall these are clicked and looked at directly, and
+                   PageSpeed asked for no compression saving on them. Only the
+                   dimension changes. */
+                srcSet={`${entry.poster.replace(/\.webp$/, '-280w.webp')} 280w, ${entry.poster} 420w`}
+                sizes="(min-width: 1024px) 172px, (min-width: 720px) 148px, 124px"
                 alt={fill(posterAlt, { title: entry.title })}
                 width={420}
                 height={630}

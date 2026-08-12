@@ -16,16 +16,19 @@
  * site.
  */
 
-/* The only two third-party origins this site touches, both Google Fonts, verified
-   against the live document rather than assumed:
-     fonts.googleapis.com  the Material Symbols stylesheet
-     fonts.gstatic.com     the .woff2 the stylesheet points at
-   The page makes no fetch/XHR/WebSocket calls at all, and every image, script and
-   style is same-origin. Add an origin here the moment that stops being true —
-   `connect-src` falls back to `default-src 'self'`, so a new endpoint would be
-   blocked once this policy is enforced. */
-const FONT_CSS = 'https://fonts.googleapis.com'
-const FONT_FILES = 'https://fonts.gstatic.com'
+/* THIS SITE NOW HAS NO THIRD-PARTY ORIGINS AT ALL.
+   
+   Two Google Fonts hosts used to be listed here — fonts.googleapis.com for the
+   Material Symbols stylesheet and fonts.gstatic.com for the .woff2 behind it. That
+   font is self-hosted as of the performance pass (PageSpeed measured the stylesheet
+   render-blocking for 750ms; see the @font-face in globals.css), so both allowances
+   were removed and `style-src`/`font-src` are back to bare 'self'. Tightening the
+   CSP was a side effect of a speed fix, not the goal.
+   
+   Everything is now same-origin: images, styles, fonts, scripts. The page makes no
+   fetch/XHR/WebSocket calls whatsoever. Add an origin the moment that stops being
+   true — `connect-src` falls back to `default-src 'self'`, so a new endpoint is
+   blocked by the enforced policy until it is listed. */
 
 /* EVERY DIRECTIVE THIS SITE NEEDS, in one place so the two policies below cannot
    drift apart. Each value was verified against a real production build rather than
@@ -74,8 +77,9 @@ const DIRECTIVES = {
      is a far smaller concession than it would be for scripts: inline CSS cannot
      execute, and the exfiltration trick it can theoretically enable (smuggling data
      out through a crafted background-image URL) is shut off by `img-src 'self'`. */
-  'style-src': `'self' 'unsafe-inline' ${FONT_CSS}`,
-  'font-src': `'self' ${FONT_FILES}`,
+  'style-src': "'self' 'unsafe-inline'",
+  /* Bare 'self' now that the icon font is served from /fonts on this origin. */
+  'font-src': "'self'",
   /* 'self' IS correct in production even though the site loads Vercel Analytics.
      Confirmed by reading @vercel/analytics' own `getScriptSrc()`: the cross-origin
      `va.vercel-scripts.com/v1/script.debug.js` is returned only when
@@ -142,11 +146,27 @@ const ENFORCED_DIRECTIVES = [
   'connect-src',
 ]
 
-const serializeCsp = (names) =>
-  [...names.map((name) => `${name} ${DIRECTIVES[name]}`), 'upgrade-insecure-requests'].join('; ')
+/* `upgrade` is opt-in per policy, and that is the fix for a real reported error.
+   
+   `upgrade-insecure-requests` used to be appended unconditionally to BOTH policies.
+   It is meaningless in a report-only policy — there is nothing to report, since the
+   directive rewrites requests rather than blocking them — so Chrome ignored it and
+   logged "The Content Security Policy directive 'upgrade-insecure-requests' is
+   ignored when delivered in a report-only policy." That console error was the whole
+   of the Best Practices deduction on the PageSpeed run (92, both the "Browser errors
+   were logged to the console" and "Issues were logged in the Issues panel" entries),
+   and it was pure noise: the enforced copy was doing the job all along.
+   
+   So it is now a parameter, passed only for the enforced policy. Do not pass it for
+   report-only again — it buys nothing and costs a console error on every page load. */
+const serializeCsp = (names, { upgrade = false } = {}) =>
+  [
+    ...names.map((name) => `${name} ${DIRECTIVES[name]}`),
+    ...(upgrade ? ['upgrade-insecure-requests'] : []),
+  ].join('; ')
 
 /* Enforced: everything above that is accurate and cannot break the build output. */
-const CSP_ENFORCED = serializeCsp(ENFORCED_DIRECTIVES)
+const CSP_ENFORCED = serializeCsp(ENFORCED_DIRECTIVES, { upgrade: true })
 
 /* Report-only: the strict policy, INCLUDING `default-src` and `script-src`, so the
    inline-script violations keep arriving in the console and the day a real fix
@@ -200,7 +220,24 @@ const CANONICAL_HOST = new URL(
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   async headers() {
-    return [{ source: '/:path*', headers: securityHeaders }]
+    return [
+      { source: '/:path*', headers: securityHeaders },
+      /* ONE YEAR, IMMUTABLE, for the self-hosted icon font.
+         
+         This is the other half of the "Use efficient cache lifetimes" finding.
+         Google served the same font with a 1-day `max-age`, which PageSpeed flagged
+         and which no amount of configuration on our side could change. Now that the
+         file is ours, a repeat visitor should never re-request it.
+         
+         Safe to mark `immutable` because the CONTENTS at this path only change when
+         `scripts/build-icon-font.mjs` is re-run, which is a deploy — and a deploy is
+         the one thing that can bust it. If the glyph list ever starts changing
+         often, rename the file rather than shortening this. */
+      {
+        source: '/fonts/:path*',
+        headers: [{ key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }],
+      },
+    ]
   },
   /**
    * Collapse `www` onto the bare domain.

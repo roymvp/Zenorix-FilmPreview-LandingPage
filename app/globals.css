@@ -266,7 +266,48 @@ body {
    to extend: outside the column there is no wall to see through the glass, and a
    band of tinted black either side of the phone would just be the canvas. */
 
-/* Material Symbols icon font for <md-icon> */
+/* Material Symbols icon font for <md-icon>, SELF-HOSTED.
+   
+   This used to be a <link rel="stylesheet"> to fonts.googleapis.com in
+   `[lang]/layout.tsx`, subset via `icon_names`. The subsetting was right; the
+   ORIGIN was the problem. Measured by PageSpeed on the live site:
+   
+     - that stylesheet was render-blocking for 750ms — six times the 150ms of our
+       own CSS, and the single largest entry in "Render-blocking requests"
+       (1,600ms estimated). A font on a third-party origin costs DNS + TCP + TLS
+       before the first byte, and only THEN does the browser learn which .woff2
+       to fetch, from a SECOND origin. Two preconnect hints existed to soften
+       exactly that and could not remove it;
+     - Google serves the file with a 1-day `max-age`, which PageSpeed flagged
+       under "Use efficient cache lifetimes". We cannot change their header;
+     - their CSS omits `font-display`, flagged separately under "Font display".
+       That one is only fixable by owning the @font-face, which is this rule.
+   
+   Self-hosting collapses all three: the file is now on the same connection the
+   HTML arrived on, immutably cached by the CDN, and `font-display: swap` is ours
+   to set. It also empties `style-src`/`font-src` of third-party origins in
+   next.config.mjs, so the CSP got strictly tighter as a side effect.
+   
+   REGENERATE WITH `node scripts/build-icon-font.mjs` after changing which icons
+   the site uses — that script owns the glyph list and the warnings about it, and
+   is the only supported way to update the .woff2. Do not hand-edit the file and
+   do not reintroduce the <link>. */
+@font-face {
+  font-family: 'Material Symbols Outlined';
+  font-style: normal;
+  /* The range, not a single value: the subset is a VARIABLE font and still
+     advertises `wght 100..700`, which is what lets Material Web's own icon
+     styles ask for a weight without triggering synthetic bolding. */
+  font-weight: 100 700;
+  /* `swap`, and it is the safe choice here specifically BECAUSE of the
+     `:not(:defined)` guard further down: every md-icon that sits above the fold
+     renders text-shaped glyph names for a moment either way, and swap at least
+     guarantees the icon appears rather than being held invisible on a slow
+     connection. */
+  font-display: swap;
+  src: url('/fonts/material-symbols-subset.woff2') format('woff2');
+}
+
 md-icon {
   font-family: 'Material Symbols Outlined';
 }

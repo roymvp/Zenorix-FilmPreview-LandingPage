@@ -90,6 +90,25 @@ export function HeroBillboard({
                   key={`${src}-${row}`}
                   className="zx-hero-tile"
                   src={src}
+                  /* TWO WIDTHS, built by scripts/build-hero-wall.mjs. The tile is
+                     130 CSS px on a phone and up to 307px on a wide desktop, so a
+                     single file is necessarily wrong at one end: PageSpeed
+                     measured the 320px file painted at 228px on a Moto G Power
+                     and called 21.4KB of it waste, per tile, across twenty tiles.
+
+                     `sizes` mirrors `--zx-wall-col` in landing.css (130px, then
+                     `max(184px, 12vw)` from 1024) — it is a promise about layout
+                     made to the preload scanner before any CSS exists, so it has
+                     to be kept in step with that variable by hand. Being wrong
+                     here is worse than having no srcset at all: too small a
+                     value ships a blurry tile that cannot be undone once the
+                     browser has committed to it.
+
+                     A DPR-2 phone still resolves to the 320 (130 x 2 = 260 > 240)
+                     and a DPR-1.75 phone takes the 240 — which is exactly the
+                     device in the report. */
+                  srcSet={`${src.replace(/\.webp$/, '-240w.webp')} 240w, ${src} 320w`}
+                  sizes="(min-width: 1024px) max(184px, 12vw), 130px"
                   alt=""
                   width={320}
                   height={480}
@@ -97,17 +116,37 @@ export function HeroBillboard({
                      out are eager; the rest exist for the full-bleed desktop
                      wall and are fetched as the browser gets to them.
 
-                     `fetchPriority="low"` on ALL of them, including the eager
-                     ones. The wall is texture behind a scrim — what has to paint
-                     first is the headline and the install button, and twenty
-                     tiles competing for the first connections is exactly how
-                     that gets delayed.
-
                      The duplicate half of each column costs no network: it
                      repeats the same URLs, so the browser serves it from the
                      same fetch. */
                   loading={column < 4 ? 'eager' : 'lazy'}
-                  fetchPriority="low"
+                  /* A TILE IS THE LCP ELEMENT, so the wall cannot be uniformly
+                     deprioritized.
+
+                     Every tile used to be `fetchPriority="low"`, reasoned as "the
+                     wall is texture behind a scrim, the headline and the install
+                     button own the first connections". Right about intent, wrong
+                     about consequence: the wall is full-bleed BEHIND the copy, so
+                     the largest element in the viewport is a tile. Lighthouse
+                     named it — LCP element `img.zx-hero-tile`, `fetchpriority=high
+                     should be applied` failing — with LCP 5.4s against FCP 2.6s.
+                     The hint was deferring the exact resource the metric waited on.
+
+                     THE TOP ROW, not one hardcoded tile. Which tile is largest
+                     depends on the viewport and on the -40px/+24px stagger that
+                     offsets alternating columns, so the LCP element is not stable
+                     across devices: the report caught `lanterns`, which sits at
+                     column 1 / row 4, NOT at the document's first <img>. Promoting
+                     row 0 of the four columns a phone lays out covers whichever of
+                     them wins without guessing — four images, which is the same
+                     number a browser would give priority to anyway once it starts
+                     laying out the hero.
+
+                     The remaining tiles stay `low` for the original reason, which
+                     still holds for them: they are texture, and twenty
+                     high-priority images would recreate the contention this hint
+                     exists to prevent. */
+                  fetchPriority={row === 0 && column < 4 ? 'high' : 'low'}
                   decoding="async"
                 />
               ))}
