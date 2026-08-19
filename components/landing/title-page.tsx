@@ -568,7 +568,7 @@ export function TitlePage({
                       including why the collapse is a CSS clamp and never a
                       `.slice()` on the string. */}
                   <TitleSynopsis
-                    text={record.synopsis}
+                    text={record.synopsis[locale]}
                     moreLabel={copy.synopsisMore}
                     lessLabel={copy.synopsisLess}
                   />

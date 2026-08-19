@@ -178,10 +178,16 @@ export function buildTitleMetadata({
   const canonical = `${SITE.url}${path(locale)}`
   const year = record.released.slice(0, 4)
   const heading = `${title} (${year}) — ${dict.title.metaSuffix}`
+  /* Read once into the market's own language. This used to be `record.synopsis`
+     when that field was a lone English string, which meant the `description` here
+     — the text a result actually quotes — was English on all three locales while
+     `heading` beside it was translated. Every one of the 29 titles therefore
+     shipped a byte-identical description to three hreflang-linked URLs. */
+  const synopsis = record.synopsis[locale]
 
   return {
     title: heading,
-    description: record.synopsis,
+    description: synopsis,
     alternates: { canonical, ...buildLocaleAlternates(path) },
     openGraph: {
       /* `video.movie` is correct HERE, unlike on the market page where it was
@@ -191,7 +197,7 @@ export function buildTitleMetadata({
       locale: localeMeta[locale].ogLocale,
       url: canonical,
       title: heading,
-      description: record.synopsis,
+      description: synopsis,
       /* The poster, not the market share card. A share of this URL should show the
          thing the URL is about. */
       images: [{ url: `${SITE.url}${poster}`, width: 420, height: 630 }],
@@ -262,7 +268,11 @@ export function buildTitleStructuredData({
         '@id': url,
         url,
         name: title,
-        description: record.synopsis,
+        /* Must match `inLanguage` on the line below it. While `synopsis` was a
+           single English string this node declared `inLanguage: 'th'` around a
+           description written in English — the node contradicting its own metadata,
+           which is worse than omitting the language. */
+        description: record.synopsis[locale],
         image: `${SITE.url}${poster}`,
         inLanguage: localeMeta[locale].hreflang,
         genre: record.genres,
