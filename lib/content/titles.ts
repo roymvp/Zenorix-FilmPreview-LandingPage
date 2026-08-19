@@ -131,17 +131,29 @@ export type TitleRecord = {
   /**
    * The age rating from the body that issues it in the US: the MPA for films, the
    * TV Parental Guidelines for series. `reason` is that body's OWN descriptor
-   * ("for strong bloody violence and gore, and for language"), quoted rather than
-   * paraphrased, because the descriptor is the part a parent is actually reading
-   * for and rewriting it turns a citation into an opinion.
+   * ("for strong bloody violence and gore, and for language") rather than our
+   * paraphrase, because the descriptor is the part a parent is actually reading for
+   * and rewriting its substance turns a citation into an opinion.
    *
    * Optional, and genuinely absent on several records: a rating exists only once
    * the film has been submitted, so an unreleased title has none to state. Nothing
    * is inferred from the franchise — Toy Story 5 is the first main-series entry
    * rated PG rather than G, and a record that assumed G from the four films before
    * it would have been confidently wrong.
+   *
+   * `reason` IS per-locale, but note what that does and does not mean. `value`
+   * ('R', 'PG-13', 'TV-MA', 'Unrated') is never translated — it is the MPA's or the
+   * TV Parental Guidelines' identifier, and a reader in São Paulo looking at a US
+   * rating is looking for 'R', not a local equivalent that this record has no
+   * authority to assert. The descriptor beside it is a sentence, and a Thai reader
+   * cannot read 'for pervasive language, sexual material, drug use and graphic
+   * nudity'. So the CODE stays fixed and the SENTENCE is translated.
+   *
+   * The `en` string remains the MPA's exact wording, so the citation above is
+   * preserved where it can be. `pt-br` and `th` are faithful renderings of that
+   * wording — still the issuing body's judgement, not ours, just readable.
    */
-  contentRating?: { value: string; reason?: string }
+  contentRating?: { value: string; reason?: Record<Locale, string> }
   /** Genre words used as-is for display and for the `genre` field in JSON-LD. */
   genres: string[]
   productionCompanies: string[]
@@ -189,7 +201,11 @@ const TITLES: Partial<Record<ChartEntryId, TitleRecord>> = {
     directors: ['Destin Daniel Cretton'],
     writers: ['Chris McKenna', 'Erik Sommers'],
     cast: ['Tom Holland', 'Zendaya', 'Sadie Sink', 'Jacob Batalon', 'Jon Bernthal', 'Florence Pugh', 'Tramell Tillman', 'Marisa Tomei', 'Mark Ruffalo'],
-    contentRating: { value: 'PG-13', reason: 'for sequences of action and violence and some language' },
+    contentRating: { value: 'PG-13', reason: {
+      en:      'for sequences of action and violence and some language',
+      'pt-br': 'por sequências de ação e violência e alguma linguagem inadequada',
+      th:      'จากฉากแอ็กชันและความรุนแรง และการใช้ภาษาไม่เหมาะสมบางส่วน',
+    } },
     genres: ['Superhero', 'Action', 'Adventure'],
     productionCompanies: ['Columbia Pictures', 'Marvel Studios', 'Pascal Pictures'],
     distributors: ['Sony Pictures Releasing'],
@@ -211,7 +227,11 @@ const TITLES: Partial<Record<ChartEntryId, TitleRecord>> = {
     directors: ['Christopher Nolan'],
     writers: ['Christopher Nolan'],
     cast: ['Matt Damon', 'Tom Holland', 'Anne Hathaway', 'Robert Pattinson', 'Lupita Nyong\u2019o', 'Zendaya', 'Charlize Theron'],
-    contentRating: { value: 'R', reason: 'for violence and some language' },
+    contentRating: { value: 'R', reason: {
+      en:      'for violence and some language',
+      'pt-br': 'por violência e alguma linguagem inadequada',
+      th:      'จากความรุนแรงและการใช้ภาษาไม่เหมาะสมบางส่วน',
+    } },
     genres: ['Epic', 'Action', 'Fantasy'],
     productionCompanies: ['Universal Pictures', 'Syncopy'],
     distributors: ['Universal Pictures'],
@@ -234,7 +254,11 @@ const TITLES: Partial<Record<ChartEntryId, TitleRecord>> = {
     writers: ['Andrew Stanton', 'Kenna Harris'],
     cast: ['Tom Hanks', 'Tim Allen', 'Joan Cusack', 'Conan O\u2019Brien', 'Greta Lee', 'Craig Robinson', 'Mykal-Michelle Harris'],
     /* PG, not G — the first main-series Toy Story to be rated above G in 31 years. */
-    contentRating: { value: 'PG', reason: 'for some thematic elements and rude humor' },
+    contentRating: { value: 'PG', reason: {
+      en:      'for some thematic elements and rude humor',
+      'pt-br': 'por alguns elementos temáticos e humor grosseiro',
+      th:      'จากเนื้อหาบางประเด็นและอารมณ์ขันหยาบคาย',
+    } },
     genres: ['Animation', 'Comedy', 'Family'],
     productionCompanies: ['Pixar Animation Studios'],
     distributors: ['Walt Disney Studios Motion Pictures'],
@@ -256,7 +280,11 @@ const TITLES: Partial<Record<ChartEntryId, TitleRecord>> = {
     directors: ['James Cameron'],
     writers: ['James Cameron', 'Rick Jaffa', 'Amanda Silver'],
     cast: ['Sam Worthington', 'Zoe Salda\u00f1a', 'Sigourney Weaver', 'Stephen Lang', 'Kate Winslet', 'Oona Chaplin'],
-    contentRating: { value: 'PG-13', reason: 'for intense sequences of violence and action, bloody images, some strong language, thematic elements and suggestive material' },
+    contentRating: { value: 'PG-13', reason: {
+      en:      'for intense sequences of violence and action, bloody images, some strong language, thematic elements and suggestive material',
+      'pt-br': 'por sequências intensas de violência e ação, imagens sangrentas, linguagem forte em alguns momentos, elementos temáticos e conteúdo sugestivo',
+      th:      'จากฉากความรุนแรงและแอ็กชันที่รุนแรง ภาพเลือด การใช้ภาษารุนแรงบางส่วน เนื้อหาบางประเด็น และเนื้อหาชี้นำทางเพศ',
+    } },
     genres: ['Science fiction', 'Epic', 'Adventure'],
     productionCompanies: ['Lightstorm Entertainment'],
     distributors: ['20th Century Studios'],
@@ -270,7 +298,7 @@ const TITLES: Partial<Record<ChartEntryId, TitleRecord>> = {
     slug: 'mortal-kombat-ii',
     synopsis: {
       en:      'Washed-up action star Johnny Cage is recruited into an interdimensional tournament against Outworld, where Earthrealm\u2019s champions must stop the immortal Shao Kahn.',
-      'pt-br': 'Johnny Cage, astro de ação em decadência, �� recrutado para um torneio interdimensional contra Outworld, onde os campeões do Earthrealm precisam deter o imortal Shao Kahn.',
+      'pt-br': 'Johnny Cage, astro de ação em decadência, é recrutado para um torneio interdimensional contra Outworld, onde os campeões do Earthrealm precisam deter o imortal Shao Kahn.',
       th:      'Johnny Cage ดาราหนังบู๊ที่ตกอับ ถูกดึงเข้าร่วมการประลองข้ามมิติกับ Outworld ที่ซึ่งเหล่าตัวแทนของ Earthrealm ต้องหยุดยั้ง Shao Kahn ผู้เป็นอมตะ',
     },
     released: '2026-05-08',
@@ -278,7 +306,11 @@ const TITLES: Partial<Record<ChartEntryId, TitleRecord>> = {
     directors: ['Simon McQuoid'],
     writers: ['Jeremy Slater'],
     cast: ['Karl Urban', 'Adeline Rudolph', 'Jessica McNamee', 'Josh Lawson', 'Tati Gabrielle', 'Hiroyuki Sanada', 'Joe Taslim'],
-    contentRating: { value: 'R', reason: 'for strong bloody violence and gore, and for language' },
+    contentRating: { value: 'R', reason: {
+      en:      'for strong bloody violence and gore, and for language',
+      'pt-br': 'por violência sangrenta intensa e cenas grotescas, e por linguagem inadequada',
+      th:      'จากความรุนแรงนองเลือดและภาพอุจาด และการใช้ภาษาไม่เหมาะสม',
+    } },
     genres: ['Martial arts', 'Fantasy', 'Action'],
     productionCompanies: ['New Line Cinema', 'Atomic Monster', 'Broken Road Productions', 'Fireside Films'],
     distributors: ['Warner Bros. Pictures'],
@@ -300,7 +332,11 @@ const TITLES: Partial<Record<ChartEntryId, TitleRecord>> = {
     directors: ['Phil Lord', 'Christopher Miller'],
     writers: ['Drew Goddard'],
     cast: ['Ryan Gosling', 'Sandra H\u00fcller', 'James Ortiz', 'Lionel Boyce'],
-    contentRating: { value: 'PG-13', reason: 'for some thematic material and suggestive references' },
+    contentRating: { value: 'PG-13', reason: {
+      en:      'for some thematic material and suggestive references',
+      'pt-br': 'por algum conteúdo temático e referências sugestivas',
+      th:      'จากเนื้อหาบางประเด็นและการอ้างถึงเรื่องเพศ',
+    } },
     genres: ['Science fiction', 'Adventure', 'Drama'],
     productionCompanies: ['Metro-Goldwyn-Mayer', 'Lord Miller Productions', 'Pascal Pictures'],
     distributors: ['Amazon MGM Studios', 'Sony Pictures Releasing International'],
@@ -322,7 +358,11 @@ const TITLES: Partial<Record<ChartEntryId, TitleRecord>> = {
     directors: ['David Frankel'],
     writers: ['Aline Brosh McKenna'],
     cast: ['Meryl Streep', 'Anne Hathaway', 'Emily Blunt', 'Justin Theroux', 'Kenneth Branagh', 'Stanley Tucci', 'Lucy Liu'],
-    contentRating: { value: 'PG-13', reason: 'for strong language and some suggestive references' },
+    contentRating: { value: 'PG-13', reason: {
+      en:      'for strong language and some suggestive references',
+      'pt-br': 'por linguagem forte e algumas referências sugestivas',
+      th:      'จากการใช้ภาษารุนแรงและการอ้างถึงเรื่องเพศบางส่วน',
+    } },
     genres: ['Comedy', 'Drama'],
     productionCompanies: ['Wendy Finerman Productions'],
     distributors: ['20th Century Studios'],
@@ -344,7 +384,11 @@ const TITLES: Partial<Record<ChartEntryId, TitleRecord>> = {
     directors: ['Thomas Kail'],
     writers: ['Jared Bush', 'Dana Ledoux Miller'],
     cast: ['Catherine Laga\u2019aia', 'Dwayne Johnson', 'Rena Owen', 'John Tui', 'Frankie Adams', 'Jemaine Clement'],
-    contentRating: { value: 'PG', reason: 'for action and peril, some scary images, rude humor and brief thematic elements' },
+    contentRating: { value: 'PG', reason: {
+      en:      'for action and peril, some scary images, rude humor and brief thematic elements',
+      'pt-br': 'por ação e situações de perigo, algumas imagens assustadoras, humor grosseiro e breves elementos temáticos',
+      th:      'จากฉากแอ็กชันและสถานการณ์อันตราย ภาพน่ากลัวบางส่วน อารมณ์ขันหยาบคาย และเนื้อหาบางประเด็นช่วงสั้นๆ',
+    } },
     genres: ['Musical', 'Adventure', 'Family'],
     productionCompanies: ['Walt Disney Pictures', 'Seven Bucks Productions', 'Flynn Picture Co.', '5000 Broadway Productions'],
     distributors: ['Walt Disney Studios Motion Pictures'],
@@ -368,7 +412,11 @@ const TITLES: Partial<Record<ChartEntryId, TitleRecord>> = {
     directors: ['Jay Chandrasekhar'],
     writers: ['Broken Lizard'],
     cast: ['Jay Chandrasekhar', 'Kevin Heffernan', 'Steve Lemme', 'Paul Soter', 'Erik Stolhanske', 'Hannah Simone', 'Nat Faxon', 'Chace Crawford', 'Brian Cox'],
-    contentRating: { value: 'R', reason: 'for sexual content, nudity, language throughout and drug content' },
+    contentRating: { value: 'R', reason: {
+      en:      'for sexual content, nudity, language throughout and drug content',
+      'pt-br': 'por conteúdo sexual, nudez, linguagem inadequada ao longo do filme e conteúdo relacionado a drogas',
+      th:      'จากเนื้อหาทางเพศ ภาพเปลือย การใช้ภาษาไม่เหมาะสมตลอดเรื่อง และเนื้อหาเกี่ยวกับยาเสพติด',
+    } },
     genres: ['Comedy'],
     productionCompanies: ['Broken Lizard Industries', 'Cataland Films'],
     distributors: ['Searchlight Pictures'],
@@ -389,7 +437,11 @@ const TITLES: Partial<Record<ChartEntryId, TitleRecord>> = {
     directors: ['Travis Knight'],
     writers: ['Chris Butler', 'Aaron Nee', 'Adam Nee', 'David Callaham'],
     cast: ['Nicholas Galitzine', 'Camila Mendes', 'Alison Brie', 'James Purefoy', 'Morena Baccarin', 'Kristen Wiig', 'Jared Leto', 'Idris Elba'],
-    contentRating: { value: 'PG-13', reason: 'for sequences of violence and action, some suggestive material and language' },
+    contentRating: { value: 'PG-13', reason: {
+      en:      'for sequences of violence and action, some suggestive material and language',
+      'pt-br': 'por sequências de violência e ação, algum conteúdo sugestivo e linguagem inadequada',
+      th:      'จากฉากความรุนแรงและแอ็กชัน เนื้อหาชี้นำทางเพศบางส่วน และการใช้ภาษาไม่เหมาะสม',
+    } },
     genres: ['Sword and sorcery', 'Fantasy', 'Action'],
     productionCompanies: ['Metro-Goldwyn-Mayer', 'Mattel Studios', 'Escape Artists'],
     distributors: ['Amazon MGM Studios', 'Sony Pictures Releasing International'],
@@ -587,7 +639,11 @@ const TITLES: Partial<Record<ChartEntryId, TitleRecord>> = {
        mirrors the credits rather than the reporting. */
     writers: ['Travis Braun'],
     cast: ['Monica Barbaro', 'Callum Turner', 'Molly Ringwald', 'LeVar Burton', 'Maya Hawke', 'Julia Fox', 'Nicholas Braun', 'Pete Davidson'],
-    contentRating: { value: 'R', reason: 'for sexual material, language and brief nudity' },
+    contentRating: { value: 'R', reason: {
+      en:      'for sexual material, language and brief nudity',
+      'pt-br': 'por conteúdo sexual, linguagem inadequada e breve nudez',
+      th:      'จากเนื้อหาทางเพศ การใช้ภาษาไม่เหมาะสม และภาพเปลือยช่วงสั้นๆ',
+    } },
     genres: ['Romantic comedy'],
     productionCompanies: ['Olive Bridge Entertainment'],
     distributors: ['Universal Pictures'],
@@ -612,7 +668,11 @@ const TITLES: Partial<Record<ChartEntryId, TitleRecord>> = {
        submitting it to the MPA so the gore would survive, and it carries an 18 from
        the BBFC in the UK. Stated rather than omitted, because "Unrated" is what a
        cinema listing shows and it means something different from "no rating yet". */
-    contentRating: { value: 'Unrated', reason: 'released without an MPA rating' },
+    contentRating: { value: 'Unrated', reason: {
+      en:      'released without an MPA rating',
+      'pt-br': 'lançado sem classificação da MPA',
+      th:      'เผยแพร่โดยไม่ผ่านการจัดเรตของ MPA',
+    } },
     genres: ['Slasher', 'Horror'],
     productionCompanies: ['The Horror Section', 'MCT Studios'],
     distributors: ['Iconic Events Releasing'],
@@ -678,7 +738,7 @@ const TITLES: Partial<Record<ChartEntryId, TitleRecord>> = {
     synopsis: {
       en:      'Los Angeles, 1981. A 17-year-old Bret Easton Ellis is in his last year at an elite prep school when a magnetic new student arrives, just as a serial killer known as the Trawler begins working the city.',
       'pt-br': 'Los Angeles, 1981. Bret Easton Ellis, de 17 anos, está no último ano de um colégio preparatório de elite quando um novo aluno magnético chega, justamente quando um serial killer conhecido como the Trawler começa a agir na cidade.',
-      th:      'Los Angeles ปี 1981 Bret Easton Ellis วัย 17 ปี กำลังเรียนปีสุดท้ายในโรงเรียนเตรียมอุดมชั้นนำ เมื่อนักเรียนใหม่ผู้มีเสน่ห์ดึงดูดมาถึง พร้อมกับที่ฆาตกรต่อเนื่องซึ่งรู้จักกันในชื่อ the Trawler เริ่มลงม���อในเมือง',
+      th:      'Los Angeles ปี 1981 Bret Easton Ellis วัย 17 ปี กำลังเรียนปีสุดท้ายในโรงเรียนเตรียมอุดมชั้นนำ เมื่อนักเรียนใหม่ผู้มีเสน่ห์ดึงดูดมาถึง พร้อมกับที่ฆาตกรต่อเนื่องซึ่งรู้จักกันในชื่อ the Trawler เริ่มลงมือในเมือง',
     },
     released: '2026-08-05',
     seasons: 1,
@@ -767,7 +827,11 @@ const TITLES: Partial<Record<ChartEntryId, TitleRecord>> = {
     cast: ['Kevin Hart', 'Marcello Hern\u00e1ndez', 'Mason Gooding', 'Kam Patterson', 'Ben Marshall', 'Teyana Taylor'],
     /* An MPA R, not a TV-MA: it is a film that premiered on Netflix, and Netflix
        originals carry the film rating rather than the TV Parental Guidelines one. */
-    contentRating: { value: 'R', reason: 'for pervasive language, sexual material, drug use and graphic nudity' },
+    contentRating: { value: 'R', reason: {
+      en:      'for pervasive language, sexual material, drug use and graphic nudity',
+      'pt-br': 'por linguagem inadequada generalizada, conteúdo sexual, uso de drogas e nudez explícita',
+      th:      'จากการใช้ภาษาไม่เหมาะสมตลอดเรื่อง เนื้อหาทางเพศ การใช้ยาเสพติด และภาพเปลือยชัดเจน',
+    } },
     genres: ['Comedy'],
     productionCompanies: ['Sony Pictures', 'Davis Entertainment', 'Counterbalance Entertainment', 'Hartbeat Productions', 'Will Packer Productions', 'The Story Company'],
     distributors: ['Netflix'],
@@ -824,7 +888,11 @@ const TITLES: Partial<Record<ChartEntryId, TitleRecord>> = {
     directors: ['Jeff Wadlow'],
     writers: ['Aja Gabel', 'Myung Joh Wesner'],
     cast: ['Kathryn Newton', 'Lana Condor', 'Gavin Casalegno', 'Nico Hiraga', 'Tommi Rose', 'Tayme Thapthimthong'],
-    contentRating: { value: 'PG-13', reason: 'for violent content, bloody images, some language and suggestive material' },
+    contentRating: { value: 'PG-13', reason: {
+      en:      'for violent content, bloody images, some language and suggestive material',
+      'pt-br': 'por conteúdo violento, imagens sangrentas, alguma linguagem inadequada e conteúdo sugestivo',
+      th:      'จากเนื้อหารุนแรง ภาพเลือด การใช้ภาษาไม่เหมาะสมบางส่วน และเนื้อหาชี้นำทางเพศ',
+    } },
     genres: ['Survival thriller', 'Horror'],
     productionCompanies: ['Lionsgate', 'Thunder Road Films'],
     /* Amazon MGM Studios distributes, via Prime Video. The chart badge said `hulu`,
@@ -852,7 +920,11 @@ const TITLES: Partial<Record<ChartEntryId, TitleRecord>> = {
     directors: ['Pierre Coffin'],
     writers: ['Brian Lynch', 'Pierre Coffin'],
     cast: ['Pierre Coffin', 'Trey Parker', 'Allison Janney', 'Christoph Waltz', 'Jesse Eisenberg', 'Jeff Bridges', 'Zoey Deutch', 'Bobby Moynihan', 'Phil LaMarr'],
-    contentRating: { value: 'PG', reason: 'for action/violence, language and rude/macabre humor' },
+    contentRating: { value: 'PG', reason: {
+      en:      'for action/violence, language and rude/macabre humor',
+      'pt-br': 'por ação/violência, linguagem inadequada e humor grosseiro/macabro',
+      th:      'จากแอ็กชัน/ความรุนแรง การใช้ภาษาไม่เหมาะสม และอารมณ์ขันหยาบคาย/มาคาบร์',
+    } },
     genres: ['Animation', 'Comedy', 'Family'],
     productionCompanies: ['Universal Pictures', 'Illumination'],
     distributors: ['Universal Pictures'],
@@ -876,7 +948,7 @@ const TITLES: Partial<Record<ChartEntryId, TitleRecord>> = {
     synopsis: {
       en:      'A three-part account of the 2022 University of Idaho student murders, built from bodycam footage, text messages and interviews with the victims\u2019 families and the investigators who worked the case.',
       'pt-br': 'Um relato em três partes dos assassinatos de estudantes da University of Idaho em 2022, construído a partir de imagens de bodycam, mensagens de texto e entrevistas com as famílias das vítimas e os investigadores que atuaram no caso.',
-      th:      'สารคดีสามตอนเกี่ยวกับคด��ฆาตกรรมนักศึกษา University of Idaho ปี 2022 ประกอบขึ้นจากภาพกล้องติดตัวเจ้าหน้าที่ ข้อความแชท และบทสัมภาษณ์ครอบครัวผู้เสียชีวิตกับพนักงานสืบสวนที่ทำคดีนี้',
+      th:      'สารคดีสามตอนเกี่ยวกับคดีฆาตกรรมนักศึกษา University of Idaho ปี 2022 ประกอบขึ้นจากภาพกล้องติดตัวเจ้าหน้าที่ ข้อความแชท และบทสัมภาษณ์ครอบครัวผู้เสียชีวิตกับพนักงานสืบสวนที่ทำคดีนี้',
     },
     released: '2026-07-29',
     seasons: 1,
@@ -920,7 +992,11 @@ const TITLES: Partial<Record<ChartEntryId, TitleRecord>> = {
     directors: ['Olivia Wilde'],
     writers: ['Will McCormack', 'Rashida Jones'],
     cast: ['Seth Rogen', 'Olivia Wilde', 'Pen\u00e9lope Cruz', 'Edward Norton'],
-    contentRating: { value: 'R', reason: 'for sexual material, language throughout and drug use' },
+    contentRating: { value: 'R', reason: {
+      en:      'for sexual material, language throughout and drug use',
+      'pt-br': 'por conteúdo sexual, linguagem inadequada ao longo do filme e uso de drogas',
+      th:      'จากเนื้อหาทางเพศ การใช้ภาษาไม่เหมาะสมตลอดเรื่อง และการใช้ยาเสพติด',
+    } },
     genres: ['Comedy', 'Drama'],
     productionCompanies: ['Annapurna Pictures', 'FilmNation Entertainment', 'Permut Presentations'],
     distributors: ['A24'],
