@@ -207,19 +207,24 @@ export function buildTitleMetadata({
 }
 
 /**
- * JSON-LD for one title: what it is, who made it, how critics scored it.
+ * JSON-LD for one title: what it is and who made it. Deliberately NOT how critics
+ * scored it — see the `aggregateRating` note on the node below.
  *
- * This is the page type where structured data earns the most and risks the most,
- * so two rules are absolute:
+ * This is the page type where structured data risks the most, so one rule is
+ * absolute: every property here describes the WORK, from a field the record
+ * actually holds. No ratings, no invented values, nothing this site is not the
+ * source of. An earlier version of this comment made "emit a researched
+ * aggregator score, with attribution" the rule; that was the wrong reading of the
+ * review snippet guidelines and the markup it authorised has been removed.
  *
- *  1. `aggregateRating` is emitted ONLY from a researched score. Google treats
- *     invented review scores as spam eligible for manual action, so a title with
- *     no verified aggregator number gets no rating node rather than a guessed one.
- *     The `Score` type in titles.ts is what makes that structural instead of a
- *     convention someone has to remember.
- *  2. Every rating carries its `ratingCount` and the organization that published
- *     it. A `ratingValue` with no count and no author is not a checkable claim,
- *     and an unattributed one implies the score is this site's own.
+ * Worth knowing what this node does and does not buy, so nobody expands it
+ * expecting search-result decoration it cannot produce: the only rich result fed
+ * by `Movie` is the movie carousel, which requires an `ItemList` + `Movie` pairing
+ * (a summary page pointing at these detail pages) and is mobile-only. This site's
+ * `ItemList` is the chart on the landing page, whose `ListItem`s carry `name` and
+ * `url` only, so no carousel is claimed. This node's value is entity
+ * understanding — knowledge panels, answer engines, disambiguating one remake from
+ * another — not SERP appearance.
  */
 export function buildTitleStructuredData({
   locale,
@@ -236,26 +241,6 @@ export function buildTitleStructuredData({
   kind: 'movie' | 'series'
 }) {
   const url = `${SITE.url}/${locale}/titles/${record.slug}`
-
-  const rating = (
-    score: NonNullable<TitleRecord['rottenTomatoes']>,
-    author: string,
-  ) => ({
-    '@type': 'AggregateRating',
-    ratingValue: score.value,
-    /* The scale MUST be stated: both of these are out of 100, and schema.org
-       defaults to a 5-point scale, so an unqualified 90 reads as 90 out of 5. */
-    bestRating: 100,
-    worstRating: 0,
-    ratingCount: score.reviewCount,
-    reviewCount: score.reviewCount,
-    author: { '@type': 'Organization', name: author },
-  })
-
-  const ratings = [
-    record.rottenTomatoes ? rating(record.rottenTomatoes, 'Rotten Tomatoes') : null,
-    record.metacritic ? rating(record.metacritic, 'Metacritic') : null,
-  ].filter(Boolean)
 
   return {
     '@context': 'https://schema.org',
@@ -276,7 +261,12 @@ export function buildTitleStructuredData({
         image: `${SITE.url}${poster}`,
         inLanguage: localeMeta[locale].hreflang,
         genre: record.genres,
-        datePublished: record.released,
+        /* `dateCreated`, which is the property Google's Movie documentation names
+           for the release date. `datePublished` was here before and is the wrong
+           one for this type — it is what `Article` uses for its publication date,
+           so on a `Movie` it states something adjacent to, but not, "this is when
+           the film came out". */
+        dateCreated: record.released,
         /* The bare rating code, NOT the code plus the descriptor the visible row
            shows: `contentRating` is a coded value crawlers match against a known
            set ("PG-13", "TV-MA"), and appending prose makes it match nothing.
@@ -312,10 +302,27 @@ export function buildTitleStructuredData({
           '@type': 'Organization',
           name,
         })),
-        /* BOTH ratings when both exist, rather than picking one. Mortal Kombat II
-           is 64% on RT and 46 on Metacritic; collapsing that spread to a single
-           number would misrepresent both sources. */
-        ...(ratings.length > 0 ? { aggregateRating: ratings } : {}),
+        /* NO `aggregateRating`. The scores this site has are Rotten Tomatoes' and
+           Metacritic's, and the review snippet guidelines say plainly: "Don't
+           aggregate reviews or ratings from other websites." That is not a
+           formatting rule with an attribution escape hatch — the objection is to
+           republishing someone else's score as this page's rating data at all.
+           Emitting it with `author: Rotten Tomatoes` did not cure the violation, it
+           documented it, and `author` is not even a property Google reads on
+           `AggregateRating` (only `itemReviewed`, `ratingValue`, `ratingCount`,
+           `reviewCount`, `bestRating`, `worstRating`), so it could never have done
+           the job the old comment expected of it.
+
+           The exposure was worse than losing a star rating: invalid rating markup
+           is in scope for a structured-data manual action, and that gets the WHOLE
+           graph on the page ignored — including the `Movie` and `BreadcrumbList`
+           nodes that are legitimate.
+
+           The visible scores in the page's critics row STAY. Quoting an aggregator
+           in body copy, attributed, is normal citation and is not what this rule
+           restricts; the restriction is specifically on feeding it to Google as
+           structured rating data. A first-party `aggregateRating` would be fine
+           here — this site simply does not collect ratings, so it has none. */
       },
       /* Market page -> this title. Two levels because that is the real depth —
          there is no intermediate index URL to name, and inventing one would put a
