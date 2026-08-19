@@ -456,8 +456,14 @@ export function buildStructuredData({
   /**
    * The two rails as rendered, so the `ItemList` nodes below describe the real
    * page. Each rail's heading comes along because it is the list's visible name.
+   *
+   * Each entry carries the `href` of its detail page, or `undefined` for a title
+   * that has none — which is not a detail but the whole point. The rail renders an
+   * `<a>` for a title with a researched record and a dialog `<button>` for one
+   * without, so passing the href through is what lets the markup below make the
+   * same distinction the DOM makes instead of asserting a uniformity that is false.
    */
-  charts: { name: string; titles: string[] }[]
+  charts: { name: string; titles: { name: string; href?: string }[] }[]
 }) {
   const url = `${SITE.url}${path(locale)}`
   const organizationId = `${SITE.url}/#organization`
@@ -542,16 +548,29 @@ export function buildStructuredData({
           availableLanguage: ['en', 'pt-BR', 'th'],
         },
         url: SITE.url,
-        /* The mark rather than the lockup: Google wants a logo that stays legible
-           when squared off, and it is served from this origin so it is crawlable
-           (robots.txt allows everything). Dimensions are stated because the file is
-           256x196 — above Google's 112px floor, but not square, so letting a
-           consumer guess risks a stretched render. */
+        /* A DEDICATED square PNG, not either of the assets the UI renders.
+           `scripts/build-brand-assets.mjs` generates it solely for this field and
+           explains the three reasons it differs (square, on the black plate, PNG).
+
+           It points here rather than at `zenorix-mark.webp` because that file is
+           sized for its only on-screen job — it never paints wider than ~34 CSS px,
+           so it is 128x98, and 98 is UNDER Google's stated 112px minimum. The UI
+           asset and this field have genuinely different requirements; sharing one
+           file means the stricter of the two loses silently.
+
+           Two failure modes worth naming, because both are invisible:
+             - An undersized logo is not an error. The file loads, nothing warns,
+               the field is simply ignored.
+             - These `width`/`height` are an ASSERTION ABOUT THE FILE. They read
+               256x196 for a while after the mark was optimised down to 128x98 —
+               correct for a file that no longer existed. The aspect ratio happened
+               to stay 4:3, so it survived every visual check.
+           If the generated size changes, change SCHEMA_LOGO and these together. */
         logo: {
           '@type': 'ImageObject',
-          url: `${SITE.url}/brand/zenorix-mark.webp`,
+          url: `${SITE.url}/brand/zenorix-logo-square.png`,
           width: 256,
-          height: 196,
+          height: 256,
         },
       },
       {
@@ -694,12 +713,25 @@ export function buildStructuredData({
          true. So an answer engine asked what is trending on Zenorix can name them,
          and none of them is presented as this page's subject.
          
-         `ListItem` carries a bare `name` and no nested `Movie`/`TVSeries` and no
-         `url`: the page shows a poster and a rank for each title and nothing else —
-         no synopsis, no cast, no year, no per-film page to link to (that route was
-         a doorway page and was deleted). A `Movie` node here would be a promise of
-         detail the document does not contain.
-         
+         `ListItem` carries no nested `Movie`/`TVSeries`: the rail shows a poster and
+         a rank and nothing else — no synopsis, no cast, no year — so a `Movie` node
+         here would be a promise of detail THIS document does not contain. That
+         reasoning is unchanged.
+
+         `url` IS now emitted, per item, and this is a correction rather than an
+         addition. The rule it follows is that a `ListItem` should point at the thing
+         it names if such a page exists; when this markup was written none did,
+         because the only per-film route was a doorway page that had been deleted.
+         Twenty-nine researched detail pages exist now, the rail links to them, and
+         the markup kept saying otherwise — a comment describing a fact that had
+         expired, which is worse than no comment because it reads as a decision.
+
+         It is conditional because the situation is genuinely mixed: a title without
+         a researched record has no page and renders as a dialog button, so it gets
+         a bare `name`, exactly as before. Emitting a URL for all thirty would be
+         the same class of error in the other direction — pointing a crawler at
+         routes that 404.
+
          `itemListOrder` is explicit because the order IS the content — it is a
          chart, and each market ranks the same catalogue differently. */
       ...charts.map((chart) => ({
@@ -710,7 +742,8 @@ export function buildStructuredData({
         itemListElement: chart.titles.map((title, index) => ({
           '@type': 'ListItem',
           position: index + 1,
-          name: title,
+          name: title.name,
+          ...(title.href ? { url: `${SITE.url}${title.href}` } : {}),
         })),
       })),
     ],

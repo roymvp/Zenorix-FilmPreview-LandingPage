@@ -136,10 +136,12 @@ await crop(firstInk, lastInk + 1, 'public/brand/zenorix-lockup.webp', 640)
  *
  * Three deliberate differences from the UI asset:
  *
- *  1. SQUARE, 512x512. The guidance is a square minimum, and a knowledge panel
- *     squares off whatever it is given; a 4:3 source risks being stretched or
- *     cropped. `contain` fits the artwork inside and pads it rather than distorting
- *     it.
+ *  1. SQUARE, at SCHEMA_LOGO px a side. The guidance is a square minimum, and a
+ *     knowledge panel squares off whatever it is given; a 4:3 source risks being
+ *     stretched or cropped. `contain` fits the artwork inside and pads it rather
+ *     than distorting it. (Stated as the constant, not a literal — an earlier draft
+ *     of this comment said "512x512" while the code said 256, which is the same
+ *     species of stale assertion as the dimensions this file exists to fix.)
  *  2. ON THE BLACK PLATE, not transparent. Google says to make sure the logo "looks
  *     how you intend it to look on a purely white background" — and this artwork
  *     fails that test badly, because `toTransparent` turns luminance into alpha, so
@@ -148,9 +150,9 @@ await crop(firstInk, lastInk + 1, 'public/brand/zenorix-lockup.webp', 640)
  *     what makes the file render as intended against a white panel.
  *  3. PNG, not WebP. WebP is the right call for the UI assets, but this one is
  *     consumed by crawlers and knowledge-panel renderers rather than by browsers,
- *     and PNG is the format with no support questions attached. It is ~20KB and is
- *     never served to a visitor, so the size argument that governs the other two
- *     files does not apply.
+ *     and PNG is the format with no support questions attached. No visitor ever
+ *     downloads it, so the LCP argument that governs the other two files does not
+ *     apply here — see the `palette` note below for why it is still compressed.
  *
  * If the source logo changes, this regenerates with the rest. If the schema's
  * declared dimensions change, they must match SCHEMA_LOGO — `lib/seo.ts` states
@@ -173,7 +175,11 @@ const schemaInfo = await sharp(schemaSource)
     background: { r: 0, g: 0, b: 0, alpha: 1 },
   })
   .flatten({ background: { r: 0, g: 0, b: 0 } })
-  .png()
+  /* `palette` because this is a few gradients on a flat plate, which quantises to
+     256 colours with no visible loss. Default PNG output was 72KB; this is well
+     under half that. Nothing here is on the critical path — it is simply not worth
+     handing a crawler four times the bytes the image needs. */
+  .png({ palette: true, compressionLevel: 9 })
   .toFile('public/brand/zenorix-logo-square.png')
 
 console.log(
