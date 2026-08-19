@@ -67,8 +67,30 @@ export type TitleRecord = {
    * describe. Deliberately short: the page's job is to confirm what the title is
    * and send the reader to the app, not to host a plot summary that competes with
    * Wikipedia for the same query and loses.
+   *
+   * PER LOCALE, and a required `Record` rather than an optional override, because
+   * this one string is both the largest block of prose on the page AND the page's
+   * `meta description` (see `buildTitleMetadata` in `lib/seo.ts`). While it was a
+   * single English string, all 29 titles served a byte-identical description to all
+   * three markets — confirmed by fetching every URL and comparing — so the Thai and
+   * Portuguese pages were a translated frame around an English body, and the one
+   * paragraph most likely to be quoted in a result was in the wrong language for
+   * the reader while being duplicated across locales for a crawler.
+   *
+   * The `Record` is what stops that recurring: adding a locale to `Locale` fails
+   * the build on every record until each is translated. An optional
+   * `synopsisLocalised?:` would have silently fallen back to English — which is
+   * precisely the state this replaced, and it went unnoticed for exactly that
+   * reason. Same bargain `Dictionary` strikes for template copy and `movieOrder`
+   * in `charts.ts` strikes for chart order.
+   *
+   * PROPER NOUNS STAY IN THE ORIGINAL: people, film and series titles, studios,
+   * networks and in-world names (Outworld, Te Fiti, the Sword of Power) are not
+   * translated, because that is what these audiences search for and how the trades
+   * write them. Latin script inside a Thai sentence is correct here, not a missed
+   * translation.
    */
-  synopsis: string
+  synopsis: Record<Locale, string>
   /** ISO date of the title's first wide release in its home market. */
   released: string
   /** Runtime in minutes. Films only — a series has no single runtime. */
@@ -109,17 +131,29 @@ export type TitleRecord = {
   /**
    * The age rating from the body that issues it in the US: the MPA for films, the
    * TV Parental Guidelines for series. `reason` is that body's OWN descriptor
-   * ("for strong bloody violence and gore, and for language"), quoted rather than
-   * paraphrased, because the descriptor is the part a parent is actually reading
-   * for and rewriting it turns a citation into an opinion.
+   * ("for strong bloody violence and gore, and for language") rather than our
+   * paraphrase, because the descriptor is the part a parent is actually reading for
+   * and rewriting its substance turns a citation into an opinion.
    *
    * Optional, and genuinely absent on several records: a rating exists only once
    * the film has been submitted, so an unreleased title has none to state. Nothing
    * is inferred from the franchise — Toy Story 5 is the first main-series entry
    * rated PG rather than G, and a record that assumed G from the four films before
    * it would have been confidently wrong.
+   *
+   * `reason` IS per-locale, but note what that does and does not mean. `value`
+   * ('R', 'PG-13', 'TV-MA', 'Unrated') is never translated — it is the MPA's or the
+   * TV Parental Guidelines' identifier, and a reader in São Paulo looking at a US
+   * rating is looking for 'R', not a local equivalent that this record has no
+   * authority to assert. The descriptor beside it is a sentence, and a Thai reader
+   * cannot read 'for pervasive language, sexual material, drug use and graphic
+   * nudity'. So the CODE stays fixed and the SENTENCE is translated.
+   *
+   * The `en` string remains the MPA's exact wording, so the citation above is
+   * preserved where it can be. `pt-br` and `th` are faithful renderings of that
+   * wording — still the issuing body's judgement, not ours, just readable.
    */
-  contentRating?: { value: string; reason?: string }
+  contentRating?: { value: string; reason?: Record<Locale, string> }
   /** Genre words used as-is for display and for the `genre` field in JSON-LD. */
   genres: string[]
   productionCompanies: string[]
@@ -157,13 +191,21 @@ const TITLES: Partial<Record<ChartEntryId, TitleRecord>> = {
   spiderMan: {
     id: 'spiderMan',
     slug: 'spider-man-brand-new-day',
-    synopsis: 'Four years after a spell erased him from the world\u2019s memory, Peter Parker protects New York anonymously while his powers begin to mutate and a young telepath hunts the agency that took her sister.',
+    synopsis: {
+      en:      'Four years after a spell erased him from the world\u2019s memory, Peter Parker protects New York anonymously while his powers begin to mutate and a young telepath hunts the agency that took her sister.',
+      'pt-br': 'Quatro anos depois de um feitiço apagá-lo da memória do mundo, Peter Parker protege Nova York no anonimato enquanto seus poderes começam a sofrer mutações e uma jovem telepata caça a agência que levou sua irmã.',
+      th:      'สี่ปีหลังคาถาลบเขาออกจากความจำของคนทั้งโลก Peter Parker ปกป้องนิวยอร์กอย่างไม่เปิดเผยตัว ขณะที่พลังของเขาเริ่มกลายพันธุ์ และหญิงสาวผู้มีพลังจิตกำลังตามล่าองค์กรที่พาน้องสาวของเธอไป',
+    },
     released: '2026-07-31',
     runtime: 145,
     directors: ['Destin Daniel Cretton'],
     writers: ['Chris McKenna', 'Erik Sommers'],
     cast: ['Tom Holland', 'Zendaya', 'Sadie Sink', 'Jacob Batalon', 'Jon Bernthal', 'Florence Pugh', 'Tramell Tillman', 'Marisa Tomei', 'Mark Ruffalo'],
-    contentRating: { value: 'PG-13', reason: 'for sequences of action and violence and some language' },
+    contentRating: { value: 'PG-13', reason: {
+      en:      'for sequences of action and violence and some language',
+      'pt-br': 'por sequências de ação e violência e alguma linguagem inadequada',
+      th:      'จากฉากแอ็กชันและความรุนแรง และการใช้ภาษาไม่เหมาะสมบางส่วน',
+    } },
     genres: ['Superhero', 'Action', 'Adventure'],
     productionCompanies: ['Columbia Pictures', 'Marvel Studios', 'Pascal Pictures'],
     distributors: ['Sony Pictures Releasing'],
@@ -175,13 +217,21 @@ const TITLES: Partial<Record<ChartEntryId, TitleRecord>> = {
   odyssey: {
     id: 'odyssey',
     slug: 'the-odyssey',
-    synopsis: 'Odysseus, king of Ithaca, endures a twenty-year journey home from the Trojan War while his wife Penelope holds off the suitors besieging his throne.',
+    synopsis: {
+      en:      'Odysseus, king of Ithaca, endures a twenty-year journey home from the Trojan War while his wife Penelope holds off the suitors besieging his throne.',
+      'pt-br': 'Odisseu, rei de Ítaca, enfrenta uma jornada de vinte anos de volta da Guerra de Troia enquanto sua esposa Penélope contém os pretendentes que sitiam seu trono.',
+      th:      'Odysseus กษัตริย์แห่ง Ithaca ฝ่าการเดินทางกลับบ้านยาวนานยี่สิบปีจากสงครามเมืองทรอย ขณะที่ Penelope ผู้เป็นภรรยาต้านทานบรรดาผู้มาสู่ขอที่ล้อมบัลลังก์ของเขาไว้',
+    },
     released: '2026-07-17',
     runtime: 173,
     directors: ['Christopher Nolan'],
     writers: ['Christopher Nolan'],
     cast: ['Matt Damon', 'Tom Holland', 'Anne Hathaway', 'Robert Pattinson', 'Lupita Nyong\u2019o', 'Zendaya', 'Charlize Theron'],
-    contentRating: { value: 'R', reason: 'for violence and some language' },
+    contentRating: { value: 'R', reason: {
+      en:      'for violence and some language',
+      'pt-br': 'por violência e alguma linguagem inadequada',
+      th:      'จากความรุนแรงและการใช้ภาษาไม่เหมาะสมบางส่วน',
+    } },
     genres: ['Epic', 'Action', 'Fantasy'],
     productionCompanies: ['Universal Pictures', 'Syncopy'],
     distributors: ['Universal Pictures'],
@@ -193,14 +243,22 @@ const TITLES: Partial<Record<ChartEntryId, TitleRecord>> = {
   toyStory5: {
     id: 'toyStory5',
     slug: 'toy-story-5',
-    synopsis: 'Jessie leads Bonnie\u2019s toys against Lilypad, a frog-shaped tablet that has become their kid\u2019s favourite plaything.',
+    synopsis: {
+      en:      'Jessie leads Bonnie\u2019s toys against Lilypad, a frog-shaped tablet that has become their kid\u2019s favourite plaything.',
+      'pt-br': 'Jessie lidera os brinquedos de Bonnie contra Lilypad, um tablet em forma de sapo que se tornou o brinquedo favorito da menina.',
+      th:      'Jessie นำเหล่าของเล่นของ Bonnie ต่อสู้กับ Lilypad แท็บเล็ตรูปกบที่กลายเป็นของเล่นชิ้นโปรดของเด็กเจ้าของ',
+    },
     released: '2026-06-19',
     runtime: 102,
     directors: ['Andrew Stanton'],
     writers: ['Andrew Stanton', 'Kenna Harris'],
     cast: ['Tom Hanks', 'Tim Allen', 'Joan Cusack', 'Conan O\u2019Brien', 'Greta Lee', 'Craig Robinson', 'Mykal-Michelle Harris'],
     /* PG, not G — the first main-series Toy Story to be rated above G in 31 years. */
-    contentRating: { value: 'PG', reason: 'for some thematic elements and rude humor' },
+    contentRating: { value: 'PG', reason: {
+      en:      'for some thematic elements and rude humor',
+      'pt-br': 'por alguns elementos temáticos e humor grosseiro',
+      th:      'จากเนื้อหาบางประเด็นและอารมณ์ขันหยาบคาย',
+    } },
     genres: ['Animation', 'Comedy', 'Family'],
     productionCompanies: ['Pixar Animation Studios'],
     distributors: ['Walt Disney Studios Motion Pictures'],
@@ -212,13 +270,21 @@ const TITLES: Partial<Record<ChartEntryId, TitleRecord>> = {
   avatar: {
     id: 'avatar',
     slug: 'avatar-fire-and-ash',
-    synopsis: 'Grieving the loss of their eldest son, the Sully family faces the RDA and the Mangkwan, a fire-worshipping Na\u2019vi clan led by the matriarch Varang.',
+    synopsis: {
+      en:      'Grieving the loss of their eldest son, the Sully family faces the RDA and the Mangkwan, a fire-worshipping Na\u2019vi clan led by the matriarch Varang.',
+      'pt-br': 'Em luto pela perda do filho mais velho, a família Sully enfrenta a RDA e os Mangkwan, um clã Na’vi adorador do fogo liderado pela matriarca Varang.',
+      th:      'ครอบครัว Sully ที่ยังโศกเศร้าจากการสูญเสียลูกชายคนโต ต้องเผชิญหน้ากับ RDA และ Mangkwan เผ่า Na’vi ผู้บูชาไฟซึ่งนำโดยหัวหน้าหญิง Varang',
+    },
     released: '2025-12-19',
     runtime: 197,
     directors: ['James Cameron'],
     writers: ['James Cameron', 'Rick Jaffa', 'Amanda Silver'],
     cast: ['Sam Worthington', 'Zoe Salda\u00f1a', 'Sigourney Weaver', 'Stephen Lang', 'Kate Winslet', 'Oona Chaplin'],
-    contentRating: { value: 'PG-13', reason: 'for intense sequences of violence and action, bloody images, some strong language, thematic elements and suggestive material' },
+    contentRating: { value: 'PG-13', reason: {
+      en:      'for intense sequences of violence and action, bloody images, some strong language, thematic elements and suggestive material',
+      'pt-br': 'por sequências intensas de violência e ação, imagens sangrentas, linguagem forte em alguns momentos, elementos temáticos e conteúdo sugestivo',
+      th:      'จากฉากความรุนแรงและแอ็กชันที่รุนแรง ภาพเลือด การใช้ภาษารุนแรงบางส่วน เนื้อหาบางประเด็น และเนื้อหาชี้นำทางเพศ',
+    } },
     genres: ['Science fiction', 'Epic', 'Adventure'],
     productionCompanies: ['Lightstorm Entertainment'],
     distributors: ['20th Century Studios'],
@@ -230,13 +296,21 @@ const TITLES: Partial<Record<ChartEntryId, TitleRecord>> = {
   kombat: {
     id: 'kombat',
     slug: 'mortal-kombat-ii',
-    synopsis: 'Washed-up action star Johnny Cage is recruited into an interdimensional tournament against Outworld, where Earthrealm\u2019s champions must stop the immortal Shao Kahn.',
+    synopsis: {
+      en:      'Washed-up action star Johnny Cage is recruited into an interdimensional tournament against Outworld, where Earthrealm\u2019s champions must stop the immortal Shao Kahn.',
+      'pt-br': 'Johnny Cage, astro de ação em decadência, é recrutado para um torneio interdimensional contra Outworld, onde os campeões do Earthrealm precisam deter o imortal Shao Kahn.',
+      th:      'Johnny Cage ดาราหนังบู๊ที่ตกอับ ถูกดึงเข้าร่วมการประลองข้ามมิติกับ Outworld ที่ซึ่งเหล่าตัวแทนของ Earthrealm ต้องหยุดยั้ง Shao Kahn ผู้เป็นอมตะ',
+    },
     released: '2026-05-08',
     runtime: 116,
     directors: ['Simon McQuoid'],
     writers: ['Jeremy Slater'],
     cast: ['Karl Urban', 'Adeline Rudolph', 'Jessica McNamee', 'Josh Lawson', 'Tati Gabrielle', 'Hiroyuki Sanada', 'Joe Taslim'],
-    contentRating: { value: 'R', reason: 'for strong bloody violence and gore, and for language' },
+    contentRating: { value: 'R', reason: {
+      en:      'for strong bloody violence and gore, and for language',
+      'pt-br': 'por violência sangrenta intensa e cenas grotescas, e por linguagem inadequada',
+      th:      'จากความรุนแรงนองเลือดและภาพอุจาด และการใช้ภาษาไม่เหมาะสม',
+    } },
     genres: ['Martial arts', 'Fantasy', 'Action'],
     productionCompanies: ['New Line Cinema', 'Atomic Monster', 'Broken Road Productions', 'Fireside Films'],
     distributors: ['Warner Bros. Pictures'],
@@ -248,13 +322,21 @@ const TITLES: Partial<Record<ChartEntryId, TitleRecord>> = {
   hailMary: {
     id: 'hailMary',
     slug: 'project-hail-mary',
-    synopsis: 'A middle school teacher wakes with amnesia aboard an interstellar ship, the last of his crew, and finds an unlikely ally in an alien engineer on the same desperate errand.',
+    synopsis: {
+      en:      'A middle school teacher wakes with amnesia aboard an interstellar ship, the last of his crew, and finds an unlikely ally in an alien engineer on the same desperate errand.',
+      'pt-br': 'Um professor de ensino fundamental acorda sem memória a bordo de uma nave interestelar, único sobrevivente da tripulação, e encontra um aliado improvável num engenheiro alienígena na mesma missão desesperada.',
+      th:      'ครูมัธยมต้นตื่นขึ้นมาพร้อมอาการความจำเสื่อมบนยานอวกาศระหว่างดวงดาว ในฐานะลูกเรือคนสุดท้ายที่เหลืออยู่ และได้พบพันธมิตรที่ไม่คาดคิดในวิศวกรต่างดาวผู้มีภารกิจสิ้นหวังเดียวกัน',
+    },
     released: '2026-03-20',
     runtime: 156,
     directors: ['Phil Lord', 'Christopher Miller'],
     writers: ['Drew Goddard'],
     cast: ['Ryan Gosling', 'Sandra H\u00fcller', 'James Ortiz', 'Lionel Boyce'],
-    contentRating: { value: 'PG-13', reason: 'for some thematic material and suggestive references' },
+    contentRating: { value: 'PG-13', reason: {
+      en:      'for some thematic material and suggestive references',
+      'pt-br': 'por algum conteúdo temático e referências sugestivas',
+      th:      'จากเนื้อหาบางประเด็นและการอ้างถึงเรื่องเพศ',
+    } },
     genres: ['Science fiction', 'Adventure', 'Drama'],
     productionCompanies: ['Metro-Goldwyn-Mayer', 'Lord Miller Productions', 'Pascal Pictures'],
     distributors: ['Amazon MGM Studios', 'Sony Pictures Releasing International'],
@@ -266,13 +348,21 @@ const TITLES: Partial<Record<ChartEntryId, TitleRecord>> = {
   prada: {
     id: 'prada',
     slug: 'the-devil-wears-prada-2',
-    synopsis: 'Two decades on, Andy Sachs returns to Runway as features editor and has to help Miranda Priestly save the magazine from a new owner who would replace its staff with AI.',
+    synopsis: {
+      en:      'Two decades on, Andy Sachs returns to Runway as features editor and has to help Miranda Priestly save the magazine from a new owner who would replace its staff with AI.',
+      'pt-br': 'Duas décadas depois, Andy Sachs volta à Runway como editora de reportagens e precisa ajudar Miranda Priestly a salvar a revista de um novo dono que quer substituir a equipe por IA.',
+      th:      'สองทศวรรษต่อมา Andy Sachs กลับมาที่ Runway ในตำแหน่งบรรณาธิการสารคดี และต้องช่วย Miranda Priestly กู้นิตยสารจากเจ้าของใหม่ที่ต้องการแทนที่พนักงานทั้งหมดด้วย AI',
+    },
     released: '2026-05-01',
     runtime: 119,
     directors: ['David Frankel'],
     writers: ['Aline Brosh McKenna'],
     cast: ['Meryl Streep', 'Anne Hathaway', 'Emily Blunt', 'Justin Theroux', 'Kenneth Branagh', 'Stanley Tucci', 'Lucy Liu'],
-    contentRating: { value: 'PG-13', reason: 'for strong language and some suggestive references' },
+    contentRating: { value: 'PG-13', reason: {
+      en:      'for strong language and some suggestive references',
+      'pt-br': 'por linguagem forte e algumas referências sugestivas',
+      th:      'จากการใช้ภาษารุนแรงและการอ้างถึงเรื่องเพศบางส่วน',
+    } },
     genres: ['Comedy', 'Drama'],
     productionCompanies: ['Wendy Finerman Productions'],
     distributors: ['20th Century Studios'],
@@ -284,13 +374,21 @@ const TITLES: Partial<Record<ChartEntryId, TitleRecord>> = {
   moana: {
     id: 'moana',
     slug: 'moana-live-action',
-    synopsis: 'A live-action retelling of the 2016 film: the ocean chooses Moana, daughter of Motunui\u2019s chief, to find the demigod Maui and restore the stolen heart of Te Fiti.',
+    synopsis: {
+      en:      'A live-action retelling of the 2016 film: the ocean chooses Moana, daughter of Motunui\u2019s chief, to find the demigod Maui and restore the stolen heart of Te Fiti.',
+      'pt-br': 'Releitura em live-action do filme de 2016: o oceano escolhe Moana, filha do chefe de Motunui, para encontrar o semideus Maui e devolver o coração roubado de Te Fiti.',
+      th:      'เวอร์ชันคนแสดงของภาพยนตร์ปี 2016 มหาสมุทรเลือก Moana ลูกสาวหัวหน้าเผ่าแห่ง Motunui ให้ออกไปหา Maui กึ่งเทพ เพื่อนำหัวใจของ Te Fiti ที่ถูกขโมยไปกลับคืน',
+    },
     released: '2026-07-10',
     runtime: 115,
     directors: ['Thomas Kail'],
     writers: ['Jared Bush', 'Dana Ledoux Miller'],
     cast: ['Catherine Laga\u2019aia', 'Dwayne Johnson', 'Rena Owen', 'John Tui', 'Frankie Adams', 'Jemaine Clement'],
-    contentRating: { value: 'PG', reason: 'for action and peril, some scary images, rude humor and brief thematic elements' },
+    contentRating: { value: 'PG', reason: {
+      en:      'for action and peril, some scary images, rude humor and brief thematic elements',
+      'pt-br': 'por ação e situações de perigo, algumas imagens assustadoras, humor grosseiro e breves elementos temáticos',
+      th:      'จากฉากแอ็กชันและสถานการณ์อันตราย ภาพน่ากลัวบางส่วน อารมณ์ขันหยาบคาย และเนื้อหาบางประเด็นช่วงสั้นๆ',
+    } },
     genres: ['Musical', 'Adventure', 'Family'],
     productionCompanies: ['Walt Disney Pictures', 'Seven Bucks Productions', 'Flynn Picture Co.', '5000 Broadway Productions'],
     distributors: ['Walt Disney Studios Motion Pictures'],
@@ -304,13 +402,21 @@ const TITLES: Partial<Record<ChartEntryId, TitleRecord>> = {
   troopers3: {
     id: 'troopers3',
     slug: 'super-troopers-3',
-    synopsis: 'The Vermont state troopers reunite for Farva\u2019s wedding to Thorny\u2019s sister, while a new narcotic called Canadian Crystal turns up in their jurisdiction.',
+    synopsis: {
+      en:      'The Vermont state troopers reunite for Farva\u2019s wedding to Thorny\u2019s sister, while a new narcotic called Canadian Crystal turns up in their jurisdiction.',
+      'pt-br': 'Os policiais rodoviários de Vermont se reúnem no casamento de Farva com a irmã de Thorny, enquanto uma nova droga chamada Canadian Crystal aparece na área que patrulham.',
+      th:      'ตำรวจทางหลวงรัฐ Vermont กลับมารวมตัวกันในงานแต่งงานของ Farva กับน้องสาวของ Thorny ขณะที่ยาเสพติดชนิดใหม่ชื่อ Canadian Crystal โผล่ขึ้นในเขตรับผิดชอบของพวกเขา',
+    },
     released: '2026-08-07',
     runtime: 104,
     directors: ['Jay Chandrasekhar'],
     writers: ['Broken Lizard'],
     cast: ['Jay Chandrasekhar', 'Kevin Heffernan', 'Steve Lemme', 'Paul Soter', 'Erik Stolhanske', 'Hannah Simone', 'Nat Faxon', 'Chace Crawford', 'Brian Cox'],
-    contentRating: { value: 'R', reason: 'for sexual content, nudity, language throughout and drug content' },
+    contentRating: { value: 'R', reason: {
+      en:      'for sexual content, nudity, language throughout and drug content',
+      'pt-br': 'por conteúdo sexual, nudez, linguagem inadequada ao longo do filme e conteúdo relacionado a drogas',
+      th:      'จากเนื้อหาทางเพศ ภาพเปลือย การใช้ภาษาไม่เหมาะสมตลอดเรื่อง และเนื้อหาเกี่ยวกับยาเสพติด',
+    } },
     genres: ['Comedy'],
     productionCompanies: ['Broken Lizard Industries', 'Cataland Films'],
     distributors: ['Searchlight Pictures'],
@@ -321,13 +427,21 @@ const TITLES: Partial<Record<ChartEntryId, TitleRecord>> = {
   masters: {
     id: 'masters',
     slug: 'masters-of-the-universe',
-    synopsis: 'Raised on Earth after fleeing Eternia as a child, Prince Adam recovers the Sword of Power and returns home to face the warlock Skeletor.',
+    synopsis: {
+      en:      'Raised on Earth after fleeing Eternia as a child, Prince Adam recovers the Sword of Power and returns home to face the warlock Skeletor.',
+      'pt-br': 'Criado na Terra depois de fugir de Eternia ainda criança, o príncipe Adam recupera a Espada do Poder e volta para casa para enfrentar o feiticeiro Skeletor.',
+      th:      'เจ้าชาย Adam ผู้เติบโตบนโลกหลังหนีจาก Eternia ตั้งแต่ยังเด็ก ได้ดาบแห่งพลังกลับคืนมาและเดินทางกลับบ้านเพื่อเผชิญหน้ากับ Skeletor จ้าวแห่งเวทมนตร์',
+    },
     released: '2026-06-05',
     runtime: 140,
     directors: ['Travis Knight'],
     writers: ['Chris Butler', 'Aaron Nee', 'Adam Nee', 'David Callaham'],
     cast: ['Nicholas Galitzine', 'Camila Mendes', 'Alison Brie', 'James Purefoy', 'Morena Baccarin', 'Kristen Wiig', 'Jared Leto', 'Idris Elba'],
-    contentRating: { value: 'PG-13', reason: 'for sequences of violence and action, some suggestive material and language' },
+    contentRating: { value: 'PG-13', reason: {
+      en:      'for sequences of violence and action, some suggestive material and language',
+      'pt-br': 'por sequências de violência e ação, algum conteúdo sugestivo e linguagem inadequada',
+      th:      'จากฉากความรุนแรงและแอ็กชัน เนื้อหาชี้นำทางเพศบางส่วน และการใช้ภาษาไม่เหมาะสม',
+    } },
     genres: ['Sword and sorcery', 'Fantasy', 'Action'],
     productionCompanies: ['Metro-Goldwyn-Mayer', 'Mattel Studios', 'Escape Artists'],
     distributors: ['Amazon MGM Studios', 'Sony Pictures Releasing International'],
@@ -344,7 +458,11 @@ const TITLES: Partial<Record<ChartEntryId, TitleRecord>> = {
   dragon: {
     id: 'dragon',
     slug: 'house-of-the-dragon',
-    synopsis: 'Two centuries before Game of Thrones, the Targaryen succession splits the family into rival courts and ignites the civil war known as the Dance of the Dragons.',
+    synopsis: {
+      en:      'Two centuries before Game of Thrones, the Targaryen succession splits the family into rival courts and ignites the civil war known as the Dance of the Dragons.',
+      'pt-br': 'Dois séculos antes de Game of Thrones, a sucessão Targaryen divide a família em cortes rivais e acende a guerra civil conhecida como a Dança dos Dragões.',
+      th:      'สองศตวรรษก่อนเหตุการณ์ใน Game of Thrones การสืบทอดบัลลังก์ของตระกูล Targaryen แยกครอบครัวออกเป็นสองราชสำนักที่เป็นศัตรูกัน และจุดชนวนสงครามกลางเมืองที่รู้จักในชื่อ Dance of the Dragons',
+    },
     released: '2022-08-21',
     seasons: 3,
     episodes: 26,
@@ -364,7 +482,11 @@ const TITLES: Partial<Record<ChartEntryId, TitleRecord>> = {
   lioness: {
     id: 'lioness',
     slug: 'special-ops-lioness',
-    synopsis: 'A CIA officer runs a programme that embeds female operatives inside the inner circles of targets in the war on terror, at mounting cost to the women sent in.',
+    synopsis: {
+      en:      'A CIA officer runs a programme that embeds female operatives inside the inner circles of targets in the war on terror, at mounting cost to the women sent in.',
+      'pt-br': 'Uma oficial da CIA comanda um programa que infiltra agentes mulheres no círculo íntimo de alvos da guerra ao terror, a um custo cada vez maior para as enviadas.',
+      th:      'เจ้าหน้าที่ CIA ดูแลโครงการที่ส่งสายลับหญิงเข้าไปแทรกซึมวงในของเป้าหมายในสงครามต่อต้านการก่อการร้าย โดยมีราคาที่ผู้หญิงเหล่านั้นต้องจ่ายสูงขึ้นเรื่อยๆ',
+    },
     released: '2023-07-23',
     seasons: 3,
     /* 18 released of a 24-episode run: season 3 has an eight-episode order with
@@ -387,7 +509,11 @@ const TITLES: Partial<Record<ChartEntryId, TitleRecord>> = {
   rickMorty: {
     id: 'rickMorty',
     slug: 'rick-and-morty',
-    synopsis: 'An alcoholic mad scientist drags his anxious grandson through an infinite number of realities, splitting their time between interdimensional catastrophe and suburban family life.',
+    synopsis: {
+      en:      'An alcoholic mad scientist drags his anxious grandson through an infinite number of realities, splitting their time between interdimensional catastrophe and suburban family life.',
+      'pt-br': 'Um cientista louco e alcoólatra arrasta o neto ansioso por um número infinito de realidades, dividindo o tempo entre catástrofes interdimensionais e a vida familiar no subúrbio.',
+      th:      'นักวิทยาศาสตร์เพี้ยนขี้เหล้าลากหลานชายขี้กังวลของเขาท่องไปในความจริงจำนวนนับไม่ถ้วน สลับเวลาไปมาระหว่างหายนะข้ามมิติกับชีวิตครอบครัวชานเมือง',
+    },
     released: '2013-12-02',
     seasons: 9,
     episodes: 91,
@@ -411,7 +537,11 @@ const TITLES: Partial<Record<ChartEntryId, TitleRecord>> = {
   walterBoys: {
     id: 'walterBoys',
     slug: 'my-life-with-the-walter-boys',
-    synopsis: 'Orphaned at fifteen, a Manhattan teenager is taken in by family friends on a rural Colorado ranch and has to find her footing in a house of ten siblings.',
+    synopsis: {
+      en:      'Orphaned at fifteen, a Manhattan teenager is taken in by family friends on a rural Colorado ranch and has to find her footing in a house of ten siblings.',
+      'pt-br': 'Órfã aos quinze anos, uma adolescente de Manhattan é acolhida por amigos da família num rancho rural do Colorado e precisa se encontrar numa casa com dez irmãos.',
+      th:      'เด็กสาววัยสิบห้าจาก Manhattan ที่กลายเป็นเด็กกำพร้า ได้รับการอุปการะจากเพื่อนของครอบครัวในฟาร์มปศุสัตว์ชนบทรัฐ Colorado และต้องหาที่ยืนของตัวเองในบ้านที่มีพี่น้องสิบคน',
+    },
     released: '2023-12-07',
     seasons: 3,
     episodes: 30,
@@ -432,7 +562,11 @@ const TITLES: Partial<Record<ChartEntryId, TitleRecord>> = {
   findYou: {
     id: 'findYou',
     slug: 'i-will-find-you',
-    synopsis: 'Wrongly imprisoned for murdering his three-year-old son, a former law professor breaks out after his ex-sister-in-law brings him a recent photograph in which the boy appears to be alive.',
+    synopsis: {
+      en:      'Wrongly imprisoned for murdering his three-year-old son, a former law professor breaks out after his ex-sister-in-law brings him a recent photograph in which the boy appears to be alive.',
+      'pt-br': 'Preso injustamente pelo assassinato do filho de três anos, um ex-professor de direito foge da prisão depois que a ex-cunhada lhe traz uma fotografia recente em que o menino parece estar vivo.',
+      th:      'อดีตอาจารย์กฎหมายที่ถูกจำคุกอย่างไม่เป็นธรรมในข้อหาฆ่าลูกชายวัยสามขวบ แหกคุกออกมาหลังพี่สะใภ้เก่านำภาพถ่ายใหม่ที่เด็กชายดูเหมือนยังมีชีวิตอยู่มาให้เขา',
+    },
     released: '2026-06-18',
     /* A closed-ended limited series: one season, eight episodes, all released the
        same day. `seasons: 1` is the true figure rather than an omission — the page
@@ -454,7 +588,11 @@ const TITLES: Partial<Record<ChartEntryId, TitleRecord>> = {
   stuart: {
     id: 'stuart',
     slug: 'stuart-fails-to-save-the-universe',
-    synopsis: 'After breaking a quantum device built by his physicist friends, a comic shop owner is left hopping between collapsing parallel universes trying to undo the damage.',
+    synopsis: {
+      en:      'After breaking a quantum device built by his physicist friends, a comic shop owner is left hopping between collapsing parallel universes trying to undo the damage.',
+      'pt-br': 'Depois de quebrar um dispositivo quântico construído por seus amigos físicos, o dono de uma loja de quadrinhos passa a saltar entre universos paralelos em colapso tentando desfazer o estrago.',
+      th:      'หลังทำอุปกรณ์ควอนตัมที่เพื่อนนักฟิสิกส์สร้างขึ้นพัง เจ้าของร้านหนังสือการ์ตูนต้องกระโดดข้ามไปมาระหว่างจักรวาลขนานที่กำลังพังทลาย เพื่อพยายามแก้ไขความเสียหาย',
+    },
     released: '2026-07-23',
     seasons: 1,
     /* 3 of a 10-episode order, airing weekly. This is the `episodes` rule in the
@@ -487,7 +625,11 @@ const TITLES: Partial<Record<ChartEntryId, TitleRecord>> = {
   oneNight: {
     id: 'oneNight',
     slug: 'one-night-only',
-    synopsis: 'Premarital sex has been outlawed for three years, with one 12-hour exemption a year. Two strangers spend that night crossing New York looking for someone worth it, and keep running into each other instead.',
+    synopsis: {
+      en:      'Premarital sex has been outlawed for three years, with one 12-hour exemption a year. Two strangers spend that night crossing New York looking for someone worth it, and keep running into each other instead.',
+      'pt-br': 'O sexo antes do casamento está proibido há três anos, com uma única isenção de 12 horas por ano. Dois estranhos passam essa noite atravessando Nova York em busca de alguém que valha a pena, e não param de se encontrar.',
+      th:      'การมีเพศสัมพันธ์ก่อนแต่งงานถูกสั่งห้ามมาสามปี โดยมีข้อยกเว้นปีละหนึ่งครั้งเป็นเวลา 12 ชั่วโมง คนแปลกหน้าสองคนใช้คืนนั้นเดินข้ามนิวยอร์กเพื่อหาคนที่คู่ควร แต่กลับเจอกันเองครั้งแล้วครั้งเล่า',
+    },
     released: '2026-08-07',
     runtime: 102,
     directors: ['Will Gluck'],
@@ -497,7 +639,11 @@ const TITLES: Partial<Record<ChartEntryId, TitleRecord>> = {
        mirrors the credits rather than the reporting. */
     writers: ['Travis Braun'],
     cast: ['Monica Barbaro', 'Callum Turner', 'Molly Ringwald', 'LeVar Burton', 'Maya Hawke', 'Julia Fox', 'Nicholas Braun', 'Pete Davidson'],
-    contentRating: { value: 'R', reason: 'for sexual material, language and brief nudity' },
+    contentRating: { value: 'R', reason: {
+      en:      'for sexual material, language and brief nudity',
+      'pt-br': 'por conteúdo sexual, linguagem inadequada e breve nudez',
+      th:      'จากเนื้อหาทางเพศ การใช้ภาษาไม่เหมาะสม และภาพเปลือยช่วงสั้นๆ',
+    } },
     genres: ['Romantic comedy'],
     productionCompanies: ['Olive Bridge Entertainment'],
     distributors: ['Universal Pictures'],
@@ -508,7 +654,11 @@ const TITLES: Partial<Record<ChartEntryId, TitleRecord>> = {
   iceCream: {
     id: 'iceCream',
     slug: 'ice-cream-man',
-    synopsis: 'An ice cream truck arrives in a quiet bayside town and the children who eat from it start killing the adults, leaving a lactose-intolerant boy who never touched the stuff to work out why.',
+    synopsis: {
+      en:      'An ice cream truck arrives in a quiet bayside town and the children who eat from it start killing the adults, leaving a lactose-intolerant boy who never touched the stuff to work out why.',
+      'pt-br': 'Um caminhão de sorvete chega a uma cidade tranquila à beira da baía e as crianças que compram dele começam a matar os adultos, deixando a um menino intolerante à lactose, que nunca provou o sorvete, a tarefa de descobrir o motivo.',
+      th:      'รถขายไอศกรีมมาถึงเมืองริมอ่าวอันเงียบสงบ และเด็กๆ ที่กินไอศกรีมจากรถคันนั้นเริ่มลงมือฆ่าผู้ใหญ่ ทิ้งให้เด็กชายที่แพ้แลคโตสและไม่เคยแตะไอศกรีมเลยต้องหาคำตอบว่าเพราะอะไร',
+    },
     released: '2026-08-07',
     runtime: 86,
     directors: ['Eli Roth'],
@@ -518,7 +668,11 @@ const TITLES: Partial<Record<ChartEntryId, TitleRecord>> = {
        submitting it to the MPA so the gore would survive, and it carries an 18 from
        the BBFC in the UK. Stated rather than omitted, because "Unrated" is what a
        cinema listing shows and it means something different from "no rating yet". */
-    contentRating: { value: 'Unrated', reason: 'released without an MPA rating' },
+    contentRating: { value: 'Unrated', reason: {
+      en:      'released without an MPA rating',
+      'pt-br': 'lançado sem classificação da MPA',
+      th:      'เผยแพร่โดยไม่ผ่านการจัดเรตของ MPA',
+    } },
     genres: ['Slasher', 'Horror'],
     productionCompanies: ['The Horror Section', 'MCT Studios'],
     distributors: ['Iconic Events Releasing'],
@@ -529,7 +683,11 @@ const TITLES: Partial<Record<ChartEntryId, TitleRecord>> = {
   sterling: {
     id: 'sterling',
     slug: 'sterling-point',
-    synopsis: 'Annie Jacobson inherits her estranged grandfather\u2019s island in Ontario cottage country and spends a summer there among new friends, first romances and the family secrets the place was hiding.',
+    synopsis: {
+      en:      'Annie Jacobson inherits her estranged grandfather\u2019s island in Ontario cottage country and spends a summer there among new friends, first romances and the family secrets the place was hiding.',
+      'pt-br': 'Annie Jacobson herda a ilha do avô com quem havia perdido o contato, na região de casas de veraneio de Ontário, e passa um verão lá entre novas amizades, primeiros romances e os segredos de família que o lugar guardava.',
+      th:      'Annie Jacobson ได้รับมรดกเป็นเกาะของปู่ที่เธอห่างเหินไปนาน ในย่านบ้านพักตากอากาศของ Ontario และใช้เวลาหนึ่งฤดูร้อนที่นั่นท่ามกลางเพื่อนใหม่ ความรักครั้งแรก และความลับของครอบครัวที่สถานที่แห่งนี้ซ่อนไว้',
+    },
     released: '2026-08-05',
     seasons: 1,
     episodes: 8,
@@ -548,7 +706,11 @@ const TITLES: Partial<Record<ChartEntryId, TitleRecord>> = {
   curtis: {
     id: 'curtis',
     slug: 'president-curtis',
-    synopsis: 'A Rick and Morty spin-off in which President Andre Curtis and his staff handle the interdimensional, paranormal and otherwise unexplained crises that Rick tends to walk away from.',
+    synopsis: {
+      en:      'A Rick and Morty spin-off in which President Andre Curtis and his staff handle the interdimensional, paranormal and otherwise unexplained crises that Rick tends to walk away from.',
+      'pt-br': 'Spin-off de Rick and Morty em que o presidente Andre Curtis e sua equipe lidam com as crises interdimensionais, paranormais e de outra forma inexplicáveis das quais Rick costuma simplesmente se afastar.',
+      th:      'ภาคแยกของ Rick and Morty ที่ประธานาธิบดี Andre Curtis และคณะทำงานของเขารับมือกับวิกฤตข้ามมิติ เหนือธรรมชาติ และเรื่องอธิบายไม่ได้อื่นๆ ที่ Rick มักเดินหนีไป',
+    },
     released: '2026-07-26',
     seasons: 1,
     /* 3, NOT 10. Season 1 is a ten-episode order airing weekly, and three had aired
@@ -573,7 +735,11 @@ const TITLES: Partial<Record<ChartEntryId, TitleRecord>> = {
   shards: {
     id: 'shards',
     slug: 'the-shards',
-    synopsis: 'Los Angeles, 1981. A 17-year-old Bret Easton Ellis is in his last year at an elite prep school when a magnetic new student arrives, just as a serial killer known as the Trawler begins working the city.',
+    synopsis: {
+      en:      'Los Angeles, 1981. A 17-year-old Bret Easton Ellis is in his last year at an elite prep school when a magnetic new student arrives, just as a serial killer known as the Trawler begins working the city.',
+      'pt-br': 'Los Angeles, 1981. Bret Easton Ellis, de 17 anos, está no último ano de um colégio preparatório de elite quando um novo aluno magnético chega, justamente quando um serial killer conhecido como the Trawler começa a agir na cidade.',
+      th:      'Los Angeles ปี 1981 Bret Easton Ellis วัย 17 ปี กำลังเรียนปีสุดท้ายในโรงเรียนเตรียมอุดมชั้นนำ เมื่อนักเรียนใหม่ผู้มีเสน่ห์ดึงดูดมาถึง พร้อมกับที่ฆาตกรต่อเนื่องซึ่งรู้จักกันในชื่อ the Trawler เริ่มลงมือในเมือง',
+    },
     released: '2026-08-05',
     seasons: 1,
     /* 4 released, of a 9-episode season running to 2026-09-09. Episodes 3 and 4
@@ -598,7 +764,11 @@ const TITLES: Partial<Record<ChartEntryId, TitleRecord>> = {
   furious: {
     id: 'furious',
     slug: 'furious',
-    synopsis: 'An FBI agent hunts a methodical female serial killer who targets wealthy men. As the two women\u2019s lives begin to intersect, each walking her own road to justice, the line between right and wrong stops holding.',
+    synopsis: {
+      en:      'An FBI agent hunts a methodical female serial killer who targets wealthy men. As the two women\u2019s lives begin to intersect, each walking her own road to justice, the line between right and wrong stops holding.',
+      'pt-br': 'Uma agente do FBI caça uma serial killer metódica que escolhe homens ricos como alvo. À medida que as vidas das duas mulheres começam a se cruzar, cada uma seguindo seu próprio caminho até a justiça, a linha entre o certo e o errado deixa de se sustentar.',
+      th:      'เจ้าหน้าที่ FBI ตามล่าฆาตกรต่อเนื่องหญิงที่ลงมืออย่างเป็นระบบและเลือกเหยื่อเป็นชายผู้มั่งคั่ง เมื่อชีวิตของหญิงทั้งสองเริ่มมาบรรจบกัน แต่ละคนเดินบนเส้นทางสู่ความยุติธรรมของตนเอง เส้นแบ่งระหว่างถูกและผิดก็เริ่มไม่อยู่กับร่องกับรอย',
+    },
     released: '2026-07-27',
     seasons: 1,
     /* 5 released, of an 8-episode season running to 2026-08-31. Premiered with
@@ -619,7 +789,11 @@ const TITLES: Partial<Record<ChartEntryId, TitleRecord>> = {
   offCampus: {
     id: 'offCampus',
     slug: 'off-campus',
-    synopsis: 'A music major agrees to tutor the captain of the Briar University hockey team, and the pair strike a deal to fake a relationship. Adapted from Elle Kennedy\u2019s Off-Campus novels.',
+    synopsis: {
+      en:      'A music major agrees to tutor the captain of the Briar University hockey team, and the pair strike a deal to fake a relationship. Adapted from Elle Kennedy\u2019s Off-Campus novels.',
+      'pt-br': 'Uma estudante de música aceita dar aulas de reforço ao capitão do time de hóquei da Briar University, e os dois fazem um acordo para fingir um namoro. Adaptado dos romances Off-Campus, de Elle Kennedy.',
+      th:      'นักศึกษาเอกดนตรีตกลงติวหนังสือให้กัปตันทีมฮ็อกกี้ของ Briar University และทั้งคู่ตกลงกันว่าจะแกล้งเป็นแฟนกัน ดัดแปลงจากนวนิยายชุด Off-Campus ของ Elle Kennedy',
+    },
     released: '2026-05-13',
     /* A complete season, all eight episodes released at once, so this figure is
        stable — unlike the mid-run records above. Season 2 is ordered but unaired,
@@ -641,7 +815,11 @@ const TITLES: Partial<Record<ChartEntryId, TitleRecord>> = {
   hours72: {
     id: 'hours72',
     slug: '72-hours',
-    synopsis: 'Passed over for a promotion for being too old, a 40-year-old ad man accepts a bachelor-party invitation he was added to by mistake and spends a weekend in Miami trying to keep up with strangers half his age.',
+    synopsis: {
+      en:      'Passed over for a promotion for being too old, a 40-year-old ad man accepts a bachelor-party invitation he was added to by mistake and spends a weekend in Miami trying to keep up with strangers half his age.',
+      'pt-br': 'Preterido numa promoção por ser velho demais, um publicitário de 40 anos aceita um convite de despedida de solteiro no qual foi incluído por engano e passa um fim de semana em Miami tentando acompanhar estranhos com metade da sua idade.',
+      th:      'นักโฆษณาวัย 40 ที่ถูกข้ามหัวในการเลื่อนตำแหน่งเพราะอายุมากเกินไป ตอบรับคำเชิญงานเลี้ยงสละโสดที่เขาถูกใส่ชื่อเข้ามาโดยเข้าใจผิด และใช้เวลาสุดสัปดาห์ใน Miami พยายามตามให้ทันคนแปลกหน้าที่อายุน้อยกว่าเขาครึ่งหนึ่ง',
+    },
     released: '2026-07-24',
     runtime: 105,
     directors: ['Tim Story'],
@@ -649,7 +827,11 @@ const TITLES: Partial<Record<ChartEntryId, TitleRecord>> = {
     cast: ['Kevin Hart', 'Marcello Hern\u00e1ndez', 'Mason Gooding', 'Kam Patterson', 'Ben Marshall', 'Teyana Taylor'],
     /* An MPA R, not a TV-MA: it is a film that premiered on Netflix, and Netflix
        originals carry the film rating rather than the TV Parental Guidelines one. */
-    contentRating: { value: 'R', reason: 'for pervasive language, sexual material, drug use and graphic nudity' },
+    contentRating: { value: 'R', reason: {
+      en:      'for pervasive language, sexual material, drug use and graphic nudity',
+      'pt-br': 'por linguagem inadequada generalizada, conteúdo sexual, uso de drogas e nudez explícita',
+      th:      'จากการใช้ภาษาไม่เหมาะสมตลอดเรื่อง เนื้อหาทางเพศ การใช้ยาเสพติด และภาพเปลือยชัดเจน',
+    } },
     genres: ['Comedy'],
     productionCompanies: ['Sony Pictures', 'Davis Entertainment', 'Counterbalance Entertainment', 'Hartbeat Productions', 'Will Packer Productions', 'The Story Company'],
     distributors: ['Netflix'],
@@ -665,7 +847,11 @@ const TITLES: Partial<Record<ChartEntryId, TitleRecord>> = {
   lastHouse: {
     id: 'lastHouse',
     slug: 'the-last-house',
-    synopsis: 'A suburban Seattle family wakes to find every door and window in their house sealed shut and the world outside drowning. Survival becomes a years-long project, and the rain brings something with it.',
+    synopsis: {
+      en:      'A suburban Seattle family wakes to find every door and window in their house sealed shut and the world outside drowning. Survival becomes a years-long project, and the rain brings something with it.',
+      'pt-br': 'Uma família dos arredores de Seattle acorda e encontra todas as portas e janelas da casa seladas e o mundo lá fora se afogando. Sobreviver se torna um projeto de anos, e a chuva traz algo consigo.',
+      th:      'ครอบครัวหนึ่งในย่านชานเมือง Seattle ตื่นขึ้นมาพบว่าประตูและหน้าต่างทุกบานในบ้านถูกปิดผนึกสนิท และโลกภายนอกกำลังจมน้ำ การเอาชีวิตรอดกลายเป็นโครงการยาวนานหลายปี และสายฝนก็พาบางอย่างมาด้วย',
+    },
     released: '2026-08-07',
     runtime: 112,
     directors: ['Louis Leterrier'],
@@ -692,13 +878,21 @@ const TITLES: Partial<Record<ChartEntryId, TitleRecord>> = {
   devilMouth: {
     id: 'devilMouth',
     slug: 'the-devils-mouth',
-    synopsis: 'Five friends on a graduation trip to Thailand talk their guide into the dangerous route through a flooded cave system, where a storm surge has trapped a bull shark in the freshwater passages with them.',
+    synopsis: {
+      en:      'Five friends on a graduation trip to Thailand talk their guide into the dangerous route through a flooded cave system, where a storm surge has trapped a bull shark in the freshwater passages with them.',
+      'pt-br': 'Cinco amigos em viagem de formatura pela Tailândia convencem o guia a levá-los pela rota perigosa de um sistema de cavernas inundado, onde uma ressaca de tempestade prendeu um tubarão-cabeça-chata nas passagens de água doce junto com eles.',
+      th:      'เพื่อนห้าคนในทริปจบการศึกษาที่ประเทศไทยเกลี้ยกล่อมไกด์ให้พาไปเส้นทางอันตรายผ่านระบบถ้ำที่น้ำท่วม ที่ซึ่งคลื่นพายุซัดฉลามหัวบาตรเข้ามาติดอยู่ในทางน้ำจืดร่วมกับพวกเขา',
+    },
     released: '2026-07-29',
     runtime: 104,
     directors: ['Jeff Wadlow'],
     writers: ['Aja Gabel', 'Myung Joh Wesner'],
     cast: ['Kathryn Newton', 'Lana Condor', 'Gavin Casalegno', 'Nico Hiraga', 'Tommi Rose', 'Tayme Thapthimthong'],
-    contentRating: { value: 'PG-13', reason: 'for violent content, bloody images, some language and suggestive material' },
+    contentRating: { value: 'PG-13', reason: {
+      en:      'for violent content, bloody images, some language and suggestive material',
+      'pt-br': 'por conteúdo violento, imagens sangrentas, alguma linguagem inadequada e conteúdo sugestivo',
+      th:      'จากเนื้อหารุนแรง ภาพเลือด การใช้ภาษาไม่เหมาะสมบางส่วน และเนื้อหาชี้นำทางเพศ',
+    } },
     genres: ['Survival thriller', 'Horror'],
     productionCompanies: ['Lionsgate', 'Thunder Road Films'],
     /* Amazon MGM Studios distributes, via Prime Video. The chart badge said `hulu`,
@@ -713,7 +907,11 @@ const TITLES: Partial<Record<ChartEntryId, TitleRecord>> = {
   minions: {
     id: 'minions',
     slug: 'minions-and-monsters',
-    synopsis: 'Old Hollywood, long before the events of Minions. A tribe of Minions stumbles into the silent-film business, and when talkies end their careers one of them sets out to make a monster movie of his own \u2014 using real monsters.',
+    synopsis: {
+      en:      'Old Hollywood, long before the events of Minions. A tribe of Minions stumbles into the silent-film business, and when talkies end their careers one of them sets out to make a monster movie of his own \u2014 using real monsters.',
+      'pt-br': 'A velha Hollywood, muito antes dos acontecimentos de Minions. Uma tribo de Minions cai por acidente no ramo do cinema mudo e, quando os filmes falados acabam com suas carreiras, um deles decide fazer seu próprio filme de monstros — com monstros de verdade.',
+      th:      'ฮอลลีวูดยุคเก่า นานก่อนเหตุการณ์ใน Minions เผ่า Minions กลุ่มหนึ่งพลัดเข้าไปในวงการหนังเงียบ และเมื่อหนังเสียงทำให้อาชีพของพวกเขาจบลง หนึ่งในนั้นก็ตั้งใจสร้างหนังสัตว์ประหลาดของตัวเอง โดยใช้สัตว์ประหลาดจริงๆ',
+    },
     /* The 2026-07-01 US theatrical date, not the 2026-06-21 Annecy premiere. A
        festival screening is not a release, the same call made for `hours72` above
        with its Paris Theater premiere. */
@@ -722,7 +920,11 @@ const TITLES: Partial<Record<ChartEntryId, TitleRecord>> = {
     directors: ['Pierre Coffin'],
     writers: ['Brian Lynch', 'Pierre Coffin'],
     cast: ['Pierre Coffin', 'Trey Parker', 'Allison Janney', 'Christoph Waltz', 'Jesse Eisenberg', 'Jeff Bridges', 'Zoey Deutch', 'Bobby Moynihan', 'Phil LaMarr'],
-    contentRating: { value: 'PG', reason: 'for action/violence, language and rude/macabre humor' },
+    contentRating: { value: 'PG', reason: {
+      en:      'for action/violence, language and rude/macabre humor',
+      'pt-br': 'por ação/violência, linguagem inadequada e humor grosseiro/macabro',
+      th:      'จากแอ็กชัน/ความรุนแรง การใช้ภาษาไม่เหมาะสม และอารมณ์ขันหยาบคาย/มาคาบร์',
+    } },
     genres: ['Animation', 'Comedy', 'Family'],
     productionCompanies: ['Universal Pictures', 'Illumination'],
     distributors: ['Universal Pictures'],
@@ -743,7 +945,11 @@ const TITLES: Partial<Record<ChartEntryId, TitleRecord>> = {
   idaho: {
     id: 'idaho',
     slug: 'the-idaho-murders-college-nightmare',
-    synopsis: 'A three-part account of the 2022 University of Idaho student murders, built from bodycam footage, text messages and interviews with the victims\u2019 families and the investigators who worked the case.',
+    synopsis: {
+      en:      'A three-part account of the 2022 University of Idaho student murders, built from bodycam footage, text messages and interviews with the victims\u2019 families and the investigators who worked the case.',
+      'pt-br': 'Um relato em três partes dos assassinatos de estudantes da University of Idaho em 2022, construído a partir de imagens de bodycam, mensagens de texto e entrevistas com as famílias das vítimas e os investigadores que atuaram no caso.',
+      th:      'สารคดีสามตอนเกี่ยวกับคดีฆาตกรรมนักศึกษา University of Idaho ปี 2022 ประกอบขึ้นจากภาพกล้องติดตัวเจ้าหน้าที่ ข้อความแชท และบทสัมภาษณ์ครอบครัวผู้เสียชีวิตกับพนักงานสืบสวนที่ทำคดีนี้',
+    },
     released: '2026-07-29',
     seasons: 1,
     episodes: 3,
@@ -772,7 +978,11 @@ const TITLES: Partial<Record<ChartEntryId, TitleRecord>> = {
     /* Kept to the setup. The third act turns on the neighbours' proposition, and a
        one-line synopsis that leads with it would be both a spoiler and a lurid
        misread of what the reviews describe as a marital comedy. */
-    synopsis: 'A San Francisco music teacher comes home to find his wife has invited the upstairs neighbours to dinner \u2014 the ones whose noise they have been arguing about. Over one evening the two couples take each other\u2019s marriages apart.',
+    synopsis: {
+    en:      'A San Francisco music teacher comes home to find his wife has invited the upstairs neighbours to dinner \u2014 the ones whose noise they have been arguing about. Over one evening the two couples take each other\u2019s marriages apart.',
+    'pt-br': 'Um professor de música de San Francisco chega em casa e descobre que a esposa convidou os vizinhos de cima para jantar — justamente aqueles cujo barulho vinha causando discussões entre eles. Ao longo de uma noite, os dois casais desmontam o casamento um do outro.',
+    th:      'ครูดนตรีใน San Francisco กลับบ้านมาพบว่าภรรยาได้เชิญเพื่อนบ้านชั้นบนมากินข้าวเย็น คนที่เสียงดังจนทั้งคู่ทะเลาะกันมาตลอด ภายในค่ำคืนเดียว สองคู่สามีภรรยาก็รื้อชีวิตแต่งงานของกันและกันออกทีละชิ้น',
+  },
     /* The 2026-07-10 WIDE release, not the 2026-06-26 limited one and not the
        Sundance premiere on 2026-01-24, because the field is defined as first wide
        release. Wikipedia's infobox leads with the limited date, so this is a
@@ -782,7 +992,11 @@ const TITLES: Partial<Record<ChartEntryId, TitleRecord>> = {
     directors: ['Olivia Wilde'],
     writers: ['Will McCormack', 'Rashida Jones'],
     cast: ['Seth Rogen', 'Olivia Wilde', 'Pen\u00e9lope Cruz', 'Edward Norton'],
-    contentRating: { value: 'R', reason: 'for sexual material, language throughout and drug use' },
+    contentRating: { value: 'R', reason: {
+      en:      'for sexual material, language throughout and drug use',
+      'pt-br': 'por conteúdo sexual, linguagem inadequada ao longo do filme e uso de drogas',
+      th:      'จากเนื้อหาทางเพศ การใช้ภาษาไม่เหมาะสมตลอดเรื่อง และการใช้ยาเสพติด',
+    } },
     genres: ['Comedy', 'Drama'],
     productionCompanies: ['Annapurna Pictures', 'FilmNation Entertainment', 'Permut Presentations'],
     distributors: ['A24'],

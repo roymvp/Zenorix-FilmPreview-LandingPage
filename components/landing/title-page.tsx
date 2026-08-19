@@ -117,15 +117,25 @@ export function TitlePage({
        and it is far too long to sit in a chip. Rendered only when the MPA published
        one — several ratings here have no descriptor.
 
-       The descriptor stays in English in all three markets on purpose: it is a
-       quotation of what the MPA published, and a translated citation is no longer
-       the citation. The LABEL is localized and says whose rating this is
-       ("Classificação (EUA)"), which is the part a reader outside the US needs. */
+       The descriptor IS translated, reversing an earlier decision here that it
+       should stay English in all three markets as a verbatim quotation of the MPA.
+       That reasoning was sound about citations and wrong about readers: 'for
+       pervasive language, sexual material, drug use and graphic nudity' conveys
+       nothing to a Thai reader, so preserving it verbatim preserved the form of a
+       citation while losing its entire function. The `en` string in the record is
+       still the MPA's exact wording, and the translations are faithful renderings
+       of it — the judgement remains the issuing body's, it is merely legible.
+
+       The rating CODE is not translated. 'R' / 'PG-13' / 'TV-MA' / 'Unrated' are
+       the MPA's and TV Parental Guidelines' identifiers; a reader looking at a US
+       rating wants the US code, and mapping it to a local system is an assertion
+       this record has no authority to make. The localized LABEL is what says whose
+       rating this is ("Classificação (EUA)"). */
     ...(record.contentRating?.reason
       ? [
           {
             label: copy.rated,
-            value: `${record.contentRating.value} · ${record.contentRating.reason}`,
+            value: `${record.contentRating.value} · ${record.contentRating.reason[locale]}`,
           },
         ]
       : []),
@@ -568,7 +578,7 @@ export function TitlePage({
                       including why the collapse is a CSS clamp and never a
                       `.slice()` on the string. */}
                   <TitleSynopsis
-                    text={record.synopsis}
+                    text={record.synopsis[locale]}
                     moreLabel={copy.synopsisMore}
                     lessLabel={copy.synopsisLess}
                   />

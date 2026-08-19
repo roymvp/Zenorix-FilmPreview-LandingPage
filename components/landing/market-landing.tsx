@@ -8,7 +8,8 @@ import { SiteFooter } from '@/components/landing/site-footer'
 import { TopBar } from '@/components/landing/top-bar'
 import { TopChart } from '@/components/landing/top-chart'
 import { SITE } from '@/lib/config/site'
-import { getMovieChart, getSeriesChart } from '@/lib/content/charts'
+import { getMovieChart, getSeriesChart, type ChartEntry } from '@/lib/content/charts'
+import { getTitle } from '@/lib/content/titles'
 import { fill, type Dictionary } from '@/lib/i18n/dictionaries'
 import { locales, type Locale } from '@/lib/i18n/config'
 import { buildStructuredData, marketValues } from '@/lib/seo'
@@ -23,6 +24,12 @@ import { buildStructuredData, marketValues } from '@/lib/seo'
  * visible and existed only to vary the <title> across a set of /movie/[slug]
  * URLs; that route was a doorway page and is gone. The page leads with the brand
  * and the catalogue, and the head now describes exactly that.
+ *
+ * Do not read that as "per-title pages were a mistake". The deleted route served
+ * thirty near-identical pages whose only difference was a film name in the title
+ * tag. `/[lang]/titles/[slug]` is the opposite bargain — a page per title that has
+ * researched facts to show, and none for a title that does not — which is why the
+ * rail links to twenty-nine of the thirty rather than all of them.
  *
  * One DOM for every width. `.zx-page` widens its column in tiers (420 -> 680 ->
  * 1200px) and the sections rearrange in CSS, so no component branches on
@@ -52,13 +59,28 @@ export function MarketLanding({
   const movies = getMovieChart(locale)
   const series = getSeriesChart(locale)
 
+  /* Built with `getTitle` — the SAME lookup `TopChart` uses to decide between a
+     real <a> and a dialog <button>. Deriving the JSON-LD's URLs from the same call
+     is what keeps the two in step: a title gaining or losing a detail record moves
+     the rail's markup and the structured data together, and neither can claim a
+     page the other does not. Spelling the hrefs out separately here would be a
+     second source of truth that drifts the moment a record is added. */
+  const withHrefs = (entries: ChartEntry[]) =>
+    entries.map((entry) => {
+      const record = getTitle(entry.id)
+      return {
+        name: entry.title,
+        href: record ? `/${locale}/titles/${record.slug}` : undefined,
+      }
+    })
+
   const structuredData = buildStructuredData({
     locale,
     dict,
     path,
     charts: [
-      { name: dict.chart.headingMovies, titles: movies.map((e) => e.title) },
-      { name: dict.chart.headingSeries, titles: series.map((e) => e.title) },
+      { name: dict.chart.headingMovies, titles: withHrefs(movies) },
+      { name: dict.chart.headingSeries, titles: withHrefs(series) },
     ],
   })
 

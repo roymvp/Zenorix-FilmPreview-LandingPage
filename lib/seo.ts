@@ -178,10 +178,16 @@ export function buildTitleMetadata({
   const canonical = `${SITE.url}${path(locale)}`
   const year = record.released.slice(0, 4)
   const heading = `${title} (${year}) — ${dict.title.metaSuffix}`
+  /* Read once into the market's own language. This used to be `record.synopsis`
+     when that field was a lone English string, which meant the `description` here
+     — the text a result actually quotes — was English on all three locales while
+     `heading` beside it was translated. Every one of the 29 titles therefore
+     shipped a byte-identical description to three hreflang-linked URLs. */
+  const synopsis = record.synopsis[locale]
 
   return {
     title: heading,
-    description: record.synopsis,
+    description: synopsis,
     alternates: { canonical, ...buildLocaleAlternates(path) },
     openGraph: {
       /* `video.movie` is correct HERE, unlike on the market page where it was
@@ -191,7 +197,7 @@ export function buildTitleMetadata({
       locale: localeMeta[locale].ogLocale,
       url: canonical,
       title: heading,
-      description: record.synopsis,
+      description: synopsis,
       /* The poster, not the market share card. A share of this URL should show the
          thing the URL is about. */
       images: [{ url: `${SITE.url}${poster}`, width: 420, height: 630 }],
@@ -201,19 +207,24 @@ export function buildTitleMetadata({
 }
 
 /**
- * JSON-LD for one title: what it is, who made it, how critics scored it.
+ * JSON-LD for one title: what it is and who made it. Deliberately NOT how critics
+ * scored it — see the `aggregateRating` note on the node below.
  *
- * This is the page type where structured data earns the most and risks the most,
- * so two rules are absolute:
+ * This is the page type where structured data risks the most, so one rule is
+ * absolute: every property here describes the WORK, from a field the record
+ * actually holds. No ratings, no invented values, nothing this site is not the
+ * source of. An earlier version of this comment made "emit a researched
+ * aggregator score, with attribution" the rule; that was the wrong reading of the
+ * review snippet guidelines and the markup it authorised has been removed.
  *
- *  1. `aggregateRating` is emitted ONLY from a researched score. Google treats
- *     invented review scores as spam eligible for manual action, so a title with
- *     no verified aggregator number gets no rating node rather than a guessed one.
- *     The `Score` type in titles.ts is what makes that structural instead of a
- *     convention someone has to remember.
- *  2. Every rating carries its `ratingCount` and the organization that published
- *     it. A `ratingValue` with no count and no author is not a checkable claim,
- *     and an unattributed one implies the score is this site's own.
+ * Worth knowing what this node does and does not buy, so nobody expands it
+ * expecting search-result decoration it cannot produce: the only rich result fed
+ * by `Movie` is the movie carousel, which requires an `ItemList` + `Movie` pairing
+ * (a summary page pointing at these detail pages) and is mobile-only. This site's
+ * `ItemList` is the chart on the landing page, whose `ListItem`s carry `name` and
+ * `url` only, so no carousel is claimed. This node's value is entity
+ * understanding — knowledge panels, answer engines, disambiguating one remake from
+ * another — not SERP appearance.
  */
 export function buildTitleStructuredData({
   locale,
@@ -231,26 +242,6 @@ export function buildTitleStructuredData({
 }) {
   const url = `${SITE.url}/${locale}/titles/${record.slug}`
 
-  const rating = (
-    score: NonNullable<TitleRecord['rottenTomatoes']>,
-    author: string,
-  ) => ({
-    '@type': 'AggregateRating',
-    ratingValue: score.value,
-    /* The scale MUST be stated: both of these are out of 100, and schema.org
-       defaults to a 5-point scale, so an unqualified 90 reads as 90 out of 5. */
-    bestRating: 100,
-    worstRating: 0,
-    ratingCount: score.reviewCount,
-    reviewCount: score.reviewCount,
-    author: { '@type': 'Organization', name: author },
-  })
-
-  const ratings = [
-    record.rottenTomatoes ? rating(record.rottenTomatoes, 'Rotten Tomatoes') : null,
-    record.metacritic ? rating(record.metacritic, 'Metacritic') : null,
-  ].filter(Boolean)
-
   return {
     '@context': 'https://schema.org',
     '@graph': [
@@ -262,11 +253,20 @@ export function buildTitleStructuredData({
         '@id': url,
         url,
         name: title,
-        description: record.synopsis,
+        /* Must match `inLanguage` on the line below it. While `synopsis` was a
+           single English string this node declared `inLanguage: 'th'` around a
+           description written in English — the node contradicting its own metadata,
+           which is worse than omitting the language. */
+        description: record.synopsis[locale],
         image: `${SITE.url}${poster}`,
         inLanguage: localeMeta[locale].hreflang,
         genre: record.genres,
-        datePublished: record.released,
+        /* `dateCreated`, which is the property Google's Movie documentation names
+           for the release date. `datePublished` was here before and is the wrong
+           one for this type — it is what `Article` uses for its publication date,
+           so on a `Movie` it states something adjacent to, but not, "this is when
+           the film came out". */
+        dateCreated: record.released,
         /* The bare rating code, NOT the code plus the descriptor the visible row
            shows: `contentRating` is a coded value crawlers match against a known
            set ("PG-13", "TV-MA"), and appending prose makes it match nothing.
@@ -302,10 +302,27 @@ export function buildTitleStructuredData({
           '@type': 'Organization',
           name,
         })),
-        /* BOTH ratings when both exist, rather than picking one. Mortal Kombat II
-           is 64% on RT and 46 on Metacritic; collapsing that spread to a single
-           number would misrepresent both sources. */
-        ...(ratings.length > 0 ? { aggregateRating: ratings } : {}),
+        /* NO `aggregateRating`. The scores this site has are Rotten Tomatoes' and
+           Metacritic's, and the review snippet guidelines say plainly: "Don't
+           aggregate reviews or ratings from other websites." That is not a
+           formatting rule with an attribution escape hatch — the objection is to
+           republishing someone else's score as this page's rating data at all.
+           Emitting it with `author: Rotten Tomatoes` did not cure the violation, it
+           documented it, and `author` is not even a property Google reads on
+           `AggregateRating` (only `itemReviewed`, `ratingValue`, `ratingCount`,
+           `reviewCount`, `bestRating`, `worstRating`), so it could never have done
+           the job the old comment expected of it.
+
+           The exposure was worse than losing a star rating: invalid rating markup
+           is in scope for a structured-data manual action, and that gets the WHOLE
+           graph on the page ignored — including the `Movie` and `BreadcrumbList`
+           nodes that are legitimate.
+
+           The visible scores in the page's critics row STAY. Quoting an aggregator
+           in body copy, attributed, is normal citation and is not what this rule
+           restricts; the restriction is specifically on feeding it to Google as
+           structured rating data. A first-party `aggregateRating` would be fine
+           here — this site simply does not collect ratings, so it has none. */
       },
       /* Market page -> this title. Two levels because that is the real depth —
          there is no intermediate index URL to name, and inventing one would put a
@@ -456,8 +473,14 @@ export function buildStructuredData({
   /**
    * The two rails as rendered, so the `ItemList` nodes below describe the real
    * page. Each rail's heading comes along because it is the list's visible name.
+   *
+   * Each entry carries the `href` of its detail page, or `undefined` for a title
+   * that has none — which is not a detail but the whole point. The rail renders an
+   * `<a>` for a title with a researched record and a dialog `<button>` for one
+   * without, so passing the href through is what lets the markup below make the
+   * same distinction the DOM makes instead of asserting a uniformity that is false.
    */
-  charts: { name: string; titles: string[] }[]
+  charts: { name: string; titles: { name: string; href?: string }[] }[]
 }) {
   const url = `${SITE.url}${path(locale)}`
   const organizationId = `${SITE.url}/#organization`
@@ -542,16 +565,29 @@ export function buildStructuredData({
           availableLanguage: ['en', 'pt-BR', 'th'],
         },
         url: SITE.url,
-        /* The mark rather than the lockup: Google wants a logo that stays legible
-           when squared off, and it is served from this origin so it is crawlable
-           (robots.txt allows everything). Dimensions are stated because the file is
-           256x196 — above Google's 112px floor, but not square, so letting a
-           consumer guess risks a stretched render. */
+        /* A DEDICATED square PNG, not either of the assets the UI renders.
+           `scripts/build-brand-assets.mjs` generates it solely for this field and
+           explains the three reasons it differs (square, on the black plate, PNG).
+
+           It points here rather than at `zenorix-mark.webp` because that file is
+           sized for its only on-screen job — it never paints wider than ~34 CSS px,
+           so it is 128x98, and 98 is UNDER Google's stated 112px minimum. The UI
+           asset and this field have genuinely different requirements; sharing one
+           file means the stricter of the two loses silently.
+
+           Two failure modes worth naming, because both are invisible:
+             - An undersized logo is not an error. The file loads, nothing warns,
+               the field is simply ignored.
+             - These `width`/`height` are an ASSERTION ABOUT THE FILE. They read
+               256x196 for a while after the mark was optimised down to 128x98 —
+               correct for a file that no longer existed. The aspect ratio happened
+               to stay 4:3, so it survived every visual check.
+           If the generated size changes, change SCHEMA_LOGO and these together. */
         logo: {
           '@type': 'ImageObject',
-          url: `${SITE.url}/brand/zenorix-mark.webp`,
+          url: `${SITE.url}/brand/zenorix-logo-square.png`,
           width: 256,
-          height: 196,
+          height: 256,
         },
       },
       {
@@ -694,12 +730,25 @@ export function buildStructuredData({
          true. So an answer engine asked what is trending on Zenorix can name them,
          and none of them is presented as this page's subject.
          
-         `ListItem` carries a bare `name` and no nested `Movie`/`TVSeries` and no
-         `url`: the page shows a poster and a rank for each title and nothing else —
-         no synopsis, no cast, no year, no per-film page to link to (that route was
-         a doorway page and was deleted). A `Movie` node here would be a promise of
-         detail the document does not contain.
-         
+         `ListItem` carries no nested `Movie`/`TVSeries`: the rail shows a poster and
+         a rank and nothing else — no synopsis, no cast, no year — so a `Movie` node
+         here would be a promise of detail THIS document does not contain. That
+         reasoning is unchanged.
+
+         `url` IS now emitted, per item, and this is a correction rather than an
+         addition. The rule it follows is that a `ListItem` should point at the thing
+         it names if such a page exists; when this markup was written none did,
+         because the only per-film route was a doorway page that had been deleted.
+         Twenty-nine researched detail pages exist now, the rail links to them, and
+         the markup kept saying otherwise — a comment describing a fact that had
+         expired, which is worse than no comment because it reads as a decision.
+
+         It is conditional because the situation is genuinely mixed: a title without
+         a researched record has no page and renders as a dialog button, so it gets
+         a bare `name`, exactly as before. Emitting a URL for all thirty would be
+         the same class of error in the other direction — pointing a crawler at
+         routes that 404.
+
          `itemListOrder` is explicit because the order IS the content — it is a
          chart, and each market ranks the same catalogue differently. */
       ...charts.map((chart) => ({
@@ -710,7 +759,8 @@ export function buildStructuredData({
         itemListElement: chart.titles.map((title, index) => ({
           '@type': 'ListItem',
           position: index + 1,
-          name: title,
+          name: title.name,
+          ...(title.href ? { url: `${SITE.url}${title.href}` } : {}),
         })),
       })),
     ],

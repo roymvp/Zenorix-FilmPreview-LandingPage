@@ -161,8 +161,14 @@
     "runtime": "Duração",
     "seasons": "Temporadas",
     "episodes": "Episódios",
-    "seasonCount": { "one": "{count} temporada", "other": "{count} temporadas" },
-    "episodeCount": { "one": "{count} episódio", "other": "{count} episódios" },
+    "seasonCount": {
+      "one": "{count} temporada",
+      "other": "{count} temporadas"
+    },
+    "episodeCount": {
+      "one": "{count} episódio",
+      "other": "{count} episódios"
+    },
     "minutes": "{count} min",
     "director": "Direção",
     "creator": "Criação",
@@ -173,7 +179,10 @@
     "distributor": "Distribuição",
     "network": "Emissora",
     "streamingOn": "Disponível em",
-    "reviews": { "one": "{count} crítica", "other": "{count} críticas" },
+    "reviews": {
+      "one": "{count} crítica",
+      "other": "{count} críticas"
+    },
     "asOf": "em {date}",
     "cta": "Assista no Zenorix",
     "ctaMeta": "APK Android · {size} · 30 dias grátis",
@@ -287,7 +296,7 @@
       "sections": [
         {
           "h": "Quem opera a Zenorix",
-          "p": "A Zenorix é operada pela Zenorix TV Limited, empresa constituída nas Ilhas Virgens Britânicas sob o número de registro BVI-BC-2024-117892, com sede registrada em Road Town, Tortola. Os dados completos estão no fim desta página. Nós os publicamos porque uma notificação de direitos autorais só vale o quanto for poss��vel identificar a parte a quem ela é dirigida."
+          "p": "A Zenorix é operada pela Zenorix TV Limited, empresa constituída nas Ilhas Virgens Britânicas sob o número de registro BVI-BC-2024-117892, com sede registrada em Road Town, Tortola. Os dados completos estão no fim desta página. Nós os publicamos porque uma notificação de direitos autorais só vale o quanto for possível identificar a parte a quem ela é dirigida."
         },
         {
           "h": "Nosso catálogo é licenciado",
