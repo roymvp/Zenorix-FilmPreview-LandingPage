@@ -1506,7 +1506,7 @@
 
 /* This section used to run a "density pass": `padding-block` overridden down to 16px
    and its title pulled to 10px, chasing the goal of fitting all four claims plus the
-   button on one screen. That is what made the page read as unevenly spaced ��� `About`
+   button on one screen. That is what made the page read as unevenly spaced — `About`
    sat 16px from its neighbours while every other boundary was 40-100px, so the
    densest part of the page also had the least air around it, and the cards ran
    together into one grey mass.
@@ -3330,7 +3330,7 @@
     --zx-text-amount: 23px;
   }
 
-  /* Wider column, so more of the rail is visible at once ��� the cards grow with it
+  /* Wider column, so more of the rail is visible at once — the cards grow with it
      rather than leaving a 680px row showing the same 124px thumbnails. */
   .zx-rail {
     grid-auto-columns: 148px;

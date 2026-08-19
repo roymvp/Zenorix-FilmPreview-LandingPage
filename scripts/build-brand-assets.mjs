@@ -120,3 +120,65 @@ async function crop(top, bottom, out, resizeWidth) {
 await crop(firstInk, splitY, 'public/brand/zenorix-mark.webp', 128)
 // The full lockup: mark + wordmark, for the hero.
 await crop(firstInk, lastInk + 1, 'public/brand/zenorix-lockup.webp', 640)
+
+/**
+ * THE STRUCTURED-DATA LOGO. Not used anywhere in the UI — this exists purely for
+ * `Organization.logo` in the JSON-LD, and it is a SEPARATE FILE because Google's
+ * requirements for that field and the page's requirements for the top bar
+ * disagree on all three counts.
+ *
+ * The mark above is 128px wide because it is never painted larger than ~34 CSS px.
+ * Google's logo guidelines say the image "must be 112x112px, at minimum" — and the
+ * mark is 128x98, so its HEIGHT is under the floor. Pointing the schema at it
+ * silently forfeited logo eligibility: no error anywhere, the file loads fine, it
+ * is simply ignored. (That is exactly what happened — the schema had been declaring
+ * a stale 256x196 from before the mark was optimised, so nothing looked wrong.)
+ *
+ * Three deliberate differences from the UI asset:
+ *
+ *  1. SQUARE, 512x512. The guidance is a square minimum, and a knowledge panel
+ *     squares off whatever it is given; a 4:3 source risks being stretched or
+ *     cropped. `contain` fits the artwork inside and pads it rather than distorting
+ *     it.
+ *  2. ON THE BLACK PLATE, not transparent. Google says to make sure the logo "looks
+ *     how you intend it to look on a purely white background" — and this artwork
+ *     fails that test badly, because `toTransparent` turns luminance into alpha, so
+ *     the mark's dark navy outline and bevels become INVISIBLE on white. The plate
+ *     is not a decoration here: the logo was designed on black, and restoring it is
+ *     what makes the file render as intended against a white panel.
+ *  3. PNG, not WebP. WebP is the right call for the UI assets, but this one is
+ *     consumed by crawlers and knowledge-panel renderers rather than by browsers,
+ *     and PNG is the format with no support questions attached. It is ~20KB and is
+ *     never served to a visitor, so the size argument that governs the other two
+ *     files does not apply.
+ *
+ * If the source logo changes, this regenerates with the rest. If the schema's
+ * declared dimensions change, they must match SCHEMA_LOGO — `lib/seo.ts` states
+ * them explicitly and a mismatch is the failure mode described above.
+ */
+const SCHEMA_LOGO = 256
+const schemaSource = await sharp(SOURCE)
+  .extract({ left: 0, top: firstInk, width, height: splitY - firstInk })
+  .trim({ threshold: 4 })
+  .png()
+  .toBuffer()
+
+const schemaInfo = await sharp(schemaSource)
+  .resize({
+    width: SCHEMA_LOGO,
+    height: SCHEMA_LOGO,
+    /* Pads instead of cropping or distorting. The plate colour is the source's own
+       background, so the padding is indistinguishable from the artwork's own. */
+    fit: 'contain',
+    background: { r: 0, g: 0, b: 0, alpha: 1 },
+  })
+  .flatten({ background: { r: 0, g: 0, b: 0 } })
+  .png()
+  .toFile('public/brand/zenorix-logo-square.png')
+
+console.log(
+  '[v0] wrote public/brand/zenorix-logo-square.png',
+  `${Math.round(schemaInfo.size / 1024)}KB`,
+  `${schemaInfo.width}x${schemaInfo.height}`,
+  schemaInfo.width >= 112 && schemaInfo.height >= 112 ? '(>= 112 floor OK)' : '(!! UNDER FLOOR)',
+)
